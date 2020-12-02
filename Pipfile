@@ -5,8 +5,10 @@ name = "pypi"
 
 [packages]
 flask = "*"
+pyopenssl = "==20.0.0"
 
 [dev-packages]
+pyinstaller = "==4.1"
 
 [requires]
 python_version = "3.8"

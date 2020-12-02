@@ -5,7 +5,7 @@ from functools import wraps
 from flask import make_response
 
 
-class ZlibCompressionMiddleware:
+class ZlibMiddleware:
     def __init__(self, send_headers=False):
         self.send_headers = send_headers
 

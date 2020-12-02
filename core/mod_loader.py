@@ -1,15 +1,35 @@
 import importlib
-import importlib.util
 import importlib.machinery
-import pathlib
+import importlib.util
+from pathlib import Path
+from types import ModuleType
+from typing import Dict
+
+from core.logger import logger
+from core.main import root_dir
+from core.module_lib import ModuleMeta
 
 
-def load_mods():
-    root_dir = pathlib.Path().absolute().parent
-    folders = (root_dir / 'mods').glob('*')
-    folders = (folder for folder in folders if folder.is_dir())
+def load_packages(path: Path) -> Dict[ModuleMeta, ModuleType]:
+    folders = (folder for folder in path.glob('*') if folder.is_dir())
 
-    for mod in folders:
-        spec = importlib.util.spec_from_file_location(mod.name, mod / '__init__.py')
+    packages: Dict[ModuleMeta, ModuleType] = {}
+
+    for pkg_path in folders:
+        logger.debug(f'Trying to load module {pkg_path}')
+
+        relative_path = pkg_path.relative_to(root_dir)
+        # package_name = str(relative_path).replace('\\', '.')
+        # print(package_name)
+        logger.debug(f'Relative path: {pkg_path.relative_to(root_dir)}')
+
+        # package = importlib.import_module(package_name)
+        # print(dir(package))
+        # print(package.__path__)
+        spec = importlib.util.spec_from_file_location(pkg_path.name, pkg_path / '__init__.py')
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
+
+        packages[module.Meta] = module
+
+    return packages
