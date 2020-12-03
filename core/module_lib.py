@@ -8,7 +8,7 @@ class ModuleMeta:
     dependencies: List[str]
 
 
-class UnresolvedModuleException(Exception):
+class UnresolvedPackageException(Exception):
     pass
 
 
@@ -36,7 +36,7 @@ class PackageTopologicalSorter:
                 for meta, dependencies in dependency_graph.items():
                     if any(dependency not in meta_names for dependency in dependencies):
                         unresolved_dependencies = list(d for d in dependencies if d not in meta_names)
-                        raise UnresolvedModuleException(
+                        raise UnresolvedPackageException(
                             f'Unresolved dependencies for module {meta.name}: {unresolved_dependencies}'
                         )
 
