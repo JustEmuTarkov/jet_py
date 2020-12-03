@@ -7,7 +7,7 @@ from typing import List, Tuple
 from core import mod_loader
 from core.app import app
 from core.logger import logger
-from core.module_lib import PackageTopologicalSorter, ModuleMeta
+from core.module_lib import PackageTopologicalSorter, PackageMeta
 
 if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
     root_dir = Path().absolute()
@@ -39,7 +39,7 @@ if __name__ == '__main__':
 
 
     #  Sort packages by their order
-    modules_in_order: List[Tuple[ModuleMeta, ModuleType]] = sorted(packages.items(), key=get_module_index)
+    modules_in_order: List[Tuple[PackageMeta, ModuleType]] = sorted(packages.items(), key=get_module_index)
 
     #  Execute packages __main__.py files in order
     for meta, package in modules_in_order:

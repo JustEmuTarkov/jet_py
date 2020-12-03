@@ -7,13 +7,13 @@ from typing import Dict
 
 from core.logger import logger
 from core.main import root_dir
-from core.module_lib import ModuleMeta
+from core.module_lib import PackageMeta
 
 
-def load_packages(path: Path) -> Dict[ModuleMeta, ModuleType]:
+def load_packages(path: Path) -> Dict[PackageMeta, ModuleType]:
     folders = (folder for folder in path.glob('*') if folder.is_dir())
 
-    packages: Dict[ModuleMeta, ModuleType] = {}
+    packages: Dict[PackageMeta, ModuleType] = {}
 
     for pkg_path in folders:
         logger.debug(f'Trying to load module {pkg_path}')

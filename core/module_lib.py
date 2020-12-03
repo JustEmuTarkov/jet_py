@@ -2,7 +2,7 @@ from copy import copy
 from typing import List, Dict
 
 
-class ModuleMeta:
+class PackageMeta:
     name: str
     version: str
     dependencies: List[str]
@@ -13,11 +13,11 @@ class UnresolvedPackageException(Exception):
 
 
 class PackageTopologicalSorter:
-    def __init__(self, modules: List[ModuleMeta]):
+    def __init__(self, modules: List[PackageMeta]):
         self.modules = modules
 
     def get_load_order(self):
-        dependency_graph: Dict[ModuleMeta, List[str]] = {meta: copy(meta.dependencies) for meta in self.modules}
+        dependency_graph: Dict[PackageMeta, List[str]] = {meta: copy(meta.dependencies) for meta in self.modules}
 
         load_order = []
         while dependency_graph:
