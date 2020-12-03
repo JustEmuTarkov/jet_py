@@ -19,6 +19,18 @@ class PackageTopologicalSorter:
     def get_load_order(self):
         dependency_graph: Dict[PackageMeta, List[str]] = {meta: copy(meta.dependencies) for meta in self.modules}
 
+        # Construct sets of package names and package dependencies names
+        package_names = set(meta.name for meta in dependency_graph.keys())
+        package_dependencies_names = set(dep for meta in dependency_graph.keys() for dep in meta.dependencies)
+
+        # If we have dependencies that are not in list of self.modules then raise an exception
+        if not package_names.issuperset(package_dependencies_names):
+            unresolved_modules = package_dependencies_names.difference(package_names)
+            unresolved_modules_str = '\n'.join(unresolved_modules)
+            raise UnresolvedPackageException(
+                f'Unresolved dependencies: {unresolved_modules_str}'
+            )
+
         load_order = []
         while dependency_graph:
             for meta, dependencies in dependency_graph.items():
@@ -30,14 +42,5 @@ class PackageTopologicalSorter:
                     load_order.append(meta)
                     del dependency_graph[meta]
                     break
-            else:
-                meta_names = list(meta.name for meta in dependency_graph.keys())
-
-                for meta, dependencies in dependency_graph.items():
-                    if any(dependency not in meta_names for dependency in dependencies):
-                        unresolved_dependencies = list(d for d in dependencies if d not in meta_names)
-                        raise UnresolvedPackageException(
-                            f'Unresolved dependencies for module {meta.name}: {unresolved_dependencies}'
-                        )
 
         return load_order
