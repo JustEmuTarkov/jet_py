@@ -7,7 +7,7 @@ from typing import Dict
 
 from core.logger import logger
 from core.main import root_dir
-from core.module_lib import PackageMeta
+from core.package_lib import PackageMeta
 
 
 def load_packages(path: Path) -> Dict[PackageMeta, ModuleType]:

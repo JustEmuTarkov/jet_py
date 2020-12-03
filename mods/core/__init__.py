@@ -1,4 +1,4 @@
-from core.module_lib import PackageMeta
+from core.package_lib import PackageMeta
 
 
 class Meta(PackageMeta):

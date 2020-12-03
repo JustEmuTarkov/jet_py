@@ -4,10 +4,10 @@ from pathlib import Path
 from types import ModuleType
 from typing import List, Tuple
 
-from core import mod_loader
+from core import package_loader
 from core.app import app
 from core.logger import logger
-from core.module_lib import PackageTopologicalSorter, PackageMeta
+from core.package_lib import PackageTopologicalSorter, PackageMeta
 
 if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
     root_dir = Path().absolute()
@@ -17,7 +17,7 @@ else:
 if __name__ == '__main__':
     logger.debug(f'Root directory is: {str(root_dir)}')
     #  Load all the packages in root/mods dir
-    packages = mod_loader.load_packages(root_dir / 'mods')
+    packages = package_loader.load_packages(root_dir / 'mods')
 
     logger.debug('Packages and metas:')
     for meta, package in packages.items():
