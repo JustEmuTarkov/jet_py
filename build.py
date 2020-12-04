@@ -5,4 +5,5 @@ PyInstaller.__main__.run([
     '--onefile',
     '--console',
     '--icon=small_logo.ico',
+    '--distpath=./',
 ])
