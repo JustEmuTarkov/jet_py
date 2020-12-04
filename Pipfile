@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 flask = "*"
 pyopenssl = "==20.0.0"
+ujson = "==4.0.1"
 
 [dev-packages]
 pyinstaller = "==4.1"
