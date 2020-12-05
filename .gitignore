@@ -3,3 +3,5 @@
 /build/
 /dist/
 /venv/
+/main.exe
+/main.spec
