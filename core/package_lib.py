@@ -53,6 +53,7 @@ class PackageTopologicalSorter:
             for pkg in self.packages
         }
         pkg_with_no_deps = [pkg for pkg, pkg_deps in dependency_graph.items() if not pkg_deps]
+
         if not pkg_with_no_deps:
             raise NoBasePackageError
 
@@ -80,7 +81,6 @@ class PackageTopologicalSorter:
                     break
 
         if dependency_graph:
-            print(dependency_graph)
             for pkg, deps in dependency_graph.items():
                 raise CycleDependencyError(package=pkg, dependencies=deps)
 

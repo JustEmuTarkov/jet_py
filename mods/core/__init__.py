@@ -24,6 +24,13 @@ class Package(BasePackage):
         logger.info('Tarkov core package is loading')
 
     def on_load(self):
+        print("Loading Core Routes")
+
+        @app.route('/', methods=['GET', 'POST'])
+        @route_decorator()
+        def index_test():
+            return request.data
+
         @app.route('/client/locations', methods=['GET', 'POST'])
         @route_decorator(is_static=True)
         def client_locations():

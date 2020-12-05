@@ -42,7 +42,6 @@ class PackageManager:
             logger.debug(f'Package load: {package.Meta.name}')
             package.on_load()
 
-
     @staticmethod
     def __is_like_package(path: Path):
         return path.is_dir() and (path / '__init__.py').exists()

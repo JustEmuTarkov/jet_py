@@ -13,7 +13,9 @@ class ZlibMiddleware:
         @wraps(function)
         def wrapper(*args, **kwargs):
             request_ = request
-
+            print(request_.args)
+            print(args)
+            # data decompression preparing happends here
             data = function(*args, **kwargs)
 
             data_json = json.dumps(data)
