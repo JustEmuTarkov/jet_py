@@ -2,7 +2,7 @@ import json
 import zlib
 from functools import wraps, lru_cache
 
-from flask import make_response
+from flask import make_response, request
 
 
 class ZlibMiddleware:
@@ -12,6 +12,8 @@ class ZlibMiddleware:
     def __call__(self, function):
         @wraps(function)
         def wrapper(*args, **kwargs):
+            request_ = request
+
             data = function(*args, **kwargs)
 
             data_json = json.dumps(data)
@@ -66,10 +68,19 @@ def compose(function, *decorators):
     return wrapped
 
 
-def static_route(function):
-    return compose(
-        function,
-        TarkovResponseStruct(),
-        ZlibMiddleware(send_browser_headers=True),
-        lru_cache(1),
-    )
+def route_decorator(**kwargs):
+    def wrapper(function):
+        decorators = [function]
+        use_struct = kwargs.get('use_tarkov_response_struct', True)
+        if use_struct:
+            decorators.append(TarkovResponseStruct())
+
+        decorators.append(ZlibMiddleware(send_browser_headers=True))
+
+        is_static = kwargs.get('is_static', False)
+        if is_static:
+            decorators.append(lru_cache(1))
+
+        return compose(*decorators)
+
+    return wrapper

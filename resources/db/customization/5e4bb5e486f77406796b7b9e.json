@@ -1,0 +1,18 @@
+{
+	"_id": "5e4bb5e486f77406796b7b9e",
+	"_name": "usec_kit_upper_tier_2",
+	"_parent": "5cd944ca1388ce03a44dc2a4",
+	"_type": "Item",
+	"_props": {
+		"Name": "DefaultUsecUpperSuite",
+		"ShortName": "DefaultUsecUpperSuite",
+		"Description": "DefaultUsecUpperSuite",
+		"Side": [
+			"Usec"
+		],
+		"AvailableAsDefault": false,
+		"Body": "5e4bb35286f77406a511c9bc",
+		"Hands": "5e4bb1fe86f774069342dec8"
+	},
+	"_proto": "5cde9ec17d6c8b04723cf479"
+}

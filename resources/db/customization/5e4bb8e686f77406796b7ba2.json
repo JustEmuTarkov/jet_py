@@ -1,0 +1,19 @@
+{
+	"_id": "5e4bb8e686f77406796b7ba2",
+	"_name": "SavageUpperRussia1",
+	"_parent": "5cd944ca1388ce03a44dc2a4",
+	"_type": "Item",
+	"_props": {
+		"Name": "SavageUpperSuite1",
+		"ShortName": "SavageUpperSuite1",
+		"Description": "SavageUpperSuite1",
+		"Side": [
+			"Bear",
+			"Usec"
+		],
+		"AvailableAsDefault": false,
+		"Body": "5e4bb3ee86f77406975c934e",
+		"Hands": "5e4bb49586f77406a313ec5a"
+	},
+	"_proto": "5cdea23c7d6c8b04723cf47b"
+}

@@ -24,7 +24,7 @@ class PackageManager:
         self.__load_packages()
 
     def __discover_packages(self):
-        packages_paths = (path for path in self.packages_dir.glob('**/*') if PackageManager.__is_like_package(path))
+        packages_paths = list(path for path in self.packages_dir.glob('**/*') if PackageManager.__is_like_package(path))
         for package_path in packages_paths:
             relative_path = package_path.relative_to(self.packages_dir)
             relative_path = str(relative_path).replace('\\', '.')
@@ -32,7 +32,9 @@ class PackageManager:
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
 
-        print(self.__get_load_order())
+            if hasattr(module, 'Package'):
+                package = getattr(module, 'Package')
+                self.register(package)
 
     def __load_packages(self):
         order = self.__get_load_order()

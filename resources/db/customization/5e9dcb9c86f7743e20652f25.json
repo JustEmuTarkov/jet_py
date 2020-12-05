@@ -1,0 +1,18 @@
+{
+	"_id": "5e9dcb9c86f7743e20652f25",
+	"_name": "usec_kit_upper_hoody",
+	"_parent": "5cd944ca1388ce03a44dc2a4",
+	"_type": "Item",
+	"_props": {
+		"Name": "DefaultUsecUpperSuite",
+		"ShortName": "DefaultUsecUpperSuite",
+		"Description": "DefaultUsecUpperSuite",
+		"Side": [
+			"Usec"
+		],
+		"AvailableAsDefault": false,
+		"Body": "5e9da17386f774054b6f79a3",
+		"Hands": "5e9da2a786f774054c19ac94"
+	},
+	"_proto": "5cde9ec17d6c8b04723cf479"
+}

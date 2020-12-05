@@ -1,0 +1,18 @@
+{
+	"_id": "Top_BOSS_Sanitar",
+	"_name": "Top_BOSS_Sanitar",
+	"_parent": "5cd944ca1388ce03a44dc2a4",
+	"_type": "Item",
+	"_props": {
+		"Name": "Top_BOSS_Sanitar",
+		"ShortName": "Top_BOSS_Sanitar",
+		"Description": "Top_BOSS_Sanitar",
+		"Side": [
+			"Usec",
+			"Bear"
+		],
+		"AvailableAsDefault": false,
+		"Body": "5e9975c486f774382b6320cb",
+		"Hands": "5cc2e68f14c02e28b47de290"
+	}
+}

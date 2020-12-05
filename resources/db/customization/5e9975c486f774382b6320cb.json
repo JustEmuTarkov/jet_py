@@ -1,0 +1,35 @@
+{
+	"_id": "5e9975c486f774382b6320cb",
+	"_name": "Top_BOSS_Sanitar",
+	"_parent": "5cc0868e14c02e000c6bea68",
+	"_type": "Item",
+	"_props": {
+		"Name": "Top_BOSS_Sanitar",
+		"ShortName": "Top_BOSS_Sanitar",
+		"Description": "Top_BOSS_Sanitar",
+		"Side": [
+			"Savage"
+		],
+		"BodyPart": "Body",
+		"Prefab": {
+			"path": "assets/content/characters/character/prefabs/top_boss_sanitar.bundle",
+			"rcid": ""
+		},
+		"WatchPrefab": {
+			"path": "",
+			"rcid": ""
+		},
+		"IntegratedArmorVest": false,
+		"WatchPosition": {
+			"x": 0,
+			"y": 0,
+			"z": 0
+		},
+		"WatchRotation": {
+			"x": 0,
+			"y": 0,
+			"z": 0
+		}
+	},
+	"_proto": "5cdea33e7d6c8b0474535dac"
+}

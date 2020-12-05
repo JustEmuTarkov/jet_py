@@ -1,13 +1,8 @@
 from core.app import app
-from core.main import package_manager
+from core.package_manager import package_manager
 import ujson
 import core.utils
 
-@app.route('/')
-def index():
-    return 'index'
-
-
 package_manager.load_packages()
-app.run()
+app.run(ssl_context='adhoc')
 

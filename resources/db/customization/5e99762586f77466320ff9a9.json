@@ -1,0 +1,35 @@
+{
+	"_id": "5e99762586f77466320ff9a9",
+	"_name": "Pants_BOSS_Sanitar",
+	"_parent": "5cc0869814c02e000a4cad94",
+	"_type": "Item",
+	"_props": {
+		"Name": "Pants_BOSS_Sanitar",
+		"ShortName": "Pants_BOSS_Sanitar",
+		"Description": "Pants_BOSS_Sanitar",
+		"Side": [
+			"Savage"
+		],
+		"BodyPart": "Feet",
+		"Prefab": {
+			"path": "assets/content/characters/character/prefabs/pants_boss_sanitar.bundle",
+			"rcid": ""
+		},
+		"WatchPrefab": {
+			"path": "",
+			"rcid": ""
+		},
+		"IntegratedArmorVest": false,
+		"WatchPosition": {
+			"x": 0,
+			"y": 0,
+			"z": 0
+		},
+		"WatchRotation": {
+			"x": 0,
+			"y": 0,
+			"z": 0
+		}
+	},
+	"_proto": "5cdea3c47d6c8b0475341734"
+}

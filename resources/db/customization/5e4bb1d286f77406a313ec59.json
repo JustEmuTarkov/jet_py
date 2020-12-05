@@ -1,0 +1,35 @@
+{
+	"_id": "5e4bb1d286f77406a313ec59",
+	"_name": "bear_hands_telnik",
+	"_parent": "5cc086a314c02e000c6bea69",
+	"_type": "Item",
+	"_props": {
+		"Name": "DefaultBearHands",
+		"ShortName": "DefaultBearHands",
+		"Description": "DefaultBearHands",
+		"Side": [
+			"Bear"
+		],
+		"BodyPart": "Hands",
+		"Prefab": {
+			"path": "assets/content/hands/hands_bear_telnik/hands_bear_telnik.skin.bundle",
+			"rcid": ""
+		},
+		"WatchPrefab": {
+			"path": "assets/content/hands/bear/bear_watch.bundle",
+			"rcid": ""
+		},
+		"IntegratedArmorVest": false,
+		"WatchPosition": {
+			"x": -0.074,
+			"y": -0.00218,
+			"z": 0.03263
+		},
+		"WatchRotation": {
+			"x": -1.907593,
+			"y": -5.286865,
+			"z": 0.3482491
+		}
+	},
+	"_proto": "5cc0876314c02e000c6bea6b"
+}

@@ -1,0 +1,67 @@
+{
+	"55f2d3fd4bdc2d5f408b4567": {
+		"Name": "Usine",
+		"Description": "La zone industrielle et les installations de l’usine chimique n°16 furent louées illégalement à la société TerraGroup. Avec l'avènement des Contract Wars, les locaux de l’usine sont devenus la scène de nombreux affrontements entre la USEC et le BEAR qui ont déterminés le contrôle de la zone industriel de Tarkov.\n\nPlus tard, à la suite du chaos, les installations de l'usine sont devenues un refuge pour les civils , les Scavs et les militaires, y compris les restes éparpillés des opérateurs de la USEC et du BEAR."
+	},
+	"56db0b3bd2720bb0678b4567": {
+		"Name": "Arène",
+		"Description": "Une arène de fortune pour les combats de gladiateurs, aménagée dans le centre commercial Equator-2 par les restes de la population locale."
+	},
+	"56f40101d2720b2a4d8b45d6": {
+		"Name": "Douanes",
+		"Description": "Une large zone du parc industriel adjacente à l'Usine. Cette zone comprend un terminal douanier, des installations destinées au stockage des carburants, des bureaux, des dortoirs ainsi qu'une variété d'autres infrastructures."
+	},
+	"5704e3c2d2720bac5b8b4567": {
+		"Name": "Bois",
+		"Description": "La réserve naturelle de priozersky a récemment fait son entrée dans la liste des réserves sauvages protégées par le District fédéral du Nord-Ouest."
+	},
+	"5704e47ed2720bb35b8b4568": {
+		"Name": "Ville",
+		"Description": "Verkhneye est une petite ville en bord de mer, un lieu exceptionnel privilégié par les habitant locaux pour le jardinage et les loisirs de plein air."
+	},
+	"5704e4dad2720bb55b8b4567": {
+		"Name": "Phare",
+		"Description": "Le phare de Cap Dalniy était un important point stratégique de la ville. Au début du conflit, la USEC l'a utilisé comme zone d'atterrissage, attirant ainsi l'attention des troupes du BEAR qui visaient à réduire leur présence hostile à zéro."
+	},
+	"5704e554d2720bac5b8b456e": {
+		"Name": "Littoral",
+		"Description": "Le Littoral forme une grande partie de la périphérie de Tarkov et est adjacent à la zone portuaire.\n\nSon territoire comprend un village partiellement abandonné, des logements modernes et des terrains privés, des champs, une grande plage avec un port de plaisance, une station-service, une station météorologique, une station émettrice de réseau cellulaire et bien plus encore.\nSon principal centre d'intérêt est la grande station thermale \"Côte d'Azur\", composée de plusieurs bâtiments et de sa propre centrale hydroélectrique. La station était autrefois utilisée comme hébergement temporaire pour le personnel de TerraGroup et ses sociétés liées en préparation de leur extraction par le port de Tarkov"
+	},
+	"5704e5a4d2720bb45b8b4567": {
+		"Name": "Terminal",
+		"Description": "Un large pan de la zone portuaire, qui serait, selon la rumeur, le point d'extraction de secours d'Emercom. "
+	},
+	"5704e5fad2720bc05b8b4567": {
+		"Name": "Base militaire",
+		"Description": "La base secrète de l'Agence Fédérale de la Réserve d'État qui, selon les légendes urbaines, contiendrait suffisamment de provisions pour tenir des années : Nourriture, médicaments et autres ressources, assez pour survivre à une guerre nucléaire totale."
+	},
+	"5704e64ad2720bb55b8b456e": {
+		"Name": "Secteur privé",
+		"Description": "Secteur résidentiel privé, constitué de cottages appartenant à la haute bourgeoisie de Tarkov. Au cours des premières semaines du chaos naissant, il servait de camp pour les réfugiés, avant de devenir un repaire réputé de Scavs."
+	},
+	"5714dbc024597771384a510d": {
+		"Name": "Échangeur",
+		"Description": "L'échangeur de l'autoroute sud-est est un point critique du réseau de transport de la ville. Il s'agit essentiellement d'un nœud stratégique reliant l'infrastructure portuaire à la périphérie industrielle de Tarkov. Au centre de l'échangeur se trouve le centre commercial ULTRA qui fut utilisé comme base principale pour les opérations d'évacuation de l'EMERCOM."
+	},
+	"5714dc342459777137212e0b": {
+		"Name": "Banlieue",
+		"Description": "La banlieue et les zones résidentielles de Tarkov comprenant les connexions et infrastructures nécessaires pour une vie longue et heureuse."
+	},
+	"5714dc692459777137212e12": {
+		"Name": "Rues de Tarkov",
+		"Description": "Le centre-ville de Tarkov avec ses banques, ses centres commerciaux, ses hôtels et toutes les autres choses dont une ville moderne et dynamique pourrait avoir besoin."
+	},
+	"599319c986f7740dca3070a6": {
+		"Name": "Arène",
+		"Description": "Une arène de fortune pour les combats de gladiateurs, aménagée dans le centre commercial Equator-2 par les restes de la population locale."
+	},
+	"59fc81d786f774390775787e": {
+		"Name": "Usine",
+		"Description": "La zone industrielle et les installations de l’usine chimique n°16 furent louées illégalement à la société TerraGroup. Pendant les Contract Wars, les locaux de l’usine sont devenus la scène de nombreux affrontements entre la USEC et le BEAR qui ont determiné le contrôle sur le district industriel de Tarkov.\n\nPlus tard, dans le sillage du chaos, les locaux de l’usine devinrent un refuge pour les civils survivants, les Scavs et toutes sortes de militaires et forces armées errants, y compris les restes dispersés de la USEC et du BEAR"
+	},
+	"5b0fc42d86f7744a585f9105": {
+		"Name": "Labo",
+		"ShortName": "Labo",
+		"Description": "Le complexe de laboratoires souterrains Terragroup Labs est un emplacement secret situé pile sous le centre-ville de Tarkov. Officiellement, ce centre de recherche n'existe pas et, selon certaines données, est engagé dans la R&D, les tests et les projets en simulations chimiques, biologique et les technologies de pointe."
+	}
+}

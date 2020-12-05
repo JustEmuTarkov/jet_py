@@ -1,0 +1,17 @@
+{
+	"_id": "5e4bb6d786f77406975c9364",
+	"_name": "bear_kit_lower_combat",
+	"_parent": "5cd944d01388ce000a659df9",
+	"_type": "Item",
+	"_props": {
+		"Name": "DefaultBearLowerSuite",
+		"ShortName": "DefaultBearLowerSuite",
+		"Description": "DefaultBearLowerSuite",
+		"Side": [
+			"Bear"
+		],
+		"AvailableAsDefault": false,
+		"Feet": "5e4bb39386f774067f79de05"
+	},
+	"_proto": "5cd946231388ce000d572fe3"
+}

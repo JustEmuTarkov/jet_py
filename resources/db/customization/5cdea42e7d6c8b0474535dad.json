@@ -1,0 +1,19 @@
+{
+	"_id": "5cdea42e7d6c8b0474535dad",
+	"_name": "KillaUpperSuite",
+	"_parent": "5cd944ca1388ce03a44dc2a4",
+	"_type": "Item",
+	"_props": {
+		"Name": "KillaUpperSuite",
+		"ShortName": "KillaUpperSuite",
+		"Description": "KillaUpperSuite",
+		"Side": [
+			"Bear",
+			"Usec",
+			"Savage"
+		],
+		"AvailableAsDefault": false,
+		"Body": "5cdea33e7d6c8b0474535dac",
+		"Hands": "5df8ead786f774530571b14b"
+	}
+}

@@ -1,0 +1,35 @@
+{
+	"5464e0404bdc2d2a708b4567": {
+		"name": "United Security",
+		"description": "USEC ist ein privates Militärunternehmen, welches sich im Jahr 1999, nach einer Fusion der beiden Unternehmen KerniSEC und Safe Sea gebildet hat. Ein Agent der Terra Group International Holding kontaktierte USEC 2004, welche daraufhin zu einer unentbehrlichen Privatarmee der Holding wurde, mit Niederlassungen auf der ganzen Welt und über 7500 Angestellten."
+	},
+	"5464e0454bdc2d06708b4567": {
+		"name": "BEAR",
+		"description": "Das private Militärunternehmen BEAR wurde als Gegenmaßnahme zu den illegalen Aktivitäten der Terra Group auf russischem Staatsgebiet, durch einen Geheimerlass der russischen Regierung gegründet."
+	},
+	"5803a58524597710ca36fcb2": {
+		"name": "TERRA GROUP",
+		"description": "TG ist eine transnationale Holding, dessen Tochtergesellschaften in eine Vielzahl von Aktivitäten verwickelt sind. Sie verbindet über 40 große Unternehmen, welche durch Niederlassungen in über 120 Ländern weltweit vertreten werden."
+	},
+	"5805f617245977100b2c1f41": {
+		"name": "TerraGroup Labs PLC",
+		"description": "In Großbritannien ansässige Tochtergesellschaft der Terra Group. Offiziell befasst sie sich mit wissenschaftlicher Forschung auf dem Gebiet der angewandten Biotechnologie in der Agrarindustrie und Landwirtschaft. "
+	},
+	"5807be8924597742c603fa19": {
+		"name": "Die Stadt Tarkov",
+		"description": "Tarkov ist eine Stadt im Nordwesten Russlands, eine Kommune innerhalb der Region Norvinsk und eine der beiden Hauptstädte der Sonderwirtschaftszone Norvinsk."
+	},
+	"5807bfe124597742a92e0a4c": {
+		"name": "Norvinsk Sonderwirtschaftszone",
+		"description": "Ein abgegrenztes Gebiet innerhalb der Norvinsk Region, einschließlich der Städte Norvinsk und Tarkov mit angrenzender Infrastruktur. Es besitzt einen speziellen rechtlichen Status im Verhältnis zum restlichen Russland und privilegierte wirtschaftliche Rahmenbedingungen für nationale und ausländische Unternehmen.  "
+	},
+	"5807c3f124597746bf2db2ce": {
+		"name": "Scavs",
+		"description": "Inmitten von Chaos und Gesetzlosigkeit, fernab der Geltungsbereiche jeglicher lebensbestimmender Regeln und Vorschriften, sind es die zwielichtigen Gestalten, die als Erste ihre Köpfe hochstrecken, unbeeindruckt von Moral oder ethischen Grundsätzen, oder schnell darin sind, ihre Prinzipien fallen zu lassen, wenn es darauf ankommt. Sie rotten sich in Rudeln zusammen, schneiden sich gegenseitig für ein größeres Stück vom Kuchen die Kehlen durch, ganz nach dem Motto: „Fressen oder gefressen werden.“. So werden Zivilisten von gestern zu Scavs von heute."
+	},
+	"5c1b857086f77465f465faa4": {
+		"Name": "Scav-Raider",
+		"ShortName": "banner_scavraiders",
+		"Description": "Eine nicht vertrauenswürdige Gruppe bewaffneter Leute, die angeblich aus ehemaligen PMC Operatoren, Ansässigen und anderen Menschen mit offensichtlicher Kampferfahrung besteht."
+	}
+}

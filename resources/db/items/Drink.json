@@ -1,0 +1,1260 @@
+[
+	{
+		"_id": "5751496424597720a27126da",
+		"_name": "hotrod",
+		"_parent": "5448e8d64bdc2dce718b4568",
+		"_type": "Item",
+		"_props": {
+			"Name": "Hot rod",
+			"ShortName": "Hot rod",
+			"Description": "Hot rod",
+			"Weight": 0.3,
+			"BackgroundColor": "default",
+			"Width": 1,
+			"Height": 1,
+			"StackMaxSize": 1,
+			"Rarity": "Rare",
+			"SpawnChance": 14,
+			"CreditsPrice": 4236,
+			"ItemSound": "food_soda_can",
+			"Prefab": {
+				"path": "assets/content/weapons/usable_items/item_hotrod/item_hotrod_loot.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "assets/content/weapons/usable_items/item_hotrod/item_hotrod_container.bundle",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 20,
+			"ExamineExperience": 10,
+			"HideEntrails": false,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": false,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"foodUseTime": 2,
+			"foodEffectType": "afterUse",
+			"MaxResource": 1,
+			"StimulatorBuffs": "Buffs_drink_hotrod",
+			"effects_health": {
+				"Energy": {
+					"value": 10
+				},
+				"Hydration": {
+					"value": 20
+				}
+			},
+			"effects_damage": []
+		},
+		"_proto": "575146b724597720a27126d5"
+	},
+	{
+		"_id": "5d1b376e86f774252519444e",
+		"_name": "item_food_moonshine",
+		"_parent": "5448e8d64bdc2dce718b4568",
+		"_type": "Item",
+		"_props": {
+			"Name": "item_food_moonshine",
+			"ShortName": "item_food_moonshine",
+			"Description": "item_food_moonshine",
+			"Weight": 1.2,
+			"BackgroundColor": "violet",
+			"Width": 1,
+			"Height": 2,
+			"StackMaxSize": 1,
+			"Rarity": "Not_exist",
+			"SpawnChance": 15,
+			"CreditsPrice": 200000,
+			"ItemSound": "food_bottle",
+			"Prefab": {
+				"path": "assets/content/weapons/usable_items/item_alcohol_moonshine/item_alcohol_moonshine_loot.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "assets/content/weapons/usable_items/item_alcohol_moonshine/item_alcohol_moonshine_container.bundle",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 10,
+			"ExamineExperience": 10,
+			"HideEntrails": false,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": false,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": true,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"foodUseTime": 6,
+			"foodEffectType": "afterUse",
+			"MaxResource": 1,
+			"StimulatorBuffs": "Buffs_drink_moonshine",
+			"effects_health": {
+				"Energy": {
+					"value": 20
+				},
+				"Hydration": {
+					"value": -10
+				}
+			},
+			"effects_damage": {
+				"Pain": {
+					"delay": 0,
+					"duration": 500
+				},
+				"Intoxication": {
+					"delay": 0,
+					"duration": 0
+				},
+				"RadExposure": {
+					"delay": 0,
+					"duration": 0
+				}
+			}
+		},
+		"_proto": "5673de654bdc2d180f8b456d"
+	},
+	{
+		"_id": "5d40407c86f774318526545a",
+		"_name": "item_food_vodka",
+		"_parent": "5448e8d64bdc2dce718b4568",
+		"_type": "Item",
+		"_props": {
+			"Name": "item_food_vodka",
+			"ShortName": "item_food_vodka",
+			"Description": "item_food_vodka",
+			"Weight": 1,
+			"BackgroundColor": "violet",
+			"Width": 1,
+			"Height": 2,
+			"StackMaxSize": 1,
+			"Rarity": "Rare",
+			"SpawnChance": 3,
+			"CreditsPrice": 25000,
+			"ItemSound": "food_bottle",
+			"Prefab": {
+				"path": "assets/content/items/food/bottles_with_alcohol/item_food_vodka.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "assets/content/weapons/usable_items/item_alcohol_vodka/item_alcohol_vodka_container.bundle",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 10,
+			"ExamineExperience": 10,
+			"HideEntrails": false,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": false,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"foodUseTime": 5,
+			"foodEffectType": "afterUse",
+			"MaxResource": 1,
+			"StimulatorBuffs": "Buffs_drink_vodka",
+			"effects_health": {
+				"Hydration": {
+					"value": -50
+				}
+			},
+			"effects_damage": {
+				"Pain": {
+					"delay": 0,
+					"duration": 250
+				},
+				"Intoxication": {
+					"delay": 0,
+					"duration": 0
+				},
+				"RadExposure": {
+					"delay": 0,
+					"duration": 0
+				}
+			}
+		},
+		"_proto": "5673de654bdc2d180f8b456d"
+	},
+	{
+		"_id": "5448fee04bdc2dbc018b4567",
+		"_name": "Бутылка воды 0.6",
+		"_parent": "5448e8d64bdc2dce718b4568",
+		"_type": "Item",
+		"_props": {
+			"Name": "Water",
+			"ShortName": "Water",
+			"Description": "грязноватая бутылка воды 0.6",
+			"Weight": 0.6,
+			"BackgroundColor": "default",
+			"Width": 1,
+			"Height": 2,
+			"StackMaxSize": 1,
+			"Rarity": "Common",
+			"SpawnChance": 5,
+			"CreditsPrice": 2450,
+			"ItemSound": "food_bottle",
+			"Prefab": {
+				"path": "assets/content/weapons/usable_items/item_bottle/item_water_bottle_loot.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "assets/content/weapons/usable_items/item_bottle/item_water_bottle_container.bundle",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 10,
+			"ExamineExperience": 10,
+			"HideEntrails": false,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": false,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"foodUseTime": 3,
+			"foodEffectType": "afterUse",
+			"MaxResource": 60,
+			"StimulatorBuffs": "",
+			"effects_health": {
+				"Hydration": {
+					"value": 55
+				}
+			},
+			"effects_damage": []
+		}
+	},
+	{
+		"_id": "5c0fa877d174af02a012e1cf",
+		"_name": "drink_aquamari",
+		"_parent": "5448e8d64bdc2dce718b4568",
+		"_type": "Item",
+		"_props": {
+			"Name": "Water",
+			"ShortName": "Water",
+			"Description": "грязноватая бутылка воды 0.6",
+			"Weight": 0.6,
+			"BackgroundColor": "default",
+			"Width": 1,
+			"Height": 2,
+			"StackMaxSize": 1,
+			"Rarity": "Superrare",
+			"SpawnChance": 6,
+			"CreditsPrice": 8600,
+			"ItemSound": "food_bottle",
+			"Prefab": {
+				"path": "assets/content/weapons/usable_items/item_filterbottle/item_filterbottle_loot.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "assets/content/weapons/usable_items/item_filterbottle/item_filterbottle_container.bundle",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 10,
+			"ExamineExperience": 10,
+			"HideEntrails": false,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": false,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"foodUseTime": 3,
+			"foodEffectType": "afterUse",
+			"MaxResource": 150,
+			"StimulatorBuffs": "",
+			"effects_health": {
+				"Energy": {
+					"value": 20
+				},
+				"Hydration": {
+					"value": 350
+				}
+			},
+			"effects_damage": {
+				"Intoxication": {
+					"delay": 0,
+					"duration": 0
+				}
+			}
+		},
+		"_proto": "5448fee04bdc2dbc018b4567"
+	},
+	{
+		"_id": "575062b524597720a31c09a1",
+		"_name": "drink_icegreen",
+		"_parent": "5448e8d64bdc2dce718b4568",
+		"_type": "Item",
+		"_props": {
+			"Name": "Green Ice",
+			"ShortName": "Green Ice",
+			"Description": "Green Ice",
+			"Weight": 0.3,
+			"BackgroundColor": "default",
+			"Width": 1,
+			"Height": 1,
+			"StackMaxSize": 1,
+			"Rarity": "Common",
+			"SpawnChance": 7,
+			"CreditsPrice": 2429,
+			"ItemSound": "food_soda_can",
+			"Prefab": {
+				"path": "assets/content/weapons/usable_items/item_drink_cans/item_icegreen_loot.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "assets/content/weapons/usable_items/item_drink_cans/item_icegeen_container.bundle",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 5,
+			"ExamineExperience": 10,
+			"HideEntrails": false,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": false,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"foodUseTime": 2,
+			"foodEffectType": "afterUse",
+			"MaxResource": 1,
+			"StimulatorBuffs": "",
+			"effects_health": {
+				"Hydration": {
+					"value": 15
+				}
+			},
+			"effects_damage": []
+		},
+		"_proto": "544fb62a4bdc2dfb738b4568"
+	},
+	{
+		"_id": "57513f07245977207e26a311",
+		"_name": "drink_juice_apple",
+		"_parent": "5448e8d64bdc2dce718b4568",
+		"_type": "Item",
+		"_props": {
+			"Name": "Apple juice",
+			"ShortName": "Apple juice",
+			"Description": "Apple juice",
+			"Weight": 1,
+			"BackgroundColor": "default",
+			"Width": 1,
+			"Height": 2,
+			"StackMaxSize": 1,
+			"Rarity": "Rare",
+			"SpawnChance": 13,
+			"CreditsPrice": 3422,
+			"ItemSound": "food_juice_carton",
+			"Prefab": {
+				"path": "assets/content/weapons/usable_items/item_juice/item_juice_apple_loot.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "assets/content/weapons/usable_items/item_juice/item_juice_apple_container.bundle",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 10,
+			"ExamineExperience": 10,
+			"HideEntrails": false,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": false,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"foodUseTime": 4,
+			"foodEffectType": "afterUse",
+			"MaxResource": 40,
+			"StimulatorBuffs": "",
+			"effects_health": {
+				"Energy": {
+					"value": 5
+				},
+				"Hydration": {
+					"value": 25
+				}
+			},
+			"effects_damage": []
+		},
+		"_proto": "575062b524597720a31c09a1"
+	},
+	{
+		"_id": "57513f9324597720a7128161",
+		"_name": "drink_juice_grand",
+		"_parent": "5448e8d64bdc2dce718b4568",
+		"_type": "Item",
+		"_props": {
+			"Name": "Grand juice",
+			"ShortName": "Grand juice",
+			"Description": "Grand juice",
+			"Weight": 1,
+			"BackgroundColor": "default",
+			"Width": 1,
+			"Height": 2,
+			"StackMaxSize": 1,
+			"Rarity": "Rare",
+			"SpawnChance": 8,
+			"CreditsPrice": 3412,
+			"ItemSound": "food_juice_carton",
+			"Prefab": {
+				"path": "assets/content/weapons/usable_items/item_juice/item_juice_grand_loot.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "assets/content/weapons/usable_items/item_juice/item_juice_grand_container.bundle",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 10,
+			"ExamineExperience": 10,
+			"HideEntrails": false,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": false,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"foodUseTime": 4,
+			"foodEffectType": "afterUse",
+			"MaxResource": 40,
+			"StimulatorBuffs": "",
+			"effects_health": {
+				"Energy": {
+					"value": 6
+				},
+				"Hydration": {
+					"value": 30
+				}
+			},
+			"effects_damage": []
+		},
+		"_proto": "57513f07245977207e26a311"
+	},
+	{
+		"_id": "57513fcc24597720a31c09a6",
+		"_name": "drink_juice_vita",
+		"_parent": "5448e8d64bdc2dce718b4568",
+		"_type": "Item",
+		"_props": {
+			"Name": "Vita juice",
+			"ShortName": "Vita juice",
+			"Description": "Vita juice",
+			"Weight": 1,
+			"BackgroundColor": "default",
+			"Width": 1,
+			"Height": 2,
+			"StackMaxSize": 1,
+			"Rarity": "Common",
+			"SpawnChance": 8,
+			"CreditsPrice": 1800,
+			"ItemSound": "food_juice_carton",
+			"Prefab": {
+				"path": "assets/content/weapons/usable_items/item_juice/item_juice_vita_loot.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "assets/content/weapons/usable_items/item_juice/item_juice_vita_container.bundle",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 20,
+			"ExamineExperience": 10,
+			"HideEntrails": false,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": false,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"foodUseTime": 4,
+			"foodEffectType": "afterUse",
+			"MaxResource": 40,
+			"StimulatorBuffs": "",
+			"effects_health": {
+				"Energy": {
+					"value": 8
+				},
+				"Hydration": {
+					"value": 28
+				}
+			},
+			"effects_damage": []
+		},
+		"_proto": "57513f9324597720a7128161"
+	},
+	{
+		"_id": "5751435d24597720a27126d1",
+		"_name": "drink_maxenergy",
+		"_parent": "5448e8d64bdc2dce718b4568",
+		"_type": "Item",
+		"_props": {
+			"Name": "Max energy",
+			"ShortName": "Max energy",
+			"Description": "Max energy",
+			"Weight": 0.3,
+			"BackgroundColor": "default",
+			"Width": 1,
+			"Height": 1,
+			"StackMaxSize": 1,
+			"Rarity": "Common",
+			"SpawnChance": 5,
+			"CreditsPrice": 2934,
+			"ItemSound": "food_soda_can",
+			"Prefab": {
+				"path": "assets/content/weapons/usable_items/item_drink_cans/item_maxenergy_loot.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "assets/content/weapons/usable_items/item_drink_cans/item_maxenergy_container.bundle",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 10,
+			"ExamineExperience": 10,
+			"HideEntrails": false,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": false,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"foodUseTime": 2,
+			"foodEffectType": "afterUse",
+			"MaxResource": 1,
+			"StimulatorBuffs": "Buffs_drink_maxenergy",
+			"effects_health": {
+				"Energy": {
+					"value": 12
+				},
+				"Hydration": {
+					"value": 20
+				}
+			},
+			"effects_damage": []
+		},
+		"_proto": "57513fcc24597720a31c09a6"
+	},
+	{
+		"_id": "575146b724597720a27126d5",
+		"_name": "drink_milk",
+		"_parent": "5448e8d64bdc2dce718b4568",
+		"_type": "Item",
+		"_props": {
+			"Name": "Carton of milk",
+			"ShortName": "Carton of milk",
+			"Description": "Carton of milk",
+			"Weight": 1,
+			"BackgroundColor": "default",
+			"Width": 1,
+			"Height": 2,
+			"StackMaxSize": 1,
+			"Rarity": "Rare",
+			"SpawnChance": 10,
+			"CreditsPrice": 4753,
+			"ItemSound": "food_juice_carton",
+			"Prefab": {
+				"path": "assets/content/weapons/usable_items/item_tetrapak/item_tetrapak_loot.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "assets/content/weapons/usable_items/item_tetrapak/item_tetrapak_container.bundle",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 10,
+			"ExamineExperience": 10,
+			"HideEntrails": false,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": false,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"foodUseTime": 3,
+			"foodEffectType": "afterUse",
+			"MaxResource": 1,
+			"StimulatorBuffs": "Buffs_drink_milk",
+			"effects_health": {
+				"Energy": {
+					"value": 20
+				},
+				"Hydration": {
+					"value": 30
+				}
+			},
+			"effects_damage": []
+		},
+		"_proto": "57514643245977207f2c2d09"
+	},
+	{
+		"_id": "57514643245977207f2c2d09",
+		"_name": "drink_tarcola",
+		"_parent": "5448e8d64bdc2dce718b4568",
+		"_type": "Item",
+		"_props": {
+			"Name": "TarCola",
+			"ShortName": "TarCola",
+			"Description": "TarCola",
+			"Weight": 0.3,
+			"BackgroundColor": "default",
+			"Width": 1,
+			"Height": 1,
+			"StackMaxSize": 1,
+			"Rarity": "Common",
+			"SpawnChance": 6,
+			"CreditsPrice": 3980,
+			"ItemSound": "food_soda_can",
+			"Prefab": {
+				"path": "assets/content/weapons/usable_items/item_drink_cans/item_tarcola_loot.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "assets/content/weapons/usable_items/item_drink_cans/item_tarcola_container.bundle",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 10,
+			"ExamineExperience": 10,
+			"HideEntrails": false,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": false,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"foodUseTime": 4,
+			"foodEffectType": "afterUse",
+			"MaxResource": 1,
+			"StimulatorBuffs": "Buffs_drink_tarcola",
+			"effects_health": {
+				"Energy": {
+					"value": 5
+				},
+				"Hydration": {
+					"value": 15
+				}
+			},
+			"effects_damage": []
+		},
+		"_proto": "5751435d24597720a27126d1"
+	},
+	{
+		"_id": "5e8f3423fd7471236e6e3b64",
+		"_name": "item_drink_kvas",
+		"_parent": "5448e8d64bdc2dce718b4568",
+		"_type": "Item",
+		"_props": {
+			"Name": "item_drink_kvas",
+			"ShortName": "item_drink_kvas",
+			"Description": "item_drink_kvas",
+			"Weight": 0.6,
+			"BackgroundColor": "default",
+			"Width": 1,
+			"Height": 2,
+			"StackMaxSize": 1,
+			"Rarity": "Rare",
+			"SpawnChance": 3,
+			"CreditsPrice": 8500,
+			"ItemSound": "food_bottle",
+			"Prefab": {
+				"path": "assets/content/weapons/usable_items/item_drink_kvas/item_drink_kvas_loot.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "assets/content/weapons/usable_items/item_drink_kvas/item_drink_kvas_container.bundle",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 10,
+			"ExamineExperience": 10,
+			"HideEntrails": false,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": false,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"foodUseTime": 3,
+			"foodEffectType": "afterUse",
+			"MaxResource": 60,
+			"StimulatorBuffs": "",
+			"effects_health": {
+				"Energy": {
+					"value": 15
+				},
+				"Hydration": {
+					"value": 65
+				}
+			},
+			"effects_damage": []
+		},
+		"_proto": "5448fee04bdc2dbc018b4567"
+	},
+	{
+		"_id": "5d403f9186f7743cac3f229b",
+		"_name": "item_food_jack",
+		"_parent": "5448e8d64bdc2dce718b4568",
+		"_type": "Item",
+		"_props": {
+			"Name": "item_food_jack",
+			"ShortName": "item_food_jack",
+			"Description": "item_food_jack",
+			"Weight": 1.2,
+			"BackgroundColor": "default",
+			"Width": 1,
+			"Height": 2,
+			"StackMaxSize": 1,
+			"Rarity": "Superrare",
+			"SpawnChance": 3,
+			"CreditsPrice": 50000,
+			"ItemSound": "food_bottle",
+			"Prefab": {
+				"path": "assets/content/items/food/bottles_with_alcohol/item_food_jack.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "assets/content/weapons/usable_items/item_alcohol_whiskey/item_alcohol_whiskey_container.bundle",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 20,
+			"ExamineExperience": 10,
+			"HideEntrails": false,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": false,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"foodUseTime": 4,
+			"foodEffectType": "afterUse",
+			"MaxResource": 1,
+			"StimulatorBuffs": "Buffs_drink_jack",
+			"effects_health": {
+				"Energy": {
+					"value": 10
+				},
+				"Hydration": {
+					"value": -35
+				}
+			},
+			"effects_damage": {
+				"Pain": {
+					"delay": 0,
+					"duration": 210
+				},
+				"Intoxication": {
+					"delay": 0,
+					"duration": 0
+				},
+				"RadExposure": {
+					"delay": 0,
+					"duration": 0
+				}
+			}
+		},
+		"_proto": "57347d3d245977448f7b7f61"
+	},
+	{
+		"_id": "5d1b33a686f7742523398398",
+		"_name": "item_food_purewater",
+		"_parent": "5448e8d64bdc2dce718b4568",
+		"_type": "Item",
+		"_props": {
+			"Name": "item_food_purewater",
+			"ShortName": "item_food_purewater",
+			"Description": "item_food_purewater",
+			"Weight": 3.3,
+			"BackgroundColor": "violet",
+			"Width": 2,
+			"Height": 2,
+			"StackMaxSize": 1,
+			"Rarity": "Not_exist",
+			"SpawnChance": 5,
+			"CreditsPrice": 50000,
+			"ItemSound": "food_juice_carton",
+			"Prefab": {
+				"path": "assets/content/items/food/item_food_purewater/item_food_purewater.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "assets/content/weapons/usable_items/item_drink_purewater/item_drink_purewater_container.bundle",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 10,
+			"ExamineExperience": 10,
+			"HideEntrails": false,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": false,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": true,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"foodUseTime": 15,
+			"foodEffectType": "afterUse",
+			"MaxResource": 1,
+			"StimulatorBuffs": "Buffs_drink_purewater",
+			"effects_health": {
+				"Energy": {
+					"value": 25
+				},
+				"Hydration": {
+					"value": 100
+				}
+			},
+			"effects_damage": {
+				"Intoxication": {
+					"delay": 0,
+					"duration": 0
+				},
+				"RadExposure": {
+					"delay": 0,
+					"duration": 0
+				}
+			}
+		},
+		"_proto": "5448fee04bdc2dbc018b4567"
+	},
+	{
+		"_id": "544fb62a4bdc2dfb738b4568",
+		"_name": "juice_army",
+		"_parent": "5448e8d64bdc2dce718b4568",
+		"_type": "Item",
+		"_props": {
+			"Name": "Пачка армейского сока (яблочный)",
+			"ShortName": "Apple juice",
+			"Description": "сок сочок",
+			"Weight": 1,
+			"BackgroundColor": "default",
+			"Width": 1,
+			"Height": 2,
+			"StackMaxSize": 1,
+			"Rarity": "Rare",
+			"SpawnChance": 11,
+			"CreditsPrice": 2135,
+			"ItemSound": "food_juice_carton",
+			"Prefab": {
+				"path": "assets/content/weapons/usable_items/item_tetrapak/item_juice_army_loot.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "assets/content/weapons/usable_items/item_tetrapak/item_juice_army_container.bundle",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 10,
+			"ExamineExperience": 10,
+			"HideEntrails": false,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": false,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"foodUseTime": 3,
+			"foodEffectType": "afterUse",
+			"MaxResource": 1,
+			"StimulatorBuffs": "Buffs_drink_juice_army",
+			"effects_health": {
+				"Energy": {
+					"value": 8
+				},
+				"Hydration": {
+					"value": 30
+				}
+			},
+			"effects_damage": []
+		}
+	}
+]

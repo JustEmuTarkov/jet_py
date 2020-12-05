@@ -1,0 +1,18 @@
+{
+	"_id": "5e9dcb8386f774054b6f79a9",
+	"_name": "bear_kit_upper_tiger",
+	"_parent": "5cd944ca1388ce03a44dc2a4",
+	"_type": "Item",
+	"_props": {
+		"Name": "DefaultBearLowerSuite",
+		"ShortName": "DefaultBearLowerSuite",
+		"Description": "DefaultBearLowerSuite",
+		"Side": [
+			"Bear"
+		],
+		"AvailableAsDefault": false,
+		"Body": "5e9d9fa986f774054d6b89f2",
+		"Hands": "5e9da26286f7741d2e3424a5"
+	},
+	"_proto": "5cd946231388ce000d572fe3"
+}

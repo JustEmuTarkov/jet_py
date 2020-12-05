@@ -1,0 +1,35 @@
+{
+	"5464e0404bdc2d2a708b4567": {
+		"name": "United Security",
+		"description": "La société militaire privée USEC a été fondée en 1999 après la fusion de deux entités : KerniSEC et Safe Sea. En 2004, un représentant de la holding internationale Terra Group prit contact avec la USEC, essentiellement devenue par la suite l'armée privée de la holding, forte de plus de 7 500 employés et avec des établissements partout dans le monde."
+	},
+	"5464e0454bdc2d06708b4567": {
+		"name": "BEAR",
+		"description": "La société militaire privée BEAR a été créée par un décret secret du gouvernement de la Fédération de Russie en tant que contre-mesure en réponse aux activités illégales de Terra Group sur le territoire russe."
+	},
+	"5803a58524597710ca36fcb2": {
+		"name": "TERRA GROUP",
+		"description": "TG est une société holding transnationale dont les filiales prennent part dans une large variété d'activités. Elle est constituée de plus de 40 grandes entreprises, représentées par des succursales présentes dans plus de 120 pays à travers le monde."
+	},
+	"5805f617245977100b2c1f41": {
+		"name": "Laboratoires TerraGroup PLC",
+		"description": "Société à responsabilité limitée basée au Royaume-Uni, filiale du Terra Group. Elle opère officiellement pour la recherche en biotechnologie appliquée à l'industrie agroalimentaire et l'agriculture. "
+	},
+	"5807be8924597742c603fa19": {
+		"name": "La ville de Tarkov",
+		"description": "Tarkov est une ville située dans le nord-ouest de la Russie, une entité municipale de la région de Norvinsk et l'une des deux principales villes de la zone économique spéciale de Norvinsk."
+	},
+	"5807bfe124597742a92e0a4c": {
+		"name": "Zone Économique Spéciale de Norvinsk",
+		"description": "Un territoire délimité à l'intérieur de la région de Norvinsk, comprenant les villes de Norvinsk et Tarkov avec toute leur infrastructure, possédant un statut légal spécifique par rapport au reste de la Russie et des conditions économiques avantageuses pour les entreprises étrangères et nationales.  "
+	},
+	"5807c3f124597746bf2db2ce": {
+		"name": "Scavs",
+		"description": "Au milieu du chaos et de l'anarchie, de la rareté des provisions vitales et des territoires, les premiers individus à relever la tête sont des personnages louches, qui ne s’embarrassent pas de moralité ou de contraintes éthiques, ou qui les perdent rapidement quand l'occasion se présente. Ils se regroupent en meutes, vivant comme des loups qui se mangent entre eux, tranchant la gorge du voisin pour un rien. C'est comme ça que les civils d'hier sont devenus les Scavs d'aujourd'hui."
+	},
+	"5c1b857086f77465f465faa4": {
+		"Name": "Scav Raiders",
+		"ShortName": "banner_scavraiders",
+		"Description": "Un groupe louche de gens armés, d'après les rumeurs, constitué d'anciens opérateurs des PMC, de résidents locaux et autres personnes ayant un entrainement non-négligeable en combat et tactique."
+	}
+}

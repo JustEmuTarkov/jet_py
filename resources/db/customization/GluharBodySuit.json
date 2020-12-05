@@ -1,0 +1,18 @@
+{
+	"_id": "GluharBodySuit",
+	"_name": "GluharBodySuit",
+	"_parent": "5cd944ca1388ce03a44dc2a4",
+	"_type": "Item",
+	"_props": {
+		"Name": "GluharBodySuit",
+		"ShortName": "GluharBodySuit",
+		"Description": "GluharBodySuit",
+		"Side": [
+			"Usec",
+			"Bear"
+		],
+		"AvailableAsDefault": false,
+		"Body": "5d5e7dd786f7744a7a274322",
+		"Hands": "5d1f5aa286f7744bca3f0b9c"
+	}
+}

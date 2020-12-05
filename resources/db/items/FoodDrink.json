@@ -1,0 +1,16 @@
+[
+	{
+		"_id": "5448e8d64bdc2dce718b4568",
+		"_name": "Drink",
+		"_parent": "543be6674bdc2df1348b4569",
+		"_type": "Node",
+		"_props": {}
+	},
+	{
+		"_id": "5448e8d04bdc2ddf718b4569",
+		"_name": "Food",
+		"_parent": "543be6674bdc2df1348b4569",
+		"_type": "Node",
+		"_props": {}
+	}
+]

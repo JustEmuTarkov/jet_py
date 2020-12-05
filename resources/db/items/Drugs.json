@@ -1,0 +1,512 @@
+[
+	{
+		"_id": "590c695186f7741e566b64a2",
+		"_name": "augmentin",
+		"_parent": "5448f3a14bdc2d27728b4569",
+		"_type": "Item",
+		"_props": {
+			"Name": "Antibiotics",
+			"ShortName": "Antibiotics",
+			"Description": "",
+			"Weight": 0.3,
+			"BackgroundColor": "orange",
+			"Width": 1,
+			"Height": 1,
+			"StackMaxSize": 1,
+			"Rarity": "Rare",
+			"SpawnChance": 3,
+			"CreditsPrice": 9175,
+			"ItemSound": "med_pills",
+			"Prefab": {
+				"path": "assets/content/weapons/usable_items/item_augmentin/item_augmentin_loot.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "assets/content/weapons/usable_items/item_augmentin/item_augmentin_container.bundle",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 50,
+			"ExamineExperience": 25,
+			"HideEntrails": false,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": false,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"medUseTime": 5,
+			"medEffectType": "duringUse",
+			"MaxHpResource": 0,
+			"hpResourceRate": 0,
+			"StimulatorBuffs": "",
+			"effects_health": [],
+			"effects_damage": {
+				"Pain": {
+					"delay": 0,
+					"duration": 150,
+					"fadeOut": 5
+				},
+				"Intoxication": {
+					"delay": 0,
+					"duration": 0,
+					"fadeOut": 0
+				}
+			}
+		},
+		"_proto": "544fb37f4bdc2dee738b4567"
+	},
+	{
+		"_id": "5751a89d24597722aa0e8db0",
+		"_name": "golden_star_balm",
+		"_parent": "5448f3a14bdc2d27728b4569",
+		"_type": "Item",
+		"_props": {
+			"Name": "Golden Star Balm",
+			"ShortName": "Golden Star Balm",
+			"Description": "Golden Star Balm",
+			"Weight": 0.1,
+			"BackgroundColor": "orange",
+			"Width": 1,
+			"Height": 1,
+			"StackMaxSize": 1,
+			"Rarity": "Superrare",
+			"SpawnChance": 1,
+			"CreditsPrice": 19259,
+			"ItemSound": "generic",
+			"Prefab": {
+				"path": "assets/content/weapons/usable_items/item_golden_star_balm/item_golden_star_balm_loot.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "assets/content/weapons/usable_items/item_golden_star_balm/item_golden_star_balm_container.bundle",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 250,
+			"ExamineExperience": 4,
+			"HideEntrails": false,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": false,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"medUseTime": 7,
+			"medEffectType": "duringUse",
+			"MaxHpResource": 10,
+			"hpResourceRate": 0,
+			"StimulatorBuffs": "BuffsGoldenStarBalm",
+			"effects_health": {
+				"Energy": {
+					"value": -10
+				}
+			},
+			"effects_damage": {
+				"Pain": {
+					"delay": 0,
+					"duration": 400,
+					"fadeOut": 20
+				},
+				"Contusion": {
+					"delay": 0,
+					"duration": 0,
+					"fadeOut": 0
+				},
+				"Intoxication": {
+					"delay": 0,
+					"duration": 400,
+					"fadeOut": 20
+				},
+				"RadExposure": {
+					"delay": 0,
+					"duration": 400,
+					"fadeOut": 20
+				}
+			}
+		},
+		"_proto": "544fb25a4bdc2dfb738b4567"
+	},
+	{
+		"_id": "5af0548586f7743a532b7e99",
+		"_name": "item_barter_medical_ibuprofen",
+		"_parent": "5448f3a14bdc2d27728b4569",
+		"_type": "Item",
+		"_props": {
+			"Name": "ibuprofen",
+			"ShortName": "ibuprofen",
+			"Description": "ibuprofen",
+			"Weight": 0.1,
+			"BackgroundColor": "orange",
+			"Width": 1,
+			"Height": 1,
+			"StackMaxSize": 1,
+			"Rarity": "Superrare",
+			"SpawnChance": 2,
+			"CreditsPrice": 16823,
+			"ItemSound": "med_pills",
+			"Prefab": {
+				"path": "assets/content/weapons/usable_items/item_ibuprofen/item_ibuprofen_loot.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "assets/content/weapons/usable_items/item_ibuprofen/item_ibuprofen_container.bundle",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 10,
+			"ExamineExperience": 4,
+			"HideEntrails": false,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": false,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"medUseTime": 5,
+			"medEffectType": "duringUse",
+			"MaxHpResource": 12,
+			"hpResourceRate": 0,
+			"StimulatorBuffs": "",
+			"effects_health": {
+				"Hydration": {
+					"value": -8
+				}
+			},
+			"effects_damage": {
+				"Pain": {
+					"delay": 0,
+					"duration": 280,
+					"fadeOut": 10
+				},
+				"Contusion": {
+					"delay": 0,
+					"duration": 0,
+					"fadeOut": 0
+				}
+			}
+		},
+		"_proto": "544fb37f4bdc2dee738b4567"
+	},
+	{
+		"_id": "544fb3f34bdc2d03748b456a",
+		"_name": "morphine",
+		"_parent": "5448f3a14bdc2d27728b4569",
+		"_type": "Item",
+		"_props": {
+			"Name": "Шприц с морфином",
+			"ShortName": "Morphine",
+			"Description": "",
+			"Weight": 0.1,
+			"BackgroundColor": "orange",
+			"Width": 1,
+			"Height": 1,
+			"StackMaxSize": 1,
+			"Rarity": "Rare",
+			"SpawnChance": 7,
+			"CreditsPrice": 16870,
+			"ItemSound": "med_stimulator",
+			"Prefab": {
+				"path": "assets/content/weapons/usable_items/item_syringe/item_morphine_loot.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "assets/content/weapons/usable_items/item_syringe/item_syringe_container.bundle",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 20,
+			"ExamineExperience": 8,
+			"HideEntrails": false,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": false,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"medUseTime": 2,
+			"medEffectType": "duringUse",
+			"MaxHpResource": 0,
+			"hpResourceRate": 0,
+			"StimulatorBuffs": "",
+			"effects_health": {
+				"Energy": {
+					"value": -5
+				},
+				"Hydration": {
+					"value": -10
+				}
+			},
+			"effects_damage": {
+				"Pain": {
+					"delay": 0,
+					"duration": 300,
+					"fadeOut": 5
+				},
+				"Contusion": {
+					"delay": 0,
+					"duration": 0,
+					"fadeOut": 0
+				}
+			}
+		}
+	},
+	{
+		"_id": "544fb37f4bdc2dee738b4567",
+		"_name": "painkiller",
+		"_parent": "5448f3a14bdc2d27728b4569",
+		"_type": "Item",
+		"_props": {
+			"Name": "Таблетки Анальгин",
+			"ShortName": "Painkillers",
+			"Description": "",
+			"Weight": 0.1,
+			"BackgroundColor": "orange",
+			"Width": 1,
+			"Height": 1,
+			"StackMaxSize": 1,
+			"Rarity": "Common",
+			"SpawnChance": 8,
+			"CreditsPrice": 3800,
+			"ItemSound": "med_pills",
+			"Prefab": {
+				"path": "assets/content/weapons/usable_items/item_blister/item_analgin_loot.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "assets/content/weapons/usable_items/item_blister/item_analgin_container.bundle",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": true,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 10,
+			"ExamineExperience": 4,
+			"HideEntrails": false,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": false,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"medUseTime": 3,
+			"medEffectType": "duringUse",
+			"MaxHpResource": 4,
+			"hpResourceRate": 0,
+			"StimulatorBuffs": "",
+			"effects_health": {
+				"Hydration": {
+					"value": -7
+				}
+			},
+			"effects_damage": {
+				"Pain": {
+					"delay": 0,
+					"duration": 100,
+					"fadeOut": 15
+				}
+			}
+		}
+	},
+	{
+		"_id": "5755383e24597772cb798966",
+		"_name": "vaseline",
+		"_parent": "5448f3a14bdc2d27728b4569",
+		"_type": "Item",
+		"_props": {
+			"Name": "Vaseline",
+			"ShortName": "Vaseline",
+			"Description": "Vaseline",
+			"Weight": 0.01,
+			"BackgroundColor": "orange",
+			"Width": 1,
+			"Height": 1,
+			"StackMaxSize": 1,
+			"Rarity": "Superrare",
+			"SpawnChance": 2,
+			"CreditsPrice": 9896,
+			"ItemSound": "generic",
+			"Prefab": {
+				"path": "assets/content/weapons/usable_items/item_vaselin/item_vaselin_loot.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "assets/content/weapons/usable_items/item_vaselin/item_vaselin_container.bundle",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 100,
+			"ExamineExperience": 4,
+			"HideEntrails": false,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": false,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"medUseTime": 6,
+			"medEffectType": "duringUse",
+			"MaxHpResource": 10,
+			"hpResourceRate": 0,
+			"StimulatorBuffs": "",
+			"effects_health": {
+				"Energy": {
+					"value": -2
+				},
+				"Hydration": {
+					"value": -2
+				}
+			},
+			"effects_damage": {
+				"Pain": {
+					"delay": 0,
+					"duration": 300,
+					"fadeOut": 50
+				}
+			}
+		},
+		"_proto": "544fb37f4bdc2dee738b4567"
+	}
+]

@@ -1,0 +1,634 @@
+[
+	{
+		"_id": "5a2c3a9486f774688b05e574",
+		"_name": "NightVision",
+		"_parent": "55818aeb4bdc2ddc698b456a",
+		"_type": "Node",
+		"_props": {
+			"Intensity": 2.27,
+			"Mask": "Thermal",
+			"MaskSize": 1.5,
+			"NoiseIntensity": 0.02,
+			"NoiseScale": 5,
+			"Color": {
+				"r": 121,
+				"g": 233,
+				"b": 121,
+				"a": 254
+			},
+			"DiffuseIntensity": 0,
+			"HasHinge": true
+		}
+	},
+	{
+		"_id": "5d21f59b6dbe99052b54ef83",
+		"_name": "ThermalVision",
+		"_parent": "55818aeb4bdc2ddc698b456a",
+		"_type": "Node",
+		"_props": {
+			"RampPalette": "Fusion",
+			"DepthFade": 0.03,
+			"RoughnessCoef": 0.04,
+			"SpecularCoef": 0.01,
+			"MainTexColorCoef": 0.2,
+			"MinimumTemperatureValue": 0.25,
+			"RampShift": 0.061,
+			"HeatMin": 0.7,
+			"ColdMax": 0.462,
+			"IsNoisy": true,
+			"NoiseIntensity": 0.02,
+			"IsFpsStuck": false,
+			"IsGlitch": false,
+			"IsMotionBlurred": true,
+			"Mask": "Thermal",
+			"MaskSize": 1.2,
+			"IsPixelated": false,
+			"PixelationBlockCount": 256
+		}
+	},
+	{
+		"_id": "5d1b5e94d7ad1a2b865a96b0",
+		"_name": "scope_all_flir_rs32_225_9x_35_60hz",
+		"_parent": "55818aeb4bdc2ddc698b456a",
+		"_type": "Item",
+		"_props": {
+			"Name": "scope_base_trijicon_reap-ir",
+			"ShortName": "scope_base_trijicon_reap-ir",
+			"Description": "scope_base_trijicon_reap-ir",
+			"Weight": 0.45,
+			"BackgroundColor": "blue",
+			"Width": 2,
+			"Height": 1,
+			"StackMaxSize": 1,
+			"Rarity": "Not_exist",
+			"SpawnChance": 1,
+			"CreditsPrice": 144794,
+			"ItemSound": "mod",
+			"Prefab": {
+				"path": "assets/content/items/mods/scopes/scope_all_flir_rs32_225_9x_35_60hz.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 20,
+			"ExamineExperience": 10,
+			"HideEntrails": false,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": true,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"Grids": [],
+			"Slots": [
+				{
+					"_name": "mod_tactical",
+					"_id": "5d1b5e94d7ad1a2b865a96b2",
+					"_parent": "5d1b5e94d7ad1a2b865a96b0",
+					"_props": {
+						"filters": [
+							{
+								"Shift": 0,
+								"Filter": []
+							}
+						]
+					},
+					"_required": false,
+					"_mergeSlotWithChildren": false,
+					"_proto": "55d30c4c4bdc2db4468b457e"
+				}
+			],
+			"CanPutIntoDuringTheRaid": true,
+			"CantRemoveFromSlotsDuringRaid": [],
+			"Durability": 100,
+			"Accuracy": 0,
+			"Recoil": 0,
+			"Loudness": 0,
+			"EffectiveDistance": 0,
+			"Ergonomics": -5,
+			"Velocity": 0,
+			"RaidModdable": true,
+			"ToolModdable": true,
+			"BlocksFolding": false,
+			"BlocksCollapsible": false,
+			"IsAnimated": false,
+			"HasShoulderContact": false,
+			"SightingRange": 500,
+			"sightModType": "hybrid",
+			"aimingSensitivity": 0.3,
+			"SightModesCount": 2,
+			"OpticCalibrationDistances": [
+				50,
+				100,
+				150,
+				200
+			],
+			"ScopesCount": 1,
+			"AimSensitivity": [
+				[
+					0.3111,
+					0.0778
+				]
+			],
+			"ModesCount": [
+				2
+			],
+			"Zooms": [
+				[
+					2.25,
+					9
+				]
+			],
+			"CalibrationDistances": [
+				[
+					50,
+					100,
+					150,
+					200
+				]
+			]
+		},
+		"_proto": "5a1eaa87fcdbcb001865f75e"
+	},
+	{
+		"_id": "5b3b6e495acfc4330140bd88",
+		"_name": "scope_base_armasight_vulcan_gen3_bravo_mg_3,5x",
+		"_parent": "55818aeb4bdc2ddc698b456a",
+		"_type": "Item",
+		"_props": {
+			"Name": "scope_base_armasight_vulcan_gen3_bravo_mg_3,5x",
+			"ShortName": "scope_base_armasight_vulcan_gen3_bravo_mg_3,5x",
+			"Description": "scope_base_armasight_vulcan_gen3_bravo_mg_3,5x",
+			"Weight": 0.9,
+			"BackgroundColor": "blue",
+			"Width": 2,
+			"Height": 1,
+			"StackMaxSize": 1,
+			"Rarity": "Superrare",
+			"SpawnChance": 2,
+			"CreditsPrice": 46950,
+			"ItemSound": "mod",
+			"Prefab": {
+				"path": "assets/content/items/mods/scopes/scope_base_armasight_vulcan_gen3_bravo_mg_3,5x.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 20,
+			"ExamineExperience": 10,
+			"HideEntrails": false,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": true,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"Grids": [],
+			"Slots": [
+				{
+					"_name": "mod_scope",
+					"_id": "5b3b7b205acfc4001638810b",
+					"_parent": "5b3b6e495acfc4330140bd88",
+					"_props": {
+						"filters": [
+							{
+								"Shift": 0,
+								"Filter": [
+									"57ae0171245977343c27bfcf",
+									"58d39d3d86f77445bb794ae7",
+									"577d128124597739d65d0e56",
+									"58d2664f86f7747fec5834f6",
+									"5a33b2c9c4a282000c5a9511"
+								]
+							}
+						]
+					},
+					"_required": false,
+					"_mergeSlotWithChildren": false,
+					"_proto": "55d30c4c4bdc2db4468b457e"
+				},
+				{
+					"_name": "mod_tactical",
+					"_id": "5b3cbcaf5acfc400194776a3",
+					"_parent": "5b3b6e495acfc4330140bd88",
+					"_props": {
+						"filters": [
+							{
+								"Shift": 0,
+								"Filter": [
+									"5b3cbc235acfc4001863ac44"
+								]
+							}
+						]
+					},
+					"_required": false,
+					"_mergeSlotWithChildren": false,
+					"_proto": "55d30c4c4bdc2db4468b457e"
+				}
+			],
+			"CanPutIntoDuringTheRaid": true,
+			"CantRemoveFromSlotsDuringRaid": [],
+			"Durability": 100,
+			"Accuracy": 0,
+			"Recoil": 0,
+			"Loudness": 0,
+			"EffectiveDistance": 0,
+			"Ergonomics": -3,
+			"Velocity": 0,
+			"RaidModdable": true,
+			"ToolModdable": true,
+			"BlocksFolding": false,
+			"BlocksCollapsible": false,
+			"IsAnimated": false,
+			"HasShoulderContact": false,
+			"SightingRange": 500,
+			"sightModType": "optic",
+			"aimingSensitivity": 0.45,
+			"SightModesCount": 1,
+			"OpticCalibrationDistances": [
+				50,
+				100,
+				150,
+				200
+			],
+			"ScopesCount": 1,
+			"AimSensitivity": [
+				[
+					0.2429
+				]
+			],
+			"ModesCount": [
+				1
+			],
+			"Zooms": [
+				[
+					3.5
+				]
+			],
+			"CalibrationDistances": [
+				[
+					50,
+					100,
+					150,
+					200
+				]
+			]
+		},
+		"_proto": "5a1eaa87fcdbcb001865f75e"
+	},
+	{
+		"_id": "5a1eaa87fcdbcb001865f75e",
+		"_name": "scope_base_trijicon_reap-ir",
+		"_parent": "55818aeb4bdc2ddc698b456a",
+		"_type": "Item",
+		"_props": {
+			"Name": "scope_base_trijicon_reap-ir",
+			"ShortName": "scope_base_trijicon_reap-ir",
+			"Description": "scope_base_trijicon_reap-ir",
+			"Weight": 0.58,
+			"BackgroundColor": "blue",
+			"Width": 2,
+			"Height": 1,
+			"StackMaxSize": 1,
+			"Rarity": "Not_exist",
+			"SpawnChance": 0.3,
+			"CreditsPrice": 355794,
+			"ItemSound": "mod",
+			"Prefab": {
+				"path": "assets/content/items/mods/scopes/scope_base_trijicon_reap-ir.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 20,
+			"ExamineExperience": 10,
+			"HideEntrails": false,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": true,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"Grids": [],
+			"Slots": [
+				{
+					"_name": "mod_tactical",
+					"_id": "5a1eac63fcdbcb001a3b0108",
+					"_parent": "5a1eaa87fcdbcb001865f75e",
+					"_props": {
+						"filters": [
+							{
+								"Shift": 0,
+								"Filter": [
+									"5a1eacb3fcdbcb09800872be"
+								]
+							}
+						]
+					},
+					"_required": false,
+					"_mergeSlotWithChildren": false,
+					"_proto": "55d30c4c4bdc2db4468b457e"
+				}
+			],
+			"CanPutIntoDuringTheRaid": true,
+			"CantRemoveFromSlotsDuringRaid": [],
+			"Durability": 100,
+			"Accuracy": 0,
+			"Recoil": 0,
+			"Loudness": 0,
+			"EffectiveDistance": 0,
+			"Ergonomics": -3,
+			"Velocity": 0,
+			"RaidModdable": true,
+			"ToolModdable": true,
+			"BlocksFolding": false,
+			"BlocksCollapsible": false,
+			"IsAnimated": false,
+			"HasShoulderContact": false,
+			"SightingRange": 500,
+			"sightModType": "hybrid",
+			"aimingSensitivity": 0.45,
+			"SightModesCount": 2,
+			"OpticCalibrationDistances": [
+				50,
+				100,
+				150,
+				200
+			],
+			"ScopesCount": 1,
+			"AimSensitivity": [
+				[
+					0.28,
+					0.28
+				]
+			],
+			"ModesCount": [
+				2
+			],
+			"Zooms": [
+				[
+					2.5,
+					2.5
+				]
+			],
+			"CalibrationDistances": [
+				[
+					50,
+					100,
+					150,
+					200
+				]
+			]
+		}
+	},
+	{
+		"_id": "5a7c74b3e899ef0014332c29",
+		"_name": "scope_dovetail_npz_nspum_3,5x",
+		"_parent": "55818aeb4bdc2ddc698b456a",
+		"_type": "Item",
+		"_props": {
+			"Name": "scope_dovetail_npz_nspum_3,5x",
+			"ShortName": "scope_dovetail_npz_nspum_3,5x",
+			"Description": "scope_dovetail_npz_nspum_3,5x",
+			"Weight": 1.9,
+			"BackgroundColor": "blue",
+			"Width": 2,
+			"Height": 1,
+			"StackMaxSize": 1,
+			"Rarity": "Rare",
+			"SpawnChance": 7,
+			"CreditsPrice": 13732,
+			"ItemSound": "mod",
+			"Prefab": {
+				"path": "assets/content/items/mods/scopes/scope_dovetail_npz_nspum_3,5x.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 20,
+			"ExamineExperience": 10,
+			"HideEntrails": false,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 1,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": true,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [
+				"57ac965c24597706be5f975c",
+				"57aca93d2459771f2c7e26db",
+				"544a3f024bdc2d1d388b4568",
+				"544a3a774bdc2d3a388b4567",
+				"57adff4f24597737f373b6e6",
+				"591c4efa86f7741030027726",
+				"570fd79bd2720bc7458b4583",
+				"570fd6c2d2720bc6458b457f",
+				"558022b54bdc2dac148b458d",
+				"58491f3324597764bc48fa02",
+				"584924ec24597768f12ae244",
+				"5b30b0dc5acfc400153b7124",
+				"5d2da1e948f035477b1ce2ba",
+				"5c0505e00db834001b735073",
+				"584984812459776a704a82a6",
+				"59f9d81586f7744c7506ee62",
+				"570fd721d2720bc5458b4596",
+				"5947db3f86f77447880cf76f",
+				"57486e672459770abd687134",
+				"5649d9a14bdc2d79388b4580",
+				"58272b842459774abc128d50",
+				"56ea70acd2720b844b8b4594",
+				"5c82342f2e221644f31c060e",
+				"576fd4ec2459777f0b518431",
+				"5c82343a2e221644f31c0611",
+				"5648b6ff4bdc2d3d1c8b4581",
+				"5a37ca54c4a282000d72296a",
+				"57c69dd424597774c03b7bbc",
+				"5aa66a9be5b5b0214e506e89",
+				"5aa66c72e5b5b00016327c93",
+				"59db7eed86f77461f8380365",
+				"5a1ead28fcdbcb001912fa9f",
+				"57ffb0062459777a045af529",
+				"591ee00d86f774592f7b841e",
+				"57acb6222459771ec34b5cb0",
+				"5649af884bdc2d1b2b8b4589",
+				"59985a6c86f77414ec448d17"
+			],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"Grids": [],
+			"Slots": [
+				{
+					"_name": "mod_tactical",
+					"_id": "5ba36fe2d4351e4502010472",
+					"_parent": "5a7c74b3e899ef0014332c29",
+					"_props": {
+						"filters": [
+							{
+								"Shift": 0,
+								"Filter": [
+									"5ba36f85d4351e0085325c81"
+								]
+							}
+						]
+					},
+					"_required": false,
+					"_mergeSlotWithChildren": false,
+					"_proto": "55d30c4c4bdc2db4468b457e"
+				}
+			],
+			"CanPutIntoDuringTheRaid": true,
+			"CantRemoveFromSlotsDuringRaid": [],
+			"Durability": 100,
+			"Accuracy": 0,
+			"Recoil": 0,
+			"Loudness": 0,
+			"EffectiveDistance": 0,
+			"Ergonomics": -5,
+			"Velocity": 0,
+			"RaidModdable": true,
+			"ToolModdable": true,
+			"BlocksFolding": true,
+			"BlocksCollapsible": false,
+			"IsAnimated": false,
+			"HasShoulderContact": false,
+			"SightingRange": 300,
+			"sightModType": "hybrid",
+			"aimingSensitivity": 0.45,
+			"SightModesCount": 1,
+			"OpticCalibrationDistances": [
+				50,
+				100,
+				150,
+				200
+			],
+			"ScopesCount": 1,
+			"AimSensitivity": [
+				[
+					0.2
+				]
+			],
+			"ModesCount": [
+				1
+			],
+			"Zooms": [
+				[
+					3.5
+				]
+			],
+			"CalibrationDistances": [
+				[
+					50,
+					100,
+					150,
+					200
+				]
+			]
+		},
+		"_proto": "5a1eaa87fcdbcb001865f75e"
+	}
+]

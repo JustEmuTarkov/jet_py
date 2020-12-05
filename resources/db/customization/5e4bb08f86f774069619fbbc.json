@@ -1,0 +1,18 @@
+{
+	"_id": "5e4bb08f86f774069619fbbc",
+	"_name": "bear_kit_upper_telnik",
+	"_parent": "5cd944ca1388ce03a44dc2a4",
+	"_type": "Item",
+	"_props": {
+		"Name": "DefaultBearLowerSuite",
+		"ShortName": "DefaultBearLowerSuite",
+		"Description": "DefaultBearLowerSuite",
+		"Side": [
+			"Bear"
+		],
+		"AvailableAsDefault": false,
+		"Body": "5e4bb31586f7740695730568",
+		"Hands": "5e4bb1d286f77406a313ec59"
+	},
+	"_proto": "5cd946231388ce000d572fe3"
+}

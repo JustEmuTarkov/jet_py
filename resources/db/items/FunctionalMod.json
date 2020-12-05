@@ -1,0 +1,111 @@
+[
+	{
+		"_id": "55818afb4bdc2dde698b456d",
+		"_name": "Bipod",
+		"_parent": "550aa4154bdc2dd8348b456b",
+		"_type": "Node",
+		"_props": {}
+	},
+	{
+		"_id": "55818b0e4bdc2dde698b456e",
+		"_name": "LightLaser",
+		"_parent": "550aa4154bdc2dd8348b456b",
+		"_type": "Node",
+		"_props": {}
+	},
+	{
+		"_id": "55818b164bdc2ddc698b456c",
+		"_name": "TacticalCombo",
+		"_parent": "550aa4154bdc2dd8348b456b",
+		"_type": "Node",
+		"_props": {
+			"ModesCount": 0
+		}
+	},
+	{
+		"_id": "55818b084bdc2d5b648b4571",
+		"_name": "Flashlight",
+		"_parent": "550aa4154bdc2dd8348b456b",
+		"_type": "Node",
+		"_props": {
+			"ModesCount": 0
+		}
+	},
+	{
+		"_id": "55818af64bdc2d5b648b4570",
+		"_name": "Foregrip",
+		"_parent": "550aa4154bdc2dd8348b456b",
+		"_type": "Node",
+		"_props": {}
+	},
+	{
+		"_id": "55818b1d4bdc2d5b648b4572",
+		"_name": "RailCovers",
+		"_parent": "550aa4154bdc2dd8348b456b",
+		"_type": "Node",
+		"_props": {}
+	},
+	{
+		"_id": "56ea9461d2720b67698b456f",
+		"_name": "Gasblock",
+		"_parent": "550aa4154bdc2dd8348b456b",
+		"_type": "Node",
+		"_props": {}
+	},
+	{
+		"_id": "5a74651486f7744e73386dd1",
+		"_name": "AuxiliaryMod",
+		"_parent": "550aa4154bdc2dd8348b456b",
+		"_type": "Node",
+		"_props": {}
+	},
+	{
+		"_id": "5448fe394bdc2d0d028b456c",
+		"_name": "Muzzle",
+		"_parent": "550aa4154bdc2dd8348b456b",
+		"_type": "Node",
+		"_props": {
+			"muzzleModType": "silencer"
+		}
+	},
+	{
+		"_id": "5448fe7a4bdc2d6f028b456b",
+		"_name": "Sights",
+		"_parent": "550aa4154bdc2dd8348b456b",
+		"_type": "Node",
+		"_props": {
+			"sightModType": "iron",
+			"aimingSensitivity": 0.2,
+			"SightModesCount": 1,
+			"OpticCalibrationDistances": [
+				50,
+				100,
+				150,
+				200
+			],
+			"SightingRange": 0,
+			"ScopesCount": 1,
+			"AimSensitivity": [
+				[
+					1
+				]
+			],
+			"ModesCount": [
+				1
+			],
+			"Zooms": [
+				[
+					1
+				]
+			],
+			"CalibrationDistances": [
+				[
+					50,
+					100,
+					150,
+					200
+				]
+			]
+		}
+	}
+]

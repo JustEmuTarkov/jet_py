@@ -1,0 +1,23 @@
+[
+	{
+		"_id": "55802f4a4bdc2ddb688b4569",
+		"_name": "MasterMod",
+		"_parent": "5448fe124bdc2da5018b4567",
+		"_type": "Node",
+		"_props": {}
+	},
+	{
+		"_id": "55802f3e4bdc2de7118b4584",
+		"_name": "GearMod",
+		"_parent": "5448fe124bdc2da5018b4567",
+		"_type": "Node",
+		"_props": {}
+	},
+	{
+		"_id": "550aa4154bdc2dd8348b456b",
+		"_name": "FunctionalMod",
+		"_parent": "5448fe124bdc2da5018b4567",
+		"_type": "Node",
+		"_props": {}
+	}
+]

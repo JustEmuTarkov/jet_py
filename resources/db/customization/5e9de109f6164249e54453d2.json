@@ -1,0 +1,19 @@
+{
+	"_id": "5e9de109f6164249e54453d2",
+	"_name": "SavageUpperSuite_motocross",
+	"_parent": "5cd944ca1388ce03a44dc2a4",
+	"_type": "Item",
+	"_props": {
+		"Name": "SavageUpperSuite1",
+		"ShortName": "SavageUpperSuite1",
+		"Description": "SavageUpperSuite1",
+		"Side": [
+			"Bear",
+			"Usec"
+		],
+		"AvailableAsDefault": false,
+		"Body": "5e9da1d086f774054a667134",
+		"Hands": "5e9da2dd86f774054e7d0f63"
+	},
+	"_proto": "5cdea23c7d6c8b04723cf47b"
+}

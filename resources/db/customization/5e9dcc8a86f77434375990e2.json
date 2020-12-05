@@ -1,0 +1,17 @@
+{
+	"_id": "5e9dcc8a86f77434375990e2",
+	"_name": "bear_kit_lower_zaslon",
+	"_parent": "5cd944d01388ce000a659df9",
+	"_type": "Item",
+	"_props": {
+		"Name": "DefaultBearLowerSuite",
+		"ShortName": "DefaultBearLowerSuite",
+		"Description": "DefaultBearLowerSuite",
+		"Side": [
+			"Bear"
+		],
+		"AvailableAsDefault": false,
+		"Feet": "5e9dc97c86f774054c19ac9a"
+	},
+	"_proto": "5cd946231388ce000d572fe3"
+}

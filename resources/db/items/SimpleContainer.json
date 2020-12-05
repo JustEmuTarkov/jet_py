@@ -1,0 +1,1548 @@
+[
+	{
+		"_id": "5783c43d2459774bbe137486",
+		"_name": "wallet",
+		"_parent": "5795f317245977243854e041",
+		"_type": "Item",
+		"_props": {
+			"Name": "Empty Wallet",
+			"ShortName": "Wallet",
+			"Description": "Empty Wallet",
+			"Weight": 0.23,
+			"BackgroundColor": "blue",
+			"Width": 1,
+			"Height": 1,
+			"StackMaxSize": 1,
+			"Rarity": "Rare",
+			"SpawnChance": 7,
+			"CreditsPrice": 10542,
+			"ItemSound": "generic",
+			"Prefab": {
+				"path": "assets/content/items/barter/wallet/item_wallet.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 20,
+			"ExamineExperience": 2,
+			"HideEntrails": true,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": false,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"Grids": [
+				{
+					"_name": "main",
+					"_id": "579604ac2459772e2a2a3d91",
+					"_parent": "5783c43d2459774bbe137486",
+					"_props": {
+						"filters": [
+							{
+								"Filter": [
+									"5c164d2286f774194c5e69fa",
+									"543be5dd4bdc2deb348b4569"
+								],
+								"ExcludedFilter": []
+							}
+						],
+						"cellsH": 2,
+						"cellsV": 2,
+						"minCount": 0,
+						"maxCount": 0,
+						"maxWeight": 0
+					},
+					"_proto": "55d329c24bdc2d892f8b4567"
+				}
+			],
+			"Slots": [],
+			"CanPutIntoDuringTheRaid": true,
+			"CantRemoveFromSlotsDuringRaid": [],
+			"TagColor": 0,
+			"TagName": ""
+		},
+		"_proto": "577e1c9d2459773cd707c525"
+	},
+	{
+		"_id": "59fafd4b86f7745ca07e1232",
+		"_name": "item_container_keybar",
+		"_parent": "5795f317245977243854e041",
+		"_type": "Item",
+		"_props": {
+			"Name": "Key-tool",
+			"ShortName": "Key-tool",
+			"Description": "Key-tool",
+			"Weight": 0.5,
+			"BackgroundColor": "blue",
+			"Width": 1,
+			"Height": 1,
+			"StackMaxSize": 1,
+			"Rarity": "Superrare",
+			"SpawnChance": 1,
+			"CreditsPrice": 748453,
+			"ItemSound": "keys",
+			"Prefab": {
+				"path": "assets/content/items/barter/item_container_keybar/item_container_keybar.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 20,
+			"ExamineExperience": 2,
+			"HideEntrails": true,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": false,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"Grids": [
+				{
+					"_name": "main",
+					"_id": "59fafd4b86f7745ca07e1233",
+					"_parent": "59fafd4b86f7745ca07e1232",
+					"_props": {
+						"filters": [
+							{
+								"Filter": [
+									"5c99f98d86f7745c314214b3"
+								],
+								"ExcludedFilter": []
+							}
+						],
+						"cellsH": 4,
+						"cellsV": 4,
+						"minCount": 0,
+						"maxCount": 0,
+						"maxWeight": 0
+					},
+					"_proto": "55d329c24bdc2d892f8b4567"
+				}
+			],
+			"Slots": [],
+			"CanPutIntoDuringTheRaid": true,
+			"CantRemoveFromSlotsDuringRaid": [],
+			"TagColor": 0,
+			"TagName": ""
+		},
+		"_proto": "577e1c9d2459773cd707c525"
+	},
+	{
+		"_id": "5aafbcd986f7745e590fff23",
+		"_name": "item_container_meds",
+		"_parent": "5795f317245977243854e041",
+		"_type": "Item",
+		"_props": {
+			"Name": "medscase",
+			"ShortName": "medscase",
+			"Description": "medscase",
+			"Weight": 16,
+			"BackgroundColor": "blue",
+			"Width": 3,
+			"Height": 3,
+			"StackMaxSize": 1,
+			"Rarity": "Superrare",
+			"SpawnChance": 0.3,
+			"CreditsPrice": 366106,
+			"ItemSound": "container_plastic",
+			"Prefab": {
+				"path": "assets/content/items/containers/item_container_meds/item_container_meds.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 30,
+			"ExamineExperience": 10,
+			"HideEntrails": true,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": false,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"Grids": [
+				{
+					"_name": "main",
+					"_id": "5aafbcd986f7745e590fff25",
+					"_parent": "5aafbcd986f7745e590fff23",
+					"_props": {
+						"filters": [
+							{
+								"Filter": [
+									"57864c8c245977548867e7f1",
+									"543be5664bdc2dd4348b4569"
+								],
+								"ExcludedFilter": []
+							}
+						],
+						"cellsH": 7,
+						"cellsV": 7,
+						"minCount": 0,
+						"maxCount": 0,
+						"maxWeight": 0
+					},
+					"_proto": "55d329c24bdc2d892f8b4567"
+				}
+			],
+			"Slots": [],
+			"CanPutIntoDuringTheRaid": true,
+			"CantRemoveFromSlotsDuringRaid": [],
+			"TagColor": 0,
+			"TagName": ""
+		},
+		"_proto": "577e1c9d2459773cd707c525"
+	},
+	{
+		"_id": "59fb042886f7746c5005a7b2",
+		"_name": "item_container_trackcase",
+		"_parent": "5795f317245977243854e041",
+		"_type": "Item",
+		"_props": {
+			"Name": "Itemcase",
+			"ShortName": "Itemcase",
+			"Description": "Itemcase",
+			"Weight": 7,
+			"BackgroundColor": "blue",
+			"Width": 4,
+			"Height": 4,
+			"StackMaxSize": 1,
+			"Rarity": "Not_exist",
+			"SpawnChance": 0.07,
+			"CreditsPrice": 1229994,
+			"ItemSound": "container_plastic",
+			"Prefab": {
+				"path": "assets/content/items/containers/item_container_trackcase/item_container_trackcase.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 30,
+			"ExamineExperience": 10,
+			"HideEntrails": true,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": false,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"Grids": [
+				{
+					"_name": "main",
+					"_id": "59fb042886f7746c5005a7b3",
+					"_parent": "59fb042886f7746c5005a7b2",
+					"_props": {
+						"filters": [
+							{
+								"Filter": [
+									"5448eb774bdc2d0a728b4567",
+									"543be5f84bdc2dd4348b456a",
+									"5645bcb74bdc2ded0b8b4578",
+									"5448fe124bdc2da5018b4567",
+									"5448e53e4bdc2d60728b4567",
+									"5448e5284bdc2dcb718b4567",
+									"5aafbde786f774389d0cbc0f",
+									"5c093db286f7740a1b2617e3",
+									"59fafd4b86f7745ca07e1232",
+									"5d235bb686f77443f4331278",
+									"5c127c4486f7745625356c13",
+									"5aafbcd986f7745e590fff23",
+									"59fb016586f7746d0d4b423a",
+									"5c093e3486f77430cb02e593",
+									"59fb023c86f7746d0d4b423c",
+									"590c60fc86f77412b13fddcf",
+									"5783c43d2459774bbe137486",
+									"5422acb9af1c889c16000029",
+									"543be6674bdc2df1348b4569",
+									"5448ecbe4bdc2d60728b4568",
+									"543be5e94bdc2df1348b4568",
+									"5447e1d04bdc2dff2f8b4567",
+									"567849dd4bdc2d150f8b456e",
+									"543be5664bdc2dd4348b4569",
+									"5447e0e74bdc2d3c308b4567",
+									"5661632d4bdc2d903d8b456b",
+									"543be6564bdc2df4348b4568"
+								],
+								"ExcludedFilter": []
+							}
+						],
+						"cellsH": 8,
+						"cellsV": 8,
+						"minCount": 0,
+						"maxCount": 0,
+						"maxWeight": 0
+					},
+					"_proto": "55d329c24bdc2d892f8b4567"
+				}
+			],
+			"Slots": [],
+			"CanPutIntoDuringTheRaid": true,
+			"CantRemoveFromSlotsDuringRaid": [],
+			"TagColor": 0,
+			"TagName": ""
+		},
+		"_proto": "577e1c9d2459773cd707c525"
+	},
+	{
+		"_id": "5c127c4486f7745625356c13",
+		"_name": "item_container_magbox",
+		"_parent": "5795f317245977243854e041",
+		"_type": "Item",
+		"_props": {
+			"Name": "item_container_magbox",
+			"ShortName": "item_container_magbox",
+			"Description": "item_container_magbox",
+			"Weight": 6,
+			"BackgroundColor": "blue",
+			"Width": 3,
+			"Height": 2,
+			"StackMaxSize": 1,
+			"Rarity": "Superrare",
+			"SpawnChance": 0.5,
+			"CreditsPrice": 235000,
+			"ItemSound": "container_metal",
+			"Prefab": {
+				"path": "assets/content/items/containers/item_container_magbox/item_container_magbox.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 30,
+			"ExamineExperience": 10,
+			"HideEntrails": true,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": false,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"Grids": [
+				{
+					"_name": "main",
+					"_id": "5c127c4486f7745625356c15",
+					"_parent": "5c127c4486f7745625356c13",
+					"_props": {
+						"filters": [
+							{
+								"Filter": [
+									"5448bc234bdc2d3c308b4569"
+								],
+								"ExcludedFilter": []
+							}
+						],
+						"cellsH": 7,
+						"cellsV": 7,
+						"minCount": 0,
+						"maxCount": 0,
+						"maxWeight": 0
+					},
+					"_proto": "55d329c24bdc2d892f8b4567"
+				}
+			],
+			"Slots": [],
+			"CanPutIntoDuringTheRaid": true,
+			"CantRemoveFromSlotsDuringRaid": [],
+			"TagColor": 0,
+			"TagName": ""
+		},
+		"_proto": "577e1c9d2459773cd707c525"
+	},
+	{
+		"_id": "590c60fc86f77412b13fddcf",
+		"_name": "item_info_docbag",
+		"_parent": "5795f317245977243854e041",
+		"_type": "Item",
+		"_props": {
+			"Name": "Docbag",
+			"ShortName": "Docbag",
+			"Description": "Docbag",
+			"Weight": 0.7,
+			"BackgroundColor": "blue",
+			"Width": 1,
+			"Height": 2,
+			"StackMaxSize": 1,
+			"Rarity": "Superrare",
+			"SpawnChance": 4,
+			"CreditsPrice": 167469,
+			"ItemSound": "gear_generic",
+			"Prefab": {
+				"path": "assets/content/items/infosubject/item_info_docbag/item_info_docbag.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 30,
+			"ExamineExperience": 10,
+			"HideEntrails": true,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": false,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"Grids": [
+				{
+					"_name": "main",
+					"_id": "590c60fc86f77412b13fddd0",
+					"_parent": "590c60fc86f77412b13fddcf",
+					"_props": {
+						"filters": [
+							{
+								"Filter": [
+									"59faff1d86f7746c51718c9c",
+									"5d235b4d86f7742e017bc88a",
+									"5448ecbe4bdc2d60728b4568",
+									"543be5e94bdc2df1348b4568",
+									"567849dd4bdc2d150f8b456e",
+									"543be5dd4bdc2deb348b4569"
+								],
+								"ExcludedFilter": []
+							}
+						],
+						"cellsH": 4,
+						"cellsV": 4,
+						"minCount": 0,
+						"maxCount": 0,
+						"maxWeight": 0
+					},
+					"_proto": "55d329c24bdc2d892f8b4567"
+				}
+			],
+			"Slots": [],
+			"CanPutIntoDuringTheRaid": true,
+			"CantRemoveFromSlotsDuringRaid": [],
+			"TagColor": 0,
+			"TagName": ""
+		},
+		"_proto": "577e1c9d2459773cd707c525"
+	},
+	{
+		"_id": "5e2af55f86f7746d4159f07c",
+		"_name": "item_container_grenadebox",
+		"_parent": "5795f317245977243854e041",
+		"_type": "Item",
+		"_props": {
+			"Name": "item_container_grenadebox",
+			"ShortName": "item_container_grenadebox",
+			"Description": "item_container_grenadebox",
+			"Weight": 3,
+			"BackgroundColor": "blue",
+			"Width": 3,
+			"Height": 3,
+			"StackMaxSize": 1,
+			"Rarity": "Not_exist",
+			"SpawnChance": 0.2,
+			"CreditsPrice": 510000,
+			"ItemSound": "container_plastic",
+			"Prefab": {
+				"path": "assets/content/items/containers/item_container_grenadebox/item_container_grenadebox.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 30,
+			"ExamineExperience": 10,
+			"HideEntrails": true,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": false,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"Grids": [
+				{
+					"_name": "main",
+					"_id": "5e2af55f86f7746d4159f07e",
+					"_parent": "5e2af55f86f7746d4159f07c",
+					"_props": {
+						"filters": [
+							{
+								"Filter": [
+									"5e2af51086f7746d3f3c3402",
+									"5656eb674bdc2d35148b457c",
+									"5ede474b0c226a66f5402622",
+									"5ede475b549eed7c6d5c18fb",
+									"5ede4739e0350d05467f73e8",
+									"5f0c892565703e5c461894e9",
+									"5ede47405b097655935d7d16",
+									"5ede475339ee016e8c534742",
+									"5ede47641cf3836a88318df1",
+									"543be6564bdc2df4348b4568"
+								],
+								"ExcludedFilter": []
+							}
+						],
+						"cellsH": 8,
+						"cellsV": 8,
+						"minCount": 0,
+						"maxCount": 0,
+						"maxWeight": 0
+					},
+					"_proto": "55d329c24bdc2d892f8b4567"
+				}
+			],
+			"Slots": [],
+			"CanPutIntoDuringTheRaid": true,
+			"CantRemoveFromSlotsDuringRaid": [],
+			"TagColor": 0,
+			"TagName": ""
+		},
+		"_proto": "577e1c9d2459773cd707c525"
+	},
+	{
+		"_id": "5c0a840b86f7742ffa4f2482",
+		"_name": "item_container_items_thicc",
+		"_parent": "5795f317245977243854e041",
+		"_type": "Item",
+		"_props": {
+			"Name": "item_container_items_thicc",
+			"ShortName": "item_container_items_thicc",
+			"Description": "item_container_items_thicc",
+			"Weight": 23,
+			"BackgroundColor": "yellow",
+			"Width": 5,
+			"Height": 3,
+			"StackMaxSize": 1,
+			"Rarity": "Not_exist",
+			"SpawnChance": 4,
+			"CreditsPrice": 3100000,
+			"ItemSound": "container_plastic",
+			"Prefab": {
+				"path": "assets/content/items/containers/item_container_items_thicc/item_container_items_thicc.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 30,
+			"ExamineExperience": 10,
+			"HideEntrails": true,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": false,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"Grids": [
+				{
+					"_name": "main",
+					"_id": "5c0a840b86f7742ffa4f2484",
+					"_parent": "5c0a840b86f7742ffa4f2482",
+					"_props": {
+						"filters": [
+							{
+								"Filter": [
+									"5448eb774bdc2d0a728b4567",
+									"543be5f84bdc2dd4348b456a",
+									"5645bcb74bdc2ded0b8b4578",
+									"5448fe124bdc2da5018b4567",
+									"5448e53e4bdc2d60728b4567",
+									"5448e5284bdc2dcb718b4567",
+									"5aafbde786f774389d0cbc0f",
+									"5c093db286f7740a1b2617e3",
+									"59fafd4b86f7745ca07e1232",
+									"5d235bb686f77443f4331278",
+									"5c127c4486f7745625356c13",
+									"5aafbcd986f7745e590fff23",
+									"59fb016586f7746d0d4b423a",
+									"5c093e3486f77430cb02e593",
+									"59fb023c86f7746d0d4b423c",
+									"590c60fc86f77412b13fddcf",
+									"5783c43d2459774bbe137486",
+									"5422acb9af1c889c16000029",
+									"543be6674bdc2df1348b4569",
+									"5448ecbe4bdc2d60728b4568",
+									"543be5e94bdc2df1348b4568",
+									"5447e1d04bdc2dff2f8b4567",
+									"567849dd4bdc2d150f8b456e",
+									"543be5664bdc2dd4348b4569",
+									"5447e0e74bdc2d3c308b4567",
+									"5661632d4bdc2d903d8b456b",
+									"543be6564bdc2df4348b4568"
+								],
+								"ExcludedFilter": []
+							}
+						],
+						"cellsH": 14,
+						"cellsV": 14,
+						"minCount": 0,
+						"maxCount": 0,
+						"maxWeight": 0
+					},
+					"_proto": "55d329c24bdc2d892f8b4567"
+				}
+			],
+			"Slots": [],
+			"CanPutIntoDuringTheRaid": true,
+			"CantRemoveFromSlotsDuringRaid": [],
+			"TagColor": 0,
+			"TagName": ""
+		},
+		"_proto": "577e1c9d2459773cd707c525"
+	},
+	{
+		"_id": "59fb016586f7746d0d4b423a",
+		"_name": "item_container_money",
+		"_parent": "5795f317245977243854e041",
+		"_type": "Item",
+		"_props": {
+			"Name": "Moneycase",
+			"ShortName": "Moneycase",
+			"Description": "Moneycase",
+			"Weight": 5,
+			"BackgroundColor": "blue",
+			"Width": 3,
+			"Height": 2,
+			"StackMaxSize": 1,
+			"Rarity": "Superrare",
+			"SpawnChance": 0.6,
+			"CreditsPrice": 398201,
+			"ItemSound": "container_metal",
+			"Prefab": {
+				"path": "assets/content/items/containers/item_container_money/item_container_money.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 30,
+			"ExamineExperience": 10,
+			"HideEntrails": true,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": false,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"Grids": [
+				{
+					"_name": "main",
+					"_id": "59fb016586f7746d0d4b423b",
+					"_parent": "59fb016586f7746d0d4b423a",
+					"_props": {
+						"filters": [
+							{
+								"Filter": [
+									"59faff1d86f7746c51718c9c",
+									"5d235b4d86f7742e017bc88a",
+									"543be5dd4bdc2deb348b4569"
+								],
+								"ExcludedFilter": []
+							}
+						],
+						"cellsH": 7,
+						"cellsV": 7,
+						"minCount": 0,
+						"maxCount": 0,
+						"maxWeight": 0
+					},
+					"_proto": "55d329c24bdc2d892f8b4567"
+				}
+			],
+			"Slots": [],
+			"CanPutIntoDuringTheRaid": true,
+			"CantRemoveFromSlotsDuringRaid": [],
+			"TagColor": 0,
+			"TagName": ""
+		},
+		"_proto": "577e1c9d2459773cd707c525"
+	},
+	{
+		"_id": "5aafbde786f774389d0cbc0f",
+		"_name": "item_container_ammo",
+		"_parent": "5795f317245977243854e041",
+		"_type": "Item",
+		"_props": {
+			"Name": "ammocase",
+			"ShortName": "ammocase",
+			"Description": "ammocase",
+			"Weight": 3,
+			"BackgroundColor": "blue",
+			"Width": 2,
+			"Height": 2,
+			"StackMaxSize": 1,
+			"Rarity": "Superrare",
+			"SpawnChance": 1,
+			"CreditsPrice": 162552,
+			"ItemSound": "container_metal",
+			"Prefab": {
+				"path": "assets/content/items/containers/item_container_ammo/item_container_ammo.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 30,
+			"ExamineExperience": 10,
+			"HideEntrails": true,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": false,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"Grids": [
+				{
+					"_name": "main",
+					"_id": "5aafbde786f774389d0cbc11",
+					"_parent": "5aafbde786f774389d0cbc0f",
+					"_props": {
+						"filters": [
+							{
+								"Filter": [
+									"5485a8684bdc2da71d8b4567",
+									"543be5cb4bdc2deb348b4568"
+								],
+								"ExcludedFilter": []
+							}
+						],
+						"cellsH": 7,
+						"cellsV": 7,
+						"minCount": 0,
+						"maxCount": 0,
+						"maxWeight": 0
+					},
+					"_proto": "55d329c24bdc2d892f8b4567"
+				}
+			],
+			"Slots": [],
+			"CanPutIntoDuringTheRaid": true,
+			"CantRemoveFromSlotsDuringRaid": [],
+			"TagColor": 0,
+			"TagName": ""
+		},
+		"_proto": "577e1c9d2459773cd707c525"
+	},
+	{
+		"_id": "5c093db286f7740a1b2617e3",
+		"_name": "item_container_food",
+		"_parent": "5795f317245977243854e041",
+		"_type": "Item",
+		"_props": {
+			"Name": "item_container_food",
+			"ShortName": "item_container_food",
+			"Description": "item_container_food",
+			"Weight": 12,
+			"BackgroundColor": "blue",
+			"Width": 3,
+			"Height": 3,
+			"StackMaxSize": 1,
+			"Rarity": "Superrare",
+			"SpawnChance": 0.3,
+			"CreditsPrice": 340000,
+			"ItemSound": "container_plastic",
+			"Prefab": {
+				"path": "assets/content/items/containers/item_container_food/item_container_food.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 30,
+			"ExamineExperience": 10,
+			"HideEntrails": true,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": false,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"Grids": [
+				{
+					"_name": "main",
+					"_id": "5c093db286f7740a1b2617e5",
+					"_parent": "5c093db286f7740a1b2617e3",
+					"_props": {
+						"filters": [
+							{
+								"Filter": [
+									"5af0484c86f7740f02001f7f",
+									"5e54f6af86f7742199090bf3",
+									"5bc9be8fd4351e00334cae6e",
+									"543be6674bdc2df1348b4569"
+								],
+								"ExcludedFilter": []
+							}
+						],
+						"cellsH": 8,
+						"cellsV": 8,
+						"minCount": 0,
+						"maxCount": 0,
+						"maxWeight": 0
+					},
+					"_proto": "55d329c24bdc2d892f8b4567"
+				}
+			],
+			"Slots": [],
+			"CanPutIntoDuringTheRaid": true,
+			"CantRemoveFromSlotsDuringRaid": [],
+			"TagColor": 0,
+			"TagName": ""
+		},
+		"_proto": "577e1c9d2459773cd707c525"
+	},
+	{
+		"_id": "59fb023c86f7746d0d4b423c",
+		"_name": "item_container_weaponcase",
+		"_parent": "5795f317245977243854e041",
+		"_type": "Item",
+		"_props": {
+			"Name": "Weaponcase",
+			"ShortName": "Weaponcase",
+			"Description": "Weaponcase",
+			"Weight": 9,
+			"BackgroundColor": "blue",
+			"Width": 5,
+			"Height": 2,
+			"StackMaxSize": 1,
+			"Rarity": "Not_exist",
+			"SpawnChance": 0.05,
+			"CreditsPrice": 874566,
+			"ItemSound": "container_plastic",
+			"Prefab": {
+				"path": "assets/content/items/containers/item_container_weaponcase/item_container_weaponcase.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 30,
+			"ExamineExperience": 10,
+			"HideEntrails": true,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": false,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"Grids": [
+				{
+					"_name": "main",
+					"_id": "59fb023c86f7746d0d4b423d",
+					"_parent": "59fb023c86f7746d0d4b423c",
+					"_props": {
+						"filters": [
+							{
+								"Filter": [
+									"5448fe124bdc2da5018b4567",
+									"5422acb9af1c889c16000029",
+									"5485a8684bdc2da71d8b4567",
+									"543be5cb4bdc2deb348b4568"
+								],
+								"ExcludedFilter": []
+							}
+						],
+						"cellsH": 5,
+						"cellsV": 10,
+						"minCount": 0,
+						"maxCount": 0,
+						"maxWeight": 0
+					},
+					"_proto": "55d329c24bdc2d892f8b4567"
+				}
+			],
+			"Slots": [],
+			"CanPutIntoDuringTheRaid": true,
+			"CantRemoveFromSlotsDuringRaid": [],
+			"TagColor": 0,
+			"TagName": ""
+		},
+		"_proto": "577e1c9d2459773cd707c525"
+	},
+	{
+		"_id": "5b6d9ce188a4501afc1b2b25",
+		"_name": "item_container_weaponcase_THICC",
+		"_parent": "5795f317245977243854e041",
+		"_type": "Item",
+		"_props": {
+			"Name": "Weaponcase thicc",
+			"ShortName": "Weaponcase thicc",
+			"Description": "Weaponcase thicc",
+			"Weight": 18,
+			"BackgroundColor": "yellow",
+			"Width": 5,
+			"Height": 2,
+			"StackMaxSize": 1,
+			"Rarity": "Not_exist",
+			"SpawnChance": 4,
+			"CreditsPrice": 1350000,
+			"ItemSound": "container_plastic",
+			"Prefab": {
+				"path": "assets/content/items/containers/item_container_weapon_thicc/item_container_weapon_thicc.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 30,
+			"ExamineExperience": 10,
+			"HideEntrails": true,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": false,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"Grids": [
+				{
+					"_name": "main",
+					"_id": "5b6d9ce188a4501afc1b2b27",
+					"_parent": "5b6d9ce188a4501afc1b2b25",
+					"_props": {
+						"filters": [
+							{
+								"Filter": [
+									"5448fe124bdc2da5018b4567",
+									"5422acb9af1c889c16000029",
+									"5485a8684bdc2da71d8b4567",
+									"543be5cb4bdc2deb348b4568"
+								],
+								"ExcludedFilter": []
+							}
+						],
+						"cellsH": 6,
+						"cellsV": 15,
+						"minCount": 0,
+						"maxCount": 0,
+						"maxWeight": 0
+					},
+					"_proto": "55d329c24bdc2d892f8b4567"
+				}
+			],
+			"Slots": [],
+			"CanPutIntoDuringTheRaid": true,
+			"CantRemoveFromSlotsDuringRaid": [],
+			"TagColor": 0,
+			"TagName": ""
+		},
+		"_proto": "577e1c9d2459773cd707c525"
+	},
+	{
+		"_id": "5b7c710788a4506dec015957",
+		"_name": "item_container_junkbox",
+		"_parent": "5795f317245977243854e041",
+		"_type": "Item",
+		"_props": {
+			"Name": "junkbox",
+			"ShortName": "junkbox",
+			"Description": "junkbox",
+			"Weight": 15,
+			"BackgroundColor": "yellow",
+			"Width": 4,
+			"Height": 4,
+			"StackMaxSize": 1,
+			"Rarity": "Not_exist",
+			"SpawnChance": 4,
+			"CreditsPrice": 1215269,
+			"ItemSound": "container_plastic",
+			"Prefab": {
+				"path": "assets/content/items/containers/item_container_junkbox/item_container_junkbox.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 30,
+			"ExamineExperience": 10,
+			"HideEntrails": true,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": false,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"Grids": [
+				{
+					"_name": "main",
+					"_id": "5b7c710788a4506dec015959",
+					"_parent": "5b7c710788a4506dec015957",
+					"_props": {
+						"filters": [
+							{
+								"Filter": [
+									"5448eb774bdc2d0a728b4567",
+									"5448ecbe4bdc2d60728b4568"
+								],
+								"ExcludedFilter": []
+							}
+						],
+						"cellsH": 14,
+						"cellsV": 14,
+						"minCount": 0,
+						"maxCount": 0,
+						"maxWeight": 0
+					},
+					"_proto": "55d329c24bdc2d892f8b4567"
+				}
+			],
+			"Slots": [],
+			"CanPutIntoDuringTheRaid": true,
+			"CantRemoveFromSlotsDuringRaid": [],
+			"TagColor": 0,
+			"TagName": ""
+		},
+		"_proto": "577e1c9d2459773cd707c525"
+	},
+	{
+		"_id": "5c093e3486f77430cb02e593",
+		"_name": "item_container_smallitems",
+		"_parent": "5795f317245977243854e041",
+		"_type": "Item",
+		"_props": {
+			"Name": "item_container_smallitems",
+			"ShortName": "item_container_smallitems",
+			"Description": "item_container_smallitems",
+			"Weight": 0.2,
+			"BackgroundColor": "blue",
+			"Width": 1,
+			"Height": 1,
+			"StackMaxSize": 1,
+			"Rarity": "Superrare",
+			"SpawnChance": 0.7,
+			"CreditsPrice": 310000,
+			"ItemSound": "container_plastic",
+			"Prefab": {
+				"path": "assets/content/items/containers/item_container_smallitems/item_container_smallitems.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 30,
+			"ExamineExperience": 10,
+			"HideEntrails": true,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": false,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"Grids": [
+				{
+					"_name": "main",
+					"_id": "5c093e3486f77430cb02e595",
+					"_parent": "5c093e3486f77430cb02e593",
+					"_props": {
+						"filters": [
+							{
+								"Filter": [
+									"59f32bb586f774757e1e8442",
+									"59f32c3b86f77472a31742f0"
+								],
+								"ExcludedFilter": []
+							}
+						],
+						"cellsH": 10,
+						"cellsV": 10,
+						"minCount": 0,
+						"maxCount": 0,
+						"maxWeight": 0
+					},
+					"_proto": "55d329c24bdc2d892f8b4567"
+				}
+			],
+			"Slots": [],
+			"CanPutIntoDuringTheRaid": true,
+			"CantRemoveFromSlotsDuringRaid": [],
+			"TagColor": 0,
+			"TagName": ""
+		},
+		"_proto": "577e1c9d2459773cd707c525"
+	},
+	{
+		"_id": "5d235bb686f77443f4331278",
+		"_name": "item_container_lopouch",
+		"_parent": "5795f317245977243854e041",
+		"_type": "Item",
+		"_props": {
+			"Name": "item_container_lopouch",
+			"ShortName": "item_container_lopouch",
+			"Description": "item_container_lopouch",
+			"Weight": 0.2,
+			"BackgroundColor": "blue",
+			"Width": 2,
+			"Height": 1,
+			"StackMaxSize": 1,
+			"Rarity": "Not_exist",
+			"SpawnChance": 0.05,
+			"CreditsPrice": 750000,
+			"ItemSound": "container_pouch",
+			"Prefab": {
+				"path": "assets/content/items/containers/item_container_lopouch/item_container_lopouch.bundle",
+				"rcid": ""
+			},
+			"UsePrefab": {
+				"path": "",
+				"rcid": ""
+			},
+			"StackObjectsCount": 1,
+			"NotShownInSlot": false,
+			"ExaminedByDefault": false,
+			"ExamineTime": 1,
+			"IsUndiscardable": false,
+			"IsUnsaleable": false,
+			"IsUnbuyable": false,
+			"IsUngivable": false,
+			"IsLockedafterEquip": false,
+			"QuestItem": false,
+			"LootExperience": 30,
+			"ExamineExperience": 10,
+			"HideEntrails": true,
+			"RepairCost": 0,
+			"RepairSpeed": 0,
+			"ExtraSizeLeft": 0,
+			"ExtraSizeRight": 0,
+			"ExtraSizeUp": 0,
+			"ExtraSizeDown": 0,
+			"ExtraSizeForceAdd": false,
+			"MergesWithChildren": false,
+			"CanSellOnRagfair": true,
+			"CanRequireOnRagfair": true,
+			"BannedFromRagfair": false,
+			"ConflictingItems": [],
+			"FixedPrice": false,
+			"Unlootable": false,
+			"UnlootableFromSlot": "FirstPrimaryWeapon",
+			"UnlootableFromSide": [],
+			"ChangePriceCoef": 1,
+			"AllowSpawnOnLocations": [],
+			"SendToClient": false,
+			"AnimationVariantsNumber": 0,
+			"DiscardingBlock": false,
+			"Grids": [
+				{
+					"_name": "main",
+					"_id": "5d235bb686f77443f433127a",
+					"_parent": "5d235bb686f77443f4331278",
+					"_props": {
+						"filters": [
+							{
+								"Filter": [
+									"59faff1d86f7746c51718c9c",
+									"5d235b4d86f7742e017bc88a",
+									"5c1267ee86f77416ec610f72",
+									"5d235a5986f77443f6329bc6",
+									"59f32bb586f774757e1e8442",
+									"59f32c3b86f77472a31742f0",
+									"590c621186f774138d11ea29",
+									"543be5e94bdc2df1348b4568",
+									"543be5dd4bdc2deb348b4569"
+								],
+								"ExcludedFilter": []
+							}
+						],
+						"cellsH": 5,
+						"cellsV": 5,
+						"minCount": 0,
+						"maxCount": 0,
+						"maxWeight": 0
+					},
+					"_proto": "55d329c24bdc2d892f8b4567"
+				}
+			],
+			"Slots": [],
+			"CanPutIntoDuringTheRaid": true,
+			"CantRemoveFromSlotsDuringRaid": [],
+			"TagColor": 0,
+			"TagName": ""
+		},
+		"_proto": "577e1c9d2459773cd707c525"
+	}
+]

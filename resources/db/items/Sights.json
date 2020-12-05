@@ -1,0 +1,44 @@
+[
+	{
+		"_id": "55818aeb4bdc2ddc698b456a",
+		"_name": "SpecialScope",
+		"_parent": "5448fe7a4bdc2d6f028b456b",
+		"_type": "Node",
+		"_props": {}
+	},
+	{
+		"_id": "55818acf4bdc2dde698b456b",
+		"_name": "CompactCollimator",
+		"_parent": "5448fe7a4bdc2d6f028b456b",
+		"_type": "Node",
+		"_props": {}
+	},
+	{
+		"_id": "55818ac54bdc2d5b648b456e",
+		"_name": "IronSight",
+		"_parent": "5448fe7a4bdc2d6f028b456b",
+		"_type": "Node",
+		"_props": {}
+	},
+	{
+		"_id": "55818add4bdc2d5b648b456f",
+		"_name": "AssaultScope",
+		"_parent": "5448fe7a4bdc2d6f028b456b",
+		"_type": "Node",
+		"_props": {}
+	},
+	{
+		"_id": "55818ad54bdc2ddc698b4569",
+		"_name": "Collimator",
+		"_parent": "5448fe7a4bdc2d6f028b456b",
+		"_type": "Node",
+		"_props": {}
+	},
+	{
+		"_id": "55818ae44bdc2dde698b456c",
+		"_name": "OpticScope",
+		"_parent": "5448fe7a4bdc2d6f028b456b",
+		"_type": "Node",
+		"_props": {}
+	}
+]

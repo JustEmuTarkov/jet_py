@@ -1,0 +1,65 @@
+{
+	"579dc571d53a0658a154fbec": {
+		"FullName": "<Vrai nom inconnu>",
+		"FirstName": "<Vrai nom inconnu>",
+		"Nickname": "Fence",
+		"Location": "Un réseau de points de vente couvrant Tarkov et ses environs",
+		"Description": "Le conflit eut à peine commencé que Fence avait déjà commencé la mise en place de points de vente anonymes pour acheter et vendre des marchandises. Toujours incognito, il est néanmoins parvenu à constituer un réseau de contrebande bien organisé opérant dans toute la région de Norvinsk."
+	},
+	"54cb50c76803fa8b248b4571": {
+		"FullName": "Pavel Yegorovich Romanenko",
+		"FirstName": "Pavel Romanenko",
+		"Nickname": "Prapor",
+		"Location": "Ville",
+		"Description": "Adjudant en charge des entrepôts d'approvisionnement sur la base de soutien de la Garde Nationale renforçant le blocus de la région de Norvinsk. Pendant les Contract Wars, il fournissait secrètement le BEAR en armes, munitions et diverses autres provisions dont il disposait."
+	},
+	"58330581ace78e27b8b10cee": {
+		"FullName": "Alexander Fyodorovich Kiselyov",
+		"FirstName": "Alexander",
+		"Nickname": "Skier",
+		"Location": "Douanes",
+		"Description": "Employé du terminal douanier de la zone portuaire. Ayant d'abord vendu les marchandises du terminal, il a formé un gang au cours du conflit afin de mettre la main sur tout ce qu'il pouvait dans les environs."
+	},
+	"54cb57776803fa99248b456e": {
+		"FullName": "Elvira Khabibullina",
+		"FirstName": "Elvira",
+		"Nickname": "La Toubib",
+		"Location": "Ville",
+		"Description": "Chef du service de Traumatologie de l'Hôpital Central de Tarkov."
+	},
+	"5935c25fb3acc3127c3d8cd9": {
+		"FullName": "Tadeusz Pilsudski",
+		"FirstName": "Tadeusz",
+		"Nickname": "Peacekeeper",
+		"Location": "Zone Portuaire",
+		"Description": "Officier des forces de maintien de la paix de l'ONU chargé du ravitaillement, basé à l'un des principaux points de contrôle menant à la zone portuaire de Tarkov. Les Casques Bleus se sont aventurés dans de petites affaires dès le début, en échangeant des armes, des munitions et de l'équipement militaire occidentaux contre tout objet de valeur."
+	},
+	"59c0ea2130c28d455c92e892": {
+		"FullName": "Nom",
+		"FirstName": "Prénom",
+		"Nickname": "Surnom",
+		"Location": "Lieu",
+		"Description": "Description"
+	},
+	"5a7c2eca46aef81a7ca2145d": {
+		"FullName": "Sergey Arsenyevich Samoylov",
+		"FirstName": "Sergey Arsenyevich",
+		"Nickname": "Le Mécano",
+		"Location": "Usine Chimique",
+		"Description": "Contremaître de l'usine chimique avant le conflit, il s'est occupé dès le début des travaux de modification des armes et des réparations, ainsi que de l'entretien de l'équipement et de la technologie complexes. Il préfère vivre clandestinement en solo et opère discrètement, plaçant les tâches compliquées et stimulantes au-dessus de tout."
+	},
+	"5ac3b934156ae10c4430e83c": {
+		"FullName": "Abramyan Arshavir Sarkisivich",
+		"FirstName": "Arshavir Sarkisivich",
+		"Nickname": "Ragman",
+		"Location": "Centre commercial principal de Tarkov",
+		"Description": "Il travaillait en tant que directeur d'un grand centre commercial situé dans la banlieue de Tarkov. On y trouvait des vêtements et de l'équipement."
+	},
+	"5c0647fdd443bc2504c2d371": {
+		"FullName": "Kharitonov Ivan Egorovich",
+		"FirstName": "Ivan Kharitonov",
+		"Nickname": "Jaeger",
+		"Location": "Réserve de Priozersky",
+		"Description": "Il a travaillé dans la propriété de chasse de la forêt de la réserve de Priozersky sous l'État des chasseurs. Chasseur professionnel et spécialiste de la survie. Il a gardé et garde toujours, peu importe les conditions, son sol de chasseur de toutes les menaces possibles."
+	}
+}

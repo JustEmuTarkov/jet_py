@@ -1,0 +1,34 @@
+[
+	{
+		"_id": "55818a104bdc2db9688b4569",
+		"_name": "Handguard",
+		"_parent": "55802f4a4bdc2ddb688b4569",
+		"_type": "Node",
+		"_props": {}
+	},
+	{
+		"_id": "55818a684bdc2ddd698b456d",
+		"_name": "PistolGrip",
+		"_parent": "55802f4a4bdc2ddb688b4569",
+		"_type": "Node",
+		"_props": {}
+	},
+	{
+		"_id": "555ef6e44bdc2de9068b457e",
+		"_name": "Barrel",
+		"_parent": "55802f4a4bdc2ddb688b4569",
+		"_type": "Node",
+		"_props": {
+			"CenterOfImpact": 0.01,
+			"ShotgunDispersion": 1,
+			"IsSilencer": false
+		}
+	},
+	{
+		"_id": "55818a304bdc2db5418b457d",
+		"_name": "Receiver",
+		"_parent": "55802f4a4bdc2ddb688b4569",
+		"_type": "Node",
+		"_props": {}
+	}
+]

@@ -1,0 +1,37 @@
+[
+	{
+		"_id": "550aa4bf4bdc2dd6348b456b",
+		"_name": "FlashHider",
+		"_parent": "5448fe394bdc2d0d028b456c",
+		"_type": "Node",
+		"_props": {}
+	},
+	{
+		"_id": "550aa4cd4bdc2dd8348b456c",
+		"_name": "Silencer",
+		"_parent": "5448fe394bdc2d0d028b456c",
+		"_type": "Node",
+		"_props": {}
+	},
+	{
+		"_id": "550ad14d4bdc2dd5348b456c",
+		"_name": "Pms",
+		"_parent": "5448fe394bdc2d0d028b456c",
+		"_type": "Node",
+		"_props": {}
+	},
+	{
+		"_id": "550aa4af4bdc2dd4348b456e",
+		"_name": "Compensator",
+		"_parent": "5448fe394bdc2d0d028b456c",
+		"_type": "Node",
+		"_props": {}
+	},
+	{
+		"_id": "550aa4dd4bdc2dc9348b4569",
+		"_name": "MuzzleCombo",
+		"_parent": "5448fe394bdc2d0d028b456c",
+		"_type": "Node",
+		"_props": {}
+	}
+]
