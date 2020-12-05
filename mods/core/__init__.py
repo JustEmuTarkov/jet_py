@@ -356,11 +356,3 @@ class Package(BasePackage):
         def notifierserver_get(profile_pk: str):
             #  ?last_id=default_id
             return {"type": "ping", "eventId": "ping"}
-
-            profile = Profile.for_id('AIDASUBHSPOIFNKAMLPDUO')
-            with profile.invenotory as inventory:
-                inventory.move()
-                inventory.move()
-                inventory.move()
-                inventory.move()
-                inventory.move()
