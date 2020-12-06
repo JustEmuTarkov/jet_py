@@ -1,6 +1,5 @@
 import datetime
 import random
-from functools import lru_cache
 
 import ujson
 from flask import request
@@ -10,7 +9,8 @@ from core.logger import logger
 from core.main import db_dir, root_dir, start_time
 from core.package_lib import PackageMeta, BasePackage
 from core.utils import route_decorator, TarkovError
-from mods.tarkov_core.lib import load_locale, concat_items_files_into_array
+from mods.tarkov_core import routes
+from mods.tarkov_core.library import load_locale
 
 
 class Package(BasePackage):
@@ -24,6 +24,8 @@ class Package(BasePackage):
         logger.info('Tarkov core package is loading')
 
     def on_load(self):
+        routes.init()
+
         @app.route('/client/locations', methods=['GET', 'POST'])
         @route_decorator(is_static=True)
         def client_locations():
@@ -81,29 +83,10 @@ class Package(BasePackage):
         def client_game_start():
             return None  # TODO Add account data, check if character exists
 
-        @app.route('/client/menu/locale/<locale_type>', methods=['POST', 'GET'])  # TODO Change to dynamic
-        @lru_cache(8)
-        @route_decorator(is_static=True)
-        def client_menu_locale_en(locale_type: str):
-            locale_path = db_dir / 'locales' / locale_type / 'menu.json'
-            locale = ujson.load(locale_path.open('r', encoding='utf8'))['data']
-            return locale
-
         @app.route('/client/game/version/validate', methods=['POST'])
         @route_decorator(is_static=True)
         def client_game_version_validate():
             return None
-
-        @app.route('/client/languages', methods=['GET', 'POST'])
-        @route_decorator(is_static=True)
-        def client_languages():
-            languages_data_list = []
-            languages_dir = db_dir / 'locales'
-            for dir_ in languages_dir.glob('*'):
-                language_file = dir_ / f'{dir_.stem}.json'
-                languages_data_list.append(ujson.load(language_file.open('r', encoding='utf8')))
-
-            return languages_data_list
 
         @app.route('/client/game/config', methods=['GET', 'POST'])
         @route_decorator()
@@ -167,44 +150,6 @@ class Package(BasePackage):
             globals_base = ujson.load(globals_base.open('r', encoding='utf8'))
             return globals_base
 
-        @app.route('/client/game/profile/list', methods=['POST', 'GET'])
-        @route_decorator()
-        def client_game_profile_list():
-            profile_dir = root_dir.joinpath('resources', 'profiles')
-            pmc_profile = ujson.load((profile_dir / 'character.json').open('r'))
-            scav_profile = ujson.load((profile_dir / 'character_scav.json').open('r'))
-            return [
-                pmc_profile,
-                scav_profile,
-            ]
-
-        @app.route('/client/game/profile/select', methods=['POST', 'GET'])
-        @route_decorator()
-        def client_game_profile_list_select():
-            return {
-                'status': 'ok',
-                'notifier': {
-                    'server': f'{request.url_root}/',
-                    'channel_id': 'testChannel',
-                },
-            }
-
-        @app.route('/client/profile/status', methods=['POST', 'GET'])
-        @route_decorator()
-        def client_profile_status():
-            session_id = request.cookies['PHPSESSID']
-            response = []
-            for profile_type in ('scav', 'pmc'):
-                response.append({
-                    'profileid': f'{profile_type}{session_id}',
-                    'status': 'Free',
-                    'sid': '',
-                    'ip': '',
-                    'port': 0
-                })
-
-            return response
-
         @app.route('/client/weather', methods=['POST', 'GET'])
         @route_decorator()
         def client_weather():
@@ -228,12 +173,6 @@ class Package(BasePackage):
 
             return weather_data
 
-        @app.route('/client/locale/<locale_name>', methods=['POST', 'GET'])
-        @lru_cache(8)
-        @route_decorator()
-        def client_locale(locale_name: str):
-            return load_locale(locale_name)
-
         @app.route('/client/handbook/templates', methods=['POST', 'GET'])
         @route_decorator(is_static=True)
         def client_handbook_templates():
@@ -242,30 +181,6 @@ class Package(BasePackage):
                 data[template_path.stem] = ujson.load(template_path.open('r', encoding='utf8'))
 
             return data
-
-        @app.route('/client/hideout/areas', methods=['POST', 'GET'])
-        @route_decorator(is_static=True)
-        def client_hideout_areas():
-            hideout_areas_dir = db_dir.joinpath('hideout', 'areas')
-            return concat_items_files_into_array(hideout_areas_dir)
-
-        @app.route('/client/hideout/settings', methods=['POST', 'GET'])
-        @route_decorator(is_static=True)
-        def client_hideout_settings():
-            setting_path = db_dir.joinpath('hideout', 'settings.json')
-            return ujson.load(setting_path.open('r', encoding='utf8'))
-
-        @app.route('/client/hideout/production/recipes', methods=['POST', 'GET'])
-        @route_decorator(is_static=True)
-        def client_hideout_production_recipes():
-            production_dir = db_dir.joinpath('hideout', 'production')
-            return concat_items_files_into_array(production_dir)
-
-        @app.route('/client/hideout/production/scavcase/recipes', methods=['POST', 'GET'])
-        @route_decorator(is_static=True)
-        def client_hideout_production_scavcase_recipes():
-            scavcase_dir = db_dir.joinpath('hideout', 'scavcase')
-            return concat_items_files_into_array(scavcase_dir)
 
         @app.route('/client/handbook/builds/my/list', methods=['POST', 'GET'])
         @route_decorator()

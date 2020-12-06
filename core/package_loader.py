@@ -60,6 +60,7 @@ class PackageManager:
             module_name = PackageManager.get_module_name(module_info=module_info)
 
             sys.modules[module_name] = module
+            sys.modules[module.__name__] = module
 
             module = importlib.import_module(module_name)
 
