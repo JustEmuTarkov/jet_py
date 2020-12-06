@@ -1,8 +1,10 @@
 import datetime
-import sys
 from pathlib import Path
 
+from core.logger import logger
 
 root_dir = Path().absolute()
+logger.debug(f'Server root directory is: {root_dir}')
+
 db_dir = root_dir / 'resources' / 'db'
 start_time = datetime.datetime.now()

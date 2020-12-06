@@ -10,7 +10,7 @@ from core.logger import logger
 from core.main import db_dir, root_dir, start_time
 from core.package_lib import PackageMeta, BasePackage
 from core.utils import route_decorator, TarkovError
-from mods.core.lib import load_locale, concat_items_files_into_array
+from mods.tarkov_core.lib import load_locale, concat_items_files_into_array
 
 
 class Package(BasePackage):

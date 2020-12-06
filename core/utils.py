@@ -2,7 +2,7 @@ import json
 import zlib
 from functools import wraps, lru_cache
 
-from flask import make_response, request
+from flask import make_response
 
 
 class ZlibMiddleware:
@@ -12,8 +12,6 @@ class ZlibMiddleware:
     def __call__(self, function):
         @wraps(function)
         def wrapper(*args, **kwargs):
-            request_ = request
-
             data = function(*args, **kwargs)
 
             data_json = json.dumps(data)

@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import PyInstaller.__main__
 
 PyInstaller.__main__.run([
@@ -8,4 +6,6 @@ PyInstaller.__main__.run([
     '--console',
     '--icon=small_logo.ico',
     '--distpath=./',
+    '--hiddenimport=ujson',
+    '--hiddenimport=core.utils',
 ])
