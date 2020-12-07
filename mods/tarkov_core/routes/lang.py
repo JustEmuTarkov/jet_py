@@ -1,14 +1,16 @@
 from functools import lru_cache
 
 import ujson
+from flask import Blueprint
 
-from core.app import app
 from core.main import db_dir
 from core.utils import route_decorator
 from mods.tarkov_core.library import load_locale
 
+blueprint = Blueprint(__name__, __name__)
 
-@app.route('/client/menu/locale/<locale_type>', methods=['POST', 'GET'])  # TODO Change to dynamic
+
+@blueprint.route('/client/menu/locale/<locale_type>', methods=['POST', 'GET'])  # TODO Change to dynamic
 @lru_cache(8)
 @route_decorator(is_static=True)
 def client_menu_locale_en(locale_type: str):
@@ -17,7 +19,7 @@ def client_menu_locale_en(locale_type: str):
     return locale
 
 
-@app.route('/client/languages', methods=['GET', 'POST'])
+@blueprint.route('/client/languages', methods=['GET', 'POST'])
 @route_decorator(is_static=True)
 def client_languages():
     languages_data_list = []
@@ -29,7 +31,7 @@ def client_languages():
     return languages_data_list
 
 
-@app.route('/client/locale/<locale_name>', methods=['POST', 'GET'])
+@blueprint.route('/client/locale/<locale_name>', methods=['POST', 'GET'])
 @lru_cache(8)
 @route_decorator()
 def client_locale(locale_name: str):

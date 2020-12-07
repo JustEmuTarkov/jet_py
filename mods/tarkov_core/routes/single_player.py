@@ -1,18 +1,17 @@
-import ujson
-from flask import request
+from flask import Blueprint
 
-from core.app import app
-from core.main import root_dir
 from core.utils import route_decorator
 
+blueprint = Blueprint(__name__, __name__)
 
-@app.route('/singleplayer/bundles')
+
+@blueprint.route('/singleplayer/bundles', methods=['POST', 'GET'])
 @route_decorator(is_static=True)
 def singleplayer_bundles():
     return {}
 
 
-@app.route('/mode/offline')
+@blueprint.route('/mode/offline', methods=['POST', 'GET'])
 @route_decorator(is_static=True)
 def mode_offline():
     return {

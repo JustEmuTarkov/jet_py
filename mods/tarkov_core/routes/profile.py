@@ -1,12 +1,13 @@
 import ujson
-from flask import request
+from flask import request, Blueprint
 
-from core.app import app
 from core.main import root_dir
 from core.utils import route_decorator
 
+blueprint = Blueprint(__name__, __name__)
 
-@app.route('/client/game/profile/list', methods=['POST', 'GET'])
+
+@blueprint.route('/client/game/profile/list', methods=['POST', 'GET'])
 @route_decorator()
 def client_game_profile_list():
     session_id = request.cookies['PHPSESSID']
@@ -19,7 +20,7 @@ def client_game_profile_list():
     ]
 
 
-@app.route('/client/game/profile/select', methods=['POST', 'GET'])
+@blueprint.route('/client/game/profile/select', methods=['POST', 'GET'])
 @route_decorator()
 def client_game_profile_list_select():
     return {
@@ -31,7 +32,7 @@ def client_game_profile_list_select():
     }
 
 
-@app.route('/client/profile/status', methods=['POST', 'GET'])
+@blueprint.route('/client/profile/status', methods=['POST', 'GET'])
 @route_decorator()
 def client_profile_status():
     session_id = request.cookies['PHPSESSID']

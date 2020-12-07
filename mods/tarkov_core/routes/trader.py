@@ -1,23 +1,22 @@
 from functools import lru_cache
 
 import ujson
-from flask import request
+from flask import Blueprint, request
 
-from core.app import app
-from core.logger import logger
 from core.main import db_dir, root_dir
 from core.utils import route_decorator
 
-print("Created TraderRoutes")
+blueprint = Blueprint(__name__, __name__)
 
 
-@app.route('/client/trading/customization/storage', methods=['POST', 'GET'])
+@blueprint.route('/client/trading/customization/storage', methods=['POST', 'GET'])
 @route_decorator()
 def client_trading_customization_storage():
-    return ujson.load(root_dir.joinpath('resources', 'profiles', 'storage.json').open('r', encoding='utf8'))
+    php_session_id = request.cookies['PHPSESSID']
+    return ujson.load(root_dir.joinpath('resources', 'profiles', php_session_id, 'storage.json').open('r', encoding='utf8'))
 
 
-@app.route('/client/trading/api/getTradersList', methods=['POST', 'GET'])
+@blueprint.route('/client/trading/api/getTradersList', methods=['POST', 'GET'])
 @route_decorator(is_static=True)
 def client_trading_api_getTraderlist():
     traders_path = db_dir.joinpath('base', 'traders')
@@ -27,7 +26,7 @@ def client_trading_api_getTraderlist():
     return traders_data
 
 
-@app.route('/client/trading/api/getTraderAssort/<string:trader_id>', methods=['POST', 'GET'])
+@blueprint.route('/client/trading/api/getTraderAssort/<string:trader_id>', methods=['POST', 'GET'])
 @lru_cache(8)
 @route_decorator()
 def client_trading_api_getTraderAssort(trader_id):

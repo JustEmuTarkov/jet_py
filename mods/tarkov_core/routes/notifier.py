@@ -1,19 +1,19 @@
-import ujson
-from flask import request
+from flask import request, Blueprint
 
 from core.app import app
-from core.main import db_dir, root_dir
 from core.utils import route_decorator, TarkovError
 
+blueprint = Blueprint(__name__, __name__)
 
-@app.route('/notifierServer/get/<string:profile_pk>', methods=['POST', 'GET'])
+
+@blueprint.route('/notifierServer/get/<string:profile_pk>', methods=['POST', 'GET'])
 @route_decorator()
 def notifierserver_get(profile_pk: str):
     #  ?last_id=default_id
     return {"type": "ping", "eventId": "ping"}
 
 
-@app.route('/client/notifier/channel/create', methods=['POST', 'GET'])
+@blueprint.route('/client/notifier/channel/create', methods=['POST', 'GET'])
 @route_decorator(is_static=True)
 def client_notifier_channel_create():
     session_id = request.cookies.get('PHPSESSID', None)

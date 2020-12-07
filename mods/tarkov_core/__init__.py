@@ -6,11 +6,12 @@ from flask import request
 
 from core.app import app
 from core.logger import logger
-from core.main import db_dir, root_dir, start_time
+from core.main import db_dir, start_time
 from core.package_lib import PackageMeta, BasePackage
-from core.utils import route_decorator, TarkovError
+from core.utils import route_decorator
 from mods.tarkov_core import routes
 from mods.tarkov_core.library import load_locale
+from mods.tarkov_core.routes import friend, hideout, lang, notifier, profile, single_player, trader
 
 
 class Package(BasePackage):
@@ -24,7 +25,13 @@ class Package(BasePackage):
         logger.info('Tarkov core package is loading')
 
     def on_load(self):
-        routes.init()
+        app.register_blueprint(blueprint=friend.blueprint)
+        app.register_blueprint(blueprint=hideout.blueprint)
+        app.register_blueprint(blueprint=lang.blueprint)
+        app.register_blueprint(blueprint=notifier.blueprint)
+        app.register_blueprint(blueprint=profile.blueprint)
+        app.register_blueprint(blueprint=single_player.blueprint)
+        app.register_blueprint(trader.blueprint)
 
         @app.route('/client/locations', methods=['GET', 'POST'])
         @route_decorator(is_static=1)
@@ -181,4 +188,3 @@ class Package(BasePackage):
             return {
                 "status": "ok"
             }
-
