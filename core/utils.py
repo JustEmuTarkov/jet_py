@@ -2,6 +2,7 @@ import json
 import zlib
 from functools import wraps, lru_cache
 
+import ujson
 from flask import make_response, request
 
 
@@ -12,9 +13,12 @@ class ZlibMiddleware:
     def __call__(self, function):
         @wraps(function)
         def wrapper(*args, **kwargs):
-            request_ = request
-            print(request_.args)
-            print(args)
+            if request.data:
+                request_body = ujson.loads(zlib.decompress(request))
+                request.body = None
+                print(request_body)
+                print(request)
+
             # data decompression preparing happends here
             data = function(*args, **kwargs)
 

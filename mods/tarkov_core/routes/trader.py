@@ -13,7 +13,9 @@ blueprint = Blueprint(__name__, __name__)
 @route_decorator()
 def client_trading_customization_storage():
     php_session_id = request.cookies['PHPSESSID']
-    return ujson.load(root_dir.joinpath('resources', 'profiles', php_session_id, 'storage.json').open('r', encoding='utf8'))
+    return ujson.load(
+        root_dir.joinpath('resources', 'profiles', php_session_id, 'storage.json').open('r', encoding='utf8')
+    )
 
 
 @blueprint.route('/client/trading/api/getTradersList', methods=['POST', 'GET'])
