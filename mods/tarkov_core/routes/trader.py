@@ -4,7 +4,7 @@ import ujson
 from flask import Blueprint, request
 
 from core.main import db_dir, root_dir
-from core.utils import route_decorator
+from core.utils import route_decorator, TarkovError
 
 blueprint = Blueprint(__name__, __name__)
 
@@ -12,10 +12,37 @@ blueprint = Blueprint(__name__, __name__)
 @blueprint.route('/client/trading/customization/storage', methods=['POST', 'GET'])
 @route_decorator()
 def client_trading_customization_storage():
-    php_session_id = request.cookies['PHPSESSID']
+    if 'PHPSESSID' not in request.cookies:
+        TarkovError(1, "No Session")
+    session_id = request.cookies['PHPSESSID']
     return ujson.load(
-        root_dir.joinpath('resources', 'profiles', php_session_id, 'storage.json').open('r', encoding='utf8')
-    )
+        root_dir.joinpath('resources', 'profiles', session_id, 'storage.json').open('r', encoding='utf8'))
+
+
+@blueprint.route('/client/trading/customization/<string:trader_id>', methods=['POST', 'GET'])
+@route_decorator()
+def client_trading_customization(trader_id):
+    suits_path = db_dir.joinpath('assort', trader_id, 'suits.json')
+    if not suits_path.exists():
+        return TarkovError(600, "This Trader Doesn't have any suits for sale")
+
+    profile_data = {"Info": {"Side": "Bear"}}  # TODO: After making profile handler load profile here
+    suits_data = ujson.load(db_dir.joinpath('assort', trader_id, 'suits.json').open('r', encoding='utf8'))
+    # for suit in suits_data:
+    #     is_suit = suit_side for suit_side in suits_data[suit]['_props']['Side'] if suit_side == profile_data['Info']['Side']:
+
+    # output is { "item._id": [[{ "_tpl": "", "count": 0 }]] }
+    output = []
+    return output
+
+
+@blueprint.route('/client/trading/api/getUserAssortPrice/trader/<string:trader_id>', methods=['POST', 'GET'])
+@route_decorator()
+def client_trading_api_getUserAssortPrice(trader_id):
+    # TODO: Calculate price for items to sell in specified trader
+    # output is { "item._id": [[{ "_tpl": "", "count": 0 }]] }
+    output = {}
+    return output
 
 
 @blueprint.route('/client/trading/api/getTradersList', methods=['POST', 'GET'])
@@ -33,7 +60,17 @@ def client_trading_api_getTraderlist():
 @route_decorator()
 def client_trading_api_getTraderAssort(trader_id):
     traders_path = db_dir.joinpath('assort', trader_id)
-    paths = set(traders_path.rglob('*.json')) - set(traders_path.rglob('questassort.json'))
+    paths = set(traders_path.glob('barter_scheme.json')) + set(traders_path.glob('items.json')) + set(traders_path.glob('loyal_level_items.json'))
 
     traders_data = {file.stem: ujson.load(file.open('r', encoding='utf8')) for file in paths}
+    return traders_data
+
+
+@blueprint.route('/client/trading/api/getTrader/<string:trader_id>', methods=['POST', 'GET'])
+@lru_cache(8)
+@route_decorator()
+def client_trading_api_getTraderAssort(trader_id):
+    trader_path = db_dir.joinpath('base', 'traders', trader_id, 'base.json')
+
+    traders_data = ujson.load(trader_path.open('r', encoding='utf8'))
     return traders_data

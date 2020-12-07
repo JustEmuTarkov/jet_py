@@ -31,7 +31,7 @@ class Package(BasePackage):
         app.register_blueprint(blueprint=notifier.blueprint)
         app.register_blueprint(blueprint=profile.blueprint)
         app.register_blueprint(blueprint=single_player.blueprint)
-        app.register_blueprint(trader.blueprint)
+        app.register_blueprint(blueprint=trader.blueprint)
 
         @app.route('/client/locations', methods=['GET', 'POST'])
         @route_decorator(is_static=1)
