@@ -9,7 +9,8 @@ from core.utils import route_decorator
 @app.route('/client/game/profile/list', methods=['POST', 'GET'])
 @route_decorator()
 def client_game_profile_list():
-    profile_dir = root_dir.joinpath('resources', 'profiles')
+    session_id = request.cookies['PHPSESSID']
+    profile_dir = root_dir.joinpath('resources', 'profiles', session_id)
     pmc_profile = ujson.load((profile_dir / 'character.json').open('r'))
     scav_profile = ujson.load((profile_dir / 'character_scav.json').open('r'))
     return [
