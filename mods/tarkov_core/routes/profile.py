@@ -7,6 +7,14 @@ from core.utils import route_decorator
 blueprint = Blueprint(__name__, __name__)
 
 
+@blueprint.route('/client/game/profile/items/moving', methods=['POST', 'GET'])
+@route_decorator()
+def client_game_profile_item_move():
+    # we are grabbing body decompressed then we loop through variable body.data as []
+    # then we switch() by Action key and checking what game want us to do
+    pass
+
+
 @blueprint.route('/client/game/profile/list', methods=['POST', 'GET'])
 @route_decorator()
 def client_game_profile_list():

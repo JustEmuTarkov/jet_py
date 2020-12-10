@@ -69,7 +69,7 @@ def client_trading_api_getTraderAssort(trader_id):
 @blueprint.route('/client/trading/api/getTrader/<string:trader_id>', methods=['POST', 'GET'])
 @lru_cache(8)
 @route_decorator()
-def client_trading_api_getTraderAssort(trader_id):
+def client_trading_api_getTrader(trader_id):
     trader_path = db_dir.joinpath('base', 'traders', trader_id, 'base.json')
 
     traders_data = ujson.load(trader_path.open('r', encoding='utf8'))

@@ -1,0 +1,871 @@
+{
+		"SessionCounters": {
+			"Items": [
+				{
+					"Key": [
+						"Exp",
+						"ExpExitStatus"
+					],
+					"Value": 200
+				},
+				{
+					"Key": [
+						"Pedometer"
+					],
+					"Value": 216
+				},
+				{
+					"Key": [
+						"ExpKill"
+					],
+					"Value": 0
+				},
+				{
+					"Key": [
+						"ExpLooting"
+					],
+					"Value": 0
+				}
+			]
+		},
+		"OverallCounters": {
+			"Items": [
+				{
+					"Key": [
+						"TriggerVisited",
+						"place_pacemaker_SCOUT_03"
+					],
+					"Value": 16
+				},
+				{
+					"Key": [
+						"Triggers"
+					],
+					"Value": 9
+				},
+				{
+					"Key": [
+						"TriggerVisited",
+						"exit3zone"
+					],
+					"Value": 17
+				},
+				{
+					"Key": [
+						"CurrentWinStreak",
+						"Pmc"
+					],
+					"Value": 0
+				},
+				{
+					"Key": [
+						"Sessions",
+						"Pmc"
+					],
+					"Value": 18
+				},
+				{
+					"Key": [
+						"ExitStatus",
+						"Survived",
+						"Pmc"
+					],
+					"Value": 11
+				},
+				{
+					"Key": [
+						"LifeTime",
+						"Pmc"
+					],
+					"Value": 4135
+				},
+				{
+					"Key": [
+						"Exp",
+						"ExpHeal"
+					],
+					"Value": 106
+				},
+				{
+					"Key": [
+						"Exp",
+						"ExpExitStatus"
+					],
+					"Value": 4500
+				},
+				{
+					"Key": [
+						"Kills"
+					],
+					"Value": 26
+				},
+				{
+					"Key": [
+						"Deaths"
+					],
+					"Value": 1
+				},
+				{
+					"Key": [
+						"KilledLevel0010"
+					],
+					"Value": 0
+				},
+				{
+					"Key": [
+						"KilledLevel1030"
+					],
+					"Value": 0
+				},
+				{
+					"Key": [
+						"KilledLevel3050"
+					],
+					"Value": 0
+				},
+				{
+					"Key": [
+						"KilledLevel5070"
+					],
+					"Value": 0
+				},
+				{
+					"Key": [
+						"KilledLevel7099"
+					],
+					"Value": 0
+				},
+				{
+					"Key": [
+						"KilledLevel100"
+					],
+					"Value": 0
+				},
+				{
+					"Key": [
+						"KilledBear"
+					],
+					"Value": 0
+				},
+				{
+					"Key": [
+						"KilledUsec"
+					],
+					"Value": 0
+				},
+				{
+					"Key": [
+						"KilledSavage"
+					],
+					"Value": 26
+				},
+				{
+					"Key": [
+						"KilledPmc"
+					],
+					"Value": 0
+				},
+				{
+					"Key": [
+						"KilledBoss"
+					],
+					"Value": 0
+				},
+				{
+					"Key": [
+						"KilledWithKnife"
+					],
+					"Value": 0
+				},
+				{
+					"Key": [
+						"KilledWithPistol"
+					],
+					"Value": 0
+				},
+				{
+					"Key": [
+						"KilledWithSmg"
+					],
+					"Value": 8
+				},
+				{
+					"Key": [
+						"KilledWithShotgun"
+					],
+					"Value": 0
+				},
+				{
+					"Key": [
+						"KilledWithAssaultRifle"
+					],
+					"Value": 9
+				},
+				{
+					"Key": [
+						"KilledWithAssaultCarbine"
+					],
+					"Value": 7
+				},
+				{
+					"Key": [
+						"KilledWithGrenadeLauncher"
+					],
+					"Value": 0
+				},
+				{
+					"Key": [
+						"KilledWithMachineGun"
+					],
+					"Value": 0
+				},
+				{
+					"Key": [
+						"KilledWithMarksmanRifle"
+					],
+					"Value": 0
+				},
+				{
+					"Key": [
+						"KilledWithSniperRifle"
+					],
+					"Value": 2
+				},
+				{
+					"Key": [
+						"KilledWithSpecialWeapon"
+					],
+					"Value": 0
+				},
+				{
+					"Key": [
+						"KilledWithThrowWeapon"
+					],
+					"Value": 0
+				},
+				{
+					"Key": [
+						"BodyPartDamage",
+						"Head"
+					],
+					"Value": 6276
+				},
+				{
+					"Key": [
+						"BodyPartDamage",
+						"Chest"
+					],
+					"Value": 11146
+				},
+				{
+					"Key": [
+						"BodyPartDamage",
+						"Stomach"
+					],
+					"Value": 16445
+				},
+				{
+					"Key": [
+						"BodyPartDamage",
+						"LeftArm"
+					],
+					"Value": 10009
+				},
+				{
+					"Key": [
+						"BodyPartDamage",
+						"RightArm"
+					],
+					"Value": 7185
+				},
+				{
+					"Key": [
+						"BodyPartDamage",
+						"LeftLeg"
+					],
+					"Value": 31627
+				},
+				{
+					"Key": [
+						"BodyPartDamage",
+						"RightLeg"
+					],
+					"Value": 36842
+				},
+				{
+					"Key": [
+						"HeadShots"
+					],
+					"Value": 10
+				},
+				{
+					"Key": [
+						"BloodLoss"
+					],
+					"Value": 8344
+				},
+				{
+					"Key": [
+						"BodyPartsDestroyed"
+					],
+					"Value": 7
+				},
+				{
+					"Key": [
+						"Heal"
+					],
+					"Value": 8163
+				},
+				{
+					"Key": [
+						"Fractures"
+					],
+					"Value": 1
+				},
+				{
+					"Key": [
+						"Contusions"
+					],
+					"Value": 0
+				},
+				{
+					"Key": [
+						"Dehydrations"
+					],
+					"Value": 0
+				},
+				{
+					"Key": [
+						"Exhaustions"
+					],
+					"Value": 0
+				},
+				{
+					"Key": [
+						"Medicines"
+					],
+					"Value": 0
+				},
+				{
+					"Key": [
+						"UsedFoods"
+					],
+					"Value": 0
+				},
+				{
+					"Key": [
+						"UsedDrinks"
+					],
+					"Value": 0
+				},
+				{
+					"Key": [
+						"Pedometer"
+					],
+					"Value": 9774
+				},
+				{
+					"Key": [
+						"BodiesLooted"
+					],
+					"Value": 22
+				},
+				{
+					"Key": [
+						"SafeLooted"
+					],
+					"Value": 4
+				},
+				{
+					"Key": [
+						"LockableContainers"
+					],
+					"Value": 0
+				},
+				{
+					"Key": [
+						"Weapons"
+					],
+					"Value": 15
+				},
+				{
+					"Key": [
+						"Ammunitions"
+					],
+					"Value": 421
+				},
+				{
+					"Key": [
+						"Mods"
+					],
+					"Value": 147
+				},
+				{
+					"Key": [
+						"ThrowWeapons"
+					],
+					"Value": 1
+				},
+				{
+					"Key": [
+						"SpecialItems"
+					],
+					"Value": 0
+				},
+				{
+					"Key": [
+						"FoodDrinks"
+					],
+					"Value": 6
+				},
+				{
+					"Key": [
+						"Keys"
+					],
+					"Value": 4
+				},
+				{
+					"Key": [
+						"BartItems"
+					],
+					"Value": 3
+				},
+				{
+					"Key": [
+						"MobContainers"
+					],
+					"Value": 22
+				},
+				{
+					"Key": [
+						"Equipments"
+					],
+					"Value": 38
+				},
+				{
+					"Key": [
+						"CauseBodyDamage"
+					],
+					"Value": 361330
+				},
+				{
+					"Key": [
+						"CauseArmorDamage"
+					],
+					"Value": 0
+				},
+				{
+					"Key": [
+						"HitCount"
+					],
+					"Value": 92
+				},
+				{
+					"Key": [
+						"LongShots"
+					],
+					"Value": 9
+				},
+				{
+					"Key": [
+						"LongestKillShot"
+					],
+					"Value": 21838
+				},
+				{
+					"Key": [
+						"LongestKillStreak"
+					],
+					"Value": 9
+				},
+				{
+					"Key": [
+						"ExpKill"
+					],
+					"Value": 4428
+				},
+				{
+					"Key": [
+						"ExpLooting"
+					],
+					"Value": 10928
+				},
+				{
+					"Key": [
+						"Money",
+						"RUB"
+					],
+					"Value": 20906
+				},
+				{
+					"Key": [
+						"Money",
+						"EUR"
+					],
+					"Value": 0
+				},
+				{
+					"Key": [
+						"Money",
+						"USD"
+					],
+					"Value": 74
+				},
+				{
+					"Key": [
+						"AmmoUsed"
+					],
+					"Value": 0
+				},
+				{
+					"Key": [
+						"AmmoReached"
+					],
+					"Value": 76
+				},
+				{
+					"Key": [
+						"TriggerVisited"
+					],
+					"Value": 0
+				},
+				{
+					"Key": [
+						"CombatDamage"
+					],
+					"Value": 21173
+				},
+				{
+					"Key": [
+						"TriggerVisited",
+						"place_SADOVOD_01_1"
+					],
+					"Value": 3
+				},
+				{
+					"Key": [
+						"LongestWinStreak",
+						"Pmc"
+					],
+					"Value": 6
+				},
+				{
+					"Key": [
+						"ExitStatus",
+						"Runner",
+						"Pmc"
+					],
+					"Value": 6
+				},
+				{
+					"Key": [
+						"TriggerVisited",
+						"showers"
+					],
+					"Value": 3
+				},
+				{
+					"Key": [
+						"ExitStatus",
+						"Killed",
+						"Pmc"
+					],
+					"Value": 1
+				},
+				{
+					"Key": [
+						"LongestShot"
+					],
+					"Value": 21838
+				},
+				{
+					"Key": [
+						"TriggerVisited",
+						"dungeon02"
+					],
+					"Value": 1
+				},
+				{
+					"Key": [
+						"TriggerVisited",
+						"caseextr"
+					],
+					"Value": 2
+				},
+				{
+					"Key": [
+						"TriggerVisited",
+						"dungeon04"
+					],
+					"Value": 1
+				},
+				{
+					"Key": [
+						"TriggerVisited",
+						"catwalk04"
+					],
+					"Value": 1
+				},
+				{
+					"Key": [
+						"TriggerVisited",
+						"office01"
+					],
+					"Value": 4
+				}
+			]
+		},
+		"SessionExperienceMult": 0.5,
+		"ExperienceBonusMult": 1,
+		"TotalSessionExperience": 0,
+		"LastSessionDate": 1605983886,
+		"Aggressor": null,
+		"DroppedItems": [],
+		"FoundInRaidItems": [],
+		"Victims": [],
+		"CarriedQuestItems": [],
+		"DamageHistory": {
+			"LethalDamagePart": "Common",
+			"LethalDamage": null,
+			"BodyParts": {
+				"Head": [],
+				"Chest": [
+					{
+						"Amount": 2.56471252,
+						"Type": "Undefined",
+						"SourceId": null,
+						"OverDamageFrom": null,
+						"Blunt": false,
+						"ImpactsCount": 1
+					}
+				],
+				"Stomach": [
+					{
+						"Amount": 7.43754959,
+						"Type": "Undefined",
+						"SourceId": null,
+						"OverDamageFrom": null,
+						"Blunt": false,
+						"ImpactsCount": 1
+					}
+				],
+				"LeftArm": [
+					{
+						"Amount": 15.5021667,
+						"Type": "Undefined",
+						"SourceId": null,
+						"OverDamageFrom": null,
+						"Blunt": false,
+						"ImpactsCount": 1
+					}
+				],
+				"RightArm": [],
+				"LeftLeg": [
+					{
+						"Amount": 44.917984,
+						"Type": "Undefined",
+						"SourceId": null,
+						"OverDamageFrom": null,
+						"Blunt": false,
+						"ImpactsCount": 1
+					}
+				],
+				"RightLeg": [
+					{
+						"Amount": 45.6067467,
+						"Type": "Undefined",
+						"SourceId": null,
+						"OverDamageFrom": null,
+						"Blunt": false,
+						"ImpactsCount": 1
+					}
+				]
+			}
+		},
+		"LastPlayerState": {
+			"Info": {
+				"Nickname": "Maoci",
+				"Side": "Bear",
+				"Level": 69,
+				"MemberCategory": "UniqueId"
+			},
+			"Customization": {
+				"Head": "5cc084dd14c02e000b0550a3",
+				"Body": "5cc0858d14c02e000c6bea66",
+				"Feet": "5cc085bb14c02e000e67a5c5",
+				"Hands": "5cc0876314c02e000c6bea6b"
+			},
+			"Equipment": {
+				"Items": [
+					{
+						"_id": "b5bc1607-0667-4ad4-a2de-16b71a736cbc",
+						"_tpl": "55d7217a4bdc2d86028b456d"
+					},
+					{
+						"_id": "7195d8a3-f12a-40f9-a9d5-bde355c02ca8",
+						"_tpl": "5644bd2b4bdc2d3b4c8b4572",
+						"parentId": "b5bc1607-0667-4ad4-a2de-16b71a736cbc",
+						"slotId": "FirstPrimaryWeapon",
+						"upd": {
+							"Repairable": {
+								"MaxDurability": 100,
+								"Durability": 98.86019
+							},
+							"FireMode": {
+								"FireMode": "single"
+							}
+						}
+					},
+					{
+						"_id": "6b26ab20-c64c-4553-a4ad-e8cfe26ee581",
+						"_tpl": "57e26fc7245977162a14b800",
+						"parentId": "b5bc1607-0667-4ad4-a2de-16b71a736cbc",
+						"slotId": "Scabbard",
+						"upd": {
+							"Repairable": {
+								"MaxDurability": 40,
+								"Durability": 40
+							}
+						}
+					},
+					{
+						"_id": "f2a28db3-5b3e-4401-834f-33d42358d061",
+						"_tpl": "572b7f1624597762ae139822",
+						"parentId": "b5bc1607-0667-4ad4-a2de-16b71a736cbc",
+						"slotId": "FaceCover",
+						"upd": {
+							"Repairable": {
+								"MaxDurability": 100,
+								"Durability": 100
+							}
+						}
+					},
+					{
+						"_id": "700e5761-17dc-4eb2-8819-e03aac628068",
+						"_tpl": "59e7708286f7742cbd762753",
+						"parentId": "b5bc1607-0667-4ad4-a2de-16b71a736cbc",
+						"slotId": "Headwear",
+						"upd": {
+							"Repairable": {
+								"MaxDurability": 10,
+								"Durability": 10
+							}
+						}
+					},
+					{
+						"_id": "442161c7-4ebc-40c2-8d79-56ea17ef42f6",
+						"_tpl": "5ab8dab586f77441cd04f2a2",
+						"parentId": "b5bc1607-0667-4ad4-a2de-16b71a736cbc",
+						"slotId": "TacticalVest"
+					},
+					{
+						"_id": "ea365e1c-6184-45f0-9fe9-8b0ceb177a36",
+						"_tpl": "5857a8b324597729ab0a0e7d",
+						"parentId": "b5bc1607-0667-4ad4-a2de-16b71a736cbc",
+						"slotId": "SecuredContainer"
+					},
+					{
+						"_id": "931bc542-1146-4390-9e25-322517f3ac20",
+						"_tpl": "557ffd194bdc2d28148b457f",
+						"parentId": "b5bc1607-0667-4ad4-a2de-16b71a736cbc",
+						"slotId": "Pockets"
+					},
+					{
+						"_id": "3453b2c2-2625-42a8-b692-b3cddc9dfb2c",
+						"_tpl": "59c6633186f7740cf0493bb9",
+						"parentId": "7195d8a3-f12a-40f9-a9d5-bde355c02ca8",
+						"slotId": "mod_gas_block"
+					},
+					{
+						"_id": "f69504b4-493d-4623-83fe-167daa9c2910",
+						"_tpl": "5649aa744bdc2ded0b8b457e",
+						"parentId": "7195d8a3-f12a-40f9-a9d5-bde355c02ca8",
+						"slotId": "mod_muzzle"
+					},
+					{
+						"_id": "96b8efd4-63d3-40ac-ada8-43f001c9c24c",
+						"_tpl": "5649ad3f4bdc2df8348b4585",
+						"parentId": "7195d8a3-f12a-40f9-a9d5-bde355c02ca8",
+						"slotId": "mod_pistol_grip"
+					},
+					{
+						"_id": "511251be-8c68-4c9b-aefd-8117b7b9446e",
+						"_tpl": "5649af094bdc2df8348b4586",
+						"parentId": "7195d8a3-f12a-40f9-a9d5-bde355c02ca8",
+						"slotId": "mod_reciever"
+					},
+					{
+						"_id": "5d16d23f-6546-461c-8023-0739af018423",
+						"_tpl": "5649b0544bdc2d1b2b8b458a",
+						"parentId": "7195d8a3-f12a-40f9-a9d5-bde355c02ca8",
+						"slotId": "mod_sight_rear",
+						"upd": {
+							"Sight": {
+								"ScopesCurrentCalibPointIndexes": [
+									0
+								],
+								"ScopesSelectedModes": [
+									0
+								],
+								"SelectedScope": 0
+							}
+						}
+					},
+					{
+						"_id": "445d503d-a856-464f-ab05-53a150333e0a",
+						"_tpl": "5649b1c04bdc2d16268b457c",
+						"parentId": "7195d8a3-f12a-40f9-a9d5-bde355c02ca8",
+						"slotId": "mod_stock"
+					},
+					{
+						"_id": "cb283504-00a1-4176-b041-6fc84421bcf0",
+						"_tpl": "564ca99c4bdc2d16268b4589",
+						"parentId": "7195d8a3-f12a-40f9-a9d5-bde355c02ca8",
+						"slotId": "mod_magazine"
+					},
+					{
+						"_id": "25f584f3-66f4-4862-8da0-ae95c0da923b",
+						"_tpl": "57486e672459770abd687134",
+						"parentId": "7195d8a3-f12a-40f9-a9d5-bde355c02ca8",
+						"slotId": "mod_mount_000",
+						"upd": {
+							"Sight": {
+								"ScopesCurrentCalibPointIndexes": [
+									0
+								],
+								"ScopesSelectedModes": [
+									0
+								],
+								"SelectedScope": 0
+							}
+						}
+					},
+					{
+						"_id": "9d76aa1c-655e-4657-ad73-9b9435ca5654",
+						"_tpl": "56dfef82d2720bbd668b4567",
+						"parentId": "7195d8a3-f12a-40f9-a9d5-bde355c02ca8",
+						"slotId": "patron_in_weapon"
+					},
+					{
+						"_id": "42b3049b-8ca3-469c-84af-473ddde97e15",
+						"_tpl": "5648b0744bdc2d363b8b4578",
+						"parentId": "3453b2c2-2625-42a8-b692-b3cddc9dfb2c",
+						"slotId": "mod_handguard"
+					},
+					{
+						"_id": "e4580060-12c1-4645-8e30-f8ff5ac97c37",
+						"_tpl": "56dfef82d2720bbd668b4567",
+						"parentId": "cb283504-00a1-4176-b041-6fc84421bcf0",
+						"slotId": "cartridges",
+						"location": 0,
+						"upd": {
+							"StackObjectsCount": 27
+						}
+					}
+				],
+				"Id": "b5bc1607-0667-4ad4-a2de-16b71a736cbc"
+			}
+		},
+		"TotalInGameTime": 0,
+		"SurvivorClass": "Marauder"
+	}
