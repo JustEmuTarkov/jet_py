@@ -1,6 +1,7 @@
 import json
 import zlib
-from functools import wraps, lru_cache
+from functools import wraps
+from typing import Callable
 
 import ujson
 from flask import make_response, request
@@ -85,8 +86,31 @@ def route_decorator(**kwargs):
 
         is_static = kwargs.get('is_static', False)
         if is_static:
-            decorators.append(lru_cache(1))
+            decorators.append(memoize_once)
 
         return compose(*decorators)
+
+    return wrapper
+
+
+def memoize_once(function: Callable):
+    """
+    Memorizes first function call result and returns only it.
+    Useful for static content - files or responses.
+
+    This function doesn't take any argument it gets into consideration -
+    e.g. if won't re-cache if it will be called with different arguments.
+
+    """
+    was_called = False
+    result = None
+
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+        nonlocal result, was_called
+        if not was_called:
+            was_called = True
+            result = function(*args, **kwargs)
+        return result
 
     return wrapper
