@@ -7,5 +7,5 @@ PyInstaller.__main__.run([
     '--icon=small_logo.ico',
     '--distpath=./',
     '--hiddenimport=ujson',
-    '--hiddenimport=core.utils',
+    '--hiddenimport=server.utils',
 ])

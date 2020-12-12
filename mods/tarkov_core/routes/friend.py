@@ -1,6 +1,6 @@
 from flask import Blueprint
 
-from core.utils import route_decorator
+from server.utils import route_decorator
 
 blueprint = Blueprint(__name__, __name__)
 

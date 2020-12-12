@@ -1,6 +1,6 @@
-from core.logger import logger
-from core.main import root_dir
-from core.package_loader import PackageManager
+from server.logger import logger
+from server.main import root_dir
+from server.package_loader import PackageManager
 
 
 mods_dir = root_dir / 'mods'

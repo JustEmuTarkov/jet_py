@@ -1,6 +1,6 @@
 from typing import List, Dict, Union, Set
 
-from core.logger import logger
+from server.logger import logger
 
 
 class PackageMeta:

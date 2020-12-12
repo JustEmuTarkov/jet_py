@@ -1,8 +1,8 @@
 import ujson
 from flask import request, Blueprint
 
-from core.main import root_dir
-from core.utils import route_decorator
+from server.main import root_dir
+from server.utils import route_decorator
 
 blueprint = Blueprint(__name__, __name__)
 

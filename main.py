@@ -1,9 +1,9 @@
 import sys
 
-from core.app import app
-from core.logger import logger
-from core.main import root_dir
-from core.package_manager import package_manager
+from server.app import app
+from server.logger import logger
+from server.main import root_dir
+from server.package_manager import package_manager
 
 if root_dir not in sys.path:
     sys.path.append(str(root_dir))

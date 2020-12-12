@@ -1,6 +1,6 @@
 import ujson
 
-from core.main import root_dir
+from server.main import root_dir
 
 
 class Profile:

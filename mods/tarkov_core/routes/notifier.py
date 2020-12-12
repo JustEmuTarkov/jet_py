@@ -1,7 +1,7 @@
 from flask import request, Blueprint
 
-from core.app import app
-from core.utils import route_decorator, TarkovError
+from server.app import app
+from server.utils import route_decorator, TarkovError
 
 blueprint = Blueprint(__name__, __name__)
 

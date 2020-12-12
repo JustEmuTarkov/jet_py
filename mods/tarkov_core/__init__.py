@@ -4,11 +4,11 @@ import random
 import ujson
 from flask import request
 
-from core.app import app
-from core.logger import logger
-from core.main import db_dir, start_time
-from core.package_lib import PackageMeta, BasePackage
-from core.utils import route_decorator
+from server.app import app
+from server.logger import logger
+from server.main import db_dir, start_time
+from server.package_lib import PackageMeta, BasePackage
+from server.utils import route_decorator
 from mods.tarkov_core import routes, functions
 from mods.tarkov_core.library import load_locale
 from mods.tarkov_core.routes import friend, hideout, lang, notifier, profile, single_player, trader
@@ -25,9 +25,6 @@ class Package(BasePackage):
         logger.info('Tarkov core package is loading')
 
     def on_load(self):
-
-        functions.init()
-
         app.register_blueprint(blueprint=friend.blueprint)
         app.register_blueprint(blueprint=hideout.blueprint)
         app.register_blueprint(blueprint=lang.blueprint)

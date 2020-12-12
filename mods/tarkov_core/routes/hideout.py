@@ -1,8 +1,8 @@
 import ujson
 from flask import Blueprint
 
-from core.main import db_dir
-from core.utils import route_decorator
+from server.main import db_dir
+from server.utils import route_decorator
 from mods.tarkov_core.functions import hideout
 from mods.tarkov_core.library import concat_items_files_into_array
 

@@ -4,9 +4,9 @@ import importlib.util
 from pathlib import Path
 from typing import Type, Iterable, List
 
-from core.logger import logger
-from core.main import root_dir
-from core.package_lib import PackageTopologicalSorter, BasePackage
+from server.logger import logger
+from server.main import root_dir
+from server.package_lib import PackageTopologicalSorter, BasePackage
 
 
 class PackageManager:

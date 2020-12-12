@@ -1,7 +1,7 @@
 import datetime
 from pathlib import Path
 
-from core.logger import logger
+from server.logger import logger
 
 root_dir = Path().absolute()
 logger.debug(f'Server root directory is: {root_dir}')

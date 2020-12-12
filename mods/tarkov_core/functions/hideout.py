@@ -1,8 +1,8 @@
 import ujson
 
-from core.main import db_dir
-from mods.tarkov_core.functions import profiles
+from server.main import db_dir
 from mods.tarkov_core.library import concat_items_files_into_array
+
 
 class Hideout:
     hideout_database = {
@@ -53,5 +53,3 @@ class Hideout:
 
     def toggle(self):
         pass
-
-    def

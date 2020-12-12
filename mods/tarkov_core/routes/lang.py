@@ -3,8 +3,8 @@ from functools import lru_cache
 import ujson
 from flask import Blueprint
 
-from core.main import db_dir
-from core.utils import route_decorator
+from server.main import db_dir
+from server.utils import route_decorator
 from mods.tarkov_core.library import load_locale
 
 blueprint = Blueprint(__name__, __name__)
