@@ -6,5 +6,5 @@ from server.app import logger
 root_dir = Path().absolute()
 logger.debug(f'Server root directory is: {root_dir}')
 
-db_dir = root_dir / 'resources' / 'db'
+db_dir = root_dir.joinpath('resources', 'db')
 start_time = datetime.datetime.now()
