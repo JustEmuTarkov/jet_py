@@ -3,6 +3,7 @@ from flask import Blueprint
 
 from core.main import db_dir
 from core.utils import route_decorator
+from mods.tarkov_core.functions import hideout
 from mods.tarkov_core.library import concat_items_files_into_array
 
 blueprint = Blueprint(__name__, __name__)
@@ -11,26 +12,22 @@ blueprint = Blueprint(__name__, __name__)
 @blueprint.route('/client/hideout/areas', methods=['POST', 'GET'])
 @route_decorator(is_static=True)
 def client_hideout_areas():
-    hideout_areas_dir = db_dir.joinpath('hideout', 'areas')
-    return concat_items_files_into_array(hideout_areas_dir)
+    return hideout.hideout_database['areas']
 
 
 @blueprint.route('/client/hideout/settings', methods=['POST', 'GET'])
 @route_decorator(is_static=True)
 def client_hideout_settings():
-    setting_path = db_dir.joinpath('hideout', 'settings.json')
-    return ujson.load(setting_path.open('r', encoding='utf8'))
+    return hideout.hideout_database['settings']
 
 
 @blueprint.route('/client/hideout/production/recipes', methods=['POST', 'GET'])
 @route_decorator(is_static=True)
 def client_hideout_production_recipes():
-    production_dir = db_dir.joinpath('hideout', 'production')
-    return concat_items_files_into_array(production_dir)
+    return hideout.hideout_database['production']
 
 
 @blueprint.route('/client/hideout/production/scavcase/recipes', methods=['POST', 'GET'])
 @route_decorator(is_static=True)
 def client_hideout_production_scavcase_recipes():
-    scavcase_dir = db_dir.joinpath('hideout', 'scavcase')
-    return concat_items_files_into_array(scavcase_dir)
+    return hideout.hideout_database['scavcase']
