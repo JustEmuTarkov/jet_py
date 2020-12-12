@@ -3,7 +3,7 @@ from pathlib import Path
 
 import ujson
 
-from server.main import db_dir
+from server import db_dir
 
 
 def load_locale(locale_name: str):

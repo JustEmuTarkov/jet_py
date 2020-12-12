@@ -1,6 +1,6 @@
 import ujson
 
-from server.main import db_dir
+from server import db_dir
 from mods.tarkov_core.library import concat_items_files_into_array
 
 

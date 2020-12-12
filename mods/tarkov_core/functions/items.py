@@ -2,7 +2,7 @@ from typing import Dict
 
 import ujson
 
-from server.main import db_dir
+from server import db_dir
 from server.utils import memoize_once
 
 

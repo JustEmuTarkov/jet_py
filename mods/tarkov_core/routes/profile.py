@@ -2,7 +2,7 @@ import ujson
 from flask import request, Blueprint
 
 from mods.tarkov_core.functions import Profile
-from server.main import root_dir
+from server import root_dir
 from server.utils import route_decorator
 
 blueprint = Blueprint(__name__, __name__)

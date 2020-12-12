@@ -3,7 +3,7 @@ from typing import TypedDict, List, Generator, Tuple
 import ujson
 
 from mods.tarkov_core.functions.items import get_item_templates
-from server.main import root_dir
+from server import root_dir
 
 
 class ItemBase(TypedDict):

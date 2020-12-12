@@ -4,8 +4,7 @@ from functools import lru_cache
 import ujson
 from flask import Blueprint, request
 
-from server.app import logger
-from server.main import db_dir, root_dir
+from server import logger, root_dir, db_dir
 from server.utils import route_decorator, TarkovError
 
 blueprint = Blueprint(__name__, __name__)

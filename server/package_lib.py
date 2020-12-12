@@ -2,8 +2,7 @@ import importlib
 from pathlib import Path
 from typing import List, Dict, Union, Set, Type, Iterable
 
-from server.app import logger
-from server.main import root_dir
+from server import logger, root_dir
 
 
 class PackageMeta:

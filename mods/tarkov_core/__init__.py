@@ -6,8 +6,7 @@ from flask import request
 
 from mods.tarkov_core.functions.items import get_item_templates
 from mods.tarkov_core.routes import friend, hideout, lang, notifier, profile, single_player, trader
-from server.app import app, logger
-from server.main import db_dir, start_time
+from server import app, logger, db_dir, start_time
 from server.package_lib import PackageMeta, BasePackage
 from server.utils import route_decorator
 
