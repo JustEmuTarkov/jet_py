@@ -18,12 +18,9 @@ class Profile:
 
     def save_profile(self, profile_id):
         saving_profile_path = root_dir.joinpath('resources', 'profiles', profile_id)
-        ujson.dump(self.profiles[profile_id]["pmc_profile"], saving_profile_path.joinpath("pmc_profile.json"))
-        ujson.dump(self.profiles[profile_id]["pmc_hideout"], saving_profile_path.joinpath("pmc_hideout.json"))
-        ujson.dump(self.profiles[profile_id]["pmc_inventory"], saving_profile_path.joinpath("pmc_inventory.json"))
-        ujson.dump(self.profiles[profile_id]["pmc_quests"], saving_profile_path.joinpath("pmc_quests.json"))
-        ujson.dump(self.profiles[profile_id]["pmc_stats"], saving_profile_path.joinpath("pmc_stats.json"))
-        ujson.dump(self.profiles[profile_id]["pmc_traders"], saving_profile_path.joinpath("pmc_traders.json"))
+        pmc_data_field_names = ['profile', 'hideout', 'inventory', 'quests', 'stats', 'traders']
+        for field in pmc_data_field_names:
+            ujson.dump(self.profiles[profile_id][f"pmc_{field}"], saving_profile_path.joinpath(f"pmc_{field}.json"))
 
     # just for testing
     def get_all_profiles(self):
@@ -38,13 +35,99 @@ class Profile:
         profile_base['Quests'] = self.profiles[profile_id]['pmc_quests']
         return profile_base
 
-    def inventory_add_item(self, data):
+    def build_save(self):
         pass
 
-    def inventory_remove_item(self, data):
+    def build_remove(self):
         pass
 
-    def inventory_move_item(self, data):
+    def customization_wear(self):
         pass
 
+    def customization_buy(self):
+        pass
 
+    def encyclopedia_read(self):
+        pass
+
+    def inventory_insure_item(self):
+        pass
+
+    def inventory_add_item(self, data, profile_id):
+        character_inventory = self.profiles[profile_id]["pmc_inventory"]
+        pass
+
+    def inventory_remove_item(self, data, profile_id):
+        character_inventory = self.profiles[profile_id]["pmc_inventory"]
+        pass
+
+    def inventory_move_item(self, data, profile_id):
+        character_inventory = self.profiles[profile_id]["pmc_inventory"]
+        pass
+
+    def inventory_remove_item(self, data, profile_id):
+        character_inventory = self.profiles[profile_id]["pmc_inventory"]
+        pass
+
+    def inventory_split_item(self, data, profile_id):
+        character_inventory = self.profiles[profile_id]["pmc_inventory"]
+        pass
+
+    def inventory_merge_item(self, data, profile_id):
+        character_inventory = self.profiles[profile_id]["pmc_inventory"]
+        pass
+
+    def inventory_transfer_item(self, data, profile_id):
+        character_inventory = self.profiles[profile_id]["pmc_inventory"]
+        pass
+
+    def inventory_swap_item(self, data, profile_id):
+        character_inventory = self.profiles[profile_id]["pmc_inventory"]
+        pass
+
+    def inventory_fold_item(self, data, profile_id):
+        character_inventory = self.profiles[profile_id]["pmc_inventory"]
+        pass
+
+    def inventory_toggle_item(self, data, profile_id):
+        character_inventory = self.profiles[profile_id]["pmc_inventory"]
+        pass
+
+    def inventory_tag_item(self, data, profile_id):
+        character_inventory = self.profiles[profile_id]["pmc_inventory"]
+        pass
+
+    def inventory_bind_item(self, data, profile_id):
+        character_inventory = self.profiles[profile_id]["pmc_inventory"]
+        pass
+
+    def inventory_examine_item(self, data, profile_id):
+        character_inventory = self.profiles[profile_id]["pmc_inventory"]
+        pass
+
+    def note_add(self):
+        pass
+
+    def node_edit(self):
+        pass
+
+    def note_delete(self):
+        pass
+
+    def player_heal(self):
+        pass
+
+    def player_eat(self):
+        pass
+
+    def player_restore_health(self):
+        pass
+
+    def quest_accept(self):
+        pass
+
+    def quest_complete(self):
+        pass
+
+    def quest_handover(self):
+        pass
