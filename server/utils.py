@@ -15,16 +15,19 @@ class ZlibMiddleware:
         @wraps(function)
         def wrapper(*args, **kwargs):
             if request.data:
-                request_body = ujson.loads(zlib.decompress(request))
-                request.body = None
-                print(request_body)
-                print(request)
+                data: bytes = request.data
+                data = zlib.decompress(data)
+                if data:
+                    request_body = ujson.loads(data)
+                else:
+                    request_body = {}
 
-            # data decompression preparing happends here
+                request.data = request_body
+
             data = function(*args, **kwargs)
 
             data_json = json.dumps(data)
-            compressed_data = zlib.compress(data_json.encode('utf8'), 9)
+            compressed_data = zlib.compress(data_json.encode('utf8'), zlib.Z_DEFAULT_COMPRESSION)
 
             response = make_response()
 

@@ -4,7 +4,7 @@ import importlib.util
 from pathlib import Path
 from typing import Type, Iterable, List
 
-from server.logger import logger
+from server.app import logger
 from server.main import root_dir
 from server.package_lib import PackageTopologicalSorter, BasePackage
 

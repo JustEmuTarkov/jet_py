@@ -1,6 +1,6 @@
 from typing import List, Dict, Union, Set
 
-from server.logger import logger
+from server.app import logger
 
 
 class PackageMeta:
@@ -58,7 +58,7 @@ class PackageTopologicalSorter:
         logger.debug(f'Dependency graph: {dependency_graph}')
         pkg_with_no_deps = [pkg for pkg, pkg_deps in dependency_graph.items() if not pkg_deps]
         logger.debug(f'pkg_with_no_deps: {pkg_with_no_deps}')
-        if not pkg_with_no_deps:
+        if not pkg_with_no_deps and dependency_graph:
             raise NoBasePackageError
 
         for s in pkg_with_no_deps:

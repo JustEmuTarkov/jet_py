@@ -1,6 +1,5 @@
 from flask import request, Blueprint
 
-from server.app import app
 from server.utils import route_decorator, TarkovError
 
 blueprint = Blueprint(__name__, __name__)

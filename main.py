@@ -1,7 +1,6 @@
 import sys
 
-from server.app import app
-from server.logger import logger
+from server.app import app, logger
 from server.main import root_dir
 from server.package_manager import package_manager
 

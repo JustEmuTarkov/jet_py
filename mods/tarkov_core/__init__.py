@@ -4,14 +4,12 @@ import random
 import ujson
 from flask import request
 
-from server.app import app
-from server.logger import logger
+from mods.tarkov_core.functions.items import get_item_templates
+from mods.tarkov_core.routes import friend, hideout, lang, notifier, profile, single_player, trader
+from server.app import app, logger
 from server.main import db_dir, start_time
 from server.package_lib import PackageMeta, BasePackage
 from server.utils import route_decorator
-from mods.tarkov_core import routes, functions
-from mods.tarkov_core.library import load_locale
-from mods.tarkov_core.routes import friend, hideout, lang, notifier, profile, single_player, trader
 
 
 class Package(BasePackage):
@@ -45,8 +43,8 @@ class Package(BasePackage):
 
             return locations_base
 
-        @app.route('/client/game/start', methods=['POST'])
-        @route_decorator(is_static=1)
+        @app.route('/client/game/start', methods=['POST', 'GET'])
+        @route_decorator(is_static=True)
         def client_game_start():
             return None  # TODO Add account data, check if character exists
 
@@ -91,13 +89,7 @@ class Package(BasePackage):
         @app.route('/client/items', methods=['GET', 'POST'])
         @route_decorator(is_static=1)
         def client_items():
-            items_dict = {}
-            for item_file_path in (db_dir / 'items').glob('*'):
-                items_data = ujson.load(item_file_path.open('r', encoding='utf8'))
-                for item in items_data:
-                    items_dict[item['_id']] = item
-
-            return items_dict
+            return get_item_templates()
 
         @app.route('/client/customization', methods=['GET', 'POST'])
         @route_decorator(is_static=1)

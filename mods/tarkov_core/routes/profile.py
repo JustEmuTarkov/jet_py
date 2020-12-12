@@ -1,6 +1,7 @@
 import ujson
 from flask import request, Blueprint
 
+from mods.tarkov_core.functions import Profile
 from server.main import root_dir
 from server.utils import route_decorator
 
@@ -19,11 +20,12 @@ def client_game_profile_item_move():
 @route_decorator()
 def client_game_profile_list():
     session_id = request.cookies['PHPSESSID']
+    profile_manager = Profile()
+    pmc = profile_manager.get_profile(session_id)
     profile_dir = root_dir.joinpath('resources', 'profiles', session_id)
-    pmc_profile = ujson.load((profile_dir / 'character.json').open('r'))
     scav_profile = ujson.load((profile_dir / 'character_scav.json').open('r'))
     return [
-        pmc_profile,
+        pmc,
         scav_profile,
     ]
 
