@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 import ujson
 from flask import request, Blueprint
 
-from mods.tarkov_core.functions import Profile
+from mods.tarkov_core.functions.profile import Profile
+from mods.tarkov_core.lib.items import MoveAction, MoveLocation, ActionType
 from server import root_dir
 from server.utils import route_decorator
 
@@ -13,17 +16,50 @@ blueprint = Blueprint(__name__, __name__)
 def client_game_profile_item_move():
     # we are grabbing body decompressed then we loop through variable body.data as []
     # then we switch() by Action key and checking what game want us to do
-    pass
+    session_id = request.cookies['PHPSESSID']
+    profile = Profile(session_id)
+
+    data: dict = request.data
+    for action in data['data']:
+        move_action: MoveAction = action
+
+        print(move_action)
+        action_type = move_action['Action']
+        if action_type == ActionType.Move.value:
+            print(action_type, ActionType.Move)
+            with profile.inventory as inventory:
+                item_id = move_action['item']
+                move_location: MoveLocation = move_action['to']
+
+                item = inventory.get_item(item_id)
+                inventory.move_item(item, move_location)
+        else:
+            print(f'Action {action_type} not implemented')
+
+    return {
+        "items": {
+            "new": [],
+            "change": [],
+            "del": []
+        },
+        "badRequest": [],
+        "quests": [],
+        "ragFairOffers": [],
+        "builds": [],
+        "currentSalesSums": {}
+    }
 
 
 @blueprint.route('/client/game/profile/list', methods=['POST', 'GET'])
 @route_decorator()
 def client_game_profile_list():
     session_id = request.cookies['PHPSESSID']
-    profile_manager = Profile()
-    pmc = profile_manager.get_profile(session_id)
+    profile_manager = Profile(session_id)
+
+    pmc = profile_manager.get_profile()
     profile_dir = root_dir.joinpath('resources', 'profiles', session_id)
     scav_profile = ujson.load((profile_dir / 'character_scav.json').open('r'))
+
     return [
         pmc,
         scav_profile,

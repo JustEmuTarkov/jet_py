@@ -7,13 +7,13 @@ from flask import request
 from mods.tarkov_core.functions.items import get_item_templates
 from mods.tarkov_core.routes import friend, hideout, lang, notifier, profile, single_player, trader
 from server import app, logger, db_dir, start_time
-from server.package_lib import PackageMeta, BasePackage
+from server.package_lib import PackageMeta, PackageBase
 from server.utils import route_decorator
 
 
-class Package(BasePackage):
+class Package(PackageBase):
     class Meta(PackageMeta):
-        name = 'core'
+        name = 'Tarkov core'
         version = '0.0.1'
         dependencies = []
 
@@ -22,6 +22,7 @@ class Package(BasePackage):
         logger.info('Tarkov core package is loading')
 
     def on_load(self):
+        logger.info('Tarkov core package on_load was called')
         app.register_blueprint(blueprint=friend.blueprint)
         app.register_blueprint(blueprint=hideout.blueprint)
         app.register_blueprint(blueprint=lang.blueprint)

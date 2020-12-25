@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import importlib
 from pathlib import Path
 from typing import List, Dict, Union, Set, Type, Iterable
@@ -11,7 +13,7 @@ class PackageMeta:
     dependencies: Union[Set[str], List[str]]
 
 
-class BasePackage:
+class PackageBase:
     Meta: PackageMeta
 
     def __init__(self):
@@ -19,6 +21,9 @@ class BasePackage:
 
     def on_load(self):
         pass
+
+    def __str__(self):
+        return f'{self.Meta.name} - {self.Meta.version}'
 
 
 class UnresolvedPackageError(Exception):
@@ -30,7 +35,7 @@ class NoBasePackageError(Exception):
 
 
 class CycleDependencyError(Exception):
-    def __init__(self, package: BasePackage, dependencies: List[BasePackage]):
+    def __init__(self, package: PackageType, dependencies: PackageTypeList):
         super().__init__()
         self.package = package
         self.dependencies = dependencies
@@ -40,19 +45,24 @@ class CycleDependencyError(Exception):
         return f'{self.package.Meta.name}: [{dependencies}]'
 
 
+PackageType = Type[PackageBase]
+PackageTypeList = List[PackageType]
+
+
 class PackageTopologicalSorter:
-    def __init__(self, packages: List[BasePackage]):
+    def __init__(self, packages: PackageTypeList):
         self.packages = packages
 
-    def __get_package_with_name(self, name: str):
+    def __get_package_with_name(self, name: str) -> PackageType:
         try:
             return next(pkg for pkg in self.packages if pkg.Meta.name == name)
         except StopIteration:
             raise UnresolvedPackageError(name)
 
-    def get_load_order(self) -> List[BasePackage]:
-        in_order: List[BasePackage] = []
-        dependency_graph: Dict[BasePackage, List[BasePackage]] = {
+    def get_load_order(self):
+        in_order: PackageTypeList = []
+
+        dependency_graph: Dict[PackageType, PackageTypeList] = {
             pkg: [self.__get_package_with_name(name) for name in pkg.Meta.dependencies]
             for pkg in self.packages
         }
@@ -97,13 +107,10 @@ class PackageTopologicalSorter:
 class PackageManager:
     def __init__(self, packages_path: Path):
         self.packages_dir = packages_path
-        self.packages: List[BasePackage] = []
+        self.packages: List[Type[PackageBase]] = []
 
-    def register(self, package: Type[BasePackage]):
-        logger.debug(f'Package import: {package.Meta.name}')
-        package_instance = package()
-        self.packages.append(package_instance)
-        return package
+    def register(self, package: Type[PackageBase]):
+        self.packages.append(package)
 
     def load_packages(self):
         self.__import_packages()
@@ -113,12 +120,12 @@ class PackageManager:
         """
         Imports top-level packages in self.packages_dir directory
         """
-        for package in (d for d in self.packages_dir.glob('*') if d.is_dir()):
-            package_name = str(package.relative_to(root_dir)).replace('\\', '.')
-            package = importlib.import_module(package_name)
-
-            if hasattr(package, 'Package'):
-                package = getattr(package, 'Package')
+        for module_path in (d for d in self.packages_dir.glob('*') if d.is_dir()):
+            module_name = str(module_path.relative_to(root_dir)).replace('\\', '.')
+            module = importlib.import_module(module_name)
+            if hasattr(module, 'Package'):
+                package: Type[PackageBase] = getattr(module, 'Package')
+                logger.debug(f'Package import: {package.Meta.name}')
                 self.register(package)
 
     def __load_packages(self):
@@ -127,10 +134,11 @@ class PackageManager:
         """
         order = self.__get_load_order()
         for package in order:
-            logger.debug(f'Package load: {package.Meta.name}')
-            package.on_load()
+            package_instance = package()
+            logger.debug(f'Package load: {str(package_instance)}')
+            package_instance.on_load()
 
-    def __get_load_order(self) -> Iterable[BasePackage]:
+    def __get_load_order(self) -> Iterable[Type[PackageBase]]:
         """
         Sorts packages to load them in correct order
         """

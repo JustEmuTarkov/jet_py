@@ -38,8 +38,8 @@ def client_trading_customization(trader_id):
     if not suits_path.exists():
         return TarkovError(600, "This Trader Doesn't have any suits for sale")
 
-    profile_data = {"Info": {"Side": "Bear"}}  # TODO: After making profile handler load profile here
-    suits_data = ujson.load(db_dir.joinpath('assort', trader_id, 'suits.json').open('r', encoding='utf8'))
+    # profile_data = {"Info": {"Side": "Bear"}}  # TODO: After making profile handler load profile here
+    # suits_data = ujson.load(db_dir.joinpath('assort', trader_id, 'suits.json').open('r', encoding='utf8'))
     # for suit in suits_data:
     #     is_suit = suit_side for suit_side in suits_data[suit]['_props']['Side']
     #       if suit_side == profile_data['Info']['Side']:
