@@ -184,7 +184,34 @@ class StashMap:
                 self.map[x_][y_] = True
 
 
-class InventoryWithGrid(ImmutableInventory, metaclass=abc.ABCMeta):
+class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
+
+    def remove_item(self, item: Item):
+        self.items.remove(item)
+        for item in self.iter_item_children_recursively(item):
+            self.items.remove(item)
+
+    def add_item(self, item: Item):
+        self.items.append(item)
+
+    def add_items(self, items: InventoryItems):
+        self.items.extend(items)
+
+    def merge(self, item: Item, with_: Item):
+        assert item['_tpl'] == with_['_tpl']
+
+        self.remove_item(item)
+        with_['upd']['StackObjectsCount'] += item['upd']['StackObjectsCount']
+
+    def transfer(self, item: Item, with_: Item, count: int):
+        item['upd']['StackObjectsCount'] -= count
+        with_['upd']['StackObjectsCount'] += count
+
+    def fold(self, item: Item, folded: bool):
+        item['upd']['Foldable']['Folded'] = folded
+
+
+class InventoryWithGrid(MutableInventory, metaclass=abc.ABCMeta):
     @property
     @abc.abstractmethod
     def grid_size(self) -> Tuple[int, int]:
@@ -195,8 +222,6 @@ class InventoryWithGrid(ImmutableInventory, metaclass=abc.ABCMeta):
     def stash_id(self) -> str:
         pass
 
-
-class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
     def move_item(self, item: Item, location: MoveLocation):
         if 'location' in location:
             item['location'] = location['location']
@@ -231,32 +256,8 @@ class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
         self.items.append(new_item)
         return new_item
 
-    def remove_item(self, item: Item):
-        self.items.remove(item)
-        for item in self.iter_item_children_recursively(item):
-            self.items.remove(item)
 
-    def add_item(self, item: Item):
-        self.items.append(item)
-
-    def add_items(self, items: InventoryItems):
-        self.items.extend(items)
-
-    def merge(self, item: Item, with_: Item):
-        assert item['_tpl'] == with_['_tpl']
-
-        self.remove_item(item)
-        with_['upd']['StackObjectsCount'] += item['upd']['StackObjectsCount']
-
-    def transfer(self, item: Item, with_: Item, count: int):
-        item['upd']['StackObjectsCount'] -= count
-        with_['upd']['StackObjectsCount'] += count
-
-    def fold(self, item: Item, folded: bool):
-        item['upd']['Foldable']['Folded'] = folded
-
-
-class Inventory(MutableInventory, InventoryWithGrid):
+class Inventory(InventoryWithGrid):
     @property
     def grid_size(self) -> Tuple[int, int]:
         stash_item = self.get_item(self.stash_id)
