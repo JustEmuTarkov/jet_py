@@ -56,11 +56,12 @@ class ProfileItemsMovingDispatcher:
             for action in actions:
                 try:
                     method = actions_map[ActionType(action['Action'])]
-                    # noinspection PyArgumentList
-                    method(action)
                 except KeyError:
                     action_type = action['Action']
                     raise NotImplementedError(f'Action with type {action_type} not implemented')
+
+                # noinspection PyArgumentList
+                method(action)
         return self.response
 
     def _move(self, action: MoveAction):
