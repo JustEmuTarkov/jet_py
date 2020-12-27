@@ -4,7 +4,7 @@ import random
 import ujson
 from flask import request, send_file
 
-from mods.tarkov_core.functions.items import get_item_templates
+from mods.tarkov_core.functions.items import item_templates_repository
 from mods.tarkov_core.routes import friend, hideout, lang, notifier, profile, single_player, trader
 from server import app, logger, db_dir, start_time, root_dir
 from server.package_lib import PackageMeta, PackageBase
@@ -89,7 +89,7 @@ class Package(PackageBase):
         @app.route('/client/items', methods=['GET', 'POST'])
         @route_decorator(is_static=1)
         def client_items():
-            return get_item_templates()
+            return item_templates_repository.templates
 
         @app.route('/client/customization', methods=['GET', 'POST'])
         @route_decorator(is_static=1)

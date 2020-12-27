@@ -1,11 +1,7 @@
 import ujson
 
-from mods.tarkov_core.functions.items import get_item_templates
 from mods.tarkov_core.lib.inventory import InventoryManager
 from server import root_dir
-
-# item_templates = {key: item for key, item in get_item_templates().items() if '_props' in item}
-item_templates = get_item_templates()
 
 
 class Profile:

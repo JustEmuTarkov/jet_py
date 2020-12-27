@@ -35,7 +35,7 @@ class TraderInventory(ImmutableInventory):
         :return Tuple with two elements: first is bought items, second is children of these items
         """
         base_item = copy.deepcopy(self.get_item(item_id))
-        item_template = item_templates_repository.get_item_template(base_item['_tpl'])
+        item_template = item_templates_repository.get_template(base_item['_tpl'])
         item_stack_size = item_template['_props']['StackMaxSize']
 
         bought_items: InventoryItems = []
