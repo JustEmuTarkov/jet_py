@@ -4,7 +4,7 @@ import random
 import ujson
 from flask import Blueprint, request, send_file
 
-from mods.tarkov_core import item_templates_repository
+from mods.tarkov_core.functions.items import item_templates_repository
 from server import app, db_dir, start_time, root_dir
 from server.utils import route_decorator
 
