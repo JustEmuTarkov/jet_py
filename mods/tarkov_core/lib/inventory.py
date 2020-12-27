@@ -14,6 +14,7 @@ from mods.tarkov_core.functions.items import item_templates_repository
 from mods.tarkov_core.lib.items import Item, ItemExtraSize, ItemNotFoundError, MoveLocation, Stash, ItemLocation, \
     ItemOrientationEnum
 from server import root_dir
+from tarkov_core.lib.items import ItemId
 
 
 class InventoryManager:
@@ -43,7 +44,7 @@ def merge_extra_size(first: ItemExtraSize, second: ItemExtraSize) -> ItemExtraSi
     return extra_size
 
 
-def generate_item_id():
+def generate_item_id() -> ItemId:
     population = string.ascii_letters + string.digits
     return ''.join(random.choices(population, k=24))
 
