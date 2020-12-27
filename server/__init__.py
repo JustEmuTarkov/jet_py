@@ -27,6 +27,7 @@ console_handler.formatter = LogFormatter()
 logger.addHandler(console_handler)
 
 
+# pylint: disable=unused-argument
 def show_server_banner(env, debug, app_import_path, eager_loading):
     pass
 
@@ -41,6 +42,7 @@ def custom_startup_log(*args):
     logger.info(args[1] % args[2:])
 
 
+# pylint: disable=protected-access
 werkzeug.serving._log = custom_startup_log
 
 
