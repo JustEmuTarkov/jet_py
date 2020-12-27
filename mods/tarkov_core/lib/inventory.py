@@ -18,7 +18,11 @@ from server import root_dir
 
 class InventoryManager:
     def __init__(self, profile_id: str):
-        self.inventory: Inventory = Inventory(profile_id=profile_id)
+        self.__inventory: Inventory = Inventory(profile_id=profile_id)
+
+    @property
+    def inventory(self):
+        return self.__inventory
 
     def __enter__(self) -> Inventory:
         self.inventory.sync()
