@@ -2,11 +2,11 @@ import datetime
 import random
 
 import ujson
-from flask import request
+from flask import request, send_file
 
 from mods.tarkov_core.functions.items import get_item_templates
 from mods.tarkov_core.routes import friend, hideout, lang, notifier, profile, single_player, trader
-from server import app, logger, db_dir, start_time
+from server import app, logger, db_dir, start_time, root_dir
 from server.package_lib import PackageMeta, PackageBase
 from server.utils import route_decorator
 
@@ -180,3 +180,11 @@ class Package(PackageBase):
             return {
                 "status": "ok"
             }
+
+        @app.route('/files/<path:file_path>', methods=['POST', 'GET'])
+        def static_files(file_path):
+            print(file_path)
+            file = root_dir.joinpath('static', file_path)
+            if file.exists():
+                return send_file(file)
+            return '', 404

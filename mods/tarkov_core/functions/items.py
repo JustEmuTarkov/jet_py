@@ -33,6 +33,8 @@ class ItemTemplatesRepository:
             raise ItemNotFoundError()
 
 
+item_templates_repository = ItemTemplatesRepository()
+
 item_templates = {}
 for __item_file_path in db_dir.joinpath('items').glob('*'):
     __items_data = ujson.load(__item_file_path.open('r', encoding='utf8'))

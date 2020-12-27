@@ -1,11 +1,17 @@
 from __future__ import annotations
 
+from typing import List
+
 import ujson
 from flask import request, Blueprint
 
 from mods.tarkov_core.functions.profile import Profile
-from mods.tarkov_core.lib.items import MoveAction, MoveLocation, ActionType
-from server import root_dir
+from mods.tarkov_core.lib.inventory import Inventory, StashMap
+from mods.tarkov_core.lib.inventory_actions import MoveAction, ActionType, Action, SplitAction, ExamineAction, \
+    MergeAction, TransferAction, TradingConfirmAction, FoldAction, ItemRemoveAction
+from mods.tarkov_core.lib.items import MoveLocation
+from mods.tarkov_core.lib.trader import TraderInventory, Traders
+from server import root_dir, logger
 from server.utils import route_decorator
 
 blueprint = Blueprint(__name__, __name__)
@@ -19,24 +25,8 @@ def client_game_profile_item_move():
     session_id = request.cookies['PHPSESSID']
     profile = Profile(session_id)
 
-    data: dict = request.data
-    for action in data['data']:
-        move_action: MoveAction = action
-
-        print(move_action)
-        action_type = move_action['Action']
-        if action_type == ActionType.Move.value:
-            print(action_type, ActionType.Move)
-            with profile.inventory as inventory:
-                item_id = move_action['item']
-                move_location: MoveLocation = move_action['to']
-
-                item = inventory.get_item(item_id)
-                inventory.move_item(item, move_location)
-        else:
-            print(f'Action {action_type} not implemented')
-
-    return {
+    data: List[Action] = request.data
+    response = {
         "items": {
             "new": [],
             "change": [],
@@ -48,6 +38,111 @@ def client_game_profile_item_move():
         "builds": [],
         "currentSalesSums": {}
     }
+
+    # with profile.inventory as inventory:
+    inventory: Inventory = profile.inventory.inventory
+    inventory.sync()
+
+    for action in data['data']:
+        action_type = ActionType(action['Action'])
+        logger.debug(action)
+
+        if action_type == ActionType.Move:
+            action: MoveAction
+
+            item_id = action['item']
+            move_location: MoveLocation = action['to']
+
+            item = inventory.get_item(item_id)
+            inventory.move_item(item, move_location)
+
+        elif action_type == ActionType.Split:
+            action: SplitAction
+
+            item_id = action['item']
+            move_location: MoveLocation = action['container']
+            item = inventory.get_item(item_id)
+            new_item = inventory.split_item(item, move_location, action['count'])
+            response['items']['new'].append(new_item)
+
+        elif action_type == ActionType.Examine:
+            action: ExamineAction
+
+            if 'fromOwner' in action:
+                pass  # TODO trader item examine
+            else:
+                item_id = action['item']
+                item = inventory.get_item(item_id)
+                inventory.examine(item)
+
+        elif action_type == ActionType.Merge:
+            action: MergeAction
+
+            item = inventory.get_item(action['item'])
+            with_ = inventory.get_item(action['with'])
+
+            inventory.merge(item, with_)
+
+            response['items']['del'].append(item)
+
+        elif action_type == ActionType.Transfer:
+            action: TransferAction
+
+            item = inventory.get_item(action['item'])
+            with_ = inventory.get_item(action['with'])
+            inventory.transfer(item, with_, action['count'])
+
+        elif action_type == ActionType.Fold:
+            action: FoldAction
+
+            item = inventory.get_item(action['item'])
+            inventory.fold(item)
+
+        elif action_type == ActionType.TradingConfirm:
+            action: TradingConfirmAction
+
+            if action['type'] == 'buy_from_trader':
+                trader_id = action['tid']
+                item_id = action['item_id']
+                item_count = action['count']
+                trader_inventory = TraderInventory(Traders(trader_id))
+                # item = trader_inventory.get_item(item_id)
+
+                items, children_items = trader_inventory.buy_item(item_id, item_count)
+                inventory.add_items(children_items)
+                stash_map = StashMap(inventory)
+                for item in items:
+                    inventory.add_item(item)
+                    location = stash_map.find_location_for_item(item, auto_fill=True)
+                    item['location'] = location
+                    item['slotId'] = 'hideout'
+                    item['parentId'] = inventory.stash_id
+
+                response['items']['new'].extend(items)
+                response['items']['new'].extend(children_items)
+
+                for scheme_item in action['scheme_items']:
+                    item = inventory.get_item(scheme_item['id'])
+                    item['upd']['StackObjectsCount'] -= scheme_item['count']
+                    if not item['upd']['StackObjectsCount']:
+                        inventory.remove_item(item)
+                        response['items']['del'].append(item)
+                    else:
+                        response['items']['change'].append(item)
+
+                logger.debug(str(items))
+                logger.debug(str(children_items))
+
+        elif action_type == ActionType.Remove:
+            action: ItemRemoveAction
+            item = inventory.get_item(action['item'])
+            inventory.remove_item(item)
+
+        else:
+            logger.debug(f'Action {action_type} not implemented')
+
+    inventory.flush()
+    return response
 
 
 @blueprint.route('/client/game/profile/list', methods=['POST', 'GET'])
