@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import enum
-from typing import TypedDict, Literal, Union, List
+from typing import TypedDict, Literal, Union, List, NewType
 
 
 class Stash(TypedDict):
@@ -13,14 +13,18 @@ class Stash(TypedDict):
     items: List[Item]
 
 
+ItemId = NewType('ItemId', str)
+TemplateId = NewType('ItemId', str)
+
+
 class ItemBase(TypedDict):
-    _id: str
-    _tpl: str
+    _id: ItemId
+    _tpl: TemplateId
 
 
 class Item(ItemBase, total=False):
     slotId: str
-    parentId: str
+    parentId: ItemId
     location: Union[ItemLocation, int]
     upd: ItemUpd
 
