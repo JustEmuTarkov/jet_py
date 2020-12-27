@@ -6,7 +6,7 @@ import random
 import string
 from traceback import TracebackException
 from types import TracebackType
-from typing import List, Tuple, Generator, Optional
+from typing import List, Tuple, Generator, Optional, Iterable
 
 import ujson
 
@@ -60,6 +60,7 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
     def get_item(self, item_id: str):
         """
         Retrieves item from inventory by it's id
+
         :param item_id: Item id
         :return: Item instance (dict)
         """
@@ -69,6 +70,11 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
             raise ItemNotFoundError
 
     def get_item_size(self, item: Item) -> Tuple[int, int]:
+        """
+        Return size of the item according to it's attachments, etc.
+
+        :return: Tuple[width, height]
+        """
         template = item_templates_repository.get_template(item)
         props = template['_props']
         width = props['Width']
@@ -187,27 +193,51 @@ class StashMap:
 class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
 
     def remove_item(self, item: Item):
+        """
+        Removes item from inventory
+        """
         self.items.remove(item)
         for item in self.iter_item_children_recursively(item):
             self.items.remove(item)
 
     def add_item(self, item: Item):
+        """
+        Adds item into inventory
+        """
         self.items.append(item)
 
-    def add_items(self, items: InventoryItems):
+    def add_items(self, items: Iterable[Item]):
+        """
+        Adds multiple items into inventory
+        """
+
         self.items.extend(items)
 
     def merge(self, item: Item, with_: Item):
+        """
+        Merges item with target item, item template ids should be same
+
+        :param item: Item that will be merged and removed
+        :param with_: Target item
+        """
         assert item['_tpl'] == with_['_tpl']
 
         self.remove_item(item)
         with_['upd']['StackObjectsCount'] += item['upd']['StackObjectsCount']
 
     def transfer(self, item: Item, with_: Item, count: int):
+        """
+        :param item: Donor item
+        :param with_: Target item
+        :param count: Amount to transfer
+        """
         item['upd']['StackObjectsCount'] -= count
         with_['upd']['StackObjectsCount'] += count
 
     def fold(self, item: Item, folded: bool):
+        """
+        Folds item
+        """
         item['upd']['Foldable']['Folded'] = folded
 
 
@@ -215,14 +245,23 @@ class InventoryWithGrid(MutableInventory, metaclass=abc.ABCMeta):
     @property
     @abc.abstractmethod
     def grid_size(self) -> Tuple[int, int]:
+        """
+        :return: Grid size: Tuple[width, height] of inventory
+        """
         pass
 
     @property
     @abc.abstractmethod
     def stash_id(self) -> str:
+        """
+        :return: Id of stash item
+        """
         pass
 
     def move_item(self, item: Item, location: MoveLocation):
+        """
+        Moves item to location
+        """
         if 'location' in location:
             item['location'] = location['location']
         else:
@@ -245,6 +284,11 @@ class InventoryWithGrid(MutableInventory, metaclass=abc.ABCMeta):
         item['slotId'] = location['container']
 
     def split_item(self, item: Item, location: MoveLocation, count: int) -> Item:
+        """
+        Splits count from item into location
+
+        :return: New item
+        """
         new_item = copy.deepcopy(item)
         new_item['upd']['StackObjectsCount'] = count
         item['upd']['StackObjectsCount'] -= count
@@ -283,9 +327,15 @@ class Inventory(InventoryWithGrid):
         return self.stash['equipment']
 
     def sync(self):
+        """
+        Reads inventory file from disk
+        """
         self.stash = ujson.load(self.__path.open('r', encoding='utf8'))
 
     def flush(self):
+        """
+        Writes inventory file to disk
+        """
         ujson.dump(self.stash, self.__path.open('w', encoding='utf8'), indent=4)
 
     def examine(self, item: Item):
