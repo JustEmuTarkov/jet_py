@@ -6,13 +6,14 @@ import ujson
 from flask import request, Blueprint
 
 from mods.tarkov_core.functions.profile import Profile
-from mods.tarkov_core.lib.inventory import Inventory, StashMap
+from mods.tarkov_core.lib.inventory import StashMap
 from mods.tarkov_core.lib.inventory_actions import MoveAction, ActionType, SplitAction, ExamineAction, \
     MergeAction, TransferAction, TradingConfirmAction, FoldAction, ItemRemoveAction, Action
 from mods.tarkov_core.lib.items import MoveLocation
 from mods.tarkov_core.lib.trader import TraderInventory, Traders
 from server import root_dir, logger
 from server.utils import route_decorator
+from tarkov_core.lib.adapters import InventoryToRequestAdapter
 
 blueprint = Blueprint(__name__, __name__)
 
@@ -21,7 +22,7 @@ class ProfileItemsMovingDispatcher:
     def __init__(self, session_id: str):
         self.profile = Profile(session_id)
         self.inventory_manager = self.profile.inventory
-        self.inventory: Optional[Inventory] = None
+        self.inventory: Optional[InventoryToRequestAdapter] = None
         self.request = request
         self.response = {
             "items": {
@@ -49,7 +50,9 @@ class ProfileItemsMovingDispatcher:
             ActionType.TradingConfirm: self._trading_confirm,
         }
 
-        with self.inventory_manager as self.inventory:
+        with self.inventory_manager as inventory:
+            self.inventory = InventoryToRequestAdapter(inventory)
+
             # request.data should be dict at this moment
             # noinspection PyTypeChecker
             actions: List[Action] = request.data['data']
