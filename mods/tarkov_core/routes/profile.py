@@ -122,7 +122,7 @@ class ProfileItemsMovingDispatcher:
 
         items, children_items = trader_inventory.buy_item(item_id, item_count)
         self.inventory.add_items(children_items)
-        stash_map = StashMap(self.inventory)
+        stash_map = StashMap(self.inventory.inventory)
         for item in items:
             self.inventory.add_item(item)
             location = stash_map.find_location_for_item(item, auto_fill=True)
