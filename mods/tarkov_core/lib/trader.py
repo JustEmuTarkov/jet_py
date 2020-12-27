@@ -32,7 +32,7 @@ class TraderInventory(ImmutableInventory):
 
     def buy_item(self, item_id: str, count: int) -> Tuple[InventoryItems, InventoryItems]:
         """
-        :return Tuple with two elements: first is bought items, second is children of these items
+        :return: Tuple with two elements: first is bought items, second is children of these items
         """
         base_item = copy.deepcopy(self.get_item(item_id))
         item_template = item_templates_repository.get_template(base_item['_tpl'])
