@@ -95,6 +95,7 @@ class ExamineAction(Action, total=False):
 class TradingSchemeItem(TypedDict):
     id: str
     count: int
+    scheme_id: int
 
 
 class TradingConfirmAction(Action):
@@ -104,6 +105,12 @@ class TradingConfirmAction(Action):
     count: int
     scheme_id: int
     scheme_items: List[TradingSchemeItem]
+
+
+class TradingSellAction(Action):
+    type: str
+    tid: str
+    items: List[TradingSchemeItem]
 
 
 class ItemRemoveAction(Action):

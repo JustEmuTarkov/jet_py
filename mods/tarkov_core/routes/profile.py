@@ -8,7 +8,7 @@ from flask import request, Blueprint
 from mods.tarkov_core.functions.profile import Profile
 from mods.tarkov_core.lib.inventory import StashMap
 from mods.tarkov_core.lib.inventory_actions import MoveAction, ActionType, SplitAction, ExamineAction, \
-    MergeAction, TransferAction, TradingConfirmAction, FoldAction, ItemRemoveAction, Action
+    MergeAction, TransferAction, TradingConfirmAction, TradingSellAction, FoldAction, ItemRemoveAction, Action
 from mods.tarkov_core.lib.items import MoveLocation
 from mods.tarkov_core.lib.trader import TraderInventory, Traders
 from server import root_dir, logger
@@ -18,6 +18,7 @@ from tarkov_core.lib.adapters import InventoryToRequestAdapter
 blueprint = Blueprint(__name__, __name__)
 
 
+# TODO: this needs to be moved into functions py script naming of the file can be profile_items_moving_dispatcher.py
 class ProfileItemsMovingDispatcher:
     def __init__(self, session_id: str):
         self.profile = Profile(session_id)
@@ -112,6 +113,8 @@ class ProfileItemsMovingDispatcher:
     def _trading_confirm(self, action: TradingConfirmAction):
         if action['type'] == 'buy_from_trader':
             self.__buy_from_trader(action)
+        if action['type'] == 'sell_to_trader':
+            self.__sell_to_trader(action)
 
     def __buy_from_trader(self, action: TradingConfirmAction):
         trader_id = action['tid']
@@ -144,6 +147,25 @@ class ProfileItemsMovingDispatcher:
 
         logger.debug(str(items))
         logger.debug(str(children_items))
+
+    def __sell_to_trader(self, action: TradingSellAction):
+        # {
+        #  Action: 'TradingConfirm',
+        #  type: 'sell_to_trader',
+        #  tid: '54cb50c76803fa8b248b4571',
+        #  items: [ { id: '5fe50af51313c05ce460bba5', count: 1, scheme_id: 0 } ]
+        # }
+
+        trader_id = action['tid']
+        items_to_sell = action['items']
+        # TODO loop through items_to_sell get its "id" find it in the inventory then get data from items.json database
+        # (or templates.items to get price of item) lower down the price by some global variable in the server and
+        # remove them by adding them to del into response
+        # we need to search if by selling items we have a space for money (yes we still counting previous items as used
+        # space ... this is stupid but that's how bsg is like... we can try to redo this and try to place money in used space by sell'd items)
+        # disclaimer: price must be matching: getUserAssortPrice response number
+        # make sure to also count items in main item slots like attachments etc. (maybe lower overall price for that so it wont be overpowered)
+        #
 
 
 @blueprint.route('/client/game/profile/items/moving', methods=['POST', 'GET'])
