@@ -56,8 +56,8 @@ class PackageTopologicalSorter:
     def __get_package_with_name(self, name: str) -> PackageType:
         try:
             return next(pkg for pkg in self.packages if pkg.Meta.name == name)
-        except StopIteration:
-            raise UnresolvedPackageError(name)
+        except StopIteration as error:
+            raise UnresolvedPackageError(name) from error
 
     def get_load_order(self):
         in_order: PackageTypeList = []

@@ -36,8 +36,8 @@ class ItemTemplatesRepository:
 
         try:
             return self.__item_templates[item]
-        except KeyError:
-            raise ItemNotFoundError()
+        except KeyError as error:
+            raise ItemNotFoundError() from error
 
     def get_category(self, item: Item) -> Optional[str]:
         try:

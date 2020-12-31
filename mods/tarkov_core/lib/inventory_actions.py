@@ -98,8 +98,11 @@ class TradingSchemeItem(TypedDict):
     scheme_id: int
 
 
-class TradingConfirmAction(Action):
+class TradingAction(Action):
     type: str
+
+
+class TradingConfirmAction(TradingAction):
     tid: str
     item_id: str
     count: int
@@ -107,8 +110,7 @@ class TradingConfirmAction(Action):
     scheme_items: List[TradingSchemeItem]
 
 
-class TradingSellAction(Action):
-    type: str
+class TradingSellAction(TradingAction):
     tid: str
     items: List[TradingSchemeItem]
 

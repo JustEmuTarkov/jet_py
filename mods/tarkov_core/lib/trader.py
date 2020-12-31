@@ -59,7 +59,7 @@ class TraderInventory(ImmutableInventory):
         bought_child_items: InventoryItems = []
 
         if item_stack_size == 1:
-            for i in range(count):
+            for _ in range(count):
                 item: Item = copy.deepcopy(base_item)
                 id_map = {
                     item['_id']: generate_item_id()

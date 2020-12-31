@@ -71,8 +71,8 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
         """
         try:
             return next(item for item in self.items if item['_id'] == item_id)
-        except StopIteration:
-            raise ItemNotFoundError
+        except StopIteration as error:
+            raise ItemNotFoundError from error
 
     def get_item_size(self, item: Item) -> Tuple[int, int]:
         """
@@ -203,8 +203,8 @@ class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
         Removes item from inventory
         """
         self.items.remove(item)
-        for item in self.iter_item_children_recursively(item):
-            self.items.remove(item)
+        for child in self.iter_item_children_recursively(item):
+            self.items.remove(child)
 
     def add_item(self, item: Item):
         """
@@ -232,7 +232,8 @@ class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
         self.remove_item(item)
         with_['upd']['StackObjectsCount'] += item['upd']['StackObjectsCount']
 
-    def transfer(self, item: Item, with_: Item, count: int):
+    @staticmethod
+    def transfer(item: Item, with_: Item, count: int):
         """
         :param item: Donor item
         :param with_: Target item
@@ -241,7 +242,8 @@ class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
         item['upd']['StackObjectsCount'] -= count
         with_['upd']['StackObjectsCount'] += count
 
-    def fold(self, item: Item, folded: bool):
+    @staticmethod
+    def fold(item: Item, folded: bool):
         """
         Folds item
         """
@@ -255,7 +257,7 @@ class InventoryWithGrid(MutableInventory, metaclass=abc.ABCMeta):
         """
         :return: Grid size: Tuple[width, height] of inventory
         """
-        pass
+        raise NotImplementedError()
 
     @property
     @abc.abstractmethod
@@ -263,7 +265,7 @@ class InventoryWithGrid(MutableInventory, metaclass=abc.ABCMeta):
         """
         :return: Id of stash item
         """
-        pass
+        raise NotImplementedError()
 
     def move_item(self, item: Item, location: MoveLocation):
         """
@@ -317,7 +319,8 @@ class Inventory(InventoryWithGrid):
         """
         ujson.dump(self.stash, self.__path.open('w', encoding='utf8'), indent=4)
 
-    def examine(self, item: Item):
+    @staticmethod
+    def examine(item: Item):
         if 'location' in item:
             location: ItemLocation = item['location']
             location['isSearched'] = True

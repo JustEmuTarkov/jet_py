@@ -7,6 +7,7 @@ blueprint = Blueprint(__name__, __name__)
 
 @blueprint.route('/notifierServer/get/<string:profile_pk>', methods=['POST', 'GET'])
 @route_decorator()
+# pylint: disable=unused-argument
 def notifierserver_get(profile_pk: str):
     #  ?last_id=default_id
     return {"type": "ping", "eventId": "ping"}

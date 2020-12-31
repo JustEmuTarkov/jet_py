@@ -1,5 +1,5 @@
 import copy
-from typing import Iterable
+from typing import Iterable, Optional
 
 from tarkov_core.functions.items import item_templates_repository
 from tarkov_core.lib.inventory import Inventory, generate_item_id
@@ -67,7 +67,7 @@ class InventoryToRequestAdapter:
         self.inventory.items.append(new_item)
         return new_item
 
-    def _move_ammo_into_magazine(self, ammo: Item, magazine: Item):
+    def _move_ammo_into_magazine(self, ammo: Item, magazine: Item) -> Optional[Item]:
         bullet_stacks_inside_mag = list(self.inventory.iter_item_children(magazine))
 
         if bullet_stacks_inside_mag:
@@ -77,7 +77,7 @@ class InventoryToRequestAdapter:
             if last_bullet_stack['_tpl'] == ammo['_tpl']:
                 last_bullet_stack['upd']['StackObjectsCount'] += ammo['upd']['StackObjectsCount']
                 self.inventory.remove_item(ammo)
-                return
+                return None
 
         # Add new ammo stack to magazine
         else:

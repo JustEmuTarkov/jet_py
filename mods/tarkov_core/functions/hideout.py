@@ -23,38 +23,37 @@ hideout_database['production'] = concat_items_files_into_array(production_dir)
 scavcase_dir = db_dir.joinpath('hideout', 'scavcase')
 hideout_database['scavcase'] = concat_items_files_into_array(scavcase_dir)
 
-
-def upgrade(self):
-    pass
-
-
-def complete(self):
-    pass
-
-
-def scav_case_start(self):
-    pass
-
-
-def continue_production_start(self):
-    pass
-
-
-def single_production_start(self):
-    pass
-
-
-def take_production(self):
-    pass
-
-
-def put_in_area_slot(self):
-    pass
-
-
-def take_from_area_slot(self):
-    pass
-
-
-def toggle(self):
-    pass
+# def upgrade(self):
+#     pass
+#
+#
+# def complete(self):
+#     pass
+#
+#
+# def scav_case_start(self):
+#     pass
+#
+#
+# def continue_production_start(self):
+#     pass
+#
+#
+# def single_production_start(self):
+#     pass
+#
+#
+# def take_production(self):
+#     pass
+#
+#
+# def put_in_area_slot(self):
+#     pass
+#
+#
+# def take_from_area_slot(self):
+#     pass
+#
+#
+# def toggle(self):
+#     pass

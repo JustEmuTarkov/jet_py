@@ -43,6 +43,7 @@ class ZlibMiddleware:
 
 class TarkovError(Exception):
     def __init__(self, err: int, errmsg: str):
+        super().__init__(self)
         self.err = err
         self.errmsg = errmsg
 

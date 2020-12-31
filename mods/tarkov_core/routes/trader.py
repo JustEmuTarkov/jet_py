@@ -64,7 +64,7 @@ def client_trading_api_get_user_assort_price(trader_id):
 
 @blueprint.route('/client/trading/api/getTradersList', methods=['POST', 'GET'])
 @route_decorator(is_static=True)
-def client_trading_api_getTraderlist():
+def client_trading_api_get_trader_list():
     traders_path = db_dir.joinpath('base', 'traders')
     paths = set(traders_path.rglob('*/base.json')) - set(traders_path.rglob('ragfair/base.json'))
 
@@ -75,7 +75,7 @@ def client_trading_api_getTraderlist():
 @blueprint.route('/client/trading/api/getTraderAssort/<string:trader_id>', methods=['POST', 'GET'])
 # @lru_cache(8)
 @route_decorator()
-def client_trading_api_getTraderAssort(trader_id):
+def client_trading_api_get_trader_assort(trader_id):
     traders_path = db_dir.joinpath('assort', trader_id)
 
     files = [
@@ -96,7 +96,7 @@ def client_trading_api_getTraderAssort(trader_id):
 @blueprint.route('/client/trading/api/getTrader/<string:trader_id>', methods=['POST', 'GET'])
 @lru_cache(8)
 @route_decorator()
-def client_trading_api_getTrader(trader_id):
+def client_trading_api_get_trader(trader_id):
     trader_path = db_dir.joinpath('base', 'traders', trader_id, 'base.json')
 
     traders_data = ujson.load(trader_path.open('r', encoding='utf8'))

@@ -8,7 +8,7 @@ from functions.items import item_templates_repository
 from lib.adapters import InventoryToRequestAdapter
 from lib.inventory import StashMap, InventoryManager, generate_item_id
 from lib.inventory_actions import ActionType, Action, MoveAction, SplitAction, ExamineAction, MergeAction, \
-    TransferAction, FoldAction, ItemRemoveAction, TradingConfirmAction, TradingSellAction
+    TransferAction, FoldAction, ItemRemoveAction, TradingConfirmAction, TradingSellAction, TradingAction
 from lib.items import MoveLocation
 from lib.trader import TraderInventory, Traders
 from server import logger, root_dir
@@ -54,9 +54,9 @@ class ProfileItemsMovingDispatcher:
             for action in actions:
                 try:
                     method = actions_map[ActionType(action['Action'])]
-                except KeyError:
+                except KeyError as error:
                     action_type = action['Action']
-                    raise NotImplementedError(f'Action with type {action_type} not implemented')
+                    raise NotImplementedError(f'Action with type {action_type} not implemented') from error
 
                 # noinspection PyArgumentList
                 method(action)
@@ -104,10 +104,13 @@ class ProfileItemsMovingDispatcher:
         item = self.inventory.get_item(action['item'])
         self.inventory.remove_item(item)
 
-    def _trading_confirm(self, action: TradingConfirmAction):
+    def _trading_confirm(self, action: TradingAction):
         if action['type'] == 'buy_from_trader':
+            action: TradingConfirmAction
             self.__buy_from_trader(action)
-        if action['type'] == 'sell_to_trader':
+
+        elif action['type'] == 'sell_to_trader':
+            action: TradingSellAction
             self.__sell_to_trader(action)
 
     def __buy_from_trader(self, action: TradingConfirmAction):
@@ -143,12 +146,6 @@ class ProfileItemsMovingDispatcher:
         logger.debug(str(children_items))
 
     def __sell_to_trader(self, action: TradingSellAction):
-        # {
-        #  Action: 'TradingConfirm',
-        #  type: 'sell_to_trader',
-        #  tid: '54cb50c76803fa8b248b4571',
-        #  items: [ { id: '5fe50af51313c05ce460bba5', count: 1, scheme_id: 0 } ]
-        # }
         logger.debug(ujson.dumps(action))
         trader_id = action['tid']
         items_to_sell = action['items']
@@ -185,9 +182,11 @@ class ProfileItemsMovingDispatcher:
         # (or templates.items to get price of item) lower down the price by some global variable in the server and
         # remove them by adding them to del into response
         # we need to search if by selling items we have a space for money (yes we still counting previous items as used
-        # space ... this is stupid but that's how bsg is like... we can try to redo this and try to place money in used space by sell'd items)
+        # space ... this is stupid but that's how bsg is like... we can try to redo this and try to place money in used
+        # space by sell'd items)
         # disclaimer: price must be matching: getUserAssortPrice response number
-        # make sure to also count items in main item slots like attachments etc. (maybe lower overall price for that so it wont be overpowered)
+        # make sure to also count items in main item slots like attachments etc. (maybe lower overall price for that so
+        # it wont be overpowered)
 
 
 class Profile:
