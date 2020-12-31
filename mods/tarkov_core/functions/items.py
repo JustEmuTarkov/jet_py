@@ -1,4 +1,4 @@
-from typing import Dict, Union
+from typing import Dict, Union, Optional
 
 import ujson
 
@@ -9,6 +9,7 @@ from server import db_dir
 class ItemTemplatesRepository:
     def __init__(self):
         self.__item_templates = self.__read_item_templates()
+        self.__item_categories = self.__read_item_categories()
 
     @staticmethod
     def __read_item_templates():
@@ -18,6 +19,12 @@ class ItemTemplatesRepository:
             for item in items_data:
                 item_templates[item['_id']] = item
         return item_templates
+
+    @staticmethod
+    def __read_item_categories():
+        items = ujson.load(db_dir.joinpath('templates', 'items.json').open('r', encoding='utf8'))
+        items = {item['Id']: item for item in items}
+        return items
 
     @property
     def templates(self) -> Dict[str, Dict]:
@@ -31,6 +38,12 @@ class ItemTemplatesRepository:
             return self.__item_templates[item]
         except KeyError:
             raise ItemNotFoundError()
+
+    def get_category(self, item: Item) -> Optional[str]:
+        try:
+            return self.__item_categories[item['_tpl']]['ParentId']
+        except KeyError:
+            return None
 
 
 item_templates_repository = ItemTemplatesRepository()

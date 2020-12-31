@@ -1,9 +1,10 @@
 import copy
 from enum import Enum
-from typing import Tuple
+from typing import Tuple, TypedDict, List, Optional
 
 import ujson
 
+from lib.items import TemplateId
 from mods.tarkov_core.functions.items import item_templates_repository
 from mods.tarkov_core.lib.inventory import ImmutableInventory, InventoryItems, generate_item_id
 from mods.tarkov_core.lib.items import Item, ItemUpd
@@ -21,10 +22,26 @@ class Traders(Enum):
     Skier = '58330581ace78e27b8b10cee'
 
 
+class TraderBase(TypedDict):
+    sell_category: List[TemplateId]
+
+
 class TraderInventory(ImmutableInventory):
     def __init__(self, trader: Traders):
         self.trader_id = trader.value
         self.__items = ujson.load(db_dir.joinpath('assort', self.trader_id, 'items.json').open('r', encoding='utf8'))
+
+        base_path = db_dir.joinpath('base', 'traders', self.trader_id, 'base.json')
+        self.__base = ujson.load(base_path.open('r', encoding='utf8'))
+
+    def get_price(self, item: Item) -> Optional[float]:
+        category_id = item_templates_repository.get_category(item)
+        if category_id not in self.__base['sell_category']:
+            return None
+
+        tpl = item_templates_repository.get_template(item)
+        price = tpl['_props']['CreditsPrice']
+        return price
 
     @property
     def items(self) -> InventoryItems:

@@ -3,6 +3,9 @@ from functools import lru_cache
 import ujson
 from flask import Blueprint, request
 
+import lib.profile as lib_profile
+from lib.inventory import ImmutableInventory
+from lib.trader import TraderInventory, Traders
 from server import root_dir, db_dir
 from server.utils import route_decorator, TarkovError
 
@@ -13,7 +16,7 @@ blueprint = Blueprint(__name__, __name__)
 @route_decorator()
 def client_trading_customization_storage():
     if 'PHPSESSID' not in request.cookies:
-        TarkovError(1, "No Session")
+        raise TarkovError(1, "No Session")
     session_id = request.cookies['PHPSESSID']
     return ujson.load(
         root_dir.joinpath('resources', 'profiles', session_id, 'storage.json').open('r', encoding='utf8'))
@@ -39,11 +42,24 @@ def client_trading_customization(trader_id):
 
 @blueprint.route('/client/trading/api/getUserAssortPrice/trader/<string:trader_id>', methods=['POST', 'GET'])
 @route_decorator()
-def client_trading_api_getUserAssortPrice(trader_id):
-    # TODO: Calculate price for items to sell in specified trader
-    # output is { "item._id": [[{ "_tpl": "", "count": 0 }]] }
-    output = {}
-    return output
+def client_trading_api_get_user_assort_price(trader_id):
+    profile_id = request.cookies['PHPSESSID']
+    player_profile = lib_profile.Profile(profile_id)
+    inventory: ImmutableInventory = player_profile.inventory
+    with player_profile.inventory as inventory:
+        trader_inventory = TraderInventory(Traders(trader_id))
+        items = {}
+        for item in inventory.items:
+            price = trader_inventory.get_price(item)
+            if not price:
+                continue
+
+            items[item['_id']] = [[{'_tpl': '5449016a4bdc2d6f028b456f', 'count': price}]]
+
+        # TODO: Calculate price for items to sell in specified trader
+        # output is { "item._id": [[{ "_tpl": "", "count": 0 }]] }
+    print(items)
+    return items
 
 
 @blueprint.route('/client/trading/api/getTradersList', methods=['POST', 'GET'])
