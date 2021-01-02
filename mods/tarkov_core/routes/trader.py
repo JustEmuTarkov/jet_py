@@ -4,7 +4,6 @@ import ujson
 from flask import Blueprint, request
 
 import lib.profile as lib_profile
-from lib.inventory import ImmutableInventory
 from lib.trader import TraderInventory, Traders
 from server import root_dir, db_dir
 from server.utils import route_decorator, TarkovError
@@ -45,9 +44,9 @@ def client_trading_customization(trader_id):
 def client_trading_api_get_user_assort_price(trader_id):
     profile_id = request.cookies['PHPSESSID']
     player_profile = lib_profile.Profile(profile_id)
-    inventory: ImmutableInventory = player_profile.inventory
+
     with player_profile.inventory as inventory:
-        trader_inventory = TraderInventory(Traders(trader_id))
+        trader_inventory = TraderInventory(Traders(trader_id), player_inventory=inventory)
         items = {}
         for item in inventory.items:
             price = trader_inventory.get_price(item)

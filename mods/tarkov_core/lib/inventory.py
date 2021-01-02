@@ -10,7 +10,7 @@ from typing import List, Tuple, Generator, Optional, Iterable
 
 import ujson
 
-from mods.tarkov_core.functions.items import item_templates_repository
+from functions.items import ItemTemplatesRepository
 from mods.tarkov_core.lib.items import Item, ItemExtraSize, ItemNotFoundError, MoveLocation, Stash, ItemLocation, \
     ItemOrientationEnum
 from server import root_dir
@@ -81,7 +81,7 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
         :return: Tuple[width, height]
         """
         # TODO: item folding isn't taken into account
-        template = item_templates_repository.get_template(item)
+        template = ItemTemplatesRepository().get_template(item)
         props = template['_props']
         width = props['Width']
         height = props['Height']
@@ -97,7 +97,7 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
         }
 
         for child in self.iter_item_children_recursively(item):
-            child_template = item_templates_repository.get_template(child)
+            child_template = ItemTemplatesRepository().get_template(child)
             child_props = child_template['_props']
             child_extra_size: ItemExtraSize = {
                 'left': child_template['_props']['ExtraSizeLeft'],
@@ -286,7 +286,7 @@ class Inventory(InventoryWithGrid):
     @property
     def grid_size(self) -> Tuple[int, int]:
         stash_item = self.get_item(self.stash_id)
-        stash_template = item_templates_repository.get_template(stash_item)
+        stash_template = ItemTemplatesRepository().get_template(stash_item)
         grids_props = stash_template['_props']['Grids'][0]['_props']
         width, height = grids_props['cellsH'], grids_props['cellsV']
         return width, height

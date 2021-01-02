@@ -2,11 +2,12 @@ from typing import Dict, Union, Optional
 
 import ujson
 
+from lib import SingletonMeta
 from mods.tarkov_core.lib.items import Item, ItemNotFoundError
 from server import db_dir
 
 
-class ItemTemplatesRepository:
+class ItemTemplatesRepository(metaclass=SingletonMeta):
     def __init__(self):
         self.__item_templates = self.__read_item_templates()
         self.__item_categories = self.__read_item_categories()

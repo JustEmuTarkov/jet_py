@@ -1,7 +1,7 @@
 import copy
 from typing import Iterable, Optional
 
-from tarkov_core.functions.items import item_templates_repository
+from functions.items import ItemTemplatesRepository
 from tarkov_core.lib.inventory import Inventory, generate_item_id
 from tarkov_core.lib.items import MoveLocation, Item, ItemId
 
@@ -24,7 +24,7 @@ class InventoryToRequestAdapter:
         return self.inventory.get_item(item_id)
 
     def _split_ammo_into_magazine(self, ammo: Item, magazine: Item):
-        magazine_template = item_templates_repository.get_template(magazine)
+        magazine_template = ItemTemplatesRepository().get_template(magazine)
         magazine_capacity: int = magazine_template['_props']['Cartridges'][0]['_max_count']
 
         bullet_stacks_inside_mag = list(self.inventory.iter_item_children(magazine))

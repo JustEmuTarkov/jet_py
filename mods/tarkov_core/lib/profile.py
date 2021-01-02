@@ -4,9 +4,9 @@ import ujson
 from flask import request
 
 import lib.items as items_lib
-from functions.items import item_templates_repository
+from functions.items import ItemTemplatesRepository
 from lib.adapters import InventoryToRequestAdapter
-from lib.inventory import StashMap, InventoryManager, generate_item_id
+from lib.inventory import StashMap, InventoryManager, generate_item_id, Inventory
 from lib.inventory_actions import ActionType, Action, MoveAction, SplitAction, ExamineAction, MergeAction, \
     TransferAction, FoldAction, ItemRemoveAction, TradingConfirmAction, TradingSellAction, TradingAction
 from lib.items import MoveLocation
@@ -17,6 +17,7 @@ from server import logger, root_dir
 class ProfileItemsMovingDispatcher:
     def __init__(self, session_id: str):
         self.profile = Profile(session_id)
+        self.player_inventory: Optional[Inventory] = None
         self.inventory_manager = self.profile.inventory
         self.inventory: Optional[InventoryToRequestAdapter] = None
         self.request = request
@@ -45,8 +46,8 @@ class ProfileItemsMovingDispatcher:
             ActionType.TradingConfirm: self._trading_confirm,
         }
 
-        with self.inventory_manager as inventory:
-            self.inventory = InventoryToRequestAdapter(inventory)
+        with self.inventory_manager as self.player_inventory:
+            self.inventory = InventoryToRequestAdapter(self.player_inventory)
 
             # request.data should be dict at this moment
             # noinspection PyTypeChecker
@@ -117,7 +118,7 @@ class ProfileItemsMovingDispatcher:
         trader_id = action['tid']
         item_id = action['item_id']
         item_count = action['count']
-        trader_inventory = TraderInventory(Traders(trader_id))
+        trader_inventory = TraderInventory(Traders(trader_id), self.player_inventory)
         # item = trader_inventory.get_item(item_id)
 
         items, children_items = trader_inventory.buy_item(item_id, item_count)
@@ -149,7 +150,7 @@ class ProfileItemsMovingDispatcher:
         logger.debug(ujson.dumps(action))
         trader_id = action['tid']
         items_to_sell = action['items']
-        trader_inventory = TraderInventory(Traders(trader_id))
+        trader_inventory = TraderInventory(Traders(trader_id), self.player_inventory)
 
         with self.inventory_manager as player_inventory:
             items = list(player_inventory.get_item(i['id']) for i in items_to_sell)
@@ -159,7 +160,7 @@ class ProfileItemsMovingDispatcher:
             for item in items:
                 player_inventory.remove_item(item)
 
-            rubles_tpl = item_templates_repository.get_template('5449016a4bdc2d6f028b456f')
+            rubles_tpl = ItemTemplatesRepository().get_template('5449016a4bdc2d6f028b456f')
             money_max_stack_size = rubles_tpl['_props']['StackMaxSize']
 
             stash_map = StashMap(player_inventory)

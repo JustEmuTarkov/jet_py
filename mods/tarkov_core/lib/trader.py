@@ -4,8 +4,9 @@ from typing import Tuple, TypedDict, List, Optional
 
 import ujson
 
+from functions.items import ItemTemplatesRepository
+from lib.inventory import Inventory
 from lib.items import TemplateId
-from mods.tarkov_core.functions.items import item_templates_repository
 from mods.tarkov_core.lib.inventory import ImmutableInventory, InventoryItems, generate_item_id
 from mods.tarkov_core.lib.items import Item, ItemUpd
 from server import db_dir
@@ -27,21 +28,35 @@ class TraderBase(TypedDict):
 
 
 class TraderInventory(ImmutableInventory):
-    def __init__(self, trader: Traders):
+    def __init__(self, trader: Traders, player_inventory: Inventory):
+        self.player_inventory = player_inventory
         self.trader_id = trader.value
         self.__items = ujson.load(db_dir.joinpath('assort', self.trader_id, 'items.json').open('r', encoding='utf8'))
 
         base_path = db_dir.joinpath('base', 'traders', self.trader_id, 'base.json')
         self.__base = ujson.load(base_path.open('r', encoding='utf8'))
 
-    def get_price(self, item: Item) -> Optional[float]:
-        category_id = item_templates_repository.get_category(item)
-        if category_id not in self.__base['sell_category']:
+    def can_sell(self, item: Item) -> bool:
+        category_id = ItemTemplatesRepository().get_category(item)
+        return category_id in self.__base['sell_category']
+
+    def get_price(self, item: Item) -> Optional[int]:
+        if not self.can_sell(item):
             return None
 
-        tpl = item_templates_repository.get_template(item)
+        templates_repository = ItemTemplatesRepository()
+        tpl = templates_repository.get_template(item)
         price = tpl['_props']['CreditsPrice']
-        return price
+
+        for child in self.player_inventory.iter_item_children_recursively(item):
+            child_tpl = templates_repository.get_template(child)
+            child_price = child_tpl['_props']['CreditsPrice']
+            if self.can_sell(child):
+                price += child_price
+            else:
+                price += child_price * 0.85
+
+        return int(price)
 
     @property
     def items(self) -> InventoryItems:
@@ -52,7 +67,7 @@ class TraderInventory(ImmutableInventory):
         :return: Tuple with two elements: first is bought items, second is children of these items
         """
         base_item = copy.deepcopy(self.get_item(item_id))
-        item_template = item_templates_repository.get_template(base_item['_tpl'])
+        item_template = ItemTemplatesRepository().get_template(base_item['_tpl'])
         item_stack_size = item_template['_props']['StackMaxSize']
 
         bought_items: InventoryItems = []

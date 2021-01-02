@@ -4,7 +4,7 @@ import random
 import ujson
 from flask import Blueprint, request, send_file
 
-from mods.tarkov_core.functions.items import item_templates_repository
+from functions.items import ItemTemplatesRepository
 from server import app, db_dir, start_time, root_dir
 from server.utils import route_decorator
 
@@ -74,7 +74,7 @@ def client_game_keepalive():
 @app.route('/client/items', methods=['GET', 'POST'])
 @route_decorator(is_static=1)
 def client_items():
-    return item_templates_repository.templates
+    return ItemTemplatesRepository().templates
 
 
 @app.route('/client/customization', methods=['GET', 'POST'])
