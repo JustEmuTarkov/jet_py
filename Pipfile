@@ -13,6 +13,9 @@ werkzeug = "==1.0.1"
 pyinstaller = "==4.1"
 flake8 = "*"
 tox = "*"
+pytest = "*"
+pytest-mock = "*"
+ipython = "*"
 
 [requires]
 python_version = "3.8"

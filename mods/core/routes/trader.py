@@ -3,6 +3,10 @@ from functools import lru_cache
 import ujson
 from flask import Blueprint, request
 
+from mods.core.routes.drivers.traders import get_items_for_fence
+from mods.core.routes.drivers.traders import get_barter_scheme
+from mods.core.routes.drivers.traders import get_items
+from mods.core.routes.drivers.traders import get_loyal_level_items
 import mods.core.lib.profile as lib_profile
 from mods.core.lib.profile import Profile
 from mods.core.lib.trader import TraderInventory, Traders
@@ -78,6 +82,9 @@ def client_trading_api_get_trader_list():
 # @lru_cache(8)
 @game_response_middleware()
 def client_trading_api_get_trader_assort(trader_id):
+    if Traders.is_fence(trader_id):
+        return get_fence_assort()
+
     with Profile(request.cookies['PHPSESSID']) as profile:
         trader_inventory = TraderInventory(Traders(trader_id), player_inventory=profile.inventory)
         return {
@@ -95,3 +102,11 @@ def client_trading_api_get_trader(trader_id):
 
     traders_data = ujson.load(trader_path.open('r', encoding='utf8'))
     return traders_data
+
+
+def get_fence_assort():
+    return dict(
+        barter_scheme=get_barter_scheme(Traders.Fence),
+        items=get_items_for_fence(),
+        loyal_level_items=get_loyal_level_items(Traders.Fence),
+    )

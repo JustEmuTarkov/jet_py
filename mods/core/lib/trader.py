@@ -23,6 +23,14 @@ class Traders(Enum):
     Peacekeeper = '5935c25fb3acc3127c3d8cd9'
     Skier = '58330581ace78e27b8b10cee'
 
+    @classmethod
+    def is_fence(cls, trader_id):
+        """
+        Fence is a little bit different trader then the rest, that is why we
+        need to sometimes check if this trader is Fance or a different one.
+        """
+        return cls.Fence == trader_id
+
 
 class TraderBase(TypedDict):
     sell_category: List[TemplateId]
