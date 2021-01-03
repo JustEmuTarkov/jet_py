@@ -116,7 +116,8 @@ class PackageManager:
         Imports top-level packages in self.packages_dir directory
         """
         for module_path in (d for d in self.packages_dir.glob('*') if d.is_dir()):
-            module_name = str(module_path.relative_to(root_dir)).replace('\\', '.')
+            module_name = '.'.join(module_path.relative_to(root_dir).parts)
+
             module = importlib.import_module(module_name)
             if hasattr(module, 'Package'):
                 package: Type[PackageBase] = getattr(module, 'Package')
