@@ -19,7 +19,7 @@ class Stash(TypedDict):
 
 
 ItemId = NewType('ItemId', str)
-TemplateId = NewType('ItemId', str)
+TemplateId = NewType('TemplateId', str)
 
 
 class ItemBase(TypedDict):
