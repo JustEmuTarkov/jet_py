@@ -1,6 +1,6 @@
 import ujson
 
-from mods.tarkov_core.library import concat_items_files_into_array
+from mods.core.library import concat_items_files_into_array
 from server import db_dir
 
 hideout_database = {

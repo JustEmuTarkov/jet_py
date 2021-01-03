@@ -1,4 +1,4 @@
-from mods.tarkov_core.routes import friend, hideout, lang, notifier, profile, single_player, trader, misc
+from mods.core.routes import friend, hideout, lang, notifier, profile, single_player, trader, misc
 from server import app, logger
 from server.package_lib import PackageMeta, PackageBase
 

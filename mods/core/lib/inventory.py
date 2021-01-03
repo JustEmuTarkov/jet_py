@@ -10,11 +10,11 @@ from typing import List, Tuple, Generator, Optional, Iterable
 
 import ujson
 
-from functions.items import ItemTemplatesRepository
-from mods.tarkov_core.lib.items import Item, ItemExtraSize, ItemNotFoundError, MoveLocation, Stash, ItemLocation, \
+from mods.core.lib.items import Item, ItemExtraSize, ItemNotFoundError, Stash, ItemLocation, \
     ItemOrientationEnum
+from mods.core.lib.items import ItemId
+from mods.core.lib.items import ItemTemplatesRepository
 from server import root_dir
-from tarkov_core.lib.items import ItemId
 
 
 class InventoryManager:
@@ -31,7 +31,7 @@ class InventoryManager:
 
     def __exit__(self, exc: Exception, exc_val: TracebackException, exc_tb: TracebackType):
         if exc_val:
-            raise exc_val
+            raise exc from exc_val
         self.inventory.flush()
 
 
@@ -46,7 +46,7 @@ def merge_extra_size(first: ItemExtraSize, second: ItemExtraSize) -> ItemExtraSi
 
 def generate_item_id() -> ItemId:
     population = string.ascii_letters + string.digits
-    return ''.join(random.choices(population, k=24))
+    return ItemId(''.join(random.choices(population, k=24)))
 
 
 InventoryItems = List[Item]
@@ -54,7 +54,7 @@ InventoryItems = List[Item]
 
 class ImmutableInventory(metaclass=abc.ABCMeta):
     """
-    Implements inventory accessor methods like searching for item, getting it's children without mutating state
+    Implements inventory_manager accessor methods like searching for item, getting it's children without mutating state
     """
 
     @property
@@ -117,7 +117,7 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
         height = height + extra_size['up'] + extra_size['down']
         return width, height
 
-    def iter_item_children(self, item: Item) -> Generator[Item, None, None]:
+    def iter_item_children(self, item: Item) -> Iterable[Item]:
         """
         Iterates over item's children
         """
@@ -128,7 +128,7 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
             except KeyError:
                 pass
 
-    def iter_item_children_recursively(self, item: Item) -> Generator[Item, None, None]:
+    def iter_item_children_recursively(self, item: Item) -> Iterable[Item]:
         """
         Iterates over item's children recursively
         """
@@ -140,8 +140,12 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
             yield item
 
 
+class NoSpaceError(Exception):
+    pass
+
+
 class StashMap:
-    def __init__(self, inventory: InventoryWithGrid):
+    def __init__(self, inventory: Inventory):
         self.inventory = inventory
         self.width, self.height = inventory.grid_size
         self.map = [[False for _ in range(self.height)] for _ in range(self.width)]
@@ -163,9 +167,10 @@ class StashMap:
             for x in range(self.width):
                 yield x, y
 
-    def __can_place(self, item: Item, x: int, y: int, orientation: ItemOrientationEnum) -> bool:
+    def can_place(self, item: Item, location: ItemLocation) -> bool:
+        x, y = location['x'], location['y']
         width, height = self.inventory.get_item_size(item)
-        if orientation == ItemOrientationEnum.Vertical:
+        if location['r'] == ItemOrientationEnum.Vertical:
             width, height = height, width
 
         for x_ in range(x, x + width):
@@ -180,11 +185,12 @@ class StashMap:
     def find_location_for_item(self, item: Item, *, auto_fill=False) -> ItemLocation:
         for x, y in self.iter_cells():
             for orientation in ItemOrientationEnum:
-                if self.__can_place(item, x, y, orientation):
+                location = ItemLocation(x=x, y=y, r=orientation.value)
+                if self.can_place(item, location):
                     if auto_fill:
                         self.fill(item, x, y, orientation)
-                    return ItemLocation(x=x, y=y, r=orientation.value, isSearched=True)
-        raise Exception('Cannot place item')
+                    return location
+        raise NoSpaceError('Cannot place item into inventory')
 
     def fill(self, item: Item, x: int, y: int, orientation: ItemOrientationEnum):
         width, height = self.inventory.get_item_size(item)
@@ -194,6 +200,25 @@ class StashMap:
         for x_ in range(x, x + width):
             for y_ in range(y, y + height):
                 self.map[x_][y_] = True
+
+    def remove(self, item: Item):
+        self.__fill_item(item, False)
+
+    def add(self, item: Item):
+        self.__fill_item(item, True)
+
+    def __fill_item(self, item: Item, with_: bool):
+        location: ItemLocation = item['location']
+        if item['slotId'] != 'hideout':
+            return
+        width, height = self.inventory.get_item_size(item)
+
+        if location['r'] == 'Vertical':
+            width, height = height, width
+
+        for x in range(location['x'], location['x'] + width):
+            for y in range(location['y'], location['y'] + height):
+                self.map[x][y] = with_
 
 
 class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
@@ -205,6 +230,10 @@ class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
         self.items.remove(item)
         for child in self.iter_item_children_recursively(item):
             self.items.remove(child)
+
+    def remove_items(self, items: List[Item]):
+        for item in items:
+            self.remove_item(item)
 
     def add_item(self, item: Item):
         """
@@ -250,39 +279,13 @@ class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
         item['upd']['Foldable']['Folded'] = folded
 
 
-class InventoryWithGrid(MutableInventory, metaclass=abc.ABCMeta):
-    @property
-    @abc.abstractmethod
-    def grid_size(self) -> Tuple[int, int]:
-        """
-        :return: Grid size: Tuple[width, height] of inventory
-        """
-        raise NotImplementedError()
+class Inventory(MutableInventory):
+    def __init__(self, profile_id: str):
+        super().__init__()
+        self.__path = root_dir.joinpath('resources', 'profiles', profile_id, 'pmc_inventory.json')
+        self.stash: Optional[Stash] = None
+        self.stash_map: Optional[StashMap] = None
 
-    @property
-    @abc.abstractmethod
-    def stash_id(self) -> str:
-        """
-        :return: Id of stash item
-        """
-        raise NotImplementedError()
-
-    def move_item(self, item: Item, location: MoveLocation):
-        """
-        Moves item to location
-        """
-        raise NotImplementedError()
-
-    def split_item(self, item: Item, location: MoveLocation, count: int) -> Item:
-        """
-        Splits count from item into location
-
-        :return: New item
-        """
-        raise NotImplementedError()
-
-
-class Inventory(InventoryWithGrid):
     @property
     def grid_size(self) -> Tuple[int, int]:
         stash_item = self.get_item(self.stash_id)
@@ -290,10 +293,6 @@ class Inventory(InventoryWithGrid):
         grids_props = stash_template['_props']['Grids'][0]['_props']
         width, height = grids_props['cellsH'], grids_props['cellsV']
         return width, height
-
-    def __init__(self, profile_id: str):
-        self.__path = root_dir.joinpath('resources', 'profiles', profile_id, 'pmc_inventory.json')
-        self.stash: Optional[Stash] = None
 
     @property
     def items(self):
@@ -312,12 +311,55 @@ class Inventory(InventoryWithGrid):
         Reads inventory file from disk
         """
         self.stash = ujson.load(self.__path.open('r', encoding='utf8'))
+        self.stash_map = StashMap(self)
 
     def flush(self):
         """
         Writes inventory file to disk
         """
         ujson.dump(self.stash, self.__path.open('w', encoding='utf8'), indent=4)
+
+    def add_item(self, item: Item, *, location: ItemLocation = None):
+
+        if location is None:
+            location = self.stash_map.find_location_for_item(item, auto_fill=True)
+        elif not self.stash_map.can_place(item, location):
+            raise ValueError('Cannot place item into location since it is taken')
+
+        self.items.append(item)
+        item['location'] = location
+        item['slotId'] = 'hideout'
+        item['parentId'] = self.stash_id
+
+    def move_item(self, item: Item, location: ItemLocation):
+        """
+        Moves item to location
+        """
+        self.stash_map.remove(item)
+        item['location'] = location
+        item['slotId'] = 'hideout'
+        item['parentId'] = self.stash_id
+        self.stash_map.add(item)
+
+    def split_item(self, item: Item, count: int) -> Item:
+        """
+        Splits count from item and returns new item
+        :return: New item
+        """
+        if item['upd']['StackObjectsCount'] < count:
+            raise ValueError("Can't split from item since stack amount < count")
+        item_copy = copy.deepcopy(item)
+        item_copy['upd']['StackObjectsCount'] = count
+
+        del item_copy['slotId']
+        del item_copy['parentId']
+        del item_copy['location']
+
+        item['upd']['StackObjectsCount'] -= count
+        if item['upd']['StackObjectsCount'] == 0:
+            self.remove_item(item)
+
+        return item_copy
 
     @staticmethod
     def examine(item: Item):

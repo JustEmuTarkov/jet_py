@@ -3,23 +3,24 @@ from typing import Optional, List
 import ujson
 from flask import request
 
-import lib.items as items_lib
-from functions.items import ItemTemplatesRepository
-from lib.adapters import InventoryToRequestAdapter
-from lib.inventory import StashMap, InventoryManager, generate_item_id, Inventory
-from lib.inventory_actions import ActionType, Action, MoveAction, SplitAction, ExamineAction, MergeAction, \
-    TransferAction, FoldAction, ItemRemoveAction, TradingConfirmAction, TradingSellAction, TradingAction
-from lib.items import MoveLocation
-from lib.trader import TraderInventory, Traders
+import mods.core.lib.items as items_lib
+from mods.core.lib.adapters import InventoryToRequestAdapter
+from mods.core.lib.inventory import StashMap, InventoryManager, generate_item_id, Inventory
+from mods.core.lib.inventory_actions import ActionType, Action, MoveAction, SplitAction, ExamineAction, MergeAction, \
+    TransferAction, FoldAction, ItemRemoveAction, TradingConfirmAction, TradingSellAction, TradingAction, \
+    QuestAcceptAction
+from mods.core.lib.items import MoveLocation, ItemTemplatesRepository
+from mods.core.lib.trader import TraderInventory, Traders
 from server import logger, root_dir
 
 
 class ProfileItemsMovingDispatcher:
     def __init__(self, session_id: str):
         self.profile = Profile(session_id)
-        self.player_inventory: Optional[Inventory] = None
-        self.inventory_manager = self.profile.inventory
-        self.inventory: Optional[InventoryToRequestAdapter] = None
+
+        self.inventory: Optional[Inventory] = None
+        self.inventory_adapter: InventoryToRequestAdapter = None
+
         self.request = request
         self.response = {
             "items": {
@@ -44,10 +45,11 @@ class ProfileItemsMovingDispatcher:
             ActionType.Fold: self._fold,
             ActionType.Remove: self._remove,
             ActionType.TradingConfirm: self._trading_confirm,
+            ActionType.QuestAccept: self._accept_quest
         }
 
-        with self.inventory_manager as self.player_inventory:
-            self.inventory = InventoryToRequestAdapter(self.player_inventory)
+        with self.profile.inventory_manager as self.inventory:
+            self.inventory_adapter = InventoryToRequestAdapter(self.inventory)
 
             # request.data should be dict at this moment
             # noinspection PyTypeChecker
@@ -57,24 +59,28 @@ class ProfileItemsMovingDispatcher:
                     method = actions_map[ActionType(action['Action'])]
                 except KeyError as error:
                     action_type = action['Action']
+                    logger.debug(action)
                     raise NotImplementedError(f'Action with type {action_type} not implemented') from error
 
                 # noinspection PyArgumentList
                 method(action)
         return self.response
 
+    def _accept_quest(self, action: QuestAcceptAction):
+        logger.info(action)
+
     def _move(self, action: MoveAction):
         item_id = action['item']
         move_location: MoveLocation = action['to']
 
-        item = self.inventory.get_item(item_id)
-        self.inventory.move_item(item, move_location)
+        item = self.inventory_adapter.get_item(item_id)
+        self.inventory_adapter.move_item(item, move_location)
 
     def _split(self, action: SplitAction):
         item_id = action['item']
         move_location: MoveLocation = action['container']
-        item = self.inventory.get_item(item_id)
-        new_item = self.inventory.split_item(item, move_location, action['count'])
+        item = self.inventory_adapter.get_item(item_id)
+        new_item = self.inventory_adapter.split_item(item, move_location, action['count'])
         self.response['items']['new'].append(new_item)
 
     def _examine(self, action: ExamineAction):
@@ -82,63 +88,61 @@ class ProfileItemsMovingDispatcher:
             pass  # TODO trader item examine
         else:
             item_id = action['item']
-            item = self.inventory.get_item(item_id)
-            self.inventory.examine(item)
+            item = self.inventory_adapter.get_item(item_id)
+            self.inventory_adapter.examine(item)
 
     def _merge(self, action: MergeAction):
-        item = self.inventory.get_item(action['item'])
-        with_ = self.inventory.get_item(action['with'])
+        item = self.inventory_adapter.get_item(action['item'])
+        with_ = self.inventory_adapter.get_item(action['with'])
 
-        self.inventory.merge(item, with_)
+        self.inventory_adapter.merge(item, with_)
         self.response['items']['del'].append(item)
 
     def _transfer(self, action: TransferAction):
-        item = self.inventory.get_item(action['item'])
-        with_ = self.inventory.get_item(action['with'])
-        self.inventory.transfer(item, with_, action['count'])
+        item = self.inventory_adapter.get_item(action['item'])
+        with_ = self.inventory_adapter.get_item(action['with'])
+        self.inventory_adapter.transfer(item, with_, action['count'])
 
     def _fold(self, action: FoldAction):
-        item = self.inventory.get_item(action['item'])
-        self.inventory.fold(item, action['value'])
+        item = self.inventory_adapter.get_item(action['item'])
+        self.inventory_adapter.fold(item, action['value'])
 
     def _remove(self, action: ItemRemoveAction):
-        item = self.inventory.get_item(action['item'])
-        self.inventory.remove_item(item)
+        item = self.inventory_adapter.get_item(action['item'])
+        self.inventory_adapter.remove_item(item)
 
     def _trading_confirm(self, action: TradingAction):
         if action['type'] == 'buy_from_trader':
-            action: TradingConfirmAction
-            self.__buy_from_trader(action)
+            self.__buy_from_trader(TradingConfirmAction(**action))
 
         elif action['type'] == 'sell_to_trader':
-            action: TradingSellAction
-            self.__sell_to_trader(action)
+            self.__sell_to_trader(TradingSellAction(**action))
 
     def __buy_from_trader(self, action: TradingConfirmAction):
         trader_id = action['tid']
         item_id = action['item_id']
         item_count = action['count']
-        trader_inventory = TraderInventory(Traders(trader_id), self.player_inventory)
+        trader_inventory = TraderInventory(Traders(trader_id), self.inventory)
         # item = trader_inventory.get_item(item_id)
 
         items, children_items = trader_inventory.buy_item(item_id, item_count)
-        self.inventory.add_items(children_items)
-        stash_map = StashMap(self.inventory.inventory)
+        self.inventory_adapter.add_items(children_items)
+        stash_map = StashMap(self.inventory_adapter.inventory)
         for item in items:
-            self.inventory.add_item(item)
+            self.inventory_adapter.add_item(item)
             location = stash_map.find_location_for_item(item, auto_fill=True)
             item['location'] = location
             item['slotId'] = 'hideout'
-            item['parentId'] = self.inventory.stash_id
+            item['parentId'] = self.inventory_adapter.stash_id
 
         self.response['items']['new'].extend(items)
         self.response['items']['new'].extend(children_items)
 
         for scheme_item in action['scheme_items']:
-            item = self.inventory.get_item(scheme_item['id'])
+            item = self.inventory_adapter.get_item(scheme_item['id'])
             item['upd']['StackObjectsCount'] -= scheme_item['count']
             if not item['upd']['StackObjectsCount']:
-                self.inventory.remove_item(item)
+                self.inventory_adapter.remove_item(item)
                 self.response['items']['del'].append(item)
             else:
                 self.response['items']['change'].append(item)
@@ -150,34 +154,31 @@ class ProfileItemsMovingDispatcher:
         logger.debug(ujson.dumps(action))
         trader_id = action['tid']
         items_to_sell = action['items']
-        trader_inventory = TraderInventory(Traders(trader_id), self.player_inventory)
+        trader_inventory = TraderInventory(Traders(trader_id), self.inventory)
 
-        with self.inventory_manager as player_inventory:
-            items = list(player_inventory.get_item(i['id']) for i in items_to_sell)
-            price_sum = sum(trader_inventory.get_price(item) for item in items)
+        items = list(self.inventory.get_item(i['id']) for i in items_to_sell)
+        price_sum = sum(trader_inventory.get_price(item) for item in items)
 
-            self.response['items']['del'].extend(items)
-            for item in items:
-                player_inventory.remove_item(item)
+        self.response['items']['del'].extend(items)
+        self.inventory.remove_items(items)
 
-            rubles_tpl = ItemTemplatesRepository().get_template('5449016a4bdc2d6f028b456f')
-            money_max_stack_size = rubles_tpl['_props']['StackMaxSize']
+        rubles_tpl = ItemTemplatesRepository().get_template('5449016a4bdc2d6f028b456f')
+        money_max_stack_size = rubles_tpl['_props']['StackMaxSize']
 
-            stash_map = StashMap(player_inventory)
-            while price_sum:
-                stack_size = min(money_max_stack_size, price_sum)
-                price_sum -= stack_size
+        while price_sum:
+            stack_size = min(money_max_stack_size, price_sum)
+            price_sum -= stack_size
 
-                money_stack = items_lib.Item(
-                    _id=generate_item_id(),
-                    _tpl=items_lib.TemplateId('5449016a4bdc2d6f028b456f'),
-                    parentId=player_inventory.stash_id,
-                    slotId='hideout',
-                )
-                money_stack['upd'] = items_lib.ItemUpd(StackObjectsCount=stack_size)
-                money_stack['location'] = stash_map.find_location_for_item(money_stack, auto_fill=True)
-                player_inventory.add_item(money_stack)
-                self.response['items']['new'].append(money_stack)
+            money_stack = items_lib.Item(
+                _id=generate_item_id(),
+                _tpl=items_lib.TemplateId('5449016a4bdc2d6f028b456f'),
+                parentId=self.inventory.stash_id,
+                slotId='hideout',
+            )
+            money_stack['upd'] = items_lib.ItemUpd(StackObjectsCount=stack_size)
+
+            self.inventory.add_item(money_stack)
+            self.response['items']['new'].append(money_stack)
 
         # TODO loop through items_to_sell get its "id" find it in the inventory then get data from items.json database
         # (or templates.items to get price of item) lower down the price by some global variable in the server and
@@ -193,7 +194,7 @@ class ProfileItemsMovingDispatcher:
 class Profile:
     def __init__(self, profile_id: str):
         self.profile_id = profile_id
-        self.inventory = InventoryManager(profile_id)
+        self.inventory_manager = InventoryManager(profile_id)
 
         self.profiles_path = root_dir.joinpath('resources', 'profiles')
         #

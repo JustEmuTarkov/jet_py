@@ -3,8 +3,8 @@ from functools import lru_cache
 import ujson
 from flask import Blueprint, request
 
-import lib.profile as lib_profile
-from lib.trader import TraderInventory, Traders
+import mods.core.lib.profile as lib_profile
+from mods.core.lib.trader import TraderInventory, Traders
 from server import root_dir, db_dir
 from server.utils import route_decorator, TarkovError
 
@@ -45,19 +45,18 @@ def client_trading_api_get_user_assort_price(trader_id):
     profile_id = request.cookies['PHPSESSID']
     player_profile = lib_profile.Profile(profile_id)
 
-    with player_profile.inventory as inventory:
+    with player_profile.inventory_manager as inventory:
         trader_inventory = TraderInventory(Traders(trader_id), player_inventory=inventory)
         items = {}
         for item in inventory.items:
-            price = trader_inventory.get_price(item)
-            if not price:
+            if not trader_inventory.can_sell(item):
                 continue
 
+            price = trader_inventory.get_price(item)
             items[item['_id']] = [[{'_tpl': '5449016a4bdc2d6f028b456f', 'count': price}]]
 
         # TODO: Calculate price for items to sell in specified trader
         # output is { "item._id": [[{ "_tpl": "", "count": 0 }]] }
-    print(items)
     return items
 
 

@@ -1,6 +1,6 @@
 from flask import Blueprint
 
-from mods.tarkov_core.functions import hideout
+from mods.core.lib import hideout
 from server.utils import route_decorator
 
 blueprint = Blueprint(__name__, __name__)

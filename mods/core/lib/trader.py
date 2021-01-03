@@ -1,14 +1,13 @@
 import copy
 from enum import Enum
-from typing import Tuple, TypedDict, List, Optional
+from typing import Tuple, TypedDict, List
 
 import ujson
 
-from functions.items import ItemTemplatesRepository
-from lib.inventory import Inventory
-from lib.items import TemplateId
-from mods.tarkov_core.lib.inventory import ImmutableInventory, InventoryItems, generate_item_id
-from mods.tarkov_core.lib.items import Item, ItemUpd
+from mods.core.lib.inventory import ImmutableInventory, InventoryItems, generate_item_id
+from mods.core.lib.inventory import Inventory
+from mods.core.lib.items import Item, ItemUpd
+from mods.core.lib.items import TemplateId, ItemTemplatesRepository
 from server import db_dir
 
 
@@ -37,12 +36,18 @@ class TraderInventory(ImmutableInventory):
         self.__base = ujson.load(base_path.open('r', encoding='utf8'))
 
     def can_sell(self, item: Item) -> bool:
-        category_id = ItemTemplatesRepository().get_category(item)
+        try:
+            category_id = ItemTemplatesRepository().get_category(item)
+        except KeyError:
+            return False
         return category_id in self.__base['sell_category']
 
-    def get_price(self, item: Item) -> Optional[int]:
+    def get_price(self, item: Item) -> int:
+        """
+        :returns Price of item and it's children
+        """
         if not self.can_sell(item):
-            return None
+            raise ValueError('Item is not sellable')
 
         templates_repository = ItemTemplatesRepository()
         tpl = templates_repository.get_template(item)

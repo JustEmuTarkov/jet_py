@@ -3,7 +3,7 @@ from __future__ import annotations
 import ujson
 from flask import request, Blueprint
 
-from lib.profile import ProfileItemsMovingDispatcher, Profile
+from mods.core.lib.profile import ProfileItemsMovingDispatcher, Profile
 from server import root_dir
 from server.utils import route_decorator
 

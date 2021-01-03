@@ -3,7 +3,7 @@ from __future__ import annotations
 import enum
 from typing import TypedDict, List
 
-from mods.tarkov_core.lib.items import MoveLocation
+from mods.core.lib.items import MoveLocation
 
 
 class ActionType(enum.Enum):
@@ -117,3 +117,7 @@ class TradingSellAction(TradingAction):
 
 class ItemRemoveAction(Action):
     item: str
+
+
+class QuestAcceptAction(Action):
+    qid: str

@@ -4,7 +4,7 @@ import random
 import ujson
 from flask import Blueprint, request, send_file
 
-from functions.items import ItemTemplatesRepository
+from mods.core.lib.items import ItemTemplatesRepository
 from server import app, db_dir, start_time, root_dir
 from server.utils import route_decorator
 

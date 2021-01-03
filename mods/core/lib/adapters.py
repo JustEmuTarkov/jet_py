@@ -1,9 +1,9 @@
 import copy
 from typing import Iterable, Optional
 
-from functions.items import ItemTemplatesRepository
-from tarkov_core.lib.inventory import Inventory, generate_item_id
-from tarkov_core.lib.items import MoveLocation, Item, ItemId
+from mods.core.lib.inventory import Inventory, generate_item_id
+from mods.core.lib.items import ItemTemplatesRepository
+from mods.core.lib.items import MoveLocation, Item, ItemId
 
 
 class InventoryToRequestAdapter:
@@ -32,17 +32,17 @@ class InventoryToRequestAdapter:
 
         # Remove ammo from inventory if stack fully fits into magazine
         if ammo['upd']['StackObjectsCount'] <= ammo_to_full:
-            # self.remove_item(ammo)
-            pass
-        # Else if stack is too big to fit into magazine copy ammo and assign it new id and proper stack count
-        else:
-            ammo['upd']['StackObjectsCount'] -= ammo_to_full
+            self.remove_item(ammo)
+            return ammo
 
-            ammo = copy.deepcopy(ammo)
-            ammo['_id'] = generate_item_id()
-            ammo['upd']['StackObjectsCount'] = ammo_to_full
-        self.inventory.add_item(ammo)
-        return ammo
+        # Else if stack is too big to fit into magazine copy ammo and assign it new id and proper stack count
+        ammo['upd']['StackObjectsCount'] -= ammo_to_full
+
+        ammo_copy = copy.deepcopy(ammo)
+        ammo_copy['_id'] = generate_item_id()
+        ammo_copy['upd']['StackObjectsCount'] = ammo_to_full
+        self.inventory.add_item(ammo_copy)
+        return ammo_copy
 
     def split_item(self, item: Item, location: MoveLocation, count: int) -> Item:
         """
