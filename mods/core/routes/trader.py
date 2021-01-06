@@ -64,9 +64,12 @@ def client_trading_api_get_user_assort_price(trader_id):
 @route_decorator(is_static=True)
 def client_trading_api_get_trader_list():
     traders_path = db_dir.joinpath('base', 'traders')
+
     paths = set(traders_path.rglob('*/base.json')) - set(traders_path.rglob('ragfair/base.json'))
 
     traders_data = [ujson.load(file.open('r', encoding='utf8')) for file in paths]
+    traders_data = sorted(traders_data, key=lambda trader: trader['_id'])
+
     return traders_data
 
 
