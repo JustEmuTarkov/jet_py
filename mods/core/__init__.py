@@ -1,4 +1,4 @@
-from mods.core.routes import friend, hideout, lang, notifier, profile, single_player, trader, misc
+from mods.core.routes import friend, hideout, lang, notifier, profile, single_player, trader, misc, flea_market
 from server import app, logger
 from server.package_lib import PackageMeta, PackageBase
 
@@ -23,3 +23,4 @@ class Package(PackageBase):
         app.register_blueprint(blueprint=single_player.blueprint)
         app.register_blueprint(blueprint=trader.blueprint)
         app.register_blueprint(blueprint=misc.blueprint)
+        app.register_blueprint(blueprint=flea_market.blueprint)
