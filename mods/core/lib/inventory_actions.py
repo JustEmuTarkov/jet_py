@@ -3,6 +3,7 @@ from __future__ import annotations
 import enum
 from typing import TypedDict, List
 
+from lib.items import ItemId
 from mods.core.lib.items import MoveLocation
 
 
@@ -56,18 +57,18 @@ class Action(TypedDict):
 
 
 class MoveAction(Action):
-    item: str
+    item: ItemId
     to: MoveLocation
 
 
 class SplitAction(Action):
-    item: str
+    item: ItemId
     container: MoveLocation
     count: int
 
 
 class FoldAction(Action):
-    item: str
+    item: ItemId
     value: bool
 
 
@@ -83,17 +84,17 @@ class TransferAction(MergeAction):
 
 
 class ExamineActionOwner(TypedDict):
-    id: str
+    id: ItemId
     type: str
 
 
 class ExamineAction(Action, total=False):
-    item: str
+    item: ItemId
     fromOwner: ExamineActionOwner
 
 
 class TradingSchemeItem(TypedDict):
-    id: str
+    id: ItemId
     count: int
     scheme_id: int
 
@@ -116,7 +117,7 @@ class TradingSellAction(TradingAction):
 
 
 class ItemRemoveAction(Action):
-    item: str
+    item: ItemId
 
 
 class QuestAcceptAction(Action):
