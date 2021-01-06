@@ -18,8 +18,9 @@ def client_locations():
     locations_base = ujson.load(locations_base.open('r'))
 
     for file in (db_dir / 'locations').glob('*.json'):
-        map_name, map_contents = file.stem, ujson.load(file.open('r'))['base']
-        locations_base['locations'][map_name] = map_contents
+        map_data = ujson.load(file.open('r'))
+        map_id = map_data['base']['_Id']
+        locations_base['locations'][map_id] = map_data['base']
 
     return locations_base
 
