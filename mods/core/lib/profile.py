@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import time
 from typing import Optional, List
 
 import ujson
 from flask import request
 
 import mods.core.lib.items as items_lib
+from lib.inventory_actions import ReadEncyclopediaAction
 from mods.core.lib.adapters import InventoryToRequestAdapter
 from mods.core.lib.inventory import StashMap, InventoryManager, generate_item_id, Inventory
 from mods.core.lib.inventory_actions import ActionType, Action, MoveAction, SplitAction, ExamineAction, MergeAction, \
@@ -47,7 +49,8 @@ class ProfileItemsMovingDispatcher:
             ActionType.Fold: self._fold,
             ActionType.Remove: self._remove,
             ActionType.TradingConfirm: self._trading_confirm,
-            ActionType.QuestAccept: self._accept_quest
+            ActionType.QuestAccept: self._accept_quest,
+            ActionType.ReadEncyclopedia: self._read_encyclopedia,
         }
 
         with self.profile:
@@ -72,7 +75,7 @@ class ProfileItemsMovingDispatcher:
         return self.response
 
     def _accept_quest(self, action: QuestAcceptAction):
-        logger.info(action)
+        self.profile.quests.accept_quest(action['qid'])
 
     def _move(self, action: MoveAction):
         item_id = action['item']
@@ -193,15 +196,9 @@ class ProfileItemsMovingDispatcher:
             self.inventory.add_item(money_stack)
             self.response['items']['new'].append(money_stack)
 
-        # TODO loop through items_to_sell get its "id" find it in the inventory then get data from items.json database
-        # (or templates.items to get price of item) lower down the price by some global variable in the server and
-        # remove them by adding them to del into response
-        # we need to search if by selling items we have a space for money (yes we still counting previous items as used
-        # space ... this is stupid but that's how bsg is like... we can try to redo this and try to place money in used
-        # space by sell'd items)
-        # disclaimer: price must be matching: getUserAssortPrice response number
-        # make sure to also count items in main item slots like attachments etc. (maybe lower overall price for that so
-        # it wont be overpowered)
+    def _read_encyclopedia(self, action: ReadEncyclopediaAction):
+        for id_ in action['ids']:
+            self.profile.encyclopedia.data[id_] = True
 
 
 class Encyclopedia:
@@ -213,23 +210,56 @@ class Encyclopedia:
         self.data[item['_tpl']] = True
 
 
+class Quests:
+    def __init__(self, profile: Profile):
+        self.data = profile.quests_data
+
+    def get_quest(self, quest_id: str):
+        try:
+            return next(quest for quest in self.data if quest['qid'] == quest_id)
+        except StopIteration as e:
+            raise KeyError from e
+
+    def accept_quest(self, quest_id: str):
+        try:
+            quest = self.get_quest(quest_id)
+            if quest['status'] in ('Started', 'Success'):
+                raise ValueError('Quest is already accepted')
+        except KeyError:
+            pass
+
+        quest = {
+            'qid': quest_id,
+            'startTime': int(time.time()),
+            'completedConditions': [],
+            'statusTimers': {},
+            'status': 'Started',
+        }
+        self.data.append(quest)
+
+
 class Profile:
+    # noinspection PyTypeChecker
     def __init__(self, profile_id: str):
         self.profile_id = profile_id
         self.inventory_manager = InventoryManager(profile_id)
 
-        self.profiles_path = root_dir.joinpath('resources', 'profiles')
+        self.profile_path = root_dir.joinpath('resources', 'profiles', profile_id)
 
-        self.pmc_profile_path = self.profiles_path.joinpath(self.profile_id, 'pmc_profile.json')
-        self.pmc_profile: dict
+        self.pmc_profile_path = self.profile_path.joinpath('pmc_profile.json')
+        self.pmc_profile: dict = None  # type: ignore
 
-        self.encyclopedia: Encyclopedia
+        self.encyclopedia: Encyclopedia = None  # type: ignore
 
-        self.inventory: Inventory
+        self.inventory: Inventory = None  # type: ignore
+
+        self.quests_path = self.profile_path.joinpath('pmc_quests.json')
+        self.quests_data: List[dict] = None  # type: ignore
+        self.quests: Quests = None  # type: ignore
 
     def get_profile(self):
         profile_data = {}
-        for file in self.profiles_path.joinpath(self.profile_id).glob('pmc_*.json'):
+        for file in self.profile_path.glob('pmc_*.json'):
             profile_data[file.stem] = ujson.load(file.open('r', encoding='utf8'))
 
         profile_base = profile_data['pmc_profile']
@@ -241,16 +271,22 @@ class Profile:
         return profile_base
 
     def __read(self):
-        self.pmc_profile = ujson.load(self.pmc_profile_path.open('r', encoding='utf8'))
+        self.pmc_profile: dict = ujson.load(self.pmc_profile_path.open('r', encoding='utf8'))
+
         self.encyclopedia = Encyclopedia(profile=self)
 
         self.inventory = Inventory(profile_id=self.profile_id)
         self.inventory.sync()
 
+        self.quests_data: List[dict] = ujson.load(self.quests_path.open('r', encoding='utf8'))
+        self.quests = Quests(profile=self)
+
     def __write(self):
         ujson.dump(self.pmc_profile, self.pmc_profile_path.open('w', encoding='utf8'), indent=4)
 
         self.inventory.flush()
+
+        ujson.dump(self.quests_data, self.quests_path.open('w', encoding='utf8'), indent=4)
 
     def __enter__(self):
         self.__read()

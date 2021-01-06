@@ -121,3 +121,7 @@ class ItemRemoveAction(Action):
 
 class QuestAcceptAction(Action):
     qid: str
+
+
+class ReadEncyclopediaAction(Action):
+    ids: List[str]
