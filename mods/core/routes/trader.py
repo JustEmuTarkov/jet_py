@@ -45,10 +45,10 @@ def client_trading_api_get_user_assort_price(trader_id):
     profile_id = request.cookies['PHPSESSID']
     player_profile = lib_profile.Profile(profile_id)
 
-    with player_profile.inventory_manager as inventory:
-        trader_inventory = TraderInventory(Traders(trader_id), player_inventory=inventory)
+    with player_profile:
+        trader_inventory = TraderInventory(Traders(trader_id), player_inventory=player_profile.inventory)
         items = {}
-        for item in inventory.items:
+        for item in player_profile.inventory.items:
             if not trader_inventory.can_sell(item):
                 continue
 
