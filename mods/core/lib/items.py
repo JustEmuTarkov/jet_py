@@ -11,7 +11,7 @@ from server import db_dir
 
 class Stash(TypedDict):
     equipment: str
-    stash: str
+    stash: ItemId
     questRaidItems: str
     questStashItems: str
     fastPanel: dict
@@ -82,7 +82,7 @@ class ItemOrientationEnum(enum.Enum):
 
 
 class MoveLocation(TypedDict):
-    id: str
+    id: ItemId
     container: str
     location: ItemLocation
 

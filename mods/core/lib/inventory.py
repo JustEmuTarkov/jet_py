@@ -4,9 +4,8 @@ import abc
 import copy
 import random
 import string
-from traceback import TracebackException
 from types import TracebackType
-from typing import List, Tuple, Generator, Optional, Iterable
+from typing import List, Tuple, Generator, Iterable, Type, Optional
 
 import ujson
 
@@ -29,9 +28,14 @@ class InventoryManager:
         self.inventory.sync()
         return self.inventory
 
-    def __exit__(self, exc: Exception, exc_val: TracebackException, exc_tb: TracebackType):
-        if exc_val:
-            raise exc from exc_val
+    def __exit__(
+            self,
+            exc: Optional[Type[BaseException]],
+            exc_val: Optional[BaseException],
+            exc_tb: Optional[TracebackType]
+    ):
+        if exc and exc_val:
+            raise exc() from exc_val
         self.inventory.flush()
 
 
@@ -135,9 +139,9 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
         items = list(self.iter_item_children(item))
 
         while items:
-            item: Item = items.pop()
-            items.extend(self.iter_item_children(item))
-            yield item
+            child: Item = items.pop()
+            items.extend(self.iter_item_children(child))
+            yield child
 
 
 class NoSpaceError(Exception):
@@ -152,6 +156,9 @@ class StashMap:
         inventory_root = inventory.get_item(inventory.stash_id)
 
         for item in (i for i in inventory.iter_item_children(inventory_root) if i['slotId'] == 'hideout'):
+            if not isinstance(item['location'], dict):
+                continue
+
             item_x, item_y = item['location']['x'], item['location']['y']
             width, height = self.inventory.get_item_size(item)
 
@@ -208,6 +215,9 @@ class StashMap:
         self.__fill_item(item, True)
 
     def __fill_item(self, item: Item, with_: bool):
+        if not isinstance(item['location'], dict):
+            return
+
         location: ItemLocation = item['location']
         if item['slotId'] != 'hideout':
             return
@@ -283,8 +293,9 @@ class Inventory(MutableInventory):
     def __init__(self, profile_id: str):
         super().__init__()
         self.__path = root_dir.joinpath('resources', 'profiles', profile_id, 'pmc_inventory.json')
-        self.stash: Optional[Stash] = None
-        self.stash_map: Optional[StashMap] = None
+
+        self.stash: Stash
+        self.stash_map: StashMap
 
     @property
     def grid_size(self) -> Tuple[int, int]:
@@ -299,7 +310,7 @@ class Inventory(MutableInventory):
         return self.stash['items']
 
     @property
-    def stash_id(self) -> str:
+    def stash_id(self):
         return self.stash['stash']
 
     @property
@@ -363,6 +374,6 @@ class Inventory(MutableInventory):
 
     @staticmethod
     def examine(item: Item):
-        if 'location' in item:
+        if 'location' in item and isinstance(item['location'], dict):
             location: ItemLocation = item['location']
             location['isSearched'] = True

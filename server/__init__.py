@@ -43,7 +43,8 @@ def custom_startup_log(*args):
 
 
 # pylint: disable=protected-access
-werkzeug.serving._log = custom_startup_log
+# noinspection PyTypeHints
+werkzeug.serving._log = custom_startup_log  # type: ignore
 
 
 @app.after_request

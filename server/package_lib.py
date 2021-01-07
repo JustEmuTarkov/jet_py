@@ -8,9 +8,9 @@ from server import logger, root_dir
 
 
 class PackageMeta:
-    name: str
-    version: str
-    dependencies: Union[Set[str], List[str]]
+    name: str = ''
+    version: str = ''
+    dependencies: Union[Set[str], List[str]] = []
 
 
 class PackageBase:

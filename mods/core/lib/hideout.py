@@ -3,7 +3,7 @@ import ujson
 from mods.core.library import concat_items_files_into_array
 from server import db_dir
 
-hideout_database = {
+hideout_database: dict = {
     "areas": [],
     "settings": {},
     "production": [],

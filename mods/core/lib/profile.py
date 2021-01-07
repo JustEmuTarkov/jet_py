@@ -1,18 +1,17 @@
 from __future__ import annotations
 
 import time
-from typing import Optional, List
+from typing import List, cast
 
 import ujson
 from flask import request
 
 import mods.core.lib.items as items_lib
-from lib.inventory_actions import ReadEncyclopediaAction
 from mods.core.lib.adapters import InventoryToRequestAdapter
 from mods.core.lib.inventory import StashMap, InventoryManager, generate_item_id, Inventory
 from mods.core.lib.inventory_actions import ActionType, Action, MoveAction, SplitAction, ExamineAction, MergeAction, \
     TransferAction, FoldAction, ItemRemoveAction, TradingConfirmAction, TradingSellAction, TradingAction, \
-    QuestAcceptAction
+    QuestAcceptAction, ReadEncyclopediaAction
 from mods.core.lib.items import MoveLocation, ItemTemplatesRepository
 from mods.core.lib.trader import TraderInventory, Traders
 from server import logger, root_dir
@@ -22,8 +21,8 @@ class ProfileItemsMovingDispatcher:
     def __init__(self, session_id: str):
         self.profile = Profile(session_id)
 
-        self.inventory: Optional[Inventory] = None
-        self.inventory_adapter: InventoryToRequestAdapter = None
+        self.inventory: Inventory
+        self.inventory_adapter: InventoryToRequestAdapter
 
         self.request = request
         self.response = {
@@ -59,7 +58,8 @@ class ProfileItemsMovingDispatcher:
 
             # request.data should be dict at this moment
             # noinspection PyTypeChecker
-            actions: List[Action] = request.data['data']
+            actions: List[Action] = request.data['data']  # type: ignore
+
             for action in actions:
                 # Log any actions into debug
                 logger.debug(action)
@@ -71,7 +71,7 @@ class ProfileItemsMovingDispatcher:
                     raise NotImplementedError(f'Action with type {action_type} not implemented') from error
 
                 # noinspection PyArgumentList
-                method(action)
+                method(action)  # type: ignore
         return self.response
 
     def _accept_quest(self, action: QuestAcceptAction):
@@ -89,7 +89,7 @@ class ProfileItemsMovingDispatcher:
         move_location: MoveLocation = action['container']
         item = self.inventory_adapter.get_item(item_id)
         new_item = self.inventory_adapter.split_item(item, move_location, action['count'])
-        self.response['items']['new'].append(new_item)
+        self.response['items']['new'].append(new_item)  # type: ignore
 
     def _examine(self, action: ExamineAction):
         if 'fromOwner' in action:
@@ -112,7 +112,7 @@ class ProfileItemsMovingDispatcher:
         with_ = self.inventory_adapter.get_item(action['with'])
 
         self.inventory_adapter.merge(item, with_)
-        self.response['items']['del'].append(item)
+        self.response['items']['del'].append(item)  # type: ignore
 
     def _transfer(self, action: TransferAction):
         item = self.inventory_adapter.get_item(action['item'])
@@ -129,10 +129,12 @@ class ProfileItemsMovingDispatcher:
 
     def _trading_confirm(self, action: TradingAction):
         if action['type'] == 'buy_from_trader':
-            self.__buy_from_trader(TradingConfirmAction(**action))
+            action = cast(TradingConfirmAction, action)
+            self.__buy_from_trader(action)
 
         elif action['type'] == 'sell_to_trader':
-            self.__sell_to_trader(TradingSellAction(**action))
+            action = cast(TradingSellAction, action)
+            self.__sell_to_trader(action)
 
     def __buy_from_trader(self, action: TradingConfirmAction):
         trader_id = action['tid']
@@ -151,17 +153,17 @@ class ProfileItemsMovingDispatcher:
             item['slotId'] = 'hideout'
             item['parentId'] = self.inventory_adapter.stash_id
 
-        self.response['items']['new'].extend(items)
-        self.response['items']['new'].extend(children_items)
+        self.response['items']['new'].extend(items)  # type: ignore
+        self.response['items']['new'].extend(children_items)  # type: ignore
 
         for scheme_item in action['scheme_items']:
             item = self.inventory_adapter.get_item(scheme_item['id'])
             item['upd']['StackObjectsCount'] -= scheme_item['count']
             if not item['upd']['StackObjectsCount']:
                 self.inventory_adapter.remove_item(item)
-                self.response['items']['del'].append(item)
+                self.response['items']['del'].append(item)  # type: ignore
             else:
-                self.response['items']['change'].append(item)
+                self.response['items']['change'].append(item)  # type: ignore
 
         logger.debug(str(items))
         logger.debug(str(children_items))
@@ -175,8 +177,8 @@ class ProfileItemsMovingDispatcher:
         items = list(self.inventory.get_item(i['id']) for i in items_to_sell)
         price_sum = sum(trader_inventory.get_price(item) for item in items)
 
-        self.response['items']['del'].extend(items)
-        self.inventory.remove_items(items)
+        self.response['items']['del'].extend(items)  # type: ignore
+        self.inventory.remove_items(items)  # type: ignore
 
         rubles_tpl = ItemTemplatesRepository().get_template('5449016a4bdc2d6f028b456f')
         money_max_stack_size = rubles_tpl['_props']['StackMaxSize']
@@ -194,7 +196,7 @@ class ProfileItemsMovingDispatcher:
             money_stack['upd'] = items_lib.ItemUpd(StackObjectsCount=stack_size)
 
             self.inventory.add_item(money_stack)
-            self.response['items']['new'].append(money_stack)
+            self.response['items']['new'].append(money_stack)  # type: ignore
 
     def _read_encyclopedia(self, action: ReadEncyclopediaAction):
         for id_ in action['ids']:
@@ -247,15 +249,15 @@ class Profile:
         self.profile_path = root_dir.joinpath('resources', 'profiles', profile_id)
 
         self.pmc_profile_path = self.profile_path.joinpath('pmc_profile.json')
-        self.pmc_profile: dict = None  # type: ignore
+        self.pmc_profile: dict
 
-        self.encyclopedia: Encyclopedia = None  # type: ignore
+        self.encyclopedia: Encyclopedia
 
-        self.inventory: Inventory = None  # type: ignore
+        self.inventory: Inventory
 
         self.quests_path = self.profile_path.joinpath('pmc_quests.json')
-        self.quests_data: List[dict] = None  # type: ignore
-        self.quests: Quests = None  # type: ignore
+        self.quests_data: List[dict]
+        self.quests: Quests
 
     def get_profile(self):
         profile_data = {}

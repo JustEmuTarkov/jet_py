@@ -3,8 +3,7 @@ from __future__ import annotations
 import enum
 from typing import TypedDict, List
 
-from lib.items import ItemId
-from mods.core.lib.items import MoveLocation
+from mods.core.lib.items import MoveLocation, ItemId
 
 
 class ActionType(enum.Enum):
@@ -76,7 +75,7 @@ class FoldAction(Action):
 #     item: str
 #     to: str
 #     with: str
-MergeAction = TypedDict('MergeAction', {'Action': ActionType, 'item': str, 'with': str})
+MergeAction = TypedDict('MergeAction', {'Action': ActionType, 'item': ItemId, 'with': ItemId})
 
 
 class TransferAction(MergeAction):

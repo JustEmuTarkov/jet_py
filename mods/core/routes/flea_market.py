@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 
 from server import logger
-from utils import route_decorator
+from server.utils import route_decorator
 
 blueprint = Blueprint(__name__, __name__)
 

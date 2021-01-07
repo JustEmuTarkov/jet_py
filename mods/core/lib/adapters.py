@@ -71,7 +71,12 @@ class InventoryToRequestAdapter:
         bullet_stacks_inside_mag = list(self.inventory.iter_item_children(magazine))
 
         if bullet_stacks_inside_mag:
-            last_bullet_stack = max(bullet_stacks_inside_mag, key=lambda stack: stack['location'])
+            def ammo_stack_position(item: Item) -> int:
+                if isinstance(item['location'], int):
+                    return item['location']
+                return 0
+
+            last_bullet_stack: Item = max(bullet_stacks_inside_mag, key=ammo_stack_position)
 
             # Stack ammo stack with last if possible
             if last_bullet_stack['_tpl'] == ammo['_tpl']:

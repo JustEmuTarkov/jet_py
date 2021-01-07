@@ -7,7 +7,6 @@ class Package(PackageBase):
     class Meta(PackageMeta):
         name = 'Tarkov core'
         version = '0.0.1'
-        dependencies = []
 
     def __init__(self):
         super().__init__()
