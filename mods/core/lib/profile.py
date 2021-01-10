@@ -8,6 +8,7 @@ import ujson
 
 import mods.core.lib.inventory as inventory_lib
 import mods.core.lib.items as items_lib
+from mods.core.lib import NotFoundError
 from mods.core.lib.trader import Traders
 from server import root_dir, db_dir
 
@@ -107,6 +108,17 @@ class HideoutProduction(TypedDict):
     StartTime: int
 
 
+class HideoutRecipe(TypedDict):
+    _id: str
+    areaType: int
+    requirements: List
+    continuous: bool
+    productionTime: int
+    endProduct: str
+    count: int
+    productionLimitCount: int
+
+
 class Hideout:
     data: dict
 
@@ -114,6 +126,10 @@ class Hideout:
         self.path = profile.profile_path.joinpath('pmc_hideout.json')
 
         self.profile: Profile = profile
+
+    def get_recipe(self, recipe_id):
+        recipe_path = db_dir.joinpath('hideout', 'production', f'{recipe_id}.json')
+        return ujson.load(recipe_path.open('r', encoding='utf8'))
 
     def get_area(self, area_type: HideoutAreaType) -> HideoutArea:
         area = (a for a in self.data['Areas'] if a['type'] == area_type.value)
@@ -155,11 +171,32 @@ class Hideout:
             inProgress=True,
             RecipeId=recipe_id,
             StartTime=timestamp,
+            Progress=0,
+            SkipTime=0,
+            Products=[]
         )
-        pass
 
-    def take_production(self, recipe_id: str):
-        pass
+        self.data['Production'][recipe_id] = production
+
+    def take_production(self, recipe_id: str) -> List[items_lib.Item]:
+
+        recipe = self.get_recipe(recipe_id)
+
+        product_tpl = recipe['endProduct']
+        count = recipe['count']
+
+        try:
+            items = items_lib.ItemTemplatesRepository().get_preset(product_tpl)
+        except NotFoundError:
+            items = [
+                items_lib.Item(_id=inventory_lib.generate_item_id(), _tpl=product_tpl) for _ in range(count)
+            ]
+
+        inventory_lib.regenerate_items_ids(items)
+
+        del self.data['Production'][recipe_id]
+
+        return items
 
     def toggle_area(self, area_type: HideoutAreaType, enabled: bool):
         area = self.get_area(area_type)
@@ -167,13 +204,25 @@ class Hideout:
 
     def read(self):
         self.data: dict = ujson.load(self.path.open('r', encoding='utf8'))
+        self.__update_production_time()
 
     def write(self):
         ujson.dump(self.data, self.path.open('w', encoding='utf8'), indent=4)
 
-    @staticmethod
-    def get_production_template(template_id: str):
-        return ujson.load(db_dir.joinpath('hideout', 'production', f'{template_id}.json').open('r', encoding='utf8'))
+    def __update_production_time(self):
+        for recipe_id, production in self.data['Production'].items():
+            production: HideoutProduction
+
+            # if not production['inProgress']:
+            #     continue
+
+            now = int(time.time())
+            last_time_visited = production['StartTime'] + production['Progress'] + production['SkipTime']
+            production['Progress'] += now - last_time_visited
+
+            production_recipe = self.get_recipe(recipe_id)
+            # if production['Progress'] >= production_recipe['productionTime']:
+            #     production['inProgress'] = False
 
 
 class Profile:
@@ -201,9 +250,9 @@ class Profile:
         for file in self.profile_path.glob('pmc_*.json'):
             profile_data[file.stem] = ujson.load(file.open('r', encoding='utf8'))
 
-        profile_base = profile_data['pmc_profile']
-        profile_base['Hideout'] = profile_data['pmc_hideout']
-        profile_base['Inventory'] = profile_data['pmc_inventory']
+        profile_base = self.pmc_profile
+        profile_base['Hideout'] = self.hideout.data
+        profile_base['Inventory'] = self.inventory.stash
         profile_base['Quests'] = profile_data['pmc_quests']
         profile_base['Stats'] = profile_data['pmc_stats']
         profile_base['TraderStandings'] = profile_data['pmc_traders']

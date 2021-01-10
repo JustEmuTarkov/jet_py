@@ -4,3 +4,7 @@ class SingletonMeta(type):
             setattr(cls, '__instance', super().__call__(*args, **kwargs))
 
         return getattr(cls, '__instance')
+
+
+class NotFoundError(Exception):
+    pass

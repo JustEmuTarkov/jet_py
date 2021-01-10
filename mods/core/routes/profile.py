@@ -24,16 +24,17 @@ def client_game_profile_item_move():
 @route_decorator()
 def client_game_profile_list():
     session_id = request.cookies['PHPSESSID']
-    profile_manager = Profile(session_id)
 
-    pmc = profile_manager.get_profile()
-    profile_dir = root_dir.joinpath('resources', 'profiles', session_id)
-    scav_profile = ujson.load((profile_dir / 'character_scav.json').open('r'))
+    with Profile(session_id) as profile:
+        pmc_profile = profile.get_profile()
 
-    return [
-        pmc,
-        scav_profile,
-    ]
+        profile_dir = root_dir.joinpath('resources', 'profiles', session_id)
+        scav_profile = ujson.load((profile_dir / 'character_scav.json').open('r'))
+
+        return [
+            pmc_profile,
+            scav_profile,
+        ]
 
 
 @blueprint.route('/client/game/profile/select', methods=['POST', 'GET'])

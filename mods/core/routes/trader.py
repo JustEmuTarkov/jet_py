@@ -4,6 +4,7 @@ import ujson
 from flask import Blueprint, request
 
 import mods.core.lib.profile as lib_profile
+from lib.profile import Profile
 from mods.core.lib.trader import TraderInventory, Traders
 from server import root_dir, db_dir
 from server.utils import route_decorator, TarkovError
@@ -52,7 +53,7 @@ def client_trading_api_get_user_assort_price(trader_id):
             if not trader_inventory.can_sell(item):
                 continue
 
-            price = trader_inventory.get_price(item)
+            price = trader_inventory.get_sell_price(item)
             items[item['_id']] = [[{'_tpl': '5449016a4bdc2d6f028b456f', 'count': price}]]
 
         # TODO: Calculate price for items to sell in specified trader
@@ -77,21 +78,13 @@ def client_trading_api_get_trader_list():
 # @lru_cache(8)
 @route_decorator()
 def client_trading_api_get_trader_assort(trader_id):
-    traders_path = db_dir.joinpath('assort', trader_id)
-
-    files = [
-        traders_path.joinpath('barter_scheme.json'),
-        traders_path.joinpath('items.json'),
-        traders_path.joinpath('loyal_level_items.json'),
-    ]
-
-    traders_data = {file.stem: ujson.load(file.open('r', encoding='utf8')) for file in files}
-    #
-    # if trader_id == '579dc571d53a0658a154fbec':
-    #     traders_data['items'] = random.choices(traders_data['items'], k=100)
-    # logger.debug(trader_id)
-    # logger.debug(traders_data)
-    return traders_data
+    with Profile(request.cookies['PHPSESSID']) as profile:
+        trader_inventory = TraderInventory(Traders(trader_id), player_inventory=profile.inventory)
+        return {
+            'barter_scheme': trader_inventory.barter_scheme,
+            'items': trader_inventory.assort,
+            'loyal_level_items': trader_inventory.loyal_level_items,
+        }
 
 
 @blueprint.route('/client/trading/api/getTrader/<string:trader_id>', methods=['POST', 'GET'])

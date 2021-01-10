@@ -28,6 +28,19 @@ def generate_item_id() -> ItemId:
     return ItemId(unique_id)
 
 
+def regenerate_items_ids(items: List[Item]):
+    id_map = {
+        item['_id']: generate_item_id() for item in items
+    }
+
+    for item in items:
+        item['_id'] = id_map[item['_id']]
+        try:
+            item['parentId'] = id_map[item['parentId']]
+        except KeyError:
+            pass
+
+
 InventoryItems = List[Item]
 
 

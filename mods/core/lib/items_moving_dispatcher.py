@@ -173,6 +173,11 @@ class HideoutSingleProductionStartAction(Action):
     items: List[dict]
 
 
+class HideoutTakeProductionAction(Action):
+    recipeId: str
+    timestamp: int
+
+
 class InsureAction(Action):
     items: List[ItemId]
     tid: str
@@ -222,6 +227,7 @@ class ProfileItemsMovingDispatcher:
             ActionType.HideoutPutItemsInAreaSlots: self._hideout_put_items_in_area_slots,
             ActionType.HideoutToggleArea: self._hideout_toggle_area,
             ActionType.HideoutSingleProductionStart: self._hideout_single_production_start,
+            ActionType.HideoutTakeProduction: self._hideout_take_production,
 
             ActionType.Insure: self._insure,
 
@@ -293,9 +299,9 @@ class ProfileItemsMovingDispatcher:
         hideout.area_upgrade_start(area_type)
 
         items_required = action['items']
-        for requirement in items_required:
-            count = requirement['count']
-            item_id = requirement['id']
+        for item_required in items_required:
+            count = item_required['count']
+            item_id = item_required['id']
 
             item = self.profile.inventory.get_item(item_id)
             item['upd']['StackObjectsCount'] -= count
@@ -350,6 +356,14 @@ class ProfileItemsMovingDispatcher:
             else:
                 self.response['items']['upd'].append(item)
 
+        self.profile.hideout.start_single_production(recipe_id=action['recipeId'])
+
+    def _hideout_take_production(self, action: HideoutTakeProductionAction):
+        items = self.profile.hideout.take_production(action['recipeId'])
+        self.response['items']['new'].extend(items)
+        for item in items:
+            self.inventory.place_item(item)
+
     def _accept_quest(self, action: QuestAcceptAction):
         self.profile.quests.accept_quest(action['qid'])
 
@@ -357,7 +371,7 @@ class ProfileItemsMovingDispatcher:
         item_id = action['item']
         move_location: MoveLocation = action['to']
 
-        item = self.inventory_adapter.get_item(item_id)
+        item = self.profile.inventory.get_item(item_id)
         self.inventory_adapter.move_item(item, move_location)
 
     def _split(self, action: SplitAction):
@@ -456,7 +470,7 @@ class ProfileItemsMovingDispatcher:
         trader_inventory = TraderInventory(Traders(trader_id), self.inventory)
 
         items = list(self.inventory.get_item(i['id']) for i in items_to_sell)
-        price_sum = sum(trader_inventory.get_price(item) for item in items)
+        price_sum = sum(trader_inventory.get_sell_price(item) for item in items)
 
         self.response['items']['del'].extend(items)
         self.inventory.remove_items(items)

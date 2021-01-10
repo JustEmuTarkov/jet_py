@@ -84,6 +84,9 @@ class InventoryToRequestAdapter:
                 self.inventory.remove_item(ammo)
                 return None
 
+            else:
+                ammo['location'] = len(bullet_stacks_inside_mag)
+
         # Add new ammo stack to magazine
         else:
             ammo['location'] = 0
@@ -104,9 +107,6 @@ class InventoryToRequestAdapter:
 
         item['parentId'] = location['id']
         item['slotId'] = location['container']
-
-    def examine(self, item: Item):
-        pass
 
     def merge(self, item: Item, with_: Item):
         return self.inventory.merge(item, with_)

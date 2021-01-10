@@ -5,7 +5,7 @@ from typing import TypedDict, Literal, Union, List, NewType, Dict
 
 import ujson
 
-from mods.core.lib import SingletonMeta
+from mods.core.lib import SingletonMeta, NotFoundError
 from server import db_dir
 
 
@@ -92,6 +92,8 @@ class ItemTemplatesRepository(metaclass=SingletonMeta):
         self.__item_templates = self.__read_item_templates()
         self.__item_categories = self.__read_item_categories()
 
+        self.globals = ujson.load(db_dir.joinpath('base', 'globals.json').open(encoding='utf8'))
+
     @staticmethod
     def __read_item_templates():
         item_templates = {}
@@ -122,3 +124,10 @@ class ItemTemplatesRepository(metaclass=SingletonMeta):
 
     def get_category(self, item: Item):
         return self.__item_categories[item['_tpl']]['ParentId']
+
+    def get_preset(self, template_id: TemplateId) -> List[Item]:
+        item_presets = self.globals['ItemPresets']
+        try:
+            return item_presets[template_id]['_items']
+        except KeyError as e:
+            raise NotFoundError() from e

@@ -1,4 +1,7 @@
 import copy
+import itertools
+import random
+import time
 from enum import Enum
 from typing import Tuple, TypedDict, List, Union
 
@@ -26,13 +29,70 @@ class TraderBase(TypedDict):
 
 
 class TraderInventory(ImmutableInventory):
-    def __init__(self, trader: Traders, player_inventory: Inventory):
-        self.player_inventory = player_inventory
-        self.trader_id = trader.value
-        self.__items = ujson.load(db_dir.joinpath('assort', self.trader_id, 'items.json').open('r', encoding='utf8'))
+    trader: Traders
+    player_inventory: Inventory
 
-        base_path = db_dir.joinpath('base', 'traders', self.trader_id, 'base.json')
+    FENCER_ASSORT_LIFETIME = 10 * 60
+    __fence_assort: List[Item] = None
+    __fence_assort_created_at: int = 0
+
+    def __init__(self, trader: Traders, player_inventory: Inventory):
+        self.trader = trader
+        self.player_inventory = player_inventory
+
+        assort_path = db_dir.joinpath('assort', self.trader.value)
+        self.__items = ujson.load(assort_path.joinpath('items.json').open('r', encoding='utf8'))
+
+        base_path = db_dir.joinpath('base', 'traders', self.trader.value, 'base.json')
         self.__base = ujson.load(base_path.open('r', encoding='utf8'))
+
+        self.__barter_scheme = ujson.load(assort_path.joinpath('barter_scheme.json').open('r', encoding='utf8'))
+        self.loyal_level_items = ujson.load(assort_path.joinpath('loyal_level_items.json').open('r', encoding='utf8'))
+
+    @property
+    def assort(self):
+        if self.trader == Traders.Fence:
+            current_time = time.time()
+            expired = current_time > TraderInventory.__fence_assort_created_at + TraderInventory.FENCER_ASSORT_LIFETIME
+
+            if not TraderInventory.__fence_assort or expired:
+                root_items = [item for item in self.__items if item['slotId'] == 'hideout']
+                assort = random.sample(root_items, k=min(len(root_items), 100))
+
+                child_items = []
+
+                for item in assort:
+                    child_items.extend(self.iter_item_children_recursively(item))
+
+                assort.extend(child_items)
+
+            return TraderInventory.__fence_assort
+
+        return self.__items
+
+    @property
+    def barter_scheme(self):
+        if self.trader == Traders.Fence:
+            barter_scheme = {}
+            template_repository = ItemTemplatesRepository()
+            for item in self.items:
+                item_template = template_repository.get_template(item)
+                item_price = self.get_item_price(item)
+
+                barter_scheme[item['_id']] = [[
+                    {
+                        'count': item_price,
+                        "_tpl": "5449016a4bdc2d6f028b456f",
+                    }
+                ]]
+
+            return barter_scheme
+
+        return self.__barter_scheme
+
+    @property
+    def base(self):
+        return self.__base
 
     def can_sell(self, item: Item) -> bool:
         try:
@@ -41,7 +101,17 @@ class TraderInventory(ImmutableInventory):
             return False
         return category_id in self.__base['sell_category']
 
-    def get_price(self, item: Item) -> int:
+    def get_item_price(self, item: Item) -> int:
+        template_repository = ItemTemplatesRepository()
+        price = 0
+
+        for i in itertools.chain([item], self.iter_item_children_recursively(item)):
+            item_template = template_repository.get_template(i)
+            price += item_template['_props']['CreditsPrice']
+
+        return int(price)
+
+    def get_sell_price(self, item: Item) -> int:
         """
         :returns Price of item and it's children
         """
