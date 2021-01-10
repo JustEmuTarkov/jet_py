@@ -111,7 +111,7 @@ class ItemTemplatesRepository(metaclass=SingletonMeta):
     def templates(self) -> Dict[str, Dict]:
         return self.__item_templates
 
-    def get_template(self, item: Union[Item, str]):
+    def get_template(self, item: Union[Item, TemplateId]):
         if isinstance(item, dict):
             item = item['_tpl']
 

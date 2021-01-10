@@ -41,7 +41,7 @@ class InventoryToRequestAdapter:
         ammo_copy = copy.deepcopy(ammo)
         ammo_copy['_id'] = generate_item_id()
         ammo_copy['upd']['StackObjectsCount'] = ammo_to_full
-        self.inventory.add_item(ammo_copy)
+        self.inventory.place_item(ammo_copy)
         return ammo_copy
 
     def split_item(self, item: Item, location: MoveLocation, count: int) -> Item:

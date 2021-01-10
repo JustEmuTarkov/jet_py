@@ -2,41 +2,15 @@ from __future__ import annotations
 
 import abc
 import copy
-import random
-import string
-from types import TracebackType
-from typing import List, Tuple, Generator, Iterable, Type, Optional
+import uuid
+from typing import List, Tuple, Generator, Iterable
 
 import ujson
 
-from mods.core.lib.items import Item, ItemExtraSize, ItemNotFoundError, Stash, ItemLocation, \
-    ItemOrientationEnum
-from mods.core.lib.items import ItemId
-from mods.core.lib.items import ItemTemplatesRepository
+from lib.items import ItemUpd
+from mods.core.lib.items import Item, ItemExtraSize, ItemNotFoundError, Stash, ItemLocation, ItemOrientationEnum, \
+    TemplateId, ItemId, ItemTemplatesRepository
 from server import root_dir
-
-
-class InventoryManager:
-    def __init__(self, profile_id: str):
-        self.__inventory: Inventory = Inventory(profile_id=profile_id)
-
-    @property
-    def inventory(self):
-        return self.__inventory
-
-    def __enter__(self) -> Inventory:
-        self.inventory.sync()
-        return self.inventory
-
-    def __exit__(
-            self,
-            exc: Optional[Type[BaseException]],
-            exc_val: Optional[BaseException],
-            exc_tb: Optional[TracebackType]
-    ):
-        if exc and exc_val:
-            raise exc() from exc_val
-        self.inventory.flush()
 
 
 def merge_extra_size(first: ItemExtraSize, second: ItemExtraSize) -> ItemExtraSize:
@@ -49,8 +23,10 @@ def merge_extra_size(first: ItemExtraSize, second: ItemExtraSize) -> ItemExtraSi
 
 
 def generate_item_id() -> ItemId:
-    population = string.ascii_letters + string.digits
-    return ItemId(''.join(random.choices(population, k=24)))
+    unique_id = str(uuid.uuid4())
+    unique_id = ''.join(unique_id.split('-')[1:])
+
+    return ItemId(unique_id)
 
 
 InventoryItems = List[Item]
@@ -119,6 +95,16 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
 
         width = width + extra_size['left'] + extra_size['right']
         height = height + extra_size['up'] + extra_size['down']
+
+        try:
+            folded = item['upd']['Foldable']['Folded']
+        except KeyError:
+            return width, height
+
+        has_stock = any(c['slotId'] == 'mod_stock' for c in self.iter_item_children_recursively(item))
+        if folded:
+            width -= 1
+
         return width, height
 
     def iter_item_children(self, item: Item) -> Iterable[Item]:
@@ -232,7 +218,6 @@ class StashMap:
 
 
 class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
-
     def remove_item(self, item: Item):
         """
         Removes item from inventory
@@ -286,7 +271,54 @@ class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
         """
         Folds item
         """
-        item['upd']['Foldable']['Folded'] = folded
+        item_template = ItemTemplatesRepository().get_template(item)
+        try:
+            foldable: bool = item_template['_props']['Foldable']
+        except KeyError:
+            foldable = False
+
+        if not foldable:
+            raise ValueError('Item is not foldable')
+
+        if 'upd' not in item:
+            item['upd'] = ItemUpd(Foldable={'Folded': folded})
+        else:
+            item['upd']['Foldable'] = {'Folded': folded}
+
+    def take_item(self, template_id: TemplateId, amount: int) -> Tuple[List[Item], List[Item]]:
+        '''
+        Deletes amount of items with given template_id
+        :returns Tuple[affected_items, deleted_items]
+        '''
+        items = (item for item in self.items if item['_tpl'] == template_id)
+        amount_to_take = amount
+
+        affected_items = []
+        deleted_items = []
+
+        for item in items:
+            if 'upd' in item and 'StackObjectsCount' in item['upd']:
+                to_take = min(amount_to_take, item['upd']['StackObjectsCount'])
+                item['upd']['StackObjectsCount'] -= to_take
+                amount_to_take -= to_take
+
+                if item['upd']['StackObjectsCount'] == 0:
+                    self.remove_item(item)
+                    deleted_items.append(item)
+                else:
+                    affected_items.append(item)
+            else:
+                self.remove_item(item)
+                deleted_items.append(item)
+                amount_to_take -= 1
+
+            if amount_to_take == 0:
+                break
+
+        if amount_to_take > 0:
+            raise ValueError('Not enough items in inventory')
+
+        return affected_items, deleted_items
 
 
 class Inventory(MutableInventory):
@@ -317,20 +349,20 @@ class Inventory(MutableInventory):
     def equipment_id(self) -> str:
         return self.stash['equipment']
 
-    def sync(self):
+    def read(self):
         """
         Reads inventory file from disk
         """
         self.stash = ujson.load(self.__path.open('r', encoding='utf8'))
         self.stash_map = StashMap(self)
 
-    def flush(self):
+    def write(self):
         """
         Writes inventory file to disk
         """
         ujson.dump(self.stash, self.__path.open('w', encoding='utf8'), indent=4)
 
-    def add_item(self, item: Item, *, location: ItemLocation = None):
+    def place_item(self, item: Item, *, location: ItemLocation = None):
 
         if location is None:
             location = self.stash_map.find_location_for_item(item, auto_fill=True)
@@ -351,6 +383,10 @@ class Inventory(MutableInventory):
         item['slotId'] = 'hideout'
         item['parentId'] = self.stash_id
         self.stash_map.add(item)
+
+    @staticmethod
+    def can_split(item: Item):
+        return 'upd' in item and 'StackObjectsCount' in item['upd']
 
     def split_item(self, item: Item, count: int) -> Item:
         """

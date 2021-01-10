@@ -1,11 +1,10 @@
 import copy
 from enum import Enum
-from typing import Tuple, TypedDict, List
+from typing import Tuple, TypedDict, List, Union
 
 import ujson
 
-from mods.core.lib.inventory import ImmutableInventory, InventoryItems, generate_item_id
-from mods.core.lib.inventory import Inventory
+from mods.core.lib.inventory import ImmutableInventory, InventoryItems, generate_item_id, Inventory
 from mods.core.lib.items import Item, ItemUpd
 from mods.core.lib.items import TemplateId, ItemTemplatesRepository
 from server import db_dir
@@ -110,3 +109,17 @@ class TraderInventory(ImmutableInventory):
             bought_items.append(item)
 
         return bought_items, []
+
+    def calculate_insurance_price(self, items: Union[Item, List[Item]]) -> int:
+        if isinstance(items, dict):
+            items = [items]
+
+        template_repository = ItemTemplatesRepository()
+
+        price = 0
+        for item in items:
+            item_template = template_repository.get_template(item)
+            price += item_template['_props']['CreditsPrice'] * 0.1
+            #  Todo account for trader standing (subtract standing from insurance price, 0.5 (50%) max)
+
+        return int(price)
