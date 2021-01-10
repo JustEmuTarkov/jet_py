@@ -5,10 +5,9 @@ import ujson
 from flask import request
 
 import mods.core.lib.items as items_lib
-from lib.items import Item
 from mods.core.lib.adapters import InventoryToRequestAdapter
 from mods.core.lib.inventory import Inventory, StashMap, generate_item_id
-from mods.core.lib.items import MoveLocation, ItemTemplatesRepository, ItemId
+from mods.core.lib.items import MoveLocation, ItemTemplatesRepository, ItemId, Item
 from mods.core.lib.profile import Profile, HideoutAreaType
 from mods.core.lib.trader import TraderInventory, Traders
 from server import logger

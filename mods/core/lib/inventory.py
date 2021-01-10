@@ -7,9 +7,8 @@ from typing import List, Tuple, Generator, Iterable
 
 import ujson
 
-from lib.items import ItemUpd
 from mods.core.lib.items import Item, ItemExtraSize, ItemNotFoundError, Stash, ItemLocation, ItemOrientationEnum, \
-    TemplateId, ItemId, ItemTemplatesRepository
+    TemplateId, ItemId, ItemTemplatesRepository, ItemUpd
 from server import root_dir
 
 
