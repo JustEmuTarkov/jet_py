@@ -4,7 +4,7 @@ import ujson
 from flask import Blueprint, request
 
 import mods.core.lib.profile as lib_profile
-from lib.profile import Profile
+from mods.core.lib.profile import Profile
 from mods.core.lib.trader import TraderInventory, Traders
 from server import root_dir, db_dir
 from server.utils import route_decorator, TarkovError

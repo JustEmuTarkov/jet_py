@@ -1,18 +1,18 @@
 import copy
 from typing import Iterable, Optional
 
-from mods.core.lib.inventory import Inventory, generate_item_id
+from mods.core.lib.inventory import PlayerInventory, generate_item_id
 from mods.core.lib.items import ItemTemplatesRepository
 from mods.core.lib.items import MoveLocation, Item, ItemId
 
 
 class InventoryToRequestAdapter:
-    def __init__(self, inventory: Inventory):
+    def __init__(self, inventory: PlayerInventory):
         self.inventory = inventory
 
     @property
     def stash_id(self):
-        return self.inventory.stash_id
+        return self.inventory.root_id
 
     def add_item(self, item: Item):
         self.inventory.add_item(item)
@@ -84,8 +84,7 @@ class InventoryToRequestAdapter:
                 self.inventory.remove_item(ammo)
                 return None
 
-            else:
-                ammo['location'] = len(bullet_stacks_inside_mag)
+            ammo['location'] = len(bullet_stacks_inside_mag)
 
         # Add new ammo stack to magazine
         else:

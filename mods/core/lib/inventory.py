@@ -51,7 +51,7 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
 
     @property
     @abc.abstractmethod
-    def items(self) -> InventoryItems:
+    def items(self) -> List[Item]:
         pass
 
     def get_item(self, item_id: str):
@@ -114,7 +114,7 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
             return width, height
 
         has_stock = any(c['slotId'] == 'mod_stock' for c in self.iter_item_children_recursively(item))
-        if folded:
+        if folded and has_stock:
             width -= 1
 
         return width, height
@@ -147,11 +147,11 @@ class NoSpaceError(Exception):
 
 
 class StashMap:
-    def __init__(self, inventory: Inventory):
+    def __init__(self, inventory: GridInventory):
         self.inventory = inventory
         self.width, self.height = inventory.grid_size
         self.map = [[False for _ in range(self.height)] for _ in range(self.width)]
-        inventory_root = inventory.get_item(inventory.stash_id)
+        inventory_root = inventory.get_item(inventory.root_id)
 
         for item in (i for i in inventory.iter_item_children(inventory_root) if i['slotId'] == 'hideout'):
             if not isinstance(item['location'], dict):
@@ -238,7 +238,7 @@ class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
         for child in self.iter_item_children_recursively(item):
             self.items.remove(child)
 
-    def remove_items(self, items: List[Item]):
+    def remove_items(self, items: Iterable[Item]):
         for item in items:
             self.remove_item(item)
 
@@ -298,10 +298,10 @@ class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
             item['upd']['Foldable'] = {'Folded': folded}
 
     def take_item(self, template_id: TemplateId, amount: int) -> Tuple[List[Item], List[Item]]:
-        '''
+        """
         Deletes amount of items with given template_id
         :returns Tuple[affected_items, deleted_items]
-        '''
+        """
         items = (item for item in self.items if item['_tpl'] == template_id)
         amount_to_take = amount
 
@@ -333,58 +333,36 @@ class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
         return affected_items, deleted_items
 
 
-class Inventory(MutableInventory):
-    def __init__(self, profile_id: str):
-        super().__init__()
-        self.__path = root_dir.joinpath('resources', 'profiles', profile_id, 'pmc_inventory.json')
-
-        self.stash: Stash
-        self.stash_map: StashMap
+class GridInventory(MutableInventory):
+    stash_map: StashMap
 
     @property
+    @abc.abstractmethod
+    def root_id(self) -> ItemId:
+        raise NotImplementedError
+
+    @property
+    @abc.abstractmethod
     def grid_size(self) -> Tuple[int, int]:
-        stash_item = self.get_item(self.stash_id)
-        stash_template = ItemTemplatesRepository().get_template(stash_item)
-        grids_props = stash_template['_props']['Grids'][0]['_props']
-        width, height = grids_props['cellsH'], grids_props['cellsV']
-        return width, height
-
-    @property
-    def items(self):
-        return self.stash['items']
-
-    @property
-    def stash_id(self):
-        return self.stash['stash']
-
-    @property
-    def equipment_id(self) -> str:
-        return self.stash['equipment']
-
-    def read(self):
         """
-        Reads inventory file from disk
+        :return: Tuple[width, height]
         """
-        self.stash = ujson.load(self.__path.open('r', encoding='utf8'))
-        self.stash_map = StashMap(self)
+        raise NotImplementedError
 
-    def write(self):
-        """
-        Writes inventory file to disk
-        """
-        ujson.dump(self.stash, self.__path.open('w', encoding='utf8'), indent=4)
-
-    def place_item(self, item: Item, *, location: ItemLocation = None):
+    def place_item(self, item: Item, *, children_items: List[Item] = None, location: ItemLocation = None):
+        if children_items is None:
+            children_items = []
 
         if location is None:
             location = self.stash_map.find_location_for_item(item, auto_fill=True)
+
         elif not self.stash_map.can_place(item, location):
             raise ValueError('Cannot place item into location since it is taken')
 
         self.items.append(item)
         item['location'] = location
         item['slotId'] = 'hideout'
-        item['parentId'] = self.stash_id
+        item['parentId'] = self.root_id
 
     def move_item(self, item: Item, location: ItemLocation):
         """
@@ -393,7 +371,7 @@ class Inventory(MutableInventory):
         self.stash_map.remove(item)
         item['location'] = location
         item['slotId'] = 'hideout'
-        item['parentId'] = self.stash_id
+        item['parentId'] = self.root_id
         self.stash_map.add(item)
 
     @staticmethod
@@ -425,3 +403,44 @@ class Inventory(MutableInventory):
         if 'location' in item and isinstance(item['location'], dict):
             location: ItemLocation = item['location']
             location['isSearched'] = True
+
+
+class PlayerInventory(GridInventory):
+    stash: Stash
+
+    def __init__(self, profile_id: str):
+        super().__init__()
+        self.__path = root_dir.joinpath('resources', 'profiles', profile_id, 'pmc_inventory.json')
+
+    @property
+    def grid_size(self) -> Tuple[int, int]:
+        stash_item = self.get_item(self.root_id)
+        stash_template = ItemTemplatesRepository().get_template(stash_item)
+        grids_props = stash_template['_props']['Grids'][0]['_props']
+        width, height = grids_props['cellsH'], grids_props['cellsV']
+        return width, height
+
+    @property
+    def items(self):
+        return self.stash['items']
+
+    @property
+    def root_id(self):
+        return self.stash['stash']
+
+    @property
+    def equipment_id(self) -> str:
+        return self.stash['equipment']
+
+    def read(self):
+        """
+        Reads inventory file from disk
+        """
+        self.stash = ujson.load(self.__path.open('r', encoding='utf8'))
+        self.stash_map = StashMap(self)
+
+    def write(self):
+        """
+        Writes inventory file to disk
+        """
+        ujson.dump(self.stash, self.__path.open('w', encoding='utf8'), indent=4)

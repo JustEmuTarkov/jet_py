@@ -6,7 +6,7 @@ from flask import request
 
 import mods.core.lib.items as items_lib
 from mods.core.lib.adapters import InventoryToRequestAdapter
-from mods.core.lib.inventory import Inventory, StashMap, generate_item_id
+from mods.core.lib.inventory import PlayerInventory, StashMap, generate_item_id
 from mods.core.lib.items import MoveLocation, ItemTemplatesRepository, ItemId, Item
 from mods.core.lib.profile import Profile, HideoutAreaType
 from mods.core.lib.trader import TraderInventory, Traders
@@ -136,7 +136,7 @@ class QuestAcceptAction(Action):
 
 
 class ReadEncyclopediaAction(Action):
-    ids: List[str]
+    ids: List[items_lib.TemplateId]
 
 
 class HideoutUpgradeAction(Action):
@@ -192,7 +192,7 @@ class ProfileItemsMovingDispatcher:
     def __init__(self, session_id: str):
         self.profile = Profile(session_id)
 
-        self.inventory: Inventory
+        self.inventory: PlayerInventory
         self.inventory_adapter: InventoryToRequestAdapter
 
         self.request = request
@@ -257,18 +257,16 @@ class ProfileItemsMovingDispatcher:
         return self.response
 
     def _apply_inventory_changes(self, action: ApplyInventoryChangesAction):
-        if action['changedItems']:
+        if action['changedItems'] is not None:
             for changed_item in action['changedItems']:
-                changed_item: Item
                 item = self.profile.inventory.get_item(changed_item['_id'])
 
                 self.profile.inventory.remove_item(item)
                 self.profile.inventory.add_item(changed_item)
                 self.response['items']['change'].append(changed_item)
 
-        if action['deletedItems']:
+        if action['deletedItems'] is not None:
             for deleted_item in action['deletedItems']:
-                deleted_item: Item
                 item = self.profile.inventory.get_item(deleted_item['_id'])
                 self.profile.inventory.remove_item(item)
                 self.response['items']['del'].append(item)
@@ -475,7 +473,7 @@ class ProfileItemsMovingDispatcher:
         self.response['items']['del'].extend(items)
         self.inventory.remove_items(items)
 
-        rubles_tpl = ItemTemplatesRepository().get_template('5449016a4bdc2d6f028b456f')
+        rubles_tpl = ItemTemplatesRepository().get_template(items_lib.TemplateId('5449016a4bdc2d6f028b456f'))
         money_max_stack_size = rubles_tpl['_props']['StackMaxSize']
 
         while price_sum:
@@ -485,7 +483,7 @@ class ProfileItemsMovingDispatcher:
             money_stack = items_lib.Item(
                 _id=generate_item_id(),
                 _tpl=items_lib.TemplateId('5449016a4bdc2d6f028b456f'),
-                parentId=self.inventory.stash_id,
+                parentId=self.inventory.root_id,
                 slotId='hideout',
             )
             money_stack['upd'] = items_lib.ItemUpd(StackObjectsCount=stack_size)

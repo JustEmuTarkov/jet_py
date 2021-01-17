@@ -12,4 +12,4 @@ logger.debug(f'Searching for packages in: {mods_dir}')
 package_manager = PackageManager(mods_dir)
 package_manager.load_packages()
 
-app.run(ssl_context='adhoc')
+app.run(ssl_context='adhoc', port=443)

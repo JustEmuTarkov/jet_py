@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import enum
-from typing import TypedDict, Literal, Union, List, NewType, Dict
+from typing import TypedDict, Literal, Union, List, NewType, Dict, Iterable
 
 import ujson
 
@@ -21,6 +21,9 @@ class Stash(TypedDict):
 ItemId = NewType('ItemId', str)
 TemplateId = NewType('TemplateId', str)
 
+# Ammo stack position in magazine, 0 means it's at the bottom of magazine
+AmmoStackPosition = NewType('AmmoStackPosition', int)
+
 
 class ItemBase(TypedDict):
     _id: ItemId
@@ -30,7 +33,7 @@ class ItemBase(TypedDict):
 class Item(ItemBase, total=False):
     slotId: str
     parentId: ItemId
-    location: Union[ItemLocation, int]
+    location: Union[ItemLocation, AmmoStackPosition]
     upd: ItemUpd
 
 
@@ -121,6 +124,23 @@ class ItemTemplatesRepository(metaclass=SingletonMeta):
             return self.__item_templates[item]
         except KeyError as error:
             raise ItemNotFoundError() from error
+
+    # @functools.lru_cache(64)
+    def iter_template_children(self, template_id: TemplateId) -> Iterable[Dict]:
+        templates = [self.get_template(template_id)]
+        while templates:
+            template = templates.pop()
+            yield template
+
+            for child in self.__item_templates.values():
+                if child['_parent'] == template['_id']:
+                    templates.append(child)
+
+    def get_template_items(self, template_id: TemplateId) -> List[dict]:
+        template: dict = self.get_template(template_id)
+        if template['_type'] == 'Item':
+            return [template]
+        return [tpl for tpl in self.iter_template_children(template_id) if tpl['_type'] == 'Item']
 
     def get_category(self, item: Item):
         return self.__item_categories[item['_tpl']]['ParentId']

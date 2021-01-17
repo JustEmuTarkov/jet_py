@@ -7,7 +7,7 @@ from typing import Tuple, TypedDict, List, Union
 
 import ujson
 
-from mods.core.lib.inventory import ImmutableInventory, InventoryItems, generate_item_id, Inventory
+from mods.core.lib.inventory import ImmutableInventory, InventoryItems, generate_item_id, PlayerInventory
 from mods.core.lib.items import Item, ItemUpd
 from mods.core.lib.items import TemplateId, ItemTemplatesRepository
 from server import db_dir
@@ -30,13 +30,13 @@ class TraderBase(TypedDict):
 
 class TraderInventory(ImmutableInventory):
     trader: Traders
-    player_inventory: Inventory
+    player_inventory: PlayerInventory
 
-    FENCER_ASSORT_LIFETIME = 10 * 60
-    __fence_assort: List[Item] = None
+    FENCE_ASSORT_LIFETIME = 10 * 60
+    __fence_assort: List[Item] = []
     __fence_assort_created_at: int = 0
 
-    def __init__(self, trader: Traders, player_inventory: Inventory):
+    def __init__(self, trader: Traders, player_inventory: PlayerInventory):
         self.trader = trader
         self.player_inventory = player_inventory
 
@@ -53,11 +53,11 @@ class TraderInventory(ImmutableInventory):
     def assort(self):
         if self.trader == Traders.Fence:
             current_time = time.time()
-            expired = current_time > TraderInventory.__fence_assort_created_at + TraderInventory.FENCER_ASSORT_LIFETIME
+            expired = current_time > TraderInventory.__fence_assort_created_at + TraderInventory.FENCE_ASSORT_LIFETIME
 
             if not TraderInventory.__fence_assort or expired:
                 root_items = [item for item in self.__items if item['slotId'] == 'hideout']
-                assort = random.sample(root_items, k=min(len(root_items), 100))
+                assort = random.sample(root_items, k=min(len(root_items), 500))
 
                 child_items = []
 
@@ -65,6 +65,9 @@ class TraderInventory(ImmutableInventory):
                     child_items.extend(self.iter_item_children_recursively(item))
 
                 assort.extend(child_items)
+
+                TraderInventory.__fence_assort = assort
+                TraderInventory.__fence_assort_created_at = int(time.time())
 
             return TraderInventory.__fence_assort
 
@@ -74,9 +77,8 @@ class TraderInventory(ImmutableInventory):
     def barter_scheme(self):
         if self.trader == Traders.Fence:
             barter_scheme = {}
-            template_repository = ItemTemplatesRepository()
+
             for item in self.items:
-                item_template = template_repository.get_template(item)
                 item_price = self.get_item_price(item)
 
                 barter_scheme[item['_id']] = [[

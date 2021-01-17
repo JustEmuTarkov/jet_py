@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import enum
 import time
 from typing import List, TypedDict, Union
@@ -127,7 +128,8 @@ class Hideout:
 
         self.profile: Profile = profile
 
-    def get_recipe(self, recipe_id):
+    @staticmethod
+    def get_recipe(recipe_id):
         recipe_path = db_dir.joinpath('hideout', 'production', f'{recipe_id}.json')
         return ujson.load(recipe_path.open('r', encoding='utf8'))
 
@@ -210,7 +212,7 @@ class Hideout:
         ujson.dump(self.data, self.path.open('w', encoding='utf8'), indent=4)
 
     def __update_production_time(self):
-        for recipe_id, production in self.data['Production'].items():
+        for production in self.data['Production'].values():
             production: HideoutProduction
 
             # if not production['inProgress']:
@@ -220,7 +222,7 @@ class Hideout:
             last_time_visited = production['StartTime'] + production['Progress'] + production['SkipTime']
             production['Progress'] += now - last_time_visited
 
-            production_recipe = self.get_recipe(recipe_id)
+            # production_recipe = self.get_recipe(recipe_id)
             # if production['Progress'] >= production_recipe['productionTime']:
             #     production['inProgress'] = False
 
@@ -233,7 +235,7 @@ class Profile:
     quests: Quests
     quests_data: List[dict]
 
-    inventory: inventory_lib.Inventory
+    inventory: inventory_lib.PlayerInventory
     encyclopedia: Encyclopedia
 
     def __init__(self, profile_id: str):
@@ -250,7 +252,7 @@ class Profile:
         for file in self.profile_path.glob('pmc_*.json'):
             profile_data[file.stem] = ujson.load(file.open('r', encoding='utf8'))
 
-        profile_base = self.pmc_profile
+        profile_base = copy.deepcopy(self.pmc_profile)
         profile_base['Hideout'] = self.hideout.data
         profile_base['Inventory'] = self.inventory.stash
         profile_base['Quests'] = profile_data['pmc_quests']
@@ -272,7 +274,7 @@ class Profile:
 
         self.encyclopedia = Encyclopedia(profile=self)
 
-        self.inventory = inventory_lib.Inventory(profile_id=self.profile_id)
+        self.inventory = inventory_lib.PlayerInventory(profile_id=self.profile_id)
         self.inventory.read()
 
         self.quests_data: List[dict] = ujson.load(self.quests_path.open('r', encoding='utf8'))

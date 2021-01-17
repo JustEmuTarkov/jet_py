@@ -8,7 +8,9 @@ from mods.core.routes import (
     trader,
     misc,
     flea_market,
-    insurance
+    insurance,
+    match,
+    launcher,
 )
 from server import app, logger
 from server.package_lib import PackageMeta, PackageBase
@@ -35,3 +37,5 @@ class Package(PackageBase):
         app.register_blueprint(blueprint=misc.blueprint)
         app.register_blueprint(blueprint=flea_market.blueprint)
         app.register_blueprint(blueprint=insurance.blueprint)
+        app.register_blueprint(blueprint=match.blueprint)
+        app.register_blueprint(blueprint=launcher.blueprint)
