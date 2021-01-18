@@ -429,10 +429,14 @@ class ProfileItemsMovingDispatcher:
         if action['type'] == 'buy_from_trader':
             action = cast(TradingConfirmAction, action)
             self.__buy_from_trader(action)
+            return
 
-        elif action['type'] == 'sell_to_trader':
+        if action['type'] == 'sell_to_trader':
             action = cast(TradingSellAction, action)
             self.__sell_to_trader(action)
+            return
+
+        raise NotImplementedError(f'Trading action {action} not implemented')
 
     def __buy_from_trader(self, action: TradingConfirmAction):
         trader_id = action['tid']
