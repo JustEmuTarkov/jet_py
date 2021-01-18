@@ -43,6 +43,10 @@ class ItemUpd(TypedDict, total=False):
     Repairable: ItemUpdRepairable
     Foldable: ItemUpdFoldable
     FireMode: ItemUpdFireMode
+    Resource: ItemUpdResource
+    FoodDrink: ItemUpdFoodDrink
+    Key: ItemUpdKey
+    MedKit: ItemUpdMedKit
 
 
 class ItemUpdRepairable(TypedDict):
@@ -55,7 +59,23 @@ class ItemUpdFoldable(TypedDict):
 
 
 class ItemUpdFireMode(TypedDict):
-    FireMode: Literal['single']
+    FireMode: Literal['single', 'fullauto']
+
+
+class ItemUpdResource(TypedDict):
+    Value: int
+
+
+class ItemUpdFoodDrink(TypedDict):
+    HpPercent: int
+
+
+class ItemUpdKey(TypedDict):
+    NumberOfUsages: int
+
+
+class ItemUpdMedKit(TypedDict):
+    HpResource: int
 
 
 class ItemLocation(TypedDict, total=False):
