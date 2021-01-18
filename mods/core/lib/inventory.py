@@ -66,6 +66,12 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
         except StopIteration as error:
             raise ItemNotFoundError from error
 
+    def get_item_by_template(self, template_id: TemplateId):
+        try:
+            return next(item for item in self.items if item['_tpl'] == template_id)
+        except StopIteration as error:
+            raise ItemNotFoundError from error
+
     def get_item_size(self, item: Item) -> Tuple[int, int]:
         """
         Return size of the item according to it's attachments, etc.

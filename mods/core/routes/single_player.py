@@ -5,6 +5,7 @@ from pathlib import Path
 import ujson
 from flask import Blueprint, request
 
+from lib.bots import BotGenerator
 from mods.core.lib import locations
 from mods.core.lib.inventory import regenerate_items_ids
 from mods.core.lib.profile import Profile
@@ -59,75 +60,21 @@ def settings_bot_limit(bot_type: str):
     return 30
 
 
-def generate_bot(difficulty, role):
-    # Bot generation will be moved into separate module
-
-    bot = ujson.load(db_dir.joinpath('base', 'botBase.json').open(encoding='utf8'))
-
-    bot['_id'] = 'bot' + ''.join(str(random.randint(0, 9)) for _ in range(7))
-
-    bot['Info']['Settings']['Role'] = role
-    bot['Info']['Settings']['BotDifficulty'] = difficulty
-
-    bot_path = db_dir.joinpath('bots', role)
-
-    random_inventory_path: Path = random.choice(list(bot_path.joinpath('inventory').glob('*.json')))
-    bot['Inventory'] = ujson.load(random_inventory_path.open(encoding='utf8'))
-    regenerate_items_ids(bot['Inventory']['items'])
-    bot['Inventory']['equipment'] = bot['Inventory']['items'][0]['_id']
-
-    health_base = {
-        'Hydration': {'Current': 100, 'Maximum': 100},
-        'Energy': {'Current': 100, 'Maximum': 100},
-        'BodyParts': {
-            'Head': {'Health': {'Current': 35, 'Maximum': 35}},
-            'Chest': {'Health': {'Current': 80, 'Maximum': 80}},
-            'Stomach': {'Health': {'Current': 70, 'Maximum': 70}},
-            'LeftArm': {'Health': {'Current': 60, 'Maximum': 60}},
-            'RightArm': {'Health': {'Current': 60, 'Maximum': 60}},
-            'LeftLeg': {'Health': {'Current': 65, 'Maximum': 65}},
-            'RightLeg': {'Health': {'Current': 65, 'Maximum': 65}}
-        },
-        'UpdateTime': 1598664622
-    }
-
-    bot_health = ujson.load(bot_path.joinpath('health', 'default.json').open(encoding='utf8'))
-    # Set current and maximum energy and hydration
-    health_base['Hydration']['Current'] = bot_health['Hydration']
-    health_base['Hydration']['Maximum'] = bot_health['Hydration']
-
-    health_base['Energy']['Current'] = bot_health['Energy']
-    health_base['Energy']['Maximum'] = bot_health['Energy']
-
-    for key, value in health_base['BodyParts'].items():
-        bot_body_part_hp = bot_health['BodyParts'][key]
-        value['Health']['Current'] = bot_body_part_hp
-        value['Health']['Maximum'] = bot_body_part_hp
-
-    health_base['UpdateTime'] = int(time.time())
-    bot['Health'] = health_base
-    bot['Info']['experience'] = 1
-
-    return bot
-
-
 @blueprint.route('/client/game/bot/generate', methods=['POST', 'GET'])
 @game_response_middleware()
 def generate_bots():
     bots = []
-    # bot_base = ujson.load(db_dir.joinpath('base', 'botBase.json').open(encoding='utf8'))
 
     logger.debug(request.data)
+    bot_generator = BotGenerator()
     for condition in request.data['conditions']:
         bot_limit = condition['Limit']
 
         for _ in range(bot_limit):
-            bot = generate_bot(
-                difficulty=condition['Difficulty'],
-                role=condition['Role']
-            )
+            bot = bot_generator.generate_bot(role=condition['Role'], difficulty=condition['Difficulty'])
             bots.append(bot)
 
+    logger.debug(ujson.dumps(bots[0], indent=4))
     return bots
 
 
