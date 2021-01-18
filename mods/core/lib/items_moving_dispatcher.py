@@ -375,9 +375,14 @@ class ProfileItemsMovingDispatcher:
     def _split(self, action: SplitAction):
         item_id = action['item']
         move_location: MoveLocation = action['container']
-        item = self.inventory_adapter.get_item(item_id)
+
+        item = self.inventory.get_item(item_id)
+
         new_item = self.inventory_adapter.split_item(item, move_location, action['count'])
+
         self.response['items']['new'].append(new_item)
+        if not item['upd']['StackObjectsCount']:
+            self.response['items']['del'].append(item)
 
     def _examine(self, action: ExamineAction):
         if 'fromOwner' in action:
@@ -397,28 +402,28 @@ class ProfileItemsMovingDispatcher:
                 raise NotImplementedError(f'Unhandled examine action: {action}')
         else:
             item_id = action['item']
-            item = self.inventory_adapter.get_item(item_id)
+            item = self.inventory.get_item(item_id)
             self.profile.encyclopedia.examine(item)
 
     def _merge(self, action: MergeAction):
-        item = self.inventory_adapter.get_item(action['item'])
-        with_ = self.inventory_adapter.get_item(action['with'])
+        item = self.inventory.get_item(action['item'])
+        with_ = self.inventory.get_item(action['with'])
 
-        self.inventory_adapter.merge(item, with_)
+        self.inventory.merge(item, with_)
         self.response['items']['del'].append(item)
 
     def _transfer(self, action: TransferAction):
-        item = self.inventory_adapter.get_item(action['item'])
-        with_ = self.inventory_adapter.get_item(action['with'])
-        self.inventory_adapter.transfer(item, with_, action['count'])
+        item = self.inventory.get_item(action['item'])
+        with_ = self.inventory.get_item(action['with'])
+        self.inventory.transfer(item, with_, action['count'])
 
     def _fold(self, action: FoldAction):
-        item = self.inventory_adapter.get_item(action['item'])
-        self.inventory_adapter.fold(item, action['value'])
+        item = self.inventory.get_item(action['item'])
+        self.inventory.fold(item, action['value'])
 
     def _remove(self, action: ItemRemoveAction):
-        item = self.inventory_adapter.get_item(action['item'])
-        self.inventory_adapter.remove_item(item)
+        item = self.inventory.get_item(action['item'])
+        self.inventory.remove_item(item)
 
     def _trading_confirm(self, action: TradingAction):
         if action['type'] == 'buy_from_trader':
@@ -437,23 +442,23 @@ class ProfileItemsMovingDispatcher:
         # item = trader_inventory.get_item(item_id)
 
         items, children_items = trader_inventory.buy_item(item_id, item_count)
-        self.inventory_adapter.add_items(children_items)
+        self.inventory.add_items(children_items)
         stash_map = StashMap(self.inventory_adapter.inventory)
         for item in items:
-            self.inventory_adapter.add_item(item)
+            self.inventory.add_item(item)
             location = stash_map.find_location_for_item(item, auto_fill=True)
             item['location'] = location
             item['slotId'] = 'hideout'
-            item['parentId'] = self.inventory_adapter.stash_id
+            item['parentId'] = self.inventory.stash_id
 
         self.response['items']['new'].extend(items)
         self.response['items']['new'].extend(children_items)
 
         for scheme_item in action['scheme_items']:
-            item = self.inventory_adapter.get_item(scheme_item['id'])
+            item = self.inventory.get_item(scheme_item['id'])
             item['upd']['StackObjectsCount'] -= scheme_item['count']
             if not item['upd']['StackObjectsCount']:
-                self.inventory_adapter.remove_item(item)
+                self.inventory.remove_item(item)
                 self.response['items']['del'].append(item)
             else:
                 self.response['items']['change'].append(item)

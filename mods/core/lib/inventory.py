@@ -435,6 +435,10 @@ class PlayerInventory(GridInventory):
         return self.stash['stash']
 
     @property
+    def stash_id(self):
+        return self.root_id
+
+    @property
     def equipment_id(self) -> str:
         return self.stash['equipment']
 

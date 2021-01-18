@@ -25,12 +25,12 @@ TemplateId = NewType('TemplateId', str)
 AmmoStackPosition = NewType('AmmoStackPosition', int)
 
 
-class __Item(TypedDict):
+class ItemBase(TypedDict):
     _id: ItemId
     _tpl: TemplateId
 
 
-class Item(__Item, total=False):
+class Item(ItemBase, total=False):
     slotId: str
     parentId: ItemId
     location: Union[ItemLocation, AmmoStackPosition]
@@ -104,9 +104,12 @@ class ItemOrientationEnum(enum.Enum):
     Vertical = 'Vertical'
 
 
-class MoveLocation(TypedDict):
+class MoveLocationBase(TypedDict):
     id: ItemId
     container: str
+
+
+class MoveLocation(MoveLocationBase, total=False):
     location: ItemLocation
 
 

@@ -1,27 +1,13 @@
 import copy
-from typing import Iterable, Optional
+from typing import Optional
 
 from mods.core.lib.inventory import PlayerInventory, generate_item_id
-from mods.core.lib.items import ItemTemplatesRepository
-from mods.core.lib.items import MoveLocation, Item, ItemId
+from mods.core.lib.items import ItemTemplatesRepository, AmmoStackPosition, MoveLocation, Item
 
 
 class InventoryToRequestAdapter:
     def __init__(self, inventory: PlayerInventory):
         self.inventory = inventory
-
-    @property
-    def stash_id(self):
-        return self.inventory.root_id
-
-    def add_item(self, item: Item):
-        self.inventory.add_item(item)
-
-    def add_items(self, items: Iterable[Item]):
-        self.inventory.add_items(items)
-
-    def get_item(self, item_id: ItemId):
-        return self.inventory.get_item(item_id)
 
     def _split_ammo_into_magazine(self, ammo: Item, magazine: Item):
         magazine_template = ItemTemplatesRepository().get_template(magazine)
@@ -32,7 +18,7 @@ class InventoryToRequestAdapter:
 
         # Remove ammo from inventory if stack fully fits into magazine
         if ammo['upd']['StackObjectsCount'] <= ammo_to_full:
-            self.remove_item(ammo)
+            self.inventory.remove_item(ammo)
             return ammo
 
         # Else if stack is too big to fit into magazine copy ammo and assign it new id and proper stack count
@@ -50,22 +36,36 @@ class InventoryToRequestAdapter:
 
         :return: New item
         """
-        if location['container'] == 'cartridges':
-            magazine = self.get_item(location['id'])
+
+        container_type = location['container']
+        if container_type == 'cartridges':
+            magazine = self.inventory.get_item(location['id'])
             ammo = self._split_ammo_into_magazine(ammo=item, magazine=magazine)
             # We have to return new ammo stack to the client
             return ammo
 
-        new_item = copy.deepcopy(item)
-        new_item['upd']['StackObjectsCount'] = count
-        item['upd']['StackObjectsCount'] -= count
+        #  Placing ammo into chamber
+        if container_type == 'patron_in_weapon':
+            bullet = self.inventory.split_item(item, count=1)
+            bullet['slotId'] = 'patron_in_weapon'
+            bullet['parentId'] = location['id']
 
-        new_item['_id'] = generate_item_id()
-        new_item['location'] = location['location']
-        new_item['parentId'] = location['id']
-        new_item['slotId'] = location['container']
-        self.inventory.items.append(new_item)
-        return new_item
+            return bullet
+
+        is_pocket_container = container_type.startswith('pocket')
+        if container_type in ('main', 'hideout') or is_pocket_container:
+            new_item = copy.deepcopy(item)
+            new_item['upd']['StackObjectsCount'] = count
+            item['upd']['StackObjectsCount'] -= count
+
+            new_item['_id'] = generate_item_id()
+            new_item['location'] = location['location']
+            new_item['parentId'] = location['id']
+            new_item['slotId'] = location['container']
+            self.inventory.items.append(new_item)
+            return new_item
+
+        raise NotImplementedError(f'Unknown split container: {container_type}')
 
     def _move_ammo_into_magazine(self, ammo: Item, magazine: Item) -> Optional[Item]:
         bullet_stacks_inside_mag = list(self.inventory.iter_item_children(magazine))
@@ -84,11 +84,11 @@ class InventoryToRequestAdapter:
                 self.inventory.remove_item(ammo)
                 return None
 
-            ammo['location'] = len(bullet_stacks_inside_mag)
+            ammo['location'] = AmmoStackPosition(len(bullet_stacks_inside_mag))
 
         # Add new ammo stack to magazine
         else:
-            ammo['location'] = 0
+            ammo['location'] = AmmoStackPosition(0)
         return ammo
 
     def move_item(self, item: Item, location: MoveLocation):
@@ -101,20 +101,8 @@ class InventoryToRequestAdapter:
             del item['location']
 
         if location['container'] == 'cartridges':
-            magazine = self.get_item(location['id'])
+            magazine = self.inventory.get_item(location['id'])
             self._move_ammo_into_magazine(ammo=item, magazine=magazine)
 
         item['parentId'] = location['id']
         item['slotId'] = location['container']
-
-    def merge(self, item: Item, with_: Item):
-        return self.inventory.merge(item, with_)
-
-    def remove_item(self, item: Item):
-        return self.inventory.remove_item(item)
-
-    def transfer(self, item: Item, with_: Item, count: int):
-        return self.inventory.transfer(item, with_, count)
-
-    def fold(self, item: Item, folded: bool):
-        return self.inventory.fold(item, folded)

@@ -1,11 +1,7 @@
-import random
-import time
-from pathlib import Path
-
 import ujson
 from flask import Blueprint, request
 
-from lib.bots import BotGenerator
+from mods.core.lib.bots import BotGenerator
 from mods.core.lib import locations
 from mods.core.lib.inventory import regenerate_items_ids
 from mods.core.lib.profile import Profile
