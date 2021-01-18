@@ -25,12 +25,12 @@ TemplateId = NewType('TemplateId', str)
 AmmoStackPosition = NewType('AmmoStackPosition', int)
 
 
-class ItemBase(TypedDict):
+class __Item(TypedDict):
     _id: ItemId
     _tpl: TemplateId
 
 
-class Item(ItemBase, total=False):
+class Item(__Item, total=False):
     slotId: str
     parentId: ItemId
     location: Union[ItemLocation, AmmoStackPosition]
