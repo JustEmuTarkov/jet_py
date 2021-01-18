@@ -1,13 +1,13 @@
 from flask import Blueprint, request
 
 from server import logger
-from server.utils import route_decorator
+from server.utils import game_response_middleware
 
 blueprint = Blueprint(__name__, __name__)
 
 
 @blueprint.route('/client/ragfair/find', methods=['POST', 'GET'])
-@route_decorator()
+@game_response_middleware()
 def find():
     logger.debug(request.data)
     response = {

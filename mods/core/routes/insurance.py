@@ -5,7 +5,7 @@ from flask import Blueprint, request
 from mods.core.lib.items import TemplateId
 from mods.core.lib.profile import Profile
 from mods.core.lib.trader import TraderInventory, Traders
-from server.utils import route_decorator
+from server.utils import game_response_middleware
 
 blueprint = Blueprint(__name__, __name__)
 
@@ -13,7 +13,7 @@ INSURANCE_PRICE_MODIFIER = 0.1
 
 
 @blueprint.route('/client/insurance/items/list/cost', methods=['POST', 'GET'])
-@route_decorator()
+@game_response_middleware()
 def items_list_cost():
     traders_list: List[str] = request.data['traders']
     item_ids: List[str] = request.data['items']

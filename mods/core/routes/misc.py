@@ -6,13 +6,13 @@ from flask import Blueprint, request, send_file
 
 from mods.core.lib.items import ItemTemplatesRepository
 from server import app, db_dir, start_time, root_dir
-from server.utils import route_decorator
+from server.utils import game_response_middleware
 
 blueprint = Blueprint(__name__, __name__)
 
 
 @app.route('/client/locations', methods=['GET', 'POST'])
-@route_decorator(is_static=1)
+@game_response_middleware(is_static=True)
 def client_locations():
     locations_base = db_dir / 'base' / 'locations.json'
     locations_base = ujson.load(locations_base.open('r'))
@@ -26,19 +26,19 @@ def client_locations():
 
 
 @app.route('/client/game/start', methods=['POST', 'GET'])
-@route_decorator(is_static=True)
+@game_response_middleware(is_static=True)
 def client_game_start():
     return None  # TODO Add account data, check if character exists
 
 
 @app.route('/client/game/version/validate', methods=['POST'])
-@route_decorator(is_static=1)
+@game_response_middleware(is_static=True)
 def client_game_version_validate():
     return None
 
 
 @app.route('/client/game/config', methods=['GET', 'POST'])
-@route_decorator()
+@game_response_middleware()
 def client_game_config():
     url_root = request.url_root
     session_id = request.cookies['PHPSESSID']
@@ -65,7 +65,7 @@ def client_game_config():
 
 
 @app.route('/client/game/keepalive', methods=['GET', 'POST'])
-@route_decorator()
+@game_response_middleware()
 def client_game_keepalive():
     if 'PHPSESSID' in request.cookies:
         return {"msg": "OK"}
@@ -73,13 +73,13 @@ def client_game_keepalive():
 
 
 @app.route('/client/items', methods=['GET', 'POST'])
-@route_decorator(is_static=1)
+@game_response_middleware(is_static=True)
 def client_items():
     return ItemTemplatesRepository().templates
 
 
 @app.route('/client/customization', methods=['GET', 'POST'])
-@route_decorator(is_static=1)
+@game_response_middleware(is_static=True)
 def client_customization():
     customization = {}
     for customization_file_path in (db_dir / 'customization').glob('*'):
@@ -91,7 +91,7 @@ def client_customization():
 
 
 @app.route('/client/globals', methods=['POST', 'GET'])
-@route_decorator(is_static=1)
+@game_response_middleware(is_static=True)
 def client_globals():
     globals_base = db_dir / 'base' / 'globals.json'
     globals_base = ujson.load(globals_base.open('r', encoding='utf8'))
@@ -99,7 +99,7 @@ def client_globals():
 
 
 @app.route('/client/weather', methods=['POST', 'GET'])
-@route_decorator()
+@game_response_middleware()
 def client_weather():
     weather_dir = db_dir / 'weather'
     weather_files = list(weather_dir.glob('*'))
@@ -123,7 +123,7 @@ def client_weather():
 
 
 @app.route('/client/handbook/templates', methods=['POST', 'GET'])
-@route_decorator(is_static=1)
+@game_response_middleware(is_static=True)
 def client_handbook_templates():
     data = {}
     for template_path in db_dir.joinpath('templates').glob('*.json'):
@@ -133,25 +133,25 @@ def client_handbook_templates():
 
 
 @app.route('/client/handbook/builds/my/list', methods=['POST', 'GET'])
-@route_decorator()
+@game_response_middleware()
 def client_handbook_builds_my_list():
     return []  # TODO load user builds
 
 
 @app.route('/client/quest/list', methods=['POST', 'GET'])
-@route_decorator(is_static=1)
+@game_response_middleware(is_static=True)
 def client_quest_list():
     return ujson.load(db_dir.joinpath('quests', 'all.json').open('r', encoding='utf8'))
 
 
 @app.route('/client/mail/dialog/list', methods=['POST', 'GET'])
-@route_decorator()
+@game_response_middleware()
 def mail_dialog_list():
     return {}  # TODO create dialogue wrapper
 
 
 @app.route('/client/server/list', methods=['POST', 'GET'])
-@route_decorator()
+@game_response_middleware()
 def client_server_list():
     return [
         {
@@ -162,7 +162,7 @@ def client_server_list():
 
 
 @app.route('/client/checkVersion', methods=['POST', 'GET'])
-@route_decorator()
+@game_response_middleware()
 def client_check_version():
     return {
         'isvalid': True,
@@ -171,7 +171,7 @@ def client_check_version():
 
 
 @app.route('/client/game/logout', methods=['POST', 'GET'])
-@route_decorator()
+@game_response_middleware()
 def client_game_logout():
     return {
         "status": "ok"

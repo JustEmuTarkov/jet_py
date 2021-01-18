@@ -9,7 +9,7 @@ from mods.core.lib import locations
 from mods.core.lib.inventory import regenerate_items_ids
 from mods.core.lib.profile import Profile
 from server import db_dir, logger
-from server.utils import route_decorator, ZlibMiddleware
+from server.utils import game_response_middleware, ZlibMiddleware
 
 blueprint = Blueprint(__name__, __name__)
 
@@ -112,7 +112,7 @@ def generate_bot(difficulty, role):
 
 
 @blueprint.route('/client/game/bot/generate', methods=['POST', 'GET'])
-@route_decorator()
+@game_response_middleware()
 def generate_bots():
     bots = []
     # bot_base = ujson.load(db_dir.joinpath('base', 'botBase.json').open(encoding='utf8'))
@@ -171,7 +171,7 @@ def mode_offline():
 
 
 @blueprint.route('/raid/profile/save', methods=['PUT'])
-@route_decorator()
+@game_response_middleware()
 def singleplayer_raid_profile_save():
     # TODO: Add Saving profile here
     # data struct {exit, isPlayerScav, profile, health}
@@ -204,7 +204,7 @@ def singleplayer_raid_profile_save():
 
 
 @blueprint.route('/raid/profile/list', methods=['POST', 'GET'])
-@route_decorator()
+@game_response_middleware()
 def singleplayer_raid_profile_list():
     # TODO: Put that into the config file !
     return {
@@ -217,7 +217,7 @@ def singleplayer_raid_profile_list():
 
 
 @blueprint.route('/raid/map/name', methods=['POST', 'GET'])
-@route_decorator()
+@game_response_middleware()
 def singleplayer_raid_menu_name():
     # TODO: This should get a Map Name and store that with profile ID(session id)
     return None

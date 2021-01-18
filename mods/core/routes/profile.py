@@ -6,13 +6,13 @@ from flask import request, Blueprint
 from mods.core.lib.items_moving_dispatcher import ProfileItemsMovingDispatcher
 from mods.core.lib.profile import Profile
 from server import root_dir
-from server.utils import route_decorator
+from server.utils import game_response_middleware
 
 blueprint = Blueprint(__name__, __name__)
 
 
 @blueprint.route('/client/game/profile/items/moving', methods=['POST', 'GET'])
-@route_decorator()
+@game_response_middleware()
 def client_game_profile_item_move():
     dispatcher = ProfileItemsMovingDispatcher(request.cookies['PHPSESSID'])
     response = dispatcher.dispatch()
@@ -21,7 +21,7 @@ def client_game_profile_item_move():
 
 
 @blueprint.route('/client/game/profile/list', methods=['POST', 'GET'])
-@route_decorator()
+@game_response_middleware()
 def client_game_profile_list():
     session_id = request.cookies['PHPSESSID']
 
@@ -38,7 +38,7 @@ def client_game_profile_list():
 
 
 @blueprint.route('/client/game/profile/select', methods=['POST', 'GET'])
-@route_decorator()
+@game_response_middleware()
 def client_game_profile_list_select():
     return {
         'status': 'ok',
@@ -50,7 +50,7 @@ def client_game_profile_list_select():
 
 
 @blueprint.route('/client/profile/status', methods=['POST', 'GET'])
-@route_decorator()
+@game_response_middleware()
 def client_profile_status():
     session_id = request.cookies['PHPSESSID']
     response = []

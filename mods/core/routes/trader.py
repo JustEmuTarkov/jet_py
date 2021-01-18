@@ -7,13 +7,13 @@ import mods.core.lib.profile as lib_profile
 from mods.core.lib.profile import Profile
 from mods.core.lib.trader import TraderInventory, Traders
 from server import root_dir, db_dir
-from server.utils import route_decorator, TarkovError
+from server.utils import game_response_middleware, TarkovError
 
 blueprint = Blueprint(__name__, __name__)
 
 
 @blueprint.route('/client/trading/customization/storage', methods=['POST', 'GET'])
-@route_decorator()
+@game_response_middleware()
 def client_trading_customization_storage():
     if 'PHPSESSID' not in request.cookies:
         raise TarkovError(1, "No Session")
@@ -23,7 +23,7 @@ def client_trading_customization_storage():
 
 
 @blueprint.route('/client/trading/customization/<string:trader_id>', methods=['POST', 'GET'])
-@route_decorator()
+@game_response_middleware()
 def client_trading_customization(trader_id):
     suits_path = db_dir.joinpath('assort', trader_id, 'suits.json')
     if not suits_path.exists():
@@ -41,7 +41,7 @@ def client_trading_customization(trader_id):
 
 
 @blueprint.route('/client/trading/api/getUserAssortPrice/trader/<string:trader_id>', methods=['POST', 'GET'])
-@route_decorator()
+@game_response_middleware()
 def client_trading_api_get_user_assort_price(trader_id):
     profile_id = request.cookies['PHPSESSID']
     player_profile = lib_profile.Profile(profile_id)
@@ -62,7 +62,7 @@ def client_trading_api_get_user_assort_price(trader_id):
 
 
 @blueprint.route('/client/trading/api/getTradersList', methods=['POST', 'GET'])
-@route_decorator(is_static=True)
+@game_response_middleware(is_static=True)
 def client_trading_api_get_trader_list():
     traders_path = db_dir.joinpath('base', 'traders')
 
@@ -76,7 +76,7 @@ def client_trading_api_get_trader_list():
 
 @blueprint.route('/client/trading/api/getTraderAssort/<string:trader_id>', methods=['POST', 'GET'])
 # @lru_cache(8)
-@route_decorator()
+@game_response_middleware()
 def client_trading_api_get_trader_assort(trader_id):
     with Profile(request.cookies['PHPSESSID']) as profile:
         trader_inventory = TraderInventory(Traders(trader_id), player_inventory=profile.inventory)
@@ -89,7 +89,7 @@ def client_trading_api_get_trader_assort(trader_id):
 
 @blueprint.route('/client/trading/api/getTrader/<string:trader_id>', methods=['POST', 'GET'])
 @lru_cache(8)
-@route_decorator()
+@game_response_middleware()
 def client_trading_api_get_trader(trader_id):
     trader_path = db_dir.joinpath('base', 'traders', trader_id, 'base.json')
 

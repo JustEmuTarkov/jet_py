@@ -1,12 +1,12 @@
 from flask import request, Blueprint
 
-from server.utils import route_decorator, TarkovError
+from server.utils import game_response_middleware, TarkovError
 
 blueprint = Blueprint(__name__, __name__)
 
 
 @blueprint.route('/notifierServer/get/<string:profile_pk>', methods=['POST', 'GET'])
-@route_decorator()
+@game_response_middleware()
 # pylint: disable=unused-argument
 def notifierserver_get(profile_pk: str):
     #  ?last_id=default_id
@@ -14,7 +14,7 @@ def notifierserver_get(profile_pk: str):
 
 
 @blueprint.route('/client/notifier/channel/create', methods=['POST', 'GET'])
-@route_decorator(is_static=True)
+@game_response_middleware(is_static=True)
 def client_notifier_channel_create():
     session_id = request.cookies.get('PHPSESSID', None)
     if session_id is None:

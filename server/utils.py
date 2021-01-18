@@ -1,4 +1,3 @@
-import json
 import zlib
 from functools import wraps
 from typing import Callable
@@ -26,7 +25,7 @@ class ZlibMiddleware:
 
             data = function(*args, **kwargs)
 
-            data_json = json.dumps(data)
+            data_json = ujson.dumps(data)
             compressed_data = zlib.compress(data_json.encode('utf8'), zlib.Z_DEFAULT_COMPRESSION)
 
             response = make_response()
@@ -79,7 +78,7 @@ def compose(function, *decorators):
     return wrapped
 
 
-def route_decorator(**kwargs):
+def game_response_middleware(**kwargs):
     def wrapper(function):
         decorators = [function]
         use_struct = kwargs.get('use_tarkov_response_struct', True)
