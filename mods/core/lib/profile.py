@@ -11,7 +11,7 @@ import mods.core.lib.inventory as inventory_lib
 import mods.core.lib.items as items_lib
 from mods.core.lib import NotFoundError
 from mods.core.lib.trader import Traders
-from server import root_dir, db_dir
+from server import root_dir, db_dir, logger
 
 
 class Encyclopedia:
@@ -121,10 +121,20 @@ class HideoutRecipe(TypedDict):
 
 
 class Hideout:
+    # Fuel burn rate, per second
+    __FUEL_BURN_RATE = 60 / (14 * 60 * 60 + 27 * 60 + 28)
+    __GENERATOR_SPEED_WITHOUT_FUEL = 0.15
+    # __FUEL_BURN_RATE = 0.0011527777777778
     data: dict
+    metadata: dict
+
+    time_elapsed: int
+    work_time_elapsed: int
+    current_time: int
 
     def __init__(self, profile: Profile):
         self.path = profile.profile_path.joinpath('pmc_hideout.json')
+        self.meta_path = profile.profile_path.joinpath('pmc_hideout.meta.json')
 
         self.profile: Profile = profile
 
@@ -165,6 +175,13 @@ class Hideout:
 
         area_slots[slot_id]['item'] = [item]
 
+    def take_item_from_area_slot(self, area_type: HideoutAreaType, slot_id: int) -> items_lib.Item:
+        area = self.get_area(area_type)
+        slot = area['slots'][slot_id]
+        item = slot['item'][0]
+        slot['item'] = None
+        return item
+
     def start_single_production(self, recipe_id: str, timestamp: int = None):
         if not timestamp:
             timestamp = int(time.time())
@@ -204,27 +221,71 @@ class Hideout:
         area = self.get_area(area_type)
         area['active'] = enabled
 
-    def read(self):
-        self.data: dict = ujson.load(self.path.open('r', encoding='utf8'))
-        self.__update_production_time()
-
-    def write(self):
-        ujson.dump(self.data, self.path.open('w', encoding='utf8'), indent=4)
-
-    def __update_production_time(self):
+    def __update_production_time(self, time_elapsed: int, generator_worked: int):
         for production in self.data['Production'].values():
             production: HideoutProduction
 
-            # if not production['inProgress']:
-            #     continue
+            generator_didnt_work_for = time_elapsed - generator_worked
+            if generator_didnt_work_for < 0:
+                raise AssertionError('generator_didnt_work_for < 0')
 
-            now = int(time.time())
-            last_time_visited = production['StartTime'] + production['Progress'] + production['SkipTime']
-            production['Progress'] += now - last_time_visited
+            production['Progress'] += generator_worked + time_elapsed * self.__GENERATOR_SPEED_WITHOUT_FUEL
+            # production['SkipTime'] += skip_time
 
-            # production_recipe = self.get_recipe(recipe_id)
-            # if production['Progress'] >= production_recipe['productionTime']:
-            #     production['inProgress'] = False
+    def __update_fuel(self) -> int:
+        """
+        :returns: Amount of time hideout had a generator working
+        """
+        generator_area = self.get_area(HideoutAreaType.Generator)
+        if not generator_area['active']:
+            return 0
+
+        fuel_should_be_consumed = self.time_elapsed * Hideout.__FUEL_BURN_RATE
+        fuel_consumed = 0
+
+        for slot in generator_area['slots']:
+            if not fuel_should_be_consumed:
+                break
+
+            if not slot['item']:
+                continue
+
+            fuel_tank = slot['item'][0]
+            fuel_in_tank = fuel_tank['upd']['Resource']['Value']
+
+            consumed = min(fuel_should_be_consumed, fuel_in_tank)
+            fuel_consumed += consumed
+            fuel_tank['upd']['Resource']['Value'] -= consumed
+            fuel_should_be_consumed -= consumed
+
+        if fuel_consumed < fuel_should_be_consumed:
+            self.toggle_area(HideoutAreaType.Generator, False)
+
+        return int(fuel_consumed / self.__FUEL_BURN_RATE)
+
+    def read(self):
+        self.data: dict = ujson.load(self.path.open('r', encoding='utf8'))
+
+        if not self.meta_path.exists():
+            self.metadata = {'updated_at': int(time.time())}
+        else:
+            self.metadata = ujson.load(self.meta_path.open('r', encoding='utf8'))
+
+        self.current_time = int(time.time())
+        self.time_elapsed = self.current_time - self.metadata['updated_at']
+        time_generator_worked = self.__update_fuel()
+        skip_time = self.time_elapsed - time_generator_worked
+
+        logger.debug(f'Generator forked for: {time_generator_worked}')
+        logger.debug(f'Time skipped: {skip_time}')
+
+        self.__update_production_time(self.time_elapsed, time_generator_worked)
+
+        self.metadata['updated_at'] = self.current_time
+
+    def write(self):
+        ujson.dump(self.data, self.path.open('w', encoding='utf8'), indent=4)
+        ujson.dump(self.metadata, self.meta_path.open('w', encoding='utf8'), indent=4)
 
 
 class Profile:

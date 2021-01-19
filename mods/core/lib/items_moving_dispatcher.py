@@ -228,6 +228,7 @@ class ProfileItemsMovingDispatcher:
             ActionType.HideoutToggleArea: self._hideout_toggle_area,
             ActionType.HideoutSingleProductionStart: self._hideout_single_production_start,
             ActionType.HideoutTakeProduction: self._hideout_take_production,
+            ActionType.HideoutTakeItemsFromAreaSlots: self._hideout_take_items_from_area_slots,
 
             ActionType.Insure: self._insure,
 
@@ -361,6 +362,15 @@ class ProfileItemsMovingDispatcher:
         self.response['items']['new'].extend(items)
         for item in items:
             self.inventory.place_item(item)
+
+    def _hideout_take_items_from_area_slots(self, action: HideoutTakeItemsFromAreaSlotsAction):
+        hideout = self.profile.hideout
+        area_type = HideoutAreaType(action['areaType'])
+        for slot_id in action['slots']:
+            item = hideout.take_item_from_area_slot(area_type=area_type, slot_id=slot_id)
+
+            self.inventory.place_item(item)
+            self.response['items']['new'].append(item)
 
     def _accept_quest(self, action: QuestAcceptAction):
         self.profile.quests.accept_quest(action['qid'])
