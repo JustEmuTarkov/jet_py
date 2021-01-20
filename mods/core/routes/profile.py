@@ -3,7 +3,7 @@ from __future__ import annotations
 import ujson
 from flask import request, Blueprint
 
-from mods.core.lib.items_moving_dispatcher import ProfileItemsMovingDispatcher
+from mods.core.lib.items_moving_dispatcher import DispatcherManager
 from mods.core.lib.profile import Profile
 from server import root_dir
 from server.utils import game_response_middleware
@@ -14,7 +14,7 @@ blueprint = Blueprint(__name__, __name__)
 @blueprint.route('/client/game/profile/items/moving', methods=['POST', 'GET'])
 @game_response_middleware()
 def client_game_profile_item_move():
-    dispatcher = ProfileItemsMovingDispatcher(request.cookies['PHPSESSID'])
+    dispatcher = DispatcherManager(request.cookies['PHPSESSID'])
     response = dispatcher.dispatch()
 
     return response

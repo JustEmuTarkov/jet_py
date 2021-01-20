@@ -1,14 +1,18 @@
-import enum
-from typing import List, cast, TypedDict, Optional
+from __future__ import annotations
 
+import enum
+from typing import List, cast, TypedDict, Optional, Dict, Callable, Iterable
+
+import flask
 import ujson
 from flask import request
 
 import mods.core.lib.items as items_lib
+from lib.profile import HideoutAreaType
 from mods.core.lib.adapters import InventoryToRequestAdapter
-from mods.core.lib.inventory import PlayerInventory, StashMap, generate_item_id
-from mods.core.lib.items import MoveLocation, ItemTemplatesRepository, ItemId, Item
-from mods.core.lib.profile import Profile, HideoutAreaType
+from mods.core.lib.inventory import PlayerInventory, StashMap
+from mods.core.lib.items import MoveLocation, ItemTemplatesRepository, ItemId, Item, generate_item_id
+from mods.core.lib.profile import Profile
 from mods.core.lib.trader import TraderInventory, Traders
 from server import logger
 
@@ -133,6 +137,23 @@ class ItemRemoveAction(Action):
 
 class QuestAcceptAction(Action):
     qid: str
+    count: int
+
+
+class QuestHandoverItem(TypedDict):
+    id: ItemId
+    count: int
+
+
+class QuestHandoverAction(Action):
+    qid: str
+    conditionId: str
+    items: List[QuestHandoverItem]
+
+
+class QuestCompleteAction(Action):
+    qid: str
+    removeExcessItems: bool
 
 
 class ReadEncyclopediaAction(Action):
@@ -188,29 +209,38 @@ class ApplyInventoryChangesAction(Action):
     deletedItems: Optional[List[Item]]
 
 
-class ProfileItemsMovingDispatcher:
-    def __init__(self, session_id: str):
-        self.profile = Profile(session_id)
+class Dispatcher:
+    dispatch_map: Dict[ActionType, Callable]
+    inventory: PlayerInventory
+    inventory_adapter: InventoryToRequestAdapter
+    profile: Profile
+    response: dict
 
-        self.inventory: PlayerInventory
-        self.inventory_adapter: InventoryToRequestAdapter
+    def __init__(self, manager: DispatcherManager):
+        self.manager = manager
+        self.inventory = manager.inventory
+        self.inventory_adapter = manager.inventory_adapter
+        self.profile = manager.profile
+        self.response = manager.response
 
-        self.request = request
-        self.response: dict = {
-            "items": {
-                "new": [],
-                "change": [],
-                "del": []
-            },
-            "badRequest": [],
-            "quests": [],
-            "ragFairOffers": [],
-            "builds": [],
-            "currentSalesSums": {}
-        }
+    def dispatch(self, action: Action):
+        try:
+            action_type = ActionType(action['Action'])
+            method = self.dispatch_map[action_type]
+        except KeyError as error:
+            action_type = action['Action']
+            raise NotImplementedError(
+                f'Action with type {action_type} not implemented in dispatcher {self.__class__}'
+            ) from error
 
-    def dispatch(self) -> dict:
-        actions_map = {
+        # noinspection PyArgumentList
+        method(action)  # type: ignore
+
+
+class InventoryDispatcher(Dispatcher):
+    def __init__(self, manager: DispatcherManager):
+        super().__init__(manager)
+        self.dispatch_map = {
             ActionType.Move: self._move,
             ActionType.Split: self._split,
             ActionType.Examine: self._examine,
@@ -218,44 +248,75 @@ class ProfileItemsMovingDispatcher:
             ActionType.Transfer: self._transfer,
             ActionType.Fold: self._fold,
             ActionType.Remove: self._remove,
-            ActionType.TradingConfirm: self._trading_confirm,
-            ActionType.QuestAccept: self._accept_quest,
             ActionType.ReadEncyclopedia: self._read_encyclopedia,
 
-            ActionType.HideoutUpgrade: self._hideout_upgrade_start,
-            ActionType.HideoutUpgradeComplete: self._hideout_upgrade_finish,
-            ActionType.HideoutPutItemsInAreaSlots: self._hideout_put_items_in_area_slots,
-            ActionType.HideoutToggleArea: self._hideout_toggle_area,
-            ActionType.HideoutSingleProductionStart: self._hideout_single_production_start,
-            ActionType.HideoutTakeProduction: self._hideout_take_production,
-            ActionType.HideoutTakeItemsFromAreaSlots: self._hideout_take_items_from_area_slots,
-
             ActionType.Insure: self._insure,
-
             ActionType.ApplyInventoryChanges: self._apply_inventory_changes,
         }
 
-        with self.profile:
-            self.inventory = self.profile.inventory
-            self.inventory_adapter = InventoryToRequestAdapter(self.inventory)
+    def _move(self, action: MoveAction):
+        item_id = action['item']
+        move_location: MoveLocation = action['to']
 
-            # request.data should be dict at this moment
-            # noinspection PyTypeChecker
-            actions: List[Action] = request.data['data']  # type: ignore
+        item = self.inventory.get_item(item_id)
+        self.inventory_adapter.move_item(item, move_location)
 
-            for action in actions:
-                # Log any actions into debug
-                logger.debug(action)
-                try:
-                    method = actions_map[ActionType(action['Action'])]
-                except KeyError as error:
-                    action_type = action['Action']
-                    logger.debug(action)
-                    raise NotImplementedError(f'Action with type {action_type} not implemented') from error
+    def _split(self, action: SplitAction):
+        item_id = action['item']
+        move_location: MoveLocation = action['container']
 
-                # noinspection PyArgumentList
-                method(action)  # type: ignore
-        return self.response
+        item = self.inventory.get_item(item_id)
+
+        new_item = self.inventory_adapter.split_item(item, move_location, action['count'])
+
+        self.response['items']['new'].append(new_item)
+        if not item['upd']['StackObjectsCount']:
+            self.response['items']['del'].append(item)
+
+    def _examine(self, action: ExamineAction):
+        if 'fromOwner' in action:
+            if action['fromOwner']['type'] == 'Trader':
+                trader_id = action['fromOwner']['id']
+                item_id = action['item']
+
+                trader_inventory = TraderInventory(Traders(trader_id), self.inventory)
+                item = trader_inventory.get_item(item_id)
+                self.profile.encyclopedia.examine(item)
+
+            elif action['fromOwner']['type'] in ('HideoutUpgrade', 'HideoutProduction'):
+                item_tpl_id = items_lib.TemplateId(action['item'])
+                self.profile.encyclopedia.examine(item_tpl_id)
+
+            else:
+                raise NotImplementedError(f'Unhandled examine action: {action}')
+        else:
+            item_id = action['item']
+            item = self.inventory.get_item(item_id)
+            self.profile.encyclopedia.examine(item)
+
+    def _merge(self, action: MergeAction):
+        item = self.inventory.get_item(action['item'])
+        with_ = self.inventory.get_item(action['with'])
+
+        self.inventory.merge(item, with_)
+        self.response['items']['del'].append(item)
+
+    def _transfer(self, action: TransferAction):
+        item = self.inventory.get_item(action['item'])
+        with_ = self.inventory.get_item(action['with'])
+        self.inventory.transfer(item, with_, action['count'])
+
+    def _fold(self, action: FoldAction):
+        item = self.inventory.get_item(action['item'])
+        self.inventory.fold(item, action['value'])
+
+    def _remove(self, action: ItemRemoveAction):
+        item = self.inventory.get_item(action['item'])
+        self.inventory.remove_item(item)
+
+    def _read_encyclopedia(self, action: ReadEncyclopediaAction):
+        for template_id in action['ids']:
+            self.profile.encyclopedia.read(template_id)
 
     def _apply_inventory_changes(self, action: ApplyInventoryChangesAction):
         if action['changedItems'] is not None:
@@ -290,6 +351,20 @@ class ProfileItemsMovingDispatcher:
 
         self.response['items']['change'].extend(affected_items)
         self.response['items']['del'].extend(deleted_items)
+
+
+class HideoutDispatcher(Dispatcher):
+    def __init__(self, manager: DispatcherManager):
+        super().__init__(manager)
+        self.dispatch_map = {
+            ActionType.HideoutUpgrade: self._hideout_upgrade_start,
+            ActionType.HideoutUpgradeComplete: self._hideout_upgrade_finish,
+            ActionType.HideoutPutItemsInAreaSlots: self._hideout_put_items_in_area_slots,
+            ActionType.HideoutToggleArea: self._hideout_toggle_area,
+            ActionType.HideoutSingleProductionStart: self._hideout_single_production_start,
+            ActionType.HideoutTakeProduction: self._hideout_take_production,
+            ActionType.HideoutTakeItemsFromAreaSlots: self._hideout_take_items_from_area_slots,
+        }
 
     def _hideout_upgrade_start(self, action: HideoutUpgradeAction):
         hideout = self.profile.hideout
@@ -372,68 +447,13 @@ class ProfileItemsMovingDispatcher:
             self.inventory.place_item(item)
             self.response['items']['new'].append(item)
 
-    def _accept_quest(self, action: QuestAcceptAction):
-        self.profile.quests.accept_quest(action['qid'])
 
-    def _move(self, action: MoveAction):
-        item_id = action['item']
-        move_location: MoveLocation = action['to']
-
-        item = self.profile.inventory.get_item(item_id)
-        self.inventory_adapter.move_item(item, move_location)
-
-    def _split(self, action: SplitAction):
-        item_id = action['item']
-        move_location: MoveLocation = action['container']
-
-        item = self.inventory.get_item(item_id)
-
-        new_item = self.inventory_adapter.split_item(item, move_location, action['count'])
-
-        self.response['items']['new'].append(new_item)
-        if not item['upd']['StackObjectsCount']:
-            self.response['items']['del'].append(item)
-
-    def _examine(self, action: ExamineAction):
-        if 'fromOwner' in action:
-            if action['fromOwner']['type'] == 'Trader':
-                trader_id = action['fromOwner']['id']
-                item_id = action['item']
-
-                trader_inventory = TraderInventory(Traders(trader_id), self.inventory)
-                item = trader_inventory.get_item(item_id)
-                self.profile.encyclopedia.examine(item)
-
-            elif action['fromOwner']['type'] in ('HideoutUpgrade', 'HideoutProduction'):
-                item_tpl_id = items_lib.TemplateId(action['item'])
-                self.profile.encyclopedia.examine(item_tpl_id)
-
-            else:
-                raise NotImplementedError(f'Unhandled examine action: {action}')
-        else:
-            item_id = action['item']
-            item = self.inventory.get_item(item_id)
-            self.profile.encyclopedia.examine(item)
-
-    def _merge(self, action: MergeAction):
-        item = self.inventory.get_item(action['item'])
-        with_ = self.inventory.get_item(action['with'])
-
-        self.inventory.merge(item, with_)
-        self.response['items']['del'].append(item)
-
-    def _transfer(self, action: TransferAction):
-        item = self.inventory.get_item(action['item'])
-        with_ = self.inventory.get_item(action['with'])
-        self.inventory.transfer(item, with_, action['count'])
-
-    def _fold(self, action: FoldAction):
-        item = self.inventory.get_item(action['item'])
-        self.inventory.fold(item, action['value'])
-
-    def _remove(self, action: ItemRemoveAction):
-        item = self.inventory.get_item(action['item'])
-        self.inventory.remove_item(item)
+class TradingDispatcher(Dispatcher):
+    def __init__(self, manager: DispatcherManager):
+        super().__init__(manager)
+        self.dispatch_map = {
+            ActionType.TradingConfirm: self._trading_confirm,
+        }
 
     def _trading_confirm(self, action: TradingAction):
         if action['type'] == 'buy_from_trader':
@@ -510,6 +530,87 @@ class ProfileItemsMovingDispatcher:
             self.inventory.place_item(money_stack)
             self.response['items']['new'].append(money_stack)
 
-    def _read_encyclopedia(self, action: ReadEncyclopediaAction):
-        for template_id in action['ids']:
-            self.profile.encyclopedia.read(template_id)
+
+class QuestDispatcher(Dispatcher):
+    def __init__(self, manager: DispatcherManager):
+        super().__init__(manager)
+        self.dispatch_map = {
+            ActionType.QuestAccept: self._quest_accept,
+            ActionType.QuestHandover: self._quest_handover,
+        }
+
+    def _quest_accept(self, action: QuestAcceptAction):
+        self.profile.quests.accept_quest(action['qid'])
+
+    def _quest_handover(self, action: QuestHandoverAction):
+        items_dict = {i['id']: i['count'] for i in action['items']}
+        removed, changed = self.profile.quests.handover_items(action['qid'], action['conditionId'], items_dict)
+
+        self.response['items']['change'].extend(changed)
+        self.response['items']['del'].extend(removed)
+
+    def _quest_finish(self):
+        pass
+
+
+class DispatcherManager:
+    profile: Profile
+    inventory: PlayerInventory
+    inventory_adapter: InventoryToRequestAdapter
+    request: flask.request
+    response: dict
+
+    dispatchers: Iterable[Dispatcher]
+
+    def __init__(self, session_id: str):
+        self.profile = Profile(session_id)
+
+        self.inventory: PlayerInventory
+        self.inventory_adapter: InventoryToRequestAdapter
+
+        self.request = request
+        self.response: dict = {
+            "items": {
+                "new": [],
+                "change": [],
+                "del": []
+            },
+            "badRequest": [],
+            "quests": [],
+            "ragFairOffers": [],
+            "builds": [],
+            "currentSalesSums": {}
+        }
+
+    def __make_dispatchers(self):
+        self.dispatchers = (
+            InventoryDispatcher(self),
+            HideoutDispatcher(self),
+            TradingDispatcher(self),
+            QuestDispatcher(self),
+        )
+
+    def dispatch(self) -> dict:
+        with self.profile:
+            self.inventory = self.profile.inventory
+            self.inventory_adapter = InventoryToRequestAdapter(self.inventory)
+            self.__make_dispatchers()
+
+            # request.data should be dict at this moment
+            # noinspection PyTypeChecker
+            actions: List[Action] = request.data['data']  # type: ignore
+
+            for action in actions:
+                logger.debug(action)
+
+                for dispatcher in self.dispatchers:
+                    try:
+                        dispatcher.dispatch(action)
+                        logger.debug(f'Action was dispatched in {dispatcher.__class__.__name__}')
+                        break
+                    except NotImplementedError:
+                        pass
+                else:
+                    raise NotImplementedError(f'Action {action} not implemented in any of the dispatchers')
+
+        return self.response
