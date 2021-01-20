@@ -116,6 +116,11 @@ class MoveLocation(MoveLocationBase, total=False):
 
 
 def generate_item_id() -> ItemId:
+    """
+    Generates new item id
+
+    :return: Generated item id
+    """
     unique_id = str(uuid.uuid4())
     unique_id = ''.join(unique_id.split('-')[1:])
 
@@ -123,6 +128,12 @@ def generate_item_id() -> ItemId:
 
 
 def regenerate_items_ids(items: List[Item]):
+    """
+    Generates new ids for all items in list (mutates the list)
+
+    :param items: List[Item]
+    :return: None
+    """
     id_map = {
         item['_id']: generate_item_id() for item in items
     }
@@ -162,6 +173,12 @@ class ItemTemplatesRepository(metaclass=SingletonMeta):
         return self.__item_templates
 
     def get_template(self, item: Union[Item, TemplateId]):
+        """
+        Returns template of item
+
+        :param item: Item or TemplateId
+        :return: Item Template
+        """
         if isinstance(item, dict):
             item = item['_tpl']
 
@@ -181,6 +198,12 @@ class ItemTemplatesRepository(metaclass=SingletonMeta):
                     templates.append(child)
 
     def get_template_items(self, template_id: TemplateId) -> List[dict]:
+        """
+        Returns all items of given category (all barter items for example)
+
+        :param template_id:
+        :return: All items of a category
+        """
         template: dict = self.get_template(template_id)
         if template['_type'] == 'Item':
             return [template]
@@ -190,6 +213,10 @@ class ItemTemplatesRepository(metaclass=SingletonMeta):
         return self.__item_categories[item['_tpl']]['ParentId']
 
     def get_preset(self, template_id: TemplateId) -> List[Item]:
+        """
+        :param template_id:
+        :return: Preset of an item from globals
+        """
         item_presets = self.globals['ItemPresets']
         try:
             items = copy.deepcopy(item_presets[template_id]['_items'])
@@ -200,6 +227,13 @@ class ItemTemplatesRepository(metaclass=SingletonMeta):
 
     @staticmethod
     def __create_item(item_template: dict, count: int = 1) -> Item:
+        """
+        Creates new item stack with size of :count:
+
+        :param item_template: Item template to create item from
+        :param count: Amount of items in stack
+        :return: new Item
+        """
         item = Item(
             _id=generate_item_id(),
             _tpl=item_template['_id'],
@@ -222,18 +256,23 @@ class ItemTemplatesRepository(metaclass=SingletonMeta):
             raise ValueError('Cannot create 0 items')
 
         repository = ItemTemplatesRepository()
+
+        #  Try to return a preset if it exists
         try:
             return repository.get_preset(template_id)
         except NotFoundError:
             pass
 
         item_template = repository.get_template(template_id)
+
+        #  If we need only one item them we will just return it
         if count == 1:
             return [ItemTemplatesRepository.__create_item(item_template)]
 
         items: List[Item] = []
         stack_size = item_template['_props']['StackMaxSize']
 
+        #  Create multiple stacks of items (Say 80 rounds of 5.45 ammo it will create two stacks (60 and 20))
         for _ in range(count, stack_size, count):
             items.append(ItemTemplatesRepository.__create_item(item_template, count))
 

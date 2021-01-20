@@ -63,7 +63,8 @@ class BotGenerator:
 
         return bot
 
-    def __generate_health(self, bot, role):
+    @staticmethod
+    def __generate_health(bot, role):
         health_base = {
             'Hydration': {'Current': 100, 'Maximum': 100},
             'Energy': {'Current': 100, 'Maximum': 100},

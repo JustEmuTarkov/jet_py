@@ -118,11 +118,11 @@ class LocationGenerator:
                     _tpl=random_template['_id'],
                     parentId=container_id,
                     slotId='main',
-                    location={"x": 0, "y": 0, "r": "Horizontal"},
+                    # location={"x": 0, "y": 0, "r": "Horizontal"},
                 )
                 try:
                     container_inventory.place_item(item)
-                    item['slotId'] = 'main'
+                    # item['slotId'] = 'main'
                     break
                 except NoSpaceError:
                     pass

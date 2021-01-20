@@ -3,16 +3,14 @@ from __future__ import annotations
 import enum
 from typing import List, cast, TypedDict, Optional, Dict, Callable, Iterable
 
-import flask
 import ujson
-from flask import request
+from flask import request, Request
 
 import mods.core.lib.items as items_lib
-from lib.profile import HideoutAreaType
 from mods.core.lib.adapters import InventoryToRequestAdapter
 from mods.core.lib.inventory import PlayerInventory, StashMap
 from mods.core.lib.items import MoveLocation, ItemTemplatesRepository, ItemId, Item, generate_item_id
-from mods.core.lib.profile import Profile
+from mods.core.lib.profile import Profile, HideoutAreaType
 from mods.core.lib.trader import TraderInventory, Traders
 from server import logger
 
@@ -557,7 +555,7 @@ class DispatcherManager:
     profile: Profile
     inventory: PlayerInventory
     inventory_adapter: InventoryToRequestAdapter
-    request: flask.request
+    request: Request
     response: dict
 
     dispatchers: Iterable[Dispatcher]
