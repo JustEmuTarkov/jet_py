@@ -215,11 +215,14 @@ class StashMap:
 
 
 class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
-    def remove_item(self, item: Item):
+    def remove_item(self, item: Item, remove_children=True):
         """
         Removes item from inventory
         """
         self.items.remove(item)
+        if not remove_children:
+            return
+
         for child in self.iter_item_children_recursively(item):
             self.items.remove(child)
 

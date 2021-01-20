@@ -321,8 +321,9 @@ class InventoryDispatcher(Dispatcher):
             for changed_item in action['changedItems']:
                 item = self.profile.inventory.get_item(changed_item['_id'])
 
-                self.profile.inventory.remove_item(item)
-                self.profile.inventory.add_item(changed_item)
+                self.inventory.remove_item(item, remove_children=False)
+                self.inventory.add_item(changed_item)
+
                 self.response['items']['change'].append(changed_item)
 
         if action['deletedItems'] is not None:
