@@ -3,7 +3,7 @@ from flask import Blueprint, request
 
 from mods.core.lib.bots import BotGenerator
 from mods.core.lib import locations
-from mods.core.lib.inventory import regenerate_items_ids
+from mods.core.lib.items import regenerate_items_ids
 from mods.core.lib.profile import Profile
 from server import db_dir, logger
 from server.utils import game_response_middleware, ZlibMiddleware
@@ -52,7 +52,7 @@ def bot_difficulty_settings(type_: str, difficulty: str):
 
 @blueprint.route('/singleplayer/settings/bot/limit/<string:bot_type>')
 @ZlibMiddleware()
-def settings_bot_limit(bot_type: str):
+def settings_bot_limit(bot_type: str):  # pylint: disable=unused-argument
     return 30
 
 

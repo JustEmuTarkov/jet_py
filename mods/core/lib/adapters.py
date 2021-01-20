@@ -1,8 +1,8 @@
 import copy
 from typing import Optional
 
-from mods.core.lib.inventory import PlayerInventory, generate_item_id
-from mods.core.lib.items import ItemTemplatesRepository, AmmoStackPosition, MoveLocation, Item
+from mods.core.lib.inventory import PlayerInventory
+from mods.core.lib.items import ItemTemplatesRepository, AmmoStackPosition, MoveLocation, Item, generate_item_id
 
 
 class InventoryToRequestAdapter:

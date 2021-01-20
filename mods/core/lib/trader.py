@@ -7,9 +7,8 @@ from typing import Tuple, TypedDict, List, Union
 
 import ujson
 
-from mods.core.lib.inventory import ImmutableInventory, InventoryItems, generate_item_id, PlayerInventory
-from mods.core.lib.items import Item, ItemUpd
-from mods.core.lib.items import TemplateId, ItemTemplatesRepository
+from mods.core.lib.inventory import ImmutableInventory, InventoryItems, PlayerInventory
+from mods.core.lib.items import Item, ItemUpd, TemplateId, ItemTemplatesRepository, generate_item_id
 from server import db_dir
 
 

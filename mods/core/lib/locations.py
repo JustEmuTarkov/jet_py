@@ -6,9 +6,10 @@ from typing import DefaultDict, List, Union, Dict, Tuple
 
 import ujson
 
-from mods.core.lib.inventory import generate_item_id, regenerate_items_ids, GridInventory, InventoryItems, \
+from mods.core.lib.inventory import GridInventory, InventoryItems, \
     NoSpaceError, StashMap
-from mods.core.lib.items import Item, ItemTemplatesRepository, TemplateId, ItemId, ItemLocation
+from mods.core.lib.items import Item, ItemTemplatesRepository, TemplateId, ItemId, ItemLocation, generate_item_id, \
+    regenerate_items_ids
 from server import db_dir
 
 

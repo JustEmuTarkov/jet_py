@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import copy
 import enum
+import uuid
 from typing import TypedDict, Literal, Union, List, NewType, Dict, Iterable
 
 import ujson
@@ -113,6 +115,26 @@ class MoveLocation(MoveLocationBase, total=False):
     location: ItemLocation
 
 
+def generate_item_id() -> ItemId:
+    unique_id = str(uuid.uuid4())
+    unique_id = ''.join(unique_id.split('-')[1:])
+
+    return ItemId(unique_id)
+
+
+def regenerate_items_ids(items: List[Item]):
+    id_map = {
+        item['_id']: generate_item_id() for item in items
+    }
+
+    for item in items:
+        item['_id'] = id_map[item['_id']]
+        try:
+            item['parentId'] = id_map[item['parentId']]
+        except KeyError:
+            pass
+
+
 class ItemTemplatesRepository(metaclass=SingletonMeta):
     def __init__(self):
         self.__item_templates = self.__read_item_templates()
@@ -148,7 +170,6 @@ class ItemTemplatesRepository(metaclass=SingletonMeta):
         except KeyError as error:
             raise ItemNotFoundError() from error
 
-    # @functools.lru_cache(64)
     def iter_template_children(self, template_id: TemplateId) -> Iterable[Dict]:
         templates = [self.get_template(template_id)]
         while templates:
@@ -171,6 +192,52 @@ class ItemTemplatesRepository(metaclass=SingletonMeta):
     def get_preset(self, template_id: TemplateId) -> List[Item]:
         item_presets = self.globals['ItemPresets']
         try:
-            return item_presets[template_id]['_items']
+            items = copy.deepcopy(item_presets[template_id]['_items'])
+            regenerate_items_ids(items)
+            return items
         except KeyError as e:
             raise NotFoundError() from e
+
+    @staticmethod
+    def __create_item(item_template: dict, count: int = 1) -> Item:
+        item = Item(
+            _id=generate_item_id(),
+            _tpl=item_template['_id'],
+        )
+
+        if count > 1:
+            item['upd'] = ItemUpd(StackObjectsCount=count)
+
+        #  Item is either medkit or a painkiller
+        if item_template['_parent'] in ('5448f39d4bdc2d0a728b4568', '5448f3a14bdc2d27728b4569'):
+            if 'upd' not in item:
+                item['upd'] = {}
+            item['upd']['MedKit'] = ItemUpdMedKit(HpResource=item_template['_props']['MaxHpResource'])
+
+        return item
+
+    @staticmethod
+    def create_item(template_id: TemplateId, count: int = 1) -> List[Item]:
+        if count == 0:
+            raise ValueError('Cannot create 0 items')
+
+        repository = ItemTemplatesRepository()
+        try:
+            return repository.get_preset(template_id)
+        except NotFoundError:
+            pass
+
+        item_template = repository.get_template(template_id)
+        if count == 1:
+            return [ItemTemplatesRepository.__create_item(item_template)]
+
+        items: List[Item] = []
+        stack_size = item_template['_props']['StackMaxSize']
+
+        for _ in range(count, stack_size, count):
+            items.append(ItemTemplatesRepository.__create_item(item_template, count))
+
+        if stack_size % count:
+            items.append(ItemTemplatesRepository.__create_item(item_template, stack_size % count))
+
+        return items

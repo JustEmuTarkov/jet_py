@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import abc
 import copy
-import uuid
 from typing import List, Tuple, Generator, Iterable
 
 import ujson
@@ -19,26 +18,6 @@ def merge_extra_size(first: ItemExtraSize, second: ItemExtraSize) -> ItemExtraSi
     extra_size['up'] = max(first['up'], second['up'])
     extra_size['down'] = max(first['down'], second['down'])
     return extra_size
-
-
-def generate_item_id() -> ItemId:
-    unique_id = str(uuid.uuid4())
-    unique_id = ''.join(unique_id.split('-')[1:])
-
-    return ItemId(unique_id)
-
-
-def regenerate_items_ids(items: List[Item]):
-    id_map = {
-        item['_id']: generate_item_id() for item in items
-    }
-
-    for item in items:
-        item['_id'] = id_map[item['_id']]
-        try:
-            item['parentId'] = id_map[item['parentId']]
-        except KeyError:
-            pass
 
 
 InventoryItems = List[Item]
@@ -389,6 +368,12 @@ class GridInventory(MutableInventory):
         Splits count from item and returns new item
         :return: New item
         """
+        if not self.can_split(item):
+            if count == 1:
+                self.remove_item(item)
+                return item
+            raise ValueError(f'Cannot split from item {item} {count} items since it does not have enough in stack')
+
         if item['upd']['StackObjectsCount'] < count:
             raise ValueError("Can't split from item since stack amount < count")
         item_copy = copy.deepcopy(item)

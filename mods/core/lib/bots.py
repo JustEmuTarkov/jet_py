@@ -6,8 +6,8 @@ from typing import List
 
 import ujson
 
-from mods.core.lib.inventory import MutableInventory, generate_item_id, regenerate_items_ids
-from mods.core.lib.items import Item, TemplateId
+from mods.core.lib.inventory import MutableInventory
+from mods.core.lib.items import Item, TemplateId, generate_item_id, regenerate_items_ids
 from server import db_dir
 
 
