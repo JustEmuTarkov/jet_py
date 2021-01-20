@@ -70,7 +70,6 @@ def generate_bots():
             bot = bot_generator.generate_bot(role=condition['Role'], difficulty=condition['Difficulty'])
             bots.append(bot)
 
-    logger.debug(ujson.dumps(bots[0], indent=4))
     return bots
 
 
