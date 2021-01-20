@@ -3,13 +3,12 @@ from __future__ import annotations
 import copy
 import enum
 import time
-from typing import List, TypedDict, Union
+from typing import List, TypedDict, Union, Dict, Tuple, cast
 
 import ujson
 
 import mods.core.lib.inventory as inventory_lib
 import mods.core.lib.items as items_lib
-from mods.core.lib import NotFoundError
 from mods.core.lib.trader import Traders
 from server import root_dir, db_dir, logger
 
@@ -39,6 +38,7 @@ class Encyclopedia:
 
 class Quests:
     def __init__(self, profile: Profile):
+        self.profile = profile
         self.data = profile.quests_data
 
     def get_quest(self, quest_id: str):
@@ -55,14 +55,48 @@ class Quests:
         except KeyError:
             pass
 
-        quest = {
-            'qid': quest_id,
-            'startTime': int(time.time()),
-            'completedConditions': [],
-            'statusTimers': {},
-            'status': 'Started',
-        }
+        # quest = {
+        #     'qid': quest_id,
+        #     'startTime': int(time.time()),
+        #     'completedConditions': [],
+        #     'statusTimers': {},
+        #     'status': 'Started',
+        # }
+
+        quest = self.get_quest(quest_id)
+        quest['status'] = 'Started'
+        quest['startTime'] = int(time.time())
+
         self.data.append(quest)
+
+    def handover_items(self, quest_id: str, condition_id: str, items: Dict[items_lib.ItemId, int]) \
+            -> Tuple[List[items_lib.Item], List[items_lib.Item]]:
+
+        try:
+            condition = self.profile.pmc_profile['BackendCounters'][condition_id]
+        except KeyError:
+            condition = {
+                'id': condition_id,
+                'qid': quest_id,
+                'value': 0
+            }
+            self.profile.pmc_profile['BackendCounters'][condition_id] = condition
+
+        removed_items = []
+        changed_items = []
+        for item_id, count in items.items():
+            item = self.profile.inventory.get_item(item_id)
+
+            if not self.profile.inventory.can_split(item) and count == 1:
+                removed_items.append(item)
+                self.profile.inventory.remove_item(item)
+            else:
+                changed_items.append(item)
+                removed_items.append(self.profile.inventory.split_item(item=item, count=count))
+
+            condition['value'] += count
+
+        return removed_items, changed_items
 
 
 class HideoutAreaType(enum.Enum):
@@ -198,20 +232,18 @@ class Hideout:
         self.data['Production'][recipe_id] = production
 
     def take_production(self, recipe_id: str) -> List[items_lib.Item]:
-
         recipe = self.get_recipe(recipe_id)
 
         product_tpl = recipe['endProduct']
         count = recipe['count']
 
-        try:
-            items = items_lib.ItemTemplatesRepository().get_preset(product_tpl)
-        except NotFoundError:
-            items = [
-                items_lib.Item(_id=inventory_lib.generate_item_id(), _tpl=product_tpl) for _ in range(count)
-            ]
+        items = items_lib.ItemTemplatesRepository.create_item(product_tpl, count)
 
-        inventory_lib.regenerate_items_ids(items)
+        for item in items:
+            try:
+                item['upd']['SpawnedInSession'] = True
+            except KeyError:
+                item['upd'] = items_lib.ItemUpd(SpawnedInSession=True)
 
         del self.data['Production'][recipe_id]
 
@@ -223,7 +255,7 @@ class Hideout:
 
     def __update_production_time(self, time_elapsed: int, generator_worked: int):
         for production in self.data['Production'].values():
-            production: HideoutProduction
+            production = cast(HideoutProduction, production)
 
             generator_didnt_work_for = time_elapsed - generator_worked
             if generator_didnt_work_for < 0:
