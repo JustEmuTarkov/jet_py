@@ -14,7 +14,7 @@ blueprint = Blueprint(__name__, __name__)
 
 @blueprint.route('/client/trading/customization/storage', methods=['POST', 'GET'])
 @game_response_middleware()
-def client_trading_customization_storage():
+def customization_storage():
     if 'PHPSESSID' not in request.cookies:
         raise TarkovError(1, "No Session")
     session_id = request.cookies['PHPSESSID']
@@ -24,7 +24,7 @@ def client_trading_customization_storage():
 
 @blueprint.route('/client/trading/customization/<string:trader_id>', methods=['POST', 'GET'])
 @game_response_middleware()
-def client_trading_customization(trader_id):
+def customization(trader_id):
     suits_path = db_dir.joinpath('assort', trader_id, 'suits.json')
     if not suits_path.exists():
         return TarkovError(600, "This Trader Doesn't have any suits for sale")
@@ -42,7 +42,7 @@ def client_trading_customization(trader_id):
 
 @blueprint.route('/client/trading/api/getUserAssortPrice/trader/<string:trader_id>', methods=['POST', 'GET'])
 @game_response_middleware()
-def client_trading_api_get_user_assort_price(trader_id):
+def get_user_assort_price(trader_id):
     profile_id = request.cookies['PHPSESSID']
     player_profile = lib_profile.Profile(profile_id)
 
@@ -63,7 +63,7 @@ def client_trading_api_get_user_assort_price(trader_id):
 
 @blueprint.route('/client/trading/api/getTradersList', methods=['POST', 'GET'])
 @game_response_middleware(is_static=True)
-def client_trading_api_get_trader_list():
+def get_trader_list():
     traders_path = db_dir.joinpath('base', 'traders')
 
     paths = set(traders_path.rglob('*/base.json')) - set(traders_path.rglob('ragfair/base.json'))
@@ -77,7 +77,7 @@ def client_trading_api_get_trader_list():
 @blueprint.route('/client/trading/api/getTraderAssort/<string:trader_id>', methods=['POST', 'GET'])
 # @lru_cache(8)
 @game_response_middleware()
-def client_trading_api_get_trader_assort(trader_id):
+def get_trader_assort(trader_id):
     with Profile(request.cookies['PHPSESSID']) as profile:
         trader_inventory = TraderInventory(Traders(trader_id), player_inventory=profile.inventory)
         return {
@@ -90,7 +90,7 @@ def client_trading_api_get_trader_assort(trader_id):
 @blueprint.route('/client/trading/api/getTrader/<string:trader_id>', methods=['POST', 'GET'])
 @lru_cache(8)
 @game_response_middleware()
-def client_trading_api_get_trader(trader_id):
+def get_trader(trader_id):
     trader_path = db_dir.joinpath('base', 'traders', trader_id, 'base.json')
 
     traders_data = ujson.load(trader_path.open('r', encoding='utf8'))
