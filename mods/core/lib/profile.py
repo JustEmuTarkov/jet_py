@@ -389,6 +389,5 @@ class Profile:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        if exc_val:
-            raise exc_type from exc_val
-        self.__write()
+        if exc_type is None:
+            self.__write()
