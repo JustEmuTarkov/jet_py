@@ -183,7 +183,6 @@ def client_game_logout():
 
 @app.route('/files/<path:file_path>', methods=['POST', 'GET'])
 def static_files(file_path):
-    print(file_path)
     file = root_dir.joinpath('static', file_path)
     if file.exists():
         return send_file(file)

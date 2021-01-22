@@ -453,7 +453,6 @@ class TradingDispatcher(Dispatcher):
 
     def _trading_confirm(self, action: TradingActions.Trading):
         if action.type == 'buy_from_trader':
-            print(action.dict())
             self.__buy_from_trader(TradingActions.BuyFromTrader(**action.dict()))
             return
 
