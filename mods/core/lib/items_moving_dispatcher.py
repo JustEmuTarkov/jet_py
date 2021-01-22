@@ -1,15 +1,19 @@
 from __future__ import annotations
 
 import enum
-from typing import List, cast, TypedDict, Optional, Dict, Callable, Iterable
+import typing
+from types import SimpleNamespace
+from typing import List, Dict, Callable, Iterable, Literal, Optional, cast
 
 import ujson
 from flask import request, Request
+from pydantic import StrictBool, StrictInt, Extra
 
 import mods.core.lib.items as items_lib
+from mods.core import models
 from mods.core.lib.adapters import InventoryToRequestAdapter
 from mods.core.lib.inventory import PlayerInventory, StashMap
-from mods.core.lib.items import MoveLocation, ItemTemplatesRepository, ItemId, Item, generate_item_id
+from mods.core.lib.items import ItemTemplatesRepository, ItemId, generate_item_id, TemplateId, MoveLocation, Item
 from mods.core.lib.profile import Profile, HideoutAreaType
 from mods.core.lib.trader import TraderInventory, Traders
 from server import logger
@@ -69,142 +73,142 @@ class ActionType(enum.Enum):
     ApplyInventoryChanges = "ApplyInventoryChanges"
 
 
-class Action(TypedDict):
+class ActionModel(models.Base):
     Action: ActionType
 
 
-class MoveAction(Action):
-    item: ItemId
-    to: MoveLocation
-
-
-class SplitAction(Action):
-    item: ItemId
-    container: MoveLocation
-    count: int
-
-
-class FoldAction(Action):
-    item: ItemId
-    value: bool
-
-
-MergeAction = TypedDict('MergeAction', {'Action': ActionType, 'item': ItemId, 'with': ItemId})
-
-
-class TransferAction(MergeAction):
-    count: int
-
-
-class ExamineActionOwner(TypedDict):
+class InventoryExamineActionOwnerModel(models.Base):
     id: ItemId
-    type: str
+    type: Optional[Literal['Trader', 'HideoutUpgrade', 'HideoutProduction']] = None
 
 
-class ExamineAction(Action, total=False):
-    item: ItemId
-    fromOwner: ExamineActionOwner
+class InventoryActions(SimpleNamespace):
+    class ApplyInventoryChanges(ActionModel):
+        changedItems: Optional[List[dict]] = None
+        deletedItems: Optional[List[dict]] = None
+
+    class Examine(ActionModel):
+        item: ItemId
+        fromOwner: InventoryExamineActionOwnerModel
+
+    class Split(ActionModel):
+        item: ItemId
+        container: dict  # MoveLocation
+        count: StrictInt
+
+    class Move(ActionModel):
+        item: ItemId
+        to: dict  # MoveLocation
+
+    class Merge(ActionModel):
+        class Config:
+            fields = {'with_': 'with'}
+
+        item: ItemId
+        with_: ItemId
+
+    class Transfer(Merge):
+        count: int
+
+    class Fold(ActionModel):
+        item: ItemId
+        value: StrictBool
+
+    class Remove(ActionModel):
+        item: ItemId
+
+    class ReadEncyclopedia(ActionModel):
+        ids: List[TemplateId]
+
+    class Insure(ActionModel):
+        items: List[ItemId]
+        tid: str
 
 
-class TradingSchemeItem(TypedDict):
+class HideoutActions(SimpleNamespace):
+    class Upgrade(ActionModel):
+        areaType: StrictInt
+        items: List[dict]
+        timestamp: StrictInt
+
+    class UpgradeComplete(ActionModel):
+        areaType: StrictInt
+        timestamp: StrictInt
+
+    class PutItemsInAreaSlots(ActionModel):
+        areaType: StrictInt
+        items: dict
+        timestamp: StrictInt
+
+    class ToggleArea(ActionModel):
+        areaType: StrictInt
+        enabled: bool
+        timestamp: StrictInt
+
+    class TakeItemsFromAreaSlots(ActionModel):
+        areaType: StrictInt
+        slots: List[StrictInt]
+        timestamp: StrictInt
+
+    class SingleProductionStart(ActionModel):
+        recipeId: str
+        items: List[dict]
+        timestamp: StrictInt
+
+    class TakeProduction(ActionModel):
+        recipeId: str
+        timestamp: StrictInt
+
+
+class TradingSchemeItemModel(models.Base):
+    id: ItemId
+    count: StrictInt
+    # scheme_id: Optional[StrictInt]
+
+
+class TradingActions(SimpleNamespace):
+    class Trading(ActionModel):
+        class Config:
+            extra = Extra.allow
+
+        type: Literal['buy_from_trader', 'sell_to_trader']
+
+    class BuyFromTrader(Trading):
+        class Config:
+            extra = Extra.forbid
+
+        tid: str
+        item_id: str
+        count: StrictInt
+        scheme_id: StrictInt
+        scheme_items: List[TradingSchemeItemModel]
+
+    class SellToTrader(Trading):
+        class Config:
+            extra = Extra.forbid
+
+        tid: str
+        items: List[TradingSchemeItemModel]
+
+
+class QuestHandoverItem(models.Base):
     id: ItemId
     count: int
-    scheme_id: int
 
 
-class TradingAction(Action):
-    type: str
+class QuestActions(SimpleNamespace):
+    class Accept(ActionModel):
+        qid: str
+        count: int
 
+    class Handover(ActionModel):
+        qid: str
+        conditionId: str
+        items: List[QuestHandoverItem]
 
-class TradingConfirmAction(TradingAction):
-    tid: str
-    item_id: str
-    count: int
-    scheme_id: int
-    scheme_items: List[TradingSchemeItem]
-
-
-class TradingSellAction(TradingAction):
-    tid: str
-    items: List[TradingSchemeItem]
-
-
-class ItemRemoveAction(Action):
-    item: ItemId
-
-
-class QuestAcceptAction(Action):
-    qid: str
-    count: int
-
-
-class QuestHandoverItem(TypedDict):
-    id: ItemId
-    count: int
-
-
-class QuestHandoverAction(Action):
-    qid: str
-    conditionId: str
-    items: List[QuestHandoverItem]
-
-
-class QuestCompleteAction(Action):
-    qid: str
-    removeExcessItems: bool
-
-
-class ReadEncyclopediaAction(Action):
-    ids: List[items_lib.TemplateId]
-
-
-class HideoutUpgradeAction(Action):
-    areaType: int
-    items: List[dict]
-    timestamp: int
-
-
-class HideoutUpgradeCompleteAction(Action):
-    areaType: int
-    timestamp: int
-
-
-class HideoutPutItemsInAreaSlotsAction(Action):
-    areaType: int
-    items: dict
-    timestamp: int
-
-
-class HideoutToggleAreaAction(Action):
-    areaType: int
-    enabled: bool
-    timestamp: int
-
-
-class HideoutTakeItemsFromAreaSlotsAction(Action):
-    areaType: int
-    slots: List[int]
-    timestamp: int
-
-
-class HideoutSingleProductionStartAction(Action):
-    recipeId: str
-    items: List[dict]
-
-
-class HideoutTakeProductionAction(Action):
-    recipeId: str
-    timestamp: int
-
-
-class InsureAction(Action):
-    items: List[ItemId]
-    tid: str
-
-
-class ApplyInventoryChangesAction(Action):
-    changedItems: Optional[List[Item]]
-    deletedItems: Optional[List[Item]]
+    class Complete(ActionModel):
+        qid: str
+        removeExcessItems: bool
 
 
 class Dispatcher:
@@ -221,18 +225,20 @@ class Dispatcher:
         self.profile = manager.profile
         self.response = manager.response
 
-    def dispatch(self, action: Action):
+    def dispatch(self, action: dict):
+        action_type: ActionType = ActionType(action['Action'])
+
         try:
-            action_type = ActionType(action['Action'])
             method = self.dispatch_map[action_type]
         except KeyError as error:
-            action_type = action['Action']
             raise NotImplementedError(
                 f'Action with type {action_type} not implemented in dispatcher {self.__class__}'
             ) from error
 
+        types = typing.get_type_hints(method)
+        model_type = types['action'] if issubclass(types['action'], ActionModel) else dict
         # noinspection PyArgumentList
-        method(action)  # type: ignore
+        method(model_type(**action))  # type: ignore
 
 
 class InventoryDispatcher(Dispatcher):
@@ -252,88 +258,79 @@ class InventoryDispatcher(Dispatcher):
             ActionType.ApplyInventoryChanges: self._apply_inventory_changes,
         }
 
-    def _move(self, action: MoveAction):
-        item_id = action['item']
-        move_location: MoveLocation = action['to']
+    def _move(self, action: InventoryActions.Move):
+        item = self.inventory.get_item(action.item)
+        self.inventory_adapter.move_item(item, cast(MoveLocation, action.to))
 
-        item = self.inventory.get_item(item_id)
-        self.inventory_adapter.move_item(item, move_location)
-
-    def _split(self, action: SplitAction):
-        item_id = action['item']
-        move_location: MoveLocation = action['container']
-
-        item = self.inventory.get_item(item_id)
-
-        new_item = self.inventory_adapter.split_item(item, move_location, action['count'])
+    def _split(self, action: InventoryActions.Split):
+        item = self.inventory.get_item(action.item)
+        new_item = self.inventory_adapter.split_item(item, cast(MoveLocation, action.container), action.count)
 
         self.response['items']['new'].append(new_item)
         if not item['upd']['StackObjectsCount']:
             self.response['items']['del'].append(item)
 
-    def _examine(self, action: ExamineAction):
-        if 'fromOwner' in action:
-            if action['fromOwner']['type'] == 'Trader':
-                trader_id = action['fromOwner']['id']
-                item_id = action['item']
+    def _examine(self, action: InventoryActions.Examine):
+        item_id = action.item
 
-                trader_inventory = TraderInventory(Traders(trader_id), self.inventory)
-                item = trader_inventory.get_item(item_id)
-                self.profile.encyclopedia.examine(item)
-
-            elif action['fromOwner']['type'] in ('HideoutUpgrade', 'HideoutProduction'):
-                item_tpl_id = items_lib.TemplateId(action['item'])
-                self.profile.encyclopedia.examine(item_tpl_id)
-
-            else:
-                raise NotImplementedError(f'Unhandled examine action: {action}')
-        else:
-            item_id = action['item']
+        if action.fromOwner is None:
             item = self.inventory.get_item(item_id)
             self.profile.encyclopedia.examine(item)
+            return
 
-    def _merge(self, action: MergeAction):
-        item = self.inventory.get_item(action['item'])
-        with_ = self.inventory.get_item(action['with'])
+        if action.fromOwner.type == 'Trader':
+            trader_id = action.fromOwner.id
+
+            trader_inventory = TraderInventory(Traders(trader_id), self.inventory)
+            item = trader_inventory.get_item(item_id)
+            self.profile.encyclopedia.examine(item)
+
+        elif action.fromOwner.type in ('HideoutUpgrade', 'HideoutProduction'):
+            item_tpl_id = items_lib.TemplateId(action.item)
+            self.profile.encyclopedia.examine(item_tpl_id)
+
+    def _merge(self, action: InventoryActions.Merge):
+        item = self.inventory.get_item(action.item)
+        with_ = self.inventory.get_item(action.with_)
 
         self.inventory.merge(item, with_)
         self.response['items']['del'].append(item)
 
-    def _transfer(self, action: TransferAction):
-        item = self.inventory.get_item(action['item'])
-        with_ = self.inventory.get_item(action['with'])
-        self.inventory.transfer(item, with_, action['count'])
+    def _transfer(self, action: InventoryActions.Transfer):
+        item = self.inventory.get_item(action.item)
+        with_ = self.inventory.get_item(action.with_)
+        self.inventory.transfer(item, with_, action.count)
 
-    def _fold(self, action: FoldAction):
-        item = self.inventory.get_item(action['item'])
-        self.inventory.fold(item, action['value'])
+    def _fold(self, action: InventoryActions.Fold):
+        item = self.inventory.get_item(action.item)
+        self.inventory.fold(item, action.value)
 
-    def _remove(self, action: ItemRemoveAction):
-        item = self.inventory.get_item(action['item'])
+    def _remove(self, action: InventoryActions.Remove):
+        item = self.inventory.get_item(action.item)
         self.inventory.remove_item(item)
 
-    def _read_encyclopedia(self, action: ReadEncyclopediaAction):
-        for template_id in action['ids']:
+    def _read_encyclopedia(self, action: InventoryActions.ReadEncyclopedia):
+        for template_id in action.ids:
             self.profile.encyclopedia.read(template_id)
 
-    def _apply_inventory_changes(self, action: ApplyInventoryChangesAction):
-        if action['changedItems'] is not None:
-            for changed_item in action['changedItems']:
+    def _apply_inventory_changes(self, action: InventoryActions.ApplyInventoryChanges):
+        if action.changedItems:
+            for changed_item in action.changedItems:
                 item = self.profile.inventory.get_item(changed_item['_id'])
 
                 self.inventory.remove_item(item, remove_children=False)
-                self.inventory.add_item(changed_item)
+                self.inventory.add_item(cast(Item, changed_item))
 
                 self.response['items']['change'].append(changed_item)
 
-        if action['deletedItems'] is not None:
-            for deleted_item in action['deletedItems']:
+        if action.deletedItems:
+            for deleted_item in action.deletedItems:
                 item = self.profile.inventory.get_item(deleted_item['_id'])
                 self.profile.inventory.remove_item(item)
                 self.response['items']['del'].append(item)
 
-    def _insure(self, action: InsureAction):
-        trader = Traders(action['tid'])
+    def _insure(self, action: InventoryActions.Insure):
+        trader = Traders(action.tid)
         trader_inventory = TraderInventory(
             trader=trader,
             player_inventory=self.profile.inventory,
@@ -341,7 +338,7 @@ class InventoryDispatcher(Dispatcher):
 
         rubles_tpl_id = items_lib.TemplateId('5449016a4bdc2d6f028b456f')
         total_price = 0
-        for item_id in action['items']:
+        for item_id in action.items:
             item = self.profile.inventory.get_item(item_id)
             total_price += trader_inventory.calculate_insurance_price(item)
             self.profile.add_insurance(item, trader)
@@ -365,13 +362,13 @@ class HideoutDispatcher(Dispatcher):
             ActionType.HideoutTakeItemsFromAreaSlots: self._hideout_take_items_from_area_slots,
         }
 
-    def _hideout_upgrade_start(self, action: HideoutUpgradeAction):
+    def _hideout_upgrade_start(self, action: HideoutActions.Upgrade):
         hideout = self.profile.hideout
 
-        area_type = HideoutAreaType(action['areaType'])
+        area_type = HideoutAreaType(action.areaType)
         hideout.area_upgrade_start(area_type)
 
-        items_required = action['items']
+        items_required = action.items
         for item_required in items_required:
             count = item_required['count']
             item_id = item_required['id']
@@ -384,16 +381,16 @@ class HideoutDispatcher(Dispatcher):
             else:
                 self.response['items']['change'].append(item)
 
-    def _hideout_upgrade_finish(self, action: HideoutUpgradeCompleteAction):
+    def _hideout_upgrade_finish(self, action: HideoutActions.UpgradeComplete):
         hideout = self.profile.hideout
 
-        area_type = HideoutAreaType(action['areaType'])
+        area_type = HideoutAreaType(action.areaType)
         hideout.area_upgrade_finish(area_type)
 
-    def _hideout_put_items_in_area_slots(self, action: HideoutPutItemsInAreaSlotsAction):
-        area_type = HideoutAreaType(action['areaType'])
+    def _hideout_put_items_in_area_slots(self, action: HideoutActions.PutItemsInAreaSlots):
+        area_type = HideoutAreaType(action.areaType)
 
-        for slot_id, item_data in action['items'].items():
+        for slot_id, item_data in action.items.items():
             count, item_id = item_data['count'], item_data['id']
             item = self.profile.inventory.get_item(item_id)
 
@@ -404,12 +401,12 @@ class HideoutDispatcher(Dispatcher):
                 self.profile.inventory.remove_item(item)
                 self.profile.hideout.put_items_in_area_slots(area_type, int(slot_id), item)
 
-    def _hideout_toggle_area(self, action: HideoutToggleAreaAction):
-        area_type = HideoutAreaType(action['areaType'])
-        self.profile.hideout.toggle_area(area_type, action['enabled'])
+    def _hideout_toggle_area(self, action: HideoutActions.ToggleArea):
+        area_type = HideoutAreaType(action.areaType)
+        self.profile.hideout.toggle_area(area_type, action.enabled)
 
-    def _hideout_single_production_start(self, action: HideoutSingleProductionStartAction):
-        items_info = action['items']
+    def _hideout_single_production_start(self, action: HideoutActions.SingleProductionStart):
+        items_info = action.items
         inventory = self.profile.inventory
 
         for item_info in items_info:
@@ -429,18 +426,18 @@ class HideoutDispatcher(Dispatcher):
             else:
                 self.response['items']['upd'].append(item)
 
-        self.profile.hideout.start_single_production(recipe_id=action['recipeId'])
+        self.profile.hideout.start_single_production(recipe_id=action.recipeId)
 
-    def _hideout_take_production(self, action: HideoutTakeProductionAction):
-        items = self.profile.hideout.take_production(action['recipeId'])
+    def _hideout_take_production(self, action: HideoutActions.TakeProduction):
+        items = self.profile.hideout.take_production(action.recipeId)
         self.response['items']['new'].extend(items)
         for item in items:
             self.inventory.place_item(item)
 
-    def _hideout_take_items_from_area_slots(self, action: HideoutTakeItemsFromAreaSlotsAction):
+    def _hideout_take_items_from_area_slots(self, action: HideoutActions.TakeItemsFromAreaSlots):
         hideout = self.profile.hideout
-        area_type = HideoutAreaType(action['areaType'])
-        for slot_id in action['slots']:
+        area_type = HideoutAreaType(action.areaType)
+        for slot_id in action.slots:
             item = hideout.take_item_from_area_slot(area_type=area_type, slot_id=slot_id)
 
             self.inventory.place_item(item)
@@ -454,23 +451,22 @@ class TradingDispatcher(Dispatcher):
             ActionType.TradingConfirm: self._trading_confirm,
         }
 
-    def _trading_confirm(self, action: TradingAction):
-        if action['type'] == 'buy_from_trader':
-            action = cast(TradingConfirmAction, action)
-            self.__buy_from_trader(action)
+    def _trading_confirm(self, action: TradingActions.Trading):
+        if action.type == 'buy_from_trader':
+            print(action.dict())
+            self.__buy_from_trader(TradingActions.BuyFromTrader(**action.dict()))
             return
 
-        if action['type'] == 'sell_to_trader':
-            action = cast(TradingSellAction, action)
-            self.__sell_to_trader(action)
+        if action.type == 'sell_to_trader':
+            self.__sell_to_trader(TradingActions.SellToTrader(**action.dict()))
             return
 
         raise NotImplementedError(f'Trading action {action} not implemented')
 
-    def __buy_from_trader(self, action: TradingConfirmAction):
-        trader_id = action['tid']
-        item_id = action['item_id']
-        item_count = action['count']
+    def __buy_from_trader(self, action: TradingActions.BuyFromTrader):
+        trader_id = action.tid
+        item_id = action.item_id
+        item_count = action.count
         trader_inventory = TraderInventory(Traders(trader_id), self.inventory)
         # item = trader_inventory.get_item(item_id)
 
@@ -487,9 +483,9 @@ class TradingDispatcher(Dispatcher):
         self.response['items']['new'].extend(items)
         self.response['items']['new'].extend(children_items)
 
-        for scheme_item in action['scheme_items']:
-            item = self.inventory.get_item(scheme_item['id'])
-            item['upd']['StackObjectsCount'] -= scheme_item['count']
+        for scheme_item in action.scheme_items:
+            item = self.inventory.get_item(scheme_item.id)
+            item['upd']['StackObjectsCount'] -= scheme_item.count
             if not item['upd']['StackObjectsCount']:
                 self.inventory.remove_item(item)
                 self.response['items']['del'].append(item)
@@ -499,13 +495,12 @@ class TradingDispatcher(Dispatcher):
         logger.debug(str(items))
         logger.debug(str(children_items))
 
-    def __sell_to_trader(self, action: TradingSellAction):
-        logger.debug(ujson.dumps(action))
-        trader_id = action['tid']
-        items_to_sell = action['items']
+    def __sell_to_trader(self, action: TradingActions.SellToTrader):
+        trader_id = action.tid
+        items_to_sell = action.items
         trader_inventory = TraderInventory(Traders(trader_id), self.inventory)
 
-        items = list(self.inventory.get_item(i['id']) for i in items_to_sell)
+        items = list(self.inventory.get_item(i.id) for i in items_to_sell)
         price_sum = sum(trader_inventory.get_sell_price(item) for item in items)
 
         self.response['items']['del'].extend(items)
@@ -538,17 +533,17 @@ class QuestDispatcher(Dispatcher):
             ActionType.QuestHandover: self._quest_handover,
         }
 
-    def _quest_accept(self, action: QuestAcceptAction):
-        self.profile.quests.accept_quest(action['qid'])
+    def _quest_accept(self, action: QuestActions.Accept):
+        self.profile.quests.accept_quest(action.qid)
 
-    def _quest_handover(self, action: QuestHandoverAction):
-        items_dict = {i['id']: i['count'] for i in action['items']}
-        removed, changed = self.profile.quests.handover_items(action['qid'], action['conditionId'], items_dict)
+    def _quest_handover(self, action: QuestActions.Handover):
+        items_dict = {item.id: item.count for item in action.items}
+        removed, changed = self.profile.quests.handover_items(action.qid, action.conditionId, items_dict)
 
         self.response['items']['change'].extend(changed)
         self.response['items']['del'].extend(removed)
 
-    def _quest_finish(self):
+    def _quest_finish(self, ):
         pass
 
 
@@ -597,10 +592,10 @@ class DispatcherManager:
 
             # request.data should be dict at this moment
             # noinspection PyTypeChecker
-            actions: List[Action] = request.data['data']  # type: ignore
+            actions: List[dict] = request.data['data']  # type: ignore
 
             for action in actions:
-                logger.debug(action)
+                logger.debug(ujson.dumps(action, indent=4))
 
                 for dispatcher in self.dispatchers:
                     try:

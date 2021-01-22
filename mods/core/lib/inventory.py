@@ -347,7 +347,7 @@ class GridInventory(MutableInventory):
         elif not self.stash_map.can_place(item, location):
             raise ValueError('Cannot place item into location since it is taken')
 
-        self.items.append(item)
+        self.items.append(item)  # TODO: Add children items
         item['location'] = location
         item['slotId'] = 'hideout'
         item['parentId'] = self.root_id
