@@ -75,7 +75,10 @@ def client_game_keepalive():
 @app.route('/client/items', methods=['GET', 'POST'])
 @game_response_middleware(is_static=True)
 def client_items():
-    return ItemTemplatesRepository().templates
+    return {
+        template.id: template.dict()
+        for template in ItemTemplatesRepository().templates.values()
+    }
 
 
 @app.route('/client/customization', methods=['GET', 'POST'])

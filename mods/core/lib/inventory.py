@@ -59,12 +59,8 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
         """
         # TODO: item folding isn't taken into account
         template = ItemTemplatesRepository().get_template(item)
-        props = template['_props']
-        width = props['Width']
-        height = props['Height']
-
-        if not props['MergesWithChildren']:
-            return width, height
+        if not template.props.MergesWithChildren:
+            return template.props.Width, template.props.Height
 
         extra_size: ItemExtraSize = {
             'left': 0,
@@ -75,14 +71,15 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
 
         for child in self.iter_item_children_recursively(item):
             child_template = ItemTemplatesRepository().get_template(child)
-            child_props = child_template['_props']
+
+            child_props = child_template.props
             child_extra_size: ItemExtraSize = {
-                'left': child_template['_props']['ExtraSizeLeft'],
-                'right': child_template['_props']['ExtraSizeRight'],
-                'up': child_template['_props']['ExtraSizeUp'],
-                'down': child_template['_props']['ExtraSizeDown'],
+                'left': child_props.ExtraSizeLeft,
+                'right': child_props.ExtraSizeRight,
+                'up': child_props.ExtraSizeUp,
+                'down': child_props.ExtraSizeDown,
             }
-            if child_props['ExtraSizeForceAdd']:
+            if child_props.ExtraSizeForceAdd:
                 extra_size['left'] += child_extra_size['left']
                 extra_size['right'] += child_extra_size['right']
                 extra_size['up'] += child_extra_size['up']
@@ -90,8 +87,8 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
             else:
                 extra_size = merge_extra_size(extra_size, child_extra_size)
 
-        width = width + extra_size['left'] + extra_size['right']
-        height = height + extra_size['up'] + extra_size['down']
+        width: int = template.props.Width + extra_size['left'] + extra_size['right']
+        height: int = template.props.Height + extra_size['up'] + extra_size['down']
 
         try:
             folded = item['upd']['Foldable']['Folded']
@@ -272,10 +269,8 @@ class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
         Folds item
         """
         item_template = ItemTemplatesRepository().get_template(item)
-        try:
-            foldable: bool = item_template['_props']['Foldable']
-        except KeyError:
-            foldable = False
+
+        foldable = item_template.props.Foldable
 
         if not foldable:
             raise ValueError('Item is not foldable')
@@ -410,9 +405,10 @@ class PlayerInventory(GridInventory):
     def grid_size(self) -> Tuple[int, int]:
         stash_item = self.get_item(self.root_id)
         stash_template = ItemTemplatesRepository().get_template(stash_item)
-        grids_props = stash_template['_props']['Grids'][0]['_props']
-        width, height = grids_props['cellsH'], grids_props['cellsV']
-        return width, height
+        stash_grids = stash_template.props.Grids
+        assert stash_grids is not None
+        grids_props = stash_grids[0].props
+        return grids_props.width, grids_props.height
 
     @property
     def items(self):

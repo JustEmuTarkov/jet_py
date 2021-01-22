@@ -80,7 +80,7 @@ class LocationGenerator:
         if template_id not in self.__category_cache:
             self.__category_cache[template_id] = list(
                 tpl for tpl in self.__templates_repository.iter_template_children(template_id)
-                if tpl['_type'] == 'Item'
+                if tpl.type == 'Item'
             )
 
         return self.__category_cache[template_id]
@@ -118,11 +118,9 @@ class LocationGenerator:
                     _tpl=random_template['_id'],
                     parentId=container_id,
                     slotId='main',
-                    # location={"x": 0, "y": 0, "r": "Horizontal"},
                 )
                 try:
                     container_inventory.place_item(item)
-                    # item['slotId'] = 'main'
                     break
                 except NoSpaceError:
                     pass

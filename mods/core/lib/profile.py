@@ -283,6 +283,8 @@ class Hideout:
                 continue
 
             fuel_tank = slot['item'][0]
+
+            # TODO: hideout will crash if fuel tank doesn't have these properties
             fuel_in_tank = fuel_tank['upd']['Resource']['Value']
 
             consumed = min(fuel_should_be_consumed, fuel_in_tank)
@@ -308,7 +310,7 @@ class Hideout:
         time_generator_worked = self.__update_fuel()
         skip_time = self.time_elapsed - time_generator_worked
 
-        logger.debug(f'Generator forked for: {time_generator_worked}')
+        logger.debug(f'Generator worked for: {time_generator_worked}')
         logger.debug(f'Time skipped: {skip_time}')
 
         self.__update_production_time(self.time_elapsed, time_generator_worked)
@@ -340,7 +342,7 @@ class Profile:
 
         self.quests_path = self.profile_path.joinpath('pmc_quests.json')
 
-    def get_profile(self):
+    def get_profile(self) -> dict:
         profile_data = {}
         for file in self.profile_path.glob('pmc_*.json'):
             profile_data[file.stem] = ujson.load(file.open('r', encoding='utf8'))
@@ -351,6 +353,7 @@ class Profile:
         profile_base['Quests'] = profile_data['pmc_quests']
         profile_base['Stats'] = profile_data['pmc_stats']
         profile_base['TraderStandings'] = profile_data['pmc_traders']
+
         return profile_base
 
     def add_insurance(self, item: items_lib.Item, trader: Traders):

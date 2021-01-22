@@ -3,11 +3,12 @@ from __future__ import annotations
 import copy
 import enum
 import uuid
-from typing import TypedDict, Literal, Union, List, NewType, Dict, Iterable
+from typing import TypedDict, Literal, Union, List, NewType, Dict, Iterable, cast
 
 import ujson
 
 from mods.core.lib import SingletonMeta, NotFoundError
+from mods.core.models import ItemTemplate, NodeTemplate
 from server import db_dir
 
 
@@ -147,6 +148,8 @@ def regenerate_items_ids(items: List[Item]):
 
 
 class ItemTemplatesRepository(metaclass=SingletonMeta):
+    __item_templates: Dict[TemplateId, Union[ItemTemplate, NodeTemplate]]
+
     def __init__(self):
         self.__item_templates = self.__read_item_templates()
         self.__item_categories = self.__read_item_categories()
@@ -159,7 +162,11 @@ class ItemTemplatesRepository(metaclass=SingletonMeta):
         for item_file_path in db_dir.joinpath('items').glob('*'):
             items_data = ujson.load(item_file_path.open('r', encoding='utf8'))
             for item in items_data:
-                item_templates[item['_id']] = item
+                if item['_type'] == 'Item':
+                    item_templates[item['_id']] = ItemTemplate(**item)
+                elif item['_type'] == 'Node':
+                    item_templates[item['_id']] = NodeTemplate(**item)
+
         return item_templates
 
     @staticmethod
@@ -169,45 +176,50 @@ class ItemTemplatesRepository(metaclass=SingletonMeta):
         return items
 
     @property
-    def templates(self) -> Dict[str, Dict]:
+    def templates(self):
         return self.__item_templates
 
-    def get_template(self, item: Union[Item, TemplateId]):
+    def get_template(self, item_id: Union[Item, TemplateId]) -> ItemTemplate:
         """
         Returns template of item
 
-        :param item: Item or TemplateId
+        :param item_id: Item or TemplateId
         :return: Item Template
         """
-        if isinstance(item, dict):
-            item = item['_tpl']
+        if isinstance(item_id, dict):
+            item_id = item_id['_tpl']
 
         try:
-            return self.__item_templates[item]
+            item_template = self.__item_templates[item_id]
         except KeyError as error:
-            raise ItemNotFoundError() from error
+            raise ItemNotFoundError(f'Can not found ItemTemplate with id {item_id}') from error
 
-    def iter_template_children(self, template_id: TemplateId) -> Iterable[Dict]:
-        templates = [self.get_template(template_id)]
+        if item_template.type == 'Node':
+            raise NotFoundError(f'Can not found ItemTemplate with id {item_id}, however node was found.')
+
+        return cast(ItemTemplate, item_template)
+
+    def iter_template_children(self, template_id: TemplateId) -> Iterable[Union[NodeTemplate, ItemTemplate]]:
+        templates: List[Union[NodeTemplate, ItemTemplate]] = [self.get_template(template_id)]
         while templates:
             template = templates.pop()
             yield template
 
             for child in self.__item_templates.values():
-                if child['_parent'] == template['_id']:
+                if child.parent == template.id:
                     templates.append(child)
 
-    def get_template_items(self, template_id: TemplateId) -> List[dict]:
+    def get_template_items(self, template_id: TemplateId) -> List[ItemTemplate]:
         """
         Returns all items of given category (all barter items for example)
 
         :param template_id:
         :return: All items of a category
         """
-        template: dict = self.get_template(template_id)
-        if template['_type'] == 'Item':
+        template = self.get_template(template_id)
+        if template.type == 'Item':
             return [template]
-        return [tpl for tpl in self.iter_template_children(template_id) if tpl['_type'] == 'Item']
+        return cast(List[ItemTemplate], [tpl for tpl in self.iter_template_children(template_id) if tpl.type == 'Item'])
 
     def get_category(self, item: Item):
         return self.__item_categories[item['_tpl']]['ParentId']
@@ -226,7 +238,7 @@ class ItemTemplatesRepository(metaclass=SingletonMeta):
             raise NotFoundError() from e
 
     @staticmethod
-    def __create_item(item_template: dict, count: int = 1) -> Item:
+    def __create_item(item_template: ItemTemplate, count: int = 1) -> Item:
         """
         Creates new item stack with size of :count:
 
@@ -236,17 +248,21 @@ class ItemTemplatesRepository(metaclass=SingletonMeta):
         """
         item = Item(
             _id=generate_item_id(),
-            _tpl=item_template['_id'],
+            _tpl=TemplateId(item_template.id),
         )
 
         if count > 1:
             item['upd'] = ItemUpd(StackObjectsCount=count)
 
         #  Item is either medkit or a painkiller
-        if item_template['_parent'] in ('5448f39d4bdc2d0a728b4568', '5448f3a14bdc2d27728b4569'):
+        if item_template.parent in ('5448f39d4bdc2d0a728b4568', '5448f3a14bdc2d27728b4569'):
             if 'upd' not in item:
                 item['upd'] = {}
-            item['upd']['MedKit'] = ItemUpdMedKit(HpResource=item_template['_props']['MaxHpResource'])
+
+            medkit_max_hp = item_template.props.MaxHpResource
+            assert medkit_max_hp is not None
+
+            item['upd']['MedKit'] = ItemUpdMedKit(HpResource=medkit_max_hp)
 
         return item
 
@@ -270,7 +286,7 @@ class ItemTemplatesRepository(metaclass=SingletonMeta):
             return [ItemTemplatesRepository.__create_item(item_template)]
 
         items: List[Item] = []
-        stack_size = item_template['_props']['StackMaxSize']
+        stack_size = item_template.props.StackMaxSize
 
         #  Create multiple stacks of items (Say 80 rounds of 5.45 ammo it will create two stacks (60 and 20))
         for _ in range(count, stack_size, count):

@@ -104,11 +104,11 @@ class TraderInventory(ImmutableInventory):
 
     def get_item_price(self, item: Item) -> int:
         template_repository = ItemTemplatesRepository()
-        price = 0
+        price: float = 0
 
         for i in itertools.chain([item], self.iter_item_children_recursively(item)):
             item_template = template_repository.get_template(i)
-            price += item_template['_props']['CreditsPrice']
+            price += item_template.props.CreditsPrice
 
         return int(price)
 
@@ -121,11 +121,11 @@ class TraderInventory(ImmutableInventory):
 
         templates_repository = ItemTemplatesRepository()
         tpl = templates_repository.get_template(item)
-        price = tpl['_props']['CreditsPrice']
+        price = tpl.props.CreditsPrice
 
         for child in self.player_inventory.iter_item_children_recursively(item):
             child_tpl = templates_repository.get_template(child)
-            child_price = child_tpl['_props']['CreditsPrice']
+            child_price = child_tpl.props.CreditsPrice
             if self.can_sell(child):
                 price += child_price
             else:
@@ -143,7 +143,7 @@ class TraderInventory(ImmutableInventory):
         """
         base_item = copy.deepcopy(self.get_item(item_id))
         item_template = ItemTemplatesRepository().get_template(base_item['_tpl'])
-        item_stack_size = item_template['_props']['StackMaxSize']
+        item_stack_size = item_template.props.StackMaxSize
 
         bought_items: InventoryItems = []
         bought_child_items: InventoryItems = []
@@ -187,10 +187,10 @@ class TraderInventory(ImmutableInventory):
 
         template_repository = ItemTemplatesRepository()
 
-        price = 0
+        price: float = 0
         for item in items:
             item_template = template_repository.get_template(item)
-            price += item_template['_props']['CreditsPrice'] * 0.1
+            price += item_template.props.CreditsPrice * 0.1
             #  Todo account for trader standing (subtract standing from insurance price, 0.5 (50%) max)
 
         return int(price)

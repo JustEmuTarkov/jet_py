@@ -507,7 +507,7 @@ class TradingDispatcher(Dispatcher):
         self.inventory.remove_items(items)
 
         rubles_tpl = ItemTemplatesRepository().get_template(items_lib.TemplateId('5449016a4bdc2d6f028b456f'))
-        money_max_stack_size = rubles_tpl['_props']['StackMaxSize']
+        money_max_stack_size = rubles_tpl.props.StackMaxSize
 
         while price_sum:
             stack_size = min(money_max_stack_size, price_sum)
