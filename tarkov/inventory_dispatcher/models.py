@@ -92,6 +92,7 @@ class InventoryActions(SimpleNamespace):
         item: ItemId
         container: dict  # MoveLocation
         count: StrictInt
+        fromOwner: Optional[Owner] = None
 
     class Move(ActionModel):
         item: ItemId

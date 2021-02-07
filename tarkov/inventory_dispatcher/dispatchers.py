@@ -74,7 +74,6 @@ class InventoryDispatcher(Dispatcher):
 
         if action.fromOwner.type == 'Mail':
             message = self.profile.notifier.get_message(action.fromOwner.id)
-            assert isinstance(message.items, notifier.MailMessageItems)
             message_inventory = SimpleInventory(message.items.data)
 
             item = message_inventory.get_item(action.item)
@@ -94,16 +93,32 @@ class InventoryDispatcher(Dispatcher):
         raise NotImplementedError
 
     def _split(self, action: InventoryActions.Split):
-        item = self.inventory.get_item(action.item)
-        new_item = self.inventory_adapter.split_item(item, cast(MoveLocation, action.container), action.count)
+        if action.fromOwner is None:
+            item = self.inventory.get_item(action.item)
+            new_item = self.inventory_adapter.split_item(item, cast(MoveLocation, action.container), action.count)
 
-        self.inventory.items.append(new_item)
-        self.response.items.new.append(new_item)
+            self.inventory.items.append(new_item)
+            self.response.items.new.append(new_item)
 
-        if not item.upd.StackObjectsCount:
-            self.response.items.del_.append(item)
-        else:
+            if not item.upd.StackObjectsCount:
+                self.response.items.del_.append(item)
+            else:
+                self.response.items.change.append(item)
+
+        elif action.fromOwner.type == 'Mail':
+            message = self.profile.notifier.get_message(action.fromOwner.id)
+            message_inventory = SimpleInventory(message.items.data)
+
+            item = message_inventory.get_item(action.item)
+            new_item = message_inventory.split_item(item, action.count)
+            new_item.location = cast(MoveLocation, action.count)
+
+            self.inventory.add_item(new_item)
+            self.response.items.new.append(new_item)
             self.response.items.change.append(item)
+
+        else:
+            raise NotImplementedError
 
     def _examine(self, action: InventoryActions.Examine):
         item_id = action.item

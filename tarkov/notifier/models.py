@@ -10,8 +10,8 @@ from tarkov.models import Base
 
 
 class MailMessageItems(Base):
-    stash: str  # Stash (root) id
-    data: List[Item]  # List of items in message
+    stash: str = Field(default_factory=generate_item_id)  # Stash (root) id
+    data: List[Item] = Field(default_factory=list)  # List of items in message
 
     @staticmethod
     def from_items(items: List[Item]):
@@ -44,7 +44,7 @@ class MailDialogueMessage(Base):
     templateId: str  # Locale template id
     hasRewards: StrictBool = False
     rewardCollected: StrictBool = False
-    items: Union[MailMessageItems, Dict] = Field(default_factory=dict)  # Empty if it has no items
+    items: MailMessageItems = Field(default_factory=MailMessageItems)  # Empty if it has no items
     maxStorageTime: int = StrictInt(datetime.timedelta(days=3).total_seconds())  # Storage time in seconds
     systemData: dict = Field(default_factory=dict)
 
