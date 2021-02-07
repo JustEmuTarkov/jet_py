@@ -1,4 +1,4 @@
-from typing import Iterable, List
+from typing import Dict, Iterable, List
 
 import ujson
 from flask import Request, request
@@ -6,8 +6,8 @@ from pydantic import Field
 
 from server import logger
 from tarkov.inventory import Item, PlayerInventory
-from tarkov.profile import Profile
 from tarkov.models import Base
+from tarkov.profile import Profile
 from . import dispatchers
 from .adapters import InventoryToRequestAdapter
 
@@ -29,7 +29,7 @@ class DispatcherResponse(Base):
     quests: list = Field(default_factory=list)
     ragFairOffers: list = Field(default_factory=list)
     builds: list = Field(default_factory=list)
-    currentSalesSums: list = Field(default_factory=list)
+    currentSalesSums: Dict[str, int] = Field(default_factory=dict)
 
 
 class DispatcherManager:
