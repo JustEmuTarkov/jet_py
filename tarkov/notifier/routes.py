@@ -5,21 +5,24 @@ import orjson
 from flask import Blueprint, request
 
 import tarkov.profile
-from server.utils import TarkovError, game_response_middleware
+from server.utils import TarkovError
 from tarkov import notifier
+from utils import tarkov_response, zlib_middleware
 
 blueprint = Blueprint(__name__, __name__)
 
 
 @blueprint.route('/client/mail/dialog/list', methods=['POST'])
-@game_response_middleware()
+@zlib_middleware
+@tarkov_response
 def mail_dialog_list() -> List[Dict]:
     with tarkov.profile.Profile.from_request(request) as profile:
         return profile.notifier.view_dialog_list()
 
 
 @blueprint.route('/client/mail/dialog/view', methods=['POST'])
-@game_response_middleware()
+@zlib_middleware
+@tarkov_response
 def mail_dialog_view() -> Dict:
     request_data: dict = request.data  # type: ignore
 
@@ -33,7 +36,8 @@ def mail_dialog_view() -> Dict:
 
 
 @blueprint.route('/client/mail/dialog/getAllAttachments', methods=['POST'])
-@game_response_middleware()
+@zlib_middleware
+@tarkov_response
 def mail_dialog_all_attachments() -> Dict:
     request_data: dict = request.data  # type: ignore
     dialogue_id = request_data['dialogId']
@@ -56,7 +60,8 @@ def notifierserver_get(profile_id: str) -> Union[dict, str]:
 
 
 @blueprint.route('/client/notifier/channel/create', methods=['POST'])
-@game_response_middleware()
+@zlib_middleware
+@tarkov_response
 def client_notifier_channel_create():
     session_id = request.cookies.get('PHPSESSID', None)
     if session_id is None:

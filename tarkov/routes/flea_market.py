@@ -1,13 +1,14 @@
 from flask import Blueprint, request
 
 from server import logger
-from server.utils import game_response_middleware
+from utils import tarkov_response, zlib_middleware
 
 blueprint = Blueprint(__name__, __name__)
 
 
 @blueprint.route('/client/ragfair/find', methods=['POST', 'GET'])
-@game_response_middleware()
+@zlib_middleware
+@tarkov_response
 def find():
     logger.debug(request.data)
     response = {

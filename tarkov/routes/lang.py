@@ -4,15 +4,16 @@ import ujson
 from flask import Blueprint
 
 from server import db_dir
-from server.utils import game_response_middleware
 from tarkov.library import load_locale
+from utils import tarkov_response, zlib_middleware
 
 blueprint = Blueprint(__name__, __name__)
 
 
 @blueprint.route('/client/menu/locale/<locale_type>', methods=['POST', 'GET'])  # TODO Change to dynamic
+@zlib_middleware
+@tarkov_response
 @lru_cache(8)
-@game_response_middleware()
 def client_menu_locale_en(locale_type: str):
     locale_path = db_dir / 'locales' / locale_type / 'menu.json'
     locale = ujson.load(locale_path.open('r', encoding='utf8'))['data']
@@ -20,7 +21,8 @@ def client_menu_locale_en(locale_type: str):
 
 
 @blueprint.route('/client/languages', methods=['GET', 'POST'])
-@game_response_middleware()
+@zlib_middleware
+@tarkov_response
 def client_languages():
     languages_data_list = []
     languages_dir = db_dir / 'locales'
@@ -32,7 +34,8 @@ def client_languages():
 
 
 @blueprint.route('/client/locale/<locale_name>', methods=['POST', 'GET'])
+@zlib_middleware
+@tarkov_response
 @lru_cache(8)
-@game_response_middleware()
 def client_locale(locale_name: str):
     return load_locale(locale_name)

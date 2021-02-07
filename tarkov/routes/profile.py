@@ -4,15 +4,16 @@ import ujson
 from flask import Blueprint, request
 
 from server import root_dir
-from server.utils import game_response_middleware
 from tarkov.inventory_dispatcher import DispatcherManager
 from tarkov.profile import Profile
+from utils import tarkov_response, zlib_middleware
 
 blueprint = Blueprint(__name__, __name__)
 
 
 @blueprint.route('/client/game/profile/items/moving', methods=['POST', 'GET'])
-@game_response_middleware()
+@zlib_middleware
+@tarkov_response
 def client_game_profile_item_move():
     dispatcher = DispatcherManager(request.cookies['PHPSESSID'])
     response = dispatcher.dispatch()
@@ -21,7 +22,8 @@ def client_game_profile_item_move():
 
 
 @blueprint.route('/client/game/profile/list', methods=['POST', 'GET'])
-@game_response_middleware()
+@zlib_middleware
+@tarkov_response
 def client_game_profile_list():
     session_id = request.cookies['PHPSESSID']
 
@@ -38,7 +40,8 @@ def client_game_profile_list():
 
 
 @blueprint.route('/client/game/profile/select', methods=['POST', 'GET'])
-@game_response_middleware()
+@zlib_middleware
+@tarkov_response
 def client_game_profile_list_select():
     return {
         'status': 'ok',
@@ -50,7 +53,8 @@ def client_game_profile_list_select():
 
 
 @blueprint.route('/client/profile/status', methods=['POST', 'GET'])
-@game_response_middleware()
+@zlib_middleware
+@tarkov_response
 def client_profile_status():
     session_id = request.cookies['PHPSESSID']
     response = []

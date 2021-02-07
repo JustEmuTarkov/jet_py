@@ -1,12 +1,12 @@
 import zlib
 from functools import wraps
-from typing import Callable
+from typing import Callable, Optional
 
 import ujson
 from flask import make_response, request
 
 
-class ZlibMiddleware:
+class _ZlibMiddleware:
     def __init__(self, /, send_browser_headers=False) -> None:
         self.send_headers = send_browser_headers
 
@@ -40,6 +40,14 @@ class ZlibMiddleware:
         return wrapper
 
 
+def zlib_middleware(function: Optional[Callable] = None, /, send_browser_headers=True) -> Callable:
+    middleware = _ZlibMiddleware(send_browser_headers=send_browser_headers)
+    if function is None:
+        return middleware
+    else:
+        return middleware(function)
+
+
 class TarkovError(Exception):
     def __init__(self, err: int, errmsg: str):
         super().__init__(self)
@@ -71,49 +79,9 @@ class TarkovResponseStruct:
         return wrapper
 
 
-def compose(function, *decorators):
-    wrapped = function
-    for deco in decorators:
-        wrapped = deco(wrapped)
-    return wrapped
-
-
-def game_response_middleware(**kwargs):
-    def wrapper(function):
-        decorators = [function]
-        use_struct = kwargs.get('use_tarkov_response_struct', True)
-        if use_struct:
-            decorators.append(TarkovResponseStruct())
-
-        decorators.append(ZlibMiddleware(send_browser_headers=True))
-
-        is_static = kwargs.get('is_static', False)
-        if is_static:
-            decorators.append(memoize_once)
-
-        return compose(*decorators)
-
-    return wrapper
-
-
-def memoize_once(function: Callable):
-    """
-    Memorizes first function call result and returns only it.
-    Useful for static content - files or responses.
-
-    This function doesn't take any argument it gets into consideration -
-    e.g. if won't re-cache if it will be called with different arguments.
-
-    """
-    was_called = False
-    result = None
-
-    @wraps(function)
-    def wrapper(*args, **kwargs):
-        nonlocal result, was_called
-        if not was_called:
-            was_called = True
-            result = function(*args, **kwargs)
-        return result
-
-    return wrapper
+def tarkov_response(function: Optional[Callable]):
+    middleware = TarkovResponseStruct()
+    if function is None:
+        return middleware
+    else:
+        return middleware(function)

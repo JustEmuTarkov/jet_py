@@ -1,6 +1,6 @@
 from flask import Blueprint, request
 
-from server.utils import ZlibMiddleware
+from utils import zlib_middleware
 
 blueprint = Blueprint(__name__, __name__)
 
@@ -9,7 +9,7 @@ blueprint = Blueprint(__name__, __name__)
 
 
 @blueprint.route('/launcher/server/connect', methods=['POST', 'GET'])
-@ZlibMiddleware()
+@zlib_middleware
 def connect():
     response = {
         'backendUrl': request.host_url.rstrip('/'),

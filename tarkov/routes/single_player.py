@@ -2,11 +2,11 @@ import ujson
 from flask import Blueprint, request
 
 from server import db_dir, logger
-from server.utils import ZlibMiddleware, game_response_middleware
 from tarkov.inventory.helpers import regenerate_items_ids
 from tarkov.lib import locations
 from tarkov.lib.bots import BotGenerator
 from tarkov.profile import Profile
+from utils import tarkov_response, zlib_middleware
 
 blueprint = Blueprint(__name__, __name__)
 
@@ -17,7 +17,7 @@ def singleplayer_bundles():
 
 
 @blueprint.route('/singleplayer/settings/raid/menu')
-@ZlibMiddleware()
+@zlib_middleware
 def singleplayer_settings_raid_menu():
     # TODO: Put that into the config file !
     return {
@@ -30,7 +30,7 @@ def singleplayer_settings_raid_menu():
 
 
 @blueprint.route('/api/location/<string:location_name>', methods=['POST', 'GET'])
-@ZlibMiddleware(send_browser_headers=True)
+@zlib_middleware
 def location(location_name: str):
     location_name = location_name.lower()
 
@@ -40,7 +40,7 @@ def location(location_name: str):
 
 
 @blueprint.route('/singleplayer/settings/bot/difficulty/<string:type_>/<string:difficulty>')
-@ZlibMiddleware()
+@zlib_middleware
 def bot_difficulty_settings(type_: str, difficulty: str):
     if type_ == 'core':
         return ujson.load(db_dir.joinpath('base', 'botCore.json').open(encoding='utf8'))
@@ -51,13 +51,14 @@ def bot_difficulty_settings(type_: str, difficulty: str):
 
 
 @blueprint.route('/singleplayer/settings/bot/limit/<string:bot_type>')
-@ZlibMiddleware()
+@zlib_middleware
 def settings_bot_limit(bot_type: str):  # pylint: disable=unused-argument
     return 30
 
 
 @blueprint.route('/client/game/bot/generate', methods=['POST', 'GET'])
-@game_response_middleware()
+@zlib_middleware
+@tarkov_response
 def generate_bots():
     bots = []
 
@@ -74,7 +75,7 @@ def generate_bots():
 
 
 @blueprint.route('/mode/offline', methods=['POST', 'GET'])
-@ZlibMiddleware()
+@zlib_middleware
 def mode_offline():
     # TODO: Put that into Server config file
     # return str(True)
@@ -112,7 +113,8 @@ def mode_offline():
 
 
 @blueprint.route('/raid/profile/save', methods=['PUT'])
-@game_response_middleware()
+@zlib_middleware()
+@tarkov_response
 def singleplayer_raid_profile_save():
     # TODO: Add Saving profile here
     # data struct {exit, isPlayerScav, profile, health}
@@ -145,7 +147,8 @@ def singleplayer_raid_profile_save():
 
 
 @blueprint.route('/raid/profile/list', methods=['POST', 'GET'])
-@game_response_middleware()
+@zlib_middleware
+@tarkov_response
 def singleplayer_raid_profile_list():
     # TODO: Put that into the config file !
     return {
@@ -158,13 +161,14 @@ def singleplayer_raid_profile_list():
 
 
 @blueprint.route('/raid/map/name', methods=['POST', 'GET'])
-@game_response_middleware()
+@zlib_middleware
+@tarkov_response
 def singleplayer_raid_menu_name():
     # TODO: This should get a Map Name and store that with profile ID(session id)
     return None
 
 
 @blueprint.route('/singleplayer/settings/weapon/durability')
-@ZlibMiddleware()
+@zlib_middleware
 def weapon_durability():
     return True
