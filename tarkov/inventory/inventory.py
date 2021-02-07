@@ -35,7 +35,7 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
         try:
             return next(item for item in self.items if item.id == item_id)
         except StopIteration as error:
-            raise NotFoundError from error
+            raise NotFoundError(f'Item with id {item_id} was not found in {self.__class__.__name__}') from error
 
     def get_item_by_template(self, template_id: TemplateId) -> Item:
         try:
