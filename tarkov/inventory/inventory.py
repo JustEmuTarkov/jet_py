@@ -309,6 +309,36 @@ class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
 
         return affected_items, deleted_items
 
+    @staticmethod
+    def can_split(item: Item):
+        return item.upd.StackObjectsCount is not None
+
+    def split_item(self, item: Item, count: int) -> Item:
+        """
+        Splits count from item and returns new item
+        :return: New item
+        """
+        if count == item.upd.StackObjectsCount:
+            self.remove_item(item)
+            return item
+
+        if item.upd.StackObjectsCount < count:
+            raise ValueError("Can't split from item since stack amount < count")
+
+        item_copy = copy.deepcopy(item)
+        item_copy.upd.StackObjectsCount = count
+        item_copy.id = generate_item_id()
+
+        del item_copy.slotId
+        del item_copy.parent_id
+        del item_copy.location
+
+        item.upd.StackObjectsCount -= count
+        if item.upd.StackObjectsCount == 0:
+            self.remove_item(item)
+
+        return item_copy
+
 
 class GridInventory(MutableInventory):
     stash_map: StashMap
@@ -350,36 +380,6 @@ class GridInventory(MutableInventory):
         item.slotId = 'hideout'
         item.parent_id = self.root_id
         self.stash_map.add(item)
-
-    @staticmethod
-    def can_split(item: Item):
-        return item.upd.StackObjectsCount is not None
-
-    def split_item(self, item: Item, count: int) -> Item:
-        """
-        Splits count from item and returns new item
-        :return: New item
-        """
-        if count == 1:
-            self.remove_item(item)
-            return item
-
-        if item.upd.StackObjectsCount < count:
-            raise ValueError("Can't split from item since stack amount < count")
-
-        item_copy = copy.deepcopy(item)
-        item_copy.upd.StackObjectsCount = count
-        item_copy.id = generate_item_id()
-
-        del item_copy.slotId
-        del item_copy.parent_id
-        del item_copy.location
-
-        item.upd.StackObjectsCount -= count
-        if item.upd.StackObjectsCount == 0:
-            self.remove_item(item)
-
-        return item_copy
 
 
 class PlayerInventory(GridInventory):
