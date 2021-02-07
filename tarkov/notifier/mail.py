@@ -14,9 +14,18 @@ class Mail:
         self.profile = profile
         self.path = self.profile.profile_dir.joinpath('dialogue.json')
 
+    def get_dialogue(self, trader_id: str) -> MailDialogue:
+        """Returns trader dialogue by trader id"""
+        try:
+            return self.dialogues[trader_id]
+        except KeyError:
+            dialogue = MailDialogue(id=trader_id)
+            self.dialogues[trader_id] = dialogue
+            return dialogue
+
     def add_message(self, message: MailDialogueMessage):
         """Adds message to mail and creates notification in notifier"""
-        category: MailDialogue = self.dialogues[message.uid]
+        category: MailDialogue = self.get_dialogue(message.uid)
         category.messages.insert(0, message)
 
         notifier_instance.add_message_notification(
@@ -41,7 +50,7 @@ class Mail:
             # Since we're returning all the messages at once we don't have to return anything if time was specified
             return {'messages': []}
 
-        dialogue = self.dialogues[dialogue_id]
+        dialogue = self.get_dialogue(dialogue_id)
 
         # attachments_count = 0
         # for message in dialogue.messages:
@@ -54,7 +63,7 @@ class Mail:
         return {'messages': [msg.dict() for msg in dialogue.messages]}
 
     def all_attachments_view(self, dialogue_id):
-        dialogue = self.dialogues[dialogue_id]
+        dialogue = self.get_dialogue(dialogue_id)
 
         messages = [msg.dict(exclude_none=True) for msg in dialogue.messages if not self.__is_message_expired(msg)]
         return {'messages': messages}

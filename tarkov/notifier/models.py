@@ -68,6 +68,9 @@ class MailDialogues(Base):
     def __getitem__(self, trader_id: str) -> MailDialogue:
         return self.__root__[trader_id]
 
+    def __setitem__(self, trader_id: str, dialogue: MailDialogue) -> None:
+        self.__root__[trader_id] = dialogue
+
     def items(self):
         return self.__root__.items()
 
