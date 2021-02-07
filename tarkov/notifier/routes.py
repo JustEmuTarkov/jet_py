@@ -17,7 +17,18 @@ blueprint = Blueprint(__name__, __name__)
 @tarkov_response
 def mail_dialog_list() -> List[Dict]:
     with tarkov.profile.Profile.from_request(request) as profile:
-        return profile.notifier.view_dialog_list()
+        return profile.notifier.view_dialogue_preview_list()
+
+
+@blueprint.route('/client/mail/dialog/info', methods=['POST'])
+@zlib_middleware
+@tarkov_response
+def mail_dialog_info() -> dict:
+    request_data: dict = request.data  # type: ignore
+    dialogue_id = request_data['dialogId']
+
+    with tarkov.profile.Profile.from_request(request) as profile:
+        return profile.notifier.view_dialog_preview(dialogue_id=dialogue_id)
 
 
 @blueprint.route('/client/mail/dialog/view', methods=['POST'])

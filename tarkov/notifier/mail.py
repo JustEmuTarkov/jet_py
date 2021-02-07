@@ -2,7 +2,7 @@ import datetime
 from typing import Dict, List
 
 import tarkov.profile
-from .models import DialoguePreviewList, MailDialogue, MailDialogueMessage, MailDialogues
+from .models import DialoguePreviewList, MailDialogue, MailDialogueMessage, MailDialoguePreview, MailDialogues
 from .notifier import notifier_instance
 
 
@@ -41,9 +41,13 @@ class Mail:
                     return message
         raise IndexError(f'DialogueMessage with id {message_id} was not found.')
 
-    def view_dialog_list(self) -> List[Dict]:
-        message_previews = DialoguePreviewList.from_dialogues(self.dialogues).__root__
-        return [msg_preview.dict() for msg_preview in message_previews]
+    def view_dialogue_preview_list(self) -> List[Dict]:
+        dialogues_previews = DialoguePreviewList.from_dialogues(self.dialogues).__root__
+        return [dialogue_preview.dict() for dialogue_preview in dialogues_previews]
+
+    def view_dialog_preview(self, dialogue_id: str) -> dict:
+        dialogue = self.get_dialogue(dialogue_id)
+        return MailDialoguePreview.from_dialogue(dialogue).dict()
 
     def view_dialog(self, dialogue_id: str, time_: float) -> dict:
         if time_:
@@ -74,7 +78,10 @@ class Mail:
         return datetime_now > message_expires_at
 
     def read(self):
-        self.dialogues = MailDialogues.parse_file(self.path)
+        try:
+            self.dialogues = MailDialogues.parse_file(self.path)
+        except FileNotFoundError:
+            self.dialogues = MailDialogues()
 
     def write(self):
         with self.path.open('w', encoding='utf8') as file:
