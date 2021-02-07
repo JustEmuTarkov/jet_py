@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import importlib
 from pathlib import Path
-from typing import List, Dict, Union, Set, Type, Iterable
+from typing import Dict, Iterable, List, Set, Type, Union
 
 from server import logger, root_dir
 

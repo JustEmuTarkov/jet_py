@@ -7,7 +7,7 @@ from flask import make_response, request
 
 
 class ZlibMiddleware:
-    def __init__(self, /, send_browser_headers=False):
+    def __init__(self, /, send_browser_headers=False) -> None:
         self.send_headers = send_browser_headers
 
     def __call__(self, function):
@@ -21,11 +21,11 @@ class ZlibMiddleware:
                 else:
                     request_body = {}
 
-                request.data = request_body
+                request.data = request_body  # type: ignore
 
-            data = function(*args, **kwargs)
+            data: dict = function(*args, **kwargs)
+            data_json: str = ujson.dumps(data)
 
-            data_json = ujson.dumps(data)
             compressed_data = zlib.compress(data_json.encode('utf8'), zlib.Z_DEFAULT_COMPRESSION)
 
             response = make_response()
