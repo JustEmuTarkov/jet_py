@@ -1,11 +1,11 @@
 import time
 from typing import Dict, List, Tuple
 
-from tarkov import inventory
 import tarkov.profile as profile_
+from tarkov import inventory
 from tarkov.inventory import Item
-from .repositories import quests_repository
 from .models import QuestRewardItem
+from .repositories import quests_repository
 
 
 class Quests:
@@ -26,6 +26,7 @@ class Quests:
             raise KeyError from e
 
     def accept_quest(self, quest_id: str):
+        # TODO: Create quest if it does not exist
         try:
             quest = self.get_quest(quest_id)
             if quest['status'] in ('Started', 'Success'):
@@ -36,8 +37,6 @@ class Quests:
         quest = self.get_quest(quest_id)
         quest['status'] = 'Started'
         quest['startTime'] = int(time.time())
-
-        self.data.append(quest)
 
     def handover_items(self, quest_id: str, condition_id: str, items: Dict[inventory.ItemId, int]) \
             -> Tuple[List[inventory.Item], List[inventory.Item]]:
