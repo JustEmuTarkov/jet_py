@@ -17,13 +17,13 @@ class MailMessageItems(Base):
     def from_items(items: List[Item]):
         stash_id = generate_item_id()
 
-        regenerate_items_ids(items)
-
         for item in items:
             if not item.parent_id:
                 item.parent_id = stash_id
             if not item.slotId:
                 item.slotId = 'main'
+
+        regenerate_items_ids(items)
 
         return MailMessageItems(
             stash=stash_id,
