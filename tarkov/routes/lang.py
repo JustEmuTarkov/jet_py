@@ -12,7 +12,7 @@ blueprint = Blueprint(__name__, __name__)
 
 @blueprint.route('/client/menu/locale/<locale_type>', methods=['POST', 'GET'])  # TODO Change to dynamic
 @lru_cache(8)
-@game_response_middleware(is_static=True)
+@game_response_middleware()
 def client_menu_locale_en(locale_type: str):
     locale_path = db_dir / 'locales' / locale_type / 'menu.json'
     locale = ujson.load(locale_path.open('r', encoding='utf8'))['data']
@@ -20,7 +20,7 @@ def client_menu_locale_en(locale_type: str):
 
 
 @blueprint.route('/client/languages', methods=['GET', 'POST'])
-@game_response_middleware(is_static=True)
+@game_response_middleware()
 def client_languages():
     languages_data_list = []
     languages_dir = db_dir / 'locales'

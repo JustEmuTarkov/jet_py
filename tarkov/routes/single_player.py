@@ -75,7 +75,6 @@ def generate_bots():
 
 @blueprint.route('/mode/offline', methods=['POST', 'GET'])
 @ZlibMiddleware()
-# @route_decorator(is_static=True)
 def mode_offline():
     # TODO: Put that into Server config file
     # return str(True)

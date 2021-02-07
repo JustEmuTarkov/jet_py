@@ -12,7 +12,7 @@ blueprint = Blueprint(__name__, __name__)
 
 
 @app.route('/client/locations', methods=['GET', 'POST'])
-@game_response_middleware(is_static=True)
+@game_response_middleware()
 def client_locations():
     locations_base = db_dir / 'base' / 'locations.json'
     locations_base = ujson.load(locations_base.open('r'))
@@ -26,13 +26,13 @@ def client_locations():
 
 
 @app.route('/client/game/start', methods=['POST', 'GET'])
-@game_response_middleware(is_static=True)
+@game_response_middleware()
 def client_game_start():
     return None  # TODO Add account data, check if character exists
 
 
 @app.route('/client/game/version/validate', methods=['POST'])
-@game_response_middleware(is_static=True)
+@game_response_middleware()
 def client_game_version_validate():
     return None
 
@@ -73,7 +73,7 @@ def client_game_keepalive():
 
 
 @app.route('/client/items', methods=['GET', 'POST'])
-@game_response_middleware(is_static=True)
+@game_response_middleware()
 def client_items():
     return {
         template.id: template.dict()
@@ -82,7 +82,7 @@ def client_items():
 
 
 @app.route('/client/customization', methods=['GET', 'POST'])
-@game_response_middleware(is_static=True)
+@game_response_middleware()
 def client_customization():
     customization = {}
     for customization_file_path in (db_dir / 'customization').glob('*'):
@@ -94,7 +94,7 @@ def client_customization():
 
 
 @app.route('/client/globals', methods=['POST', 'GET'])
-@game_response_middleware(is_static=True)
+@game_response_middleware()
 def client_globals():
     globals_base = db_dir / 'base' / 'globals.json'
     globals_base = ujson.load(globals_base.open('r', encoding='utf8'))
@@ -126,7 +126,7 @@ def client_weather():
 
 
 @app.route('/client/handbook/templates', methods=['POST', 'GET'])
-@game_response_middleware(is_static=True)
+@game_response_middleware()
 def client_handbook_templates():
     data = {}
     for template_path in db_dir.joinpath('templates').glob('*.json'):
@@ -142,7 +142,7 @@ def client_handbook_builds_my_list():
 
 
 @app.route('/client/quest/list', methods=['POST', 'GET'])
-@game_response_middleware(is_static=True)
+@game_response_middleware()
 def client_quest_list():
     return ujson.load(db_dir.joinpath('quests', 'all.json').open('r', encoding='utf8'))
 

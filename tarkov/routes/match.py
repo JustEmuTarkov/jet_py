@@ -71,6 +71,6 @@ def exit_():
 
 
 @blueprint.route('/client/getMetricsConfig', methods=['POST', 'GET'])
-@game_response_middleware(is_static=True)
+@game_response_middleware()
 def get_metrics_config():
     return ujson.load(db_dir.joinpath('base', 'matchMetrics.json').open(encoding='utf8'))

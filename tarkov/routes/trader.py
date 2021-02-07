@@ -61,7 +61,7 @@ def get_user_assort_price(trader_id):
 
 
 @blueprint.route('/client/trading/api/getTradersList', methods=['POST', 'GET'])
-@game_response_middleware(is_static=True)
+@game_response_middleware()
 def get_trader_list():
     traders_path = db_dir.joinpath('base', 'traders')
 

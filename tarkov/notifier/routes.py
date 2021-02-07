@@ -56,7 +56,7 @@ def notifierserver_get(profile_id: str) -> Union[dict, str]:
 
 
 @blueprint.route('/client/notifier/channel/create', methods=['POST'])
-@game_response_middleware(is_static=True)
+@game_response_middleware()
 def client_notifier_channel_create():
     session_id = request.cookies.get('PHPSESSID', None)
     if session_id is None:
