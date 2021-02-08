@@ -16,11 +16,10 @@
 		"5cde9ff17d6c8b0474535daa"
 	],
 	"voice": [
-		"Bear_1",
-		"Bear_2",
-		"Bear_3",
-		"Usec_1",
-		"Usec_2",
-		"Usec_3"
+		"bear_1",
+		"bear_2",
+		"usec_1",
+		"usec_2",
+		"usec_3"
 	]
 }

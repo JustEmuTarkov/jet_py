@@ -1,0 +1,13 @@
+{
+   "Hydration": 100,
+   "Energy": 100,
+   "BodyParts":{
+      "Head": 40,
+      "Chest": 145,
+      "Stomach": 100,
+      "LeftArm": 100,
+      "RightArm": 100,
+      "LeftLeg": 100,
+      "RightLeg": 100
+   }
+}
