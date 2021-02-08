@@ -1,7 +1,7 @@
 import datetime
 from typing import Dict, List
 
-import tarkov.profile
+import tarkov.profile  # pylint: disable=unused-import
 from .models import DialoguePreviewList, MailDialogue, MailDialogueMessage, MailDialoguePreview, MailDialogues
 from .notifier import notifier_instance
 

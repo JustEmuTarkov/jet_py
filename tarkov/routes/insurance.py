@@ -2,10 +2,10 @@ from typing import Dict, List
 
 from flask import Blueprint, request
 
-from tarkov.inventory import TemplateId
+from server.utils import tarkov_response, zlib_middleware
+from tarkov.inventory.models import TemplateId
 from tarkov.lib.trader import TraderInventory, Traders
 from tarkov.profile import Profile
-from server.utils import tarkov_response, zlib_middleware
 
 blueprint = Blueprint(__name__, __name__)
 

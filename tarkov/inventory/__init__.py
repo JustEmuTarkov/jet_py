@@ -1,6 +1,4 @@
 from .dict_models import ItemExtraSize
+from .helpers import generate_item_id, regenerate_items_ids
 from .inventory import GridInventory, ImmutableInventory, MutableInventory, PlayerInventory, StashMap
-from .models import *
 from .repositories import ItemTemplatesRepository, item_templates_repository
-from .helpers import regenerate_items_ids, generate_item_id
-from .implementations import SimpleInventory

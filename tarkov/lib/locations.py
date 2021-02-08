@@ -8,9 +8,9 @@ import ujson
 
 from server import db_dir
 from tarkov.exceptions import NoSpaceError
-from tarkov.inventory import (AnyItemLocation, GridInventory, Item, ItemId, ItemInventoryLocation, StashMap, TemplateId,
-                              item_templates_repository, )
+from tarkov.inventory import GridInventory, StashMap, item_templates_repository
 from tarkov.inventory.helpers import generate_item_id, regenerate_items_ids
+from tarkov.inventory.models import AnyItemLocation, Item, ItemId, TemplateId
 
 
 class ContainerInventory(GridInventory):

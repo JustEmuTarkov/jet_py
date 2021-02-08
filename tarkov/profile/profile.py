@@ -9,8 +9,9 @@ from flask import Request
 import tarkov.inventory.repositories
 from server import root_dir
 from server.utils import TarkovError
-from tarkov import inventory as inventory_, quests, notifier
+from tarkov import inventory as inventory_, notifier, quests
 from tarkov.hideout import Hideout
+from tarkov.inventory.models import Item, TemplateId
 from tarkov.lib.trader import Traders
 
 
@@ -19,16 +20,16 @@ class Encyclopedia:
         self.profile = profile
         self.data = profile.pmc_profile['Encyclopedia']
 
-    def examine(self, item: Union[inventory_.Item, inventory_.TemplateId]):
-        if isinstance(item, inventory_.Item):
+    def examine(self, item: Union[Item, TemplateId]):
+        if isinstance(item, Item):
             self.data[item.id] = False
 
         else:
             item_template_id = item
             self.data[item_template_id] = False
 
-    def read(self, item: Union[inventory_.Item, inventory_.TemplateId]):
-        if isinstance(item, inventory_.Item):
+    def read(self, item: Union[Item, TemplateId]):
+        if isinstance(item, Item):
             item_tpl_id = item.tpl
         else:
             item_tpl_id = item
@@ -80,7 +81,7 @@ class Profile:
 
         return profile_base
 
-    def add_insurance(self, item: inventory_.Item, trader: Traders):
+    def add_insurance(self, item: Item, trader: Traders):
         insurance_info = {
             'itemId': item.id,
             'tid': trader.value

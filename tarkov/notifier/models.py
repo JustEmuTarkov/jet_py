@@ -1,11 +1,11 @@
 import datetime
 import time
-from typing import Dict, List, Union
+from typing import Dict, List
 
 from pydantic import Field, StrictBool, StrictInt
 
-from tarkov.inventory import Item
-from tarkov.inventory.helpers import generate_item_id, regenerate_items_ids
+from tarkov.inventory import generate_item_id, regenerate_items_ids
+from tarkov.inventory.models import Item
 from tarkov.models import Base
 
 

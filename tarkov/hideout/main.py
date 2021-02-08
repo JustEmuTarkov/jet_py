@@ -7,8 +7,9 @@ from pydantic import parse_obj_as
 import tarkov.profile.profile as profile_
 from server import db_dir, logger
 from tarkov import inventory
+from tarkov.inventory import item_templates_repository
+from tarkov.inventory.models import Item
 from .models import HideoutArea, HideoutAreaType, HideoutProduction
-from tarkov.inventory import Item, item_templates_repository
 
 
 class Hideout:
@@ -52,7 +53,7 @@ class Hideout:
         area['completeTime'] = 0
         area['level'] += 1
 
-    def put_items_in_area_slots(self, area_type: HideoutAreaType, slot_id: int, item: inventory.Item):
+    def put_items_in_area_slots(self, area_type: HideoutAreaType, slot_id: int, item: inventory.models.Item):
         area = self.get_area(area_type)
 
         item.location = None
@@ -66,7 +67,7 @@ class Hideout:
 
         area_slots[slot_id]['item'] = [item.dict()]
 
-    def take_item_from_area_slot(self, area_type: HideoutAreaType, slot_id: int) -> inventory.Item:
+    def take_item_from_area_slot(self, area_type: HideoutAreaType, slot_id: int) -> inventory.models.Item:
         area = self.get_area(area_type)
         slot = area['slots'][slot_id]
         item: dict = slot['item'][0]
@@ -88,7 +89,7 @@ class Hideout:
 
         self.data['Production'][recipe_id] = production
 
-    def take_production(self, recipe_id: str) -> List[inventory.Item]:
+    def take_production(self, recipe_id: str) -> List[inventory.models.Item]:
         recipe = self.get_recipe(recipe_id)
 
         product_tpl = recipe['endProduct']

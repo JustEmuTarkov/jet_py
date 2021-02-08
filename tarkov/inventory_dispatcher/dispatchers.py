@@ -5,15 +5,17 @@ from pydantic import StrictInt
 
 import tarkov.inventory
 from server import logger
-from tarkov import notifier, quests
+from tarkov import quests
 from tarkov.hideout.models import HideoutAreaType
-from tarkov.inventory import (Item, MutableInventory, PlayerInventory, SimpleInventory, TemplateId, generate_item_id,
+from tarkov.inventory import (MutableInventory, PlayerInventory, generate_item_id,
                               item_templates_repository, )
+from tarkov.inventory.implementations import SimpleInventory
+from tarkov.inventory.models import Item, TemplateId
 from tarkov.lib.trader import TraderInventory, Traders
-from tarkov.notifier import MailMessageItems
+from tarkov.notifier.models import MailDialogueMessage, MailMessageItems
 from tarkov.profile import Profile
-from tarkov.quests import QuestMessageType, QuestRewardItem
-from . import manager as manager_
+from tarkov.quests.models import QuestMessageType, QuestRewardItem
+from . import manager as manager_  # pylint: disable=unused-import
 from .models import ActionModel, ActionType, HideoutActions, InventoryActions, Owner, QuestActions, TradingActions
 
 
@@ -382,7 +384,7 @@ class QuestDispatcher(Dispatcher):
             if isinstance(reward, QuestRewardItem):
                 reward_items.extend(reward.items)
 
-        message = notifier.MailDialogueMessage(
+        message = MailDialogueMessage(
             uid=quest_template.traderId,
             type=StrictInt(QuestMessageType.questSuccess.value),
             templateId='5ab0f32686f7745dd409f56b',  # TODO: Right now this is a placeholder

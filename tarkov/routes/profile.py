@@ -4,9 +4,9 @@ import ujson
 from flask import Blueprint, request
 
 from server import root_dir
+from server.utils import tarkov_response, zlib_middleware
 from tarkov.inventory_dispatcher import DispatcherManager
 from tarkov.profile import Profile
-from server.utils import tarkov_response, zlib_middleware
 
 blueprint = Blueprint(__name__, __name__)
 

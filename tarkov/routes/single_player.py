@@ -2,11 +2,11 @@ import ujson
 from flask import Blueprint, request
 
 from server import db_dir, logger
+from server.utils import tarkov_response, zlib_middleware
 from tarkov.inventory.helpers import regenerate_items_ids
 from tarkov.lib import locations
 from tarkov.lib.bots import BotGenerator
 from tarkov.profile import Profile
-from server.utils import tarkov_response, zlib_middleware
 
 blueprint = Blueprint(__name__, __name__)
 

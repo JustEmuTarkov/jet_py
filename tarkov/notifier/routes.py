@@ -5,9 +5,8 @@ import orjson
 from flask import Blueprint, request
 
 import tarkov.profile
-from server.utils import TarkovError
+from server.utils import TarkovError, tarkov_response, zlib_middleware
 from tarkov import notifier
-from server.utils import tarkov_response, zlib_middleware
 
 blueprint = Blueprint(__name__, __name__)
 

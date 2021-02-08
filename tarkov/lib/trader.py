@@ -1,17 +1,15 @@
-import copy
 import itertools
 import random
 import time
 from enum import Enum
-from typing import List, NamedTuple, Tuple, TypedDict, Union
+from typing import List, NamedTuple, TypedDict, Union
 
 import pydantic
 import ujson
 
 from server import db_dir
-from tarkov.inventory import (ImmutableInventory, Item, ItemUpd, PlayerInventory, TemplateId,
-                              item_templates_repository, )
-from tarkov.inventory.helpers import generate_item_id, regenerate_items_ids
+from tarkov.inventory import ImmutableInventory, PlayerInventory, item_templates_repository, regenerate_items_ids
+from tarkov.inventory.models import Item, ItemUpd, TemplateId
 
 
 class Traders(Enum):

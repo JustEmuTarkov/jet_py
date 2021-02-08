@@ -5,7 +5,8 @@ from flask import Request, request
 from pydantic import Field
 
 from server import logger
-from tarkov.inventory import Item, PlayerInventory
+from tarkov.inventory import PlayerInventory
+from tarkov.inventory.models import Item
 from tarkov.models import Base
 from tarkov.profile import Profile
 from . import dispatchers

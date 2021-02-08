@@ -3,7 +3,7 @@ from typing import Dict, List, Tuple
 
 import tarkov.profile as profile_
 from tarkov import inventory
-from tarkov.inventory import Item
+from tarkov.inventory.models import Item
 from .models import QuestRewardItem
 from .repositories import quests_repository
 
@@ -38,8 +38,8 @@ class Quests:
         quest['status'] = 'Started'
         quest['startTime'] = int(time.time())
 
-    def handover_items(self, quest_id: str, condition_id: str, items: Dict[inventory.ItemId, int]) \
-            -> Tuple[List[inventory.Item], List[inventory.Item]]:
+    def handover_items(self, quest_id: str, condition_id: str, items: Dict[inventory.models.ItemId, int]) \
+            -> Tuple[List[inventory.models.Item], List[inventory.models.Item]]:
 
         try:
             condition = self.profile.pmc_profile['BackendCounters'][condition_id]

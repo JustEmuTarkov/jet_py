@@ -1,11 +1,11 @@
 import enum
 from types import SimpleNamespace
-from typing import List, Literal, Optional, Union
+from typing import List, Literal, Optional
 
 from pydantic import Extra, StrictBool, StrictInt
 
 from tarkov import models
-from tarkov.inventory import AnyMoveLocation, CartridgesMoveLocation, InventoryMoveLocation, Item, ItemId, TemplateId
+from tarkov.inventory.models import AnyMoveLocation, Item, ItemId, TemplateId
 
 
 class ActionType(enum.Enum):

@@ -5,8 +5,8 @@ import ujson
 from flask import Blueprint, request
 
 from server import app, db_dir, start_time
-from tarkov.inventory import item_templates_repository
 from server.utils import tarkov_response, zlib_middleware
+from tarkov.inventory import item_templates_repository
 
 blueprint = Blueprint(__name__, __name__)
 

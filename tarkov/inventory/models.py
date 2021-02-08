@@ -7,7 +7,7 @@ from typing import Any, List, Literal, NewType, Optional, Union
 from pydantic import Extra, Field, PrivateAttr, StrictBool, StrictInt
 
 from tarkov.models import Base
-from . import inventory
+from tarkov import inventory
 
 ItemId = NewType('ItemId', str)
 TemplateId = NewType('TemplateId', str)

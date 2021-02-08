@@ -7,8 +7,9 @@ from typing import List
 import ujson
 
 from server import db_dir
-from tarkov.inventory import Item, MutableInventory, TemplateId
+from tarkov.inventory import MutableInventory
 from tarkov.inventory.helpers import generate_item_id, regenerate_items_ids
+from tarkov.inventory.models import Item, TemplateId
 
 
 class BotInventory(MutableInventory):

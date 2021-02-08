@@ -1,7 +1,7 @@
 from flask import Blueprint
 
-from tarkov.lib import hideout
 from server.utils import tarkov_response, zlib_middleware
+from tarkov.lib import hideout
 
 blueprint = Blueprint(__name__, __name__)
 

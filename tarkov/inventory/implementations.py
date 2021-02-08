@@ -1,6 +1,7 @@
 from typing import List
 
-from tarkov.inventory import Item, MutableInventory
+from tarkov.inventory import MutableInventory
+from tarkov.inventory.models import Item
 
 
 class SimpleInventory(MutableInventory):
