@@ -33,3 +33,16 @@ def regenerate_items_ids(items: List[Item]) -> None:
         item.id = id_map[item.id]
         if item.parent_id in id_map:
             item.parent_id = id_map[item.parent_id]
+
+
+def regenerate_item_ids_dict(items: List[Dict]) -> None:
+    items: List[Dict] = [item for item in items if 'parentId' in item]
+
+    id_map: Dict[ItemId, ItemId] = {
+        item['_id']: generate_item_id() for item in items
+    }
+
+    for item in items:
+        item['_id'] = id_map[item['_id']]
+        if item['parentId'] in id_map:
+            item['parentId'] = id_map[item['parentId']]

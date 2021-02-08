@@ -1,3 +1,5 @@
+from typing import List
+
 import ujson
 from flask import Blueprint, request
 
@@ -59,8 +61,8 @@ def settings_bot_limit(bot_type: str):  # pylint: disable=unused-argument
 @blueprint.route('/client/game/bot/generate', methods=['POST', 'GET'])
 @zlib_middleware
 @tarkov_response
-def generate_bots():
-    bots = []
+def generate_bots() -> List[dict]:
+    bots: List[dict] = []
 
     logger.debug(request.data)
     bot_generator = BotGenerator()

@@ -45,6 +45,14 @@ class ItemTemplatesRepository:
         """
         Returns template of item
         """
+        item_template = self.get_any_template(item)
+
+        if item_template.type == 'Node':
+            raise NotFoundError(f'Can not found ItemTemplate with id {item_template.id}, however node was found.')
+
+        return cast(ItemTemplate, item_template)
+
+    def get_any_template(self, item: Union[Item, TemplateId]) -> Union[NodeTemplate, ItemTemplate]:
         if isinstance(item, Item):
             template_id = item.tpl
         else:
@@ -53,15 +61,12 @@ class ItemTemplatesRepository:
         try:
             item_template = self.__item_templates[template_id]
         except KeyError as error:
-            raise NotFoundError(f'Can not found ItemTemplate with id {template_id}') from error
+            raise NotFoundError(f'Can not found any template with id {template_id}') from error
 
-        if item_template.type == 'Node':
-            raise NotFoundError(f'Can not found ItemTemplate with id {template_id}, however node was found.')
-
-        return cast(ItemTemplate, item_template)
+        return item_template
 
     def iter_template_children(self, template_id: TemplateId) -> Iterable[Union[NodeTemplate, ItemTemplate]]:
-        templates: List[Union[NodeTemplate, ItemTemplate]] = [self.get_template(template_id)]
+        templates: List[Union[NodeTemplate, ItemTemplate]] = [self.get_any_template(template_id)]
         while templates:
             template = templates.pop()
             yield template

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import abc
 import copy
-from typing import Generator, Iterable, List, Optional, Tuple, cast
+from typing import Generator, Iterable, List, Optional, Tuple, Union, cast
 
 import ujson
 
@@ -395,7 +395,8 @@ class GridInventory(MutableInventory):
         item_inventory.remove_item(item, remove_children=True)
 
         if isinstance(move_location, InventoryMoveLocation):
-            self.place_item(item=item, children_items=children_items, location=move_location.location)
+            self._move_item(item=item, children_items=children_items, move_location=move_location)
+            # self.place_item(item=item, children_items=children_items, location=move_location.location)
 
         elif isinstance(move_location, CartridgesMoveLocation):
             self.__place_ammo_into_magazine(ammo=item, move_location=move_location)
@@ -404,14 +405,30 @@ class GridInventory(MutableInventory):
             self.__place_ammo_into_weapon(ammo=item, move_location=move_location)
 
         elif isinstance(move_location, ModMoveLocation):
-            self.add_item(item)
-            self.add_items(children_items)
-
-            item.location = None
-            item.slotId = move_location.container
+            self._move_item(item=item, children_items=children_items, move_location=move_location)
 
         else:
             raise ValueError(f'Unknown item location: {move_location}')
+
+    def _move_item(
+            self,
+            item: Item,
+            children_items: List[Item],
+            move_location: Union[InventoryMoveLocation, ModMoveLocation]
+    ) -> None:
+        if isinstance(move_location, InventoryMoveLocation) and move_location.container == 'hideout':
+            if not self.stash_map.can_place(item, children_items, move_location.location):
+                raise ValueError('Cannot place item into location since it is taken')
+
+        # self.stash_map.add(item, children_items)
+        self.add_item(item)
+        self.add_items(children_items)
+        item.slotId = move_location.container
+        item.parent_id = move_location.id
+        if isinstance(move_location, ModMoveLocation):
+            item.location = None
+        else:
+            item.location = move_location.location
 
     def __place_ammo_into_magazine(
             self,

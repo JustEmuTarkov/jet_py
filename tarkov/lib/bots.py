@@ -5,44 +5,45 @@ from pathlib import Path
 from typing import List
 
 import ujson
+from pydantic import parse_obj_as
 
 from server import db_dir
 from tarkov.inventory import MutableInventory
 from tarkov.inventory.helpers import generate_item_id, regenerate_items_ids
-from tarkov.inventory.models import Item, TemplateId
+from tarkov.inventory.models import InventoryModel, Item, TemplateId
 
 
 class BotInventory(MutableInventory):
-    data: dict
+    data: InventoryModel
 
     def __init__(self, bot_inventory: dict):
-        self.data = bot_inventory
+        self.data = parse_obj_as(InventoryModel, bot_inventory)
 
     @property
     def items(self) -> List[Item]:
-        return self.data['items']
+        return self.data.items
 
     def regenerate_ids(self) -> None:
         regenerate_items_ids(self.items)
 
         equipment_item = self.get_item_by_template(TemplateId('55d7217a4bdc2d86028b456d'))
-        self.data['equipment'] = equipment_item.id
+        self.data.equipment = equipment_item.id
 
         quest_raid_items = self.get_item_by_template(TemplateId('5963866286f7747bf429b572'))
-        self.data['questRaidItems'] = quest_raid_items.id
+        self.data.questRaidItems = quest_raid_items.id
 
         quest_stash_items = self.get_item_by_template(TemplateId('5963866b86f7747bfa1c4462'))
-        self.data['questStashItems'] = quest_stash_items.id
+        self.data.questStashItems = quest_stash_items.id
 
         stash = self.get_item_by_template(TemplateId('566abbc34bdc2d92178b4576'))
-        self.data['stash'] = stash.id
+        self.data.stash = stash.id
 
 
 class BotGenerator:
     def __init__(self):
         self.__bot_base = ujson.load(db_dir.joinpath('base', 'botBase.json').open(encoding='utf8'))
 
-    def generate_bot(self, role: str, difficulty: str):
+    def generate_bot(self, role: str, difficulty: str) -> dict:
         bot = copy.deepcopy(self.__bot_base)
 
         bot['_id'] = f'bot{generate_item_id()}'
@@ -58,7 +59,7 @@ class BotGenerator:
         bot_inventory = BotInventory(ujson.load(random_inventory_path.open(encoding='utf8')))
         bot_inventory.regenerate_ids()
 
-        bot['Inventory'] = bot_inventory.data
+        bot['Inventory'] = bot_inventory.data.dict()
 
         self.__generate_health(bot, role)
 

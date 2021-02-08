@@ -266,7 +266,7 @@ class ItemUpdLockable(Base):
 
 
 class ItemUpdRepairable(Base):
-    MaxDurability: int
+    MaxDurability: int = None
     Durability: int
 
 
