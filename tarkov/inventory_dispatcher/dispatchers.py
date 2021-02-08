@@ -1,34 +1,31 @@
-import itertools
 import typing
-from typing import Callable, Dict, cast
+from typing import Callable, Dict, List, Optional
+
+from pydantic import StrictInt
 
 import tarkov.inventory
 from server import logger
 from tarkov import notifier, quests
 from tarkov.hideout.models import HideoutAreaType
-from tarkov.inventory import ItemLocation, MoveLocation, PlayerInventory, item_templates_repository
-from tarkov.inventory.helpers import generate_item_id, regenerate_items_ids
+from tarkov.inventory import (Item, MutableInventory, PlayerInventory, SimpleInventory, TemplateId, generate_item_id,
+                              item_templates_repository, )
 from tarkov.lib.trader import TraderInventory, Traders
+from tarkov.notifier import MailMessageItems
 from tarkov.profile import Profile
+from tarkov.quests import QuestMessageType, QuestRewardItem
 from . import manager as manager_
-from .adapters import InventoryToRequestAdapter
-from .models import *
-from ..inventory.implementations import SimpleInventory
-from ..notifier import MailMessageItems
-from ..quests.models import QuestMessageType, QuestRewardItem
+from .models import ActionModel, ActionType, HideoutActions, InventoryActions, Owner, QuestActions, TradingActions
 
 
 class Dispatcher:
     dispatch_map: Dict[ActionType, Callable]
     inventory: PlayerInventory
-    inventory_adapter: InventoryToRequestAdapter
     profile: Profile
     response: 'manager_.DispatcherResponse'
 
     def __init__(self, manager: 'manager_.DispatcherManager'):
         self.manager = manager
         self.inventory = manager.inventory
-        self.inventory_adapter = manager.inventory_adapter
         self.profile = manager.profile
         self.response = manager.response
 
@@ -65,60 +62,38 @@ class InventoryDispatcher(Dispatcher):
             ActionType.ApplyInventoryChanges: self._apply_inventory_changes,
         }
 
+    def get_owner_inventory(self, owner: Optional[Owner] = None) -> MutableInventory:
+        if owner is None:
+            return self.inventory
+
+        if owner.type == 'Mail':
+            message = self.profile.notifier.get_message(owner.id)
+            return SimpleInventory(message.items.data)
+
+        raise ValueError(f'Cannot find inventory for owner: {owner}')
+
     def _move(self, action: InventoryActions.Move):
-        if action.fromOwner is None:
-            item = self.inventory.get_item(action.item)
-            self.inventory_adapter.move_item(item, cast(MoveLocation, action.to))
-            self.response.items.change.append(item)
-            return
+        donor_inventory = self.get_owner_inventory(action.fromOwner)
+        item = donor_inventory.get_item(action.item)
 
-        if action.fromOwner.type == 'Mail':
-            message = self.profile.notifier.get_message(action.fromOwner.id)
-            message_inventory = SimpleInventory(message.items.data)
-
-            item = message_inventory.get_item(action.item)
-            children_items: List[Item] = list(message_inventory.iter_item_children_recursively(item))
-            all_items = [item, *children_items]
-            message_inventory.remove_item(item)  # Also removes children
-
-            item.location = ItemLocation(**action.to['location'])
-            item.parent_id = action.to['id']
-            item.slotId = action.to['container']
-
-            # regenerate_items_ids([item, *children_items])
-            self.response.items.new.extend(all_items)
-            self.profile.inventory.add_items(all_items)
-            return
-
-        raise NotImplementedError
+        self.inventory.move_item(
+            item=item,
+            move_location=action.to,
+        )
+        self.response.items.new.append(item)
 
     def _split(self, action: InventoryActions.Split):
-        if action.fromOwner is None:
-            item = self.inventory.get_item(action.item)
-            new_item = self.inventory_adapter.split_item(item, cast(MoveLocation, action.container), action.count)
+        donor_inventory = self.get_owner_inventory(action.fromOwner)
+        item = donor_inventory.get_item(action.item)
 
-            self.inventory.items.append(new_item)
+        new_item = self.inventory.split_item(
+            item=item,
+            split_location=action.container,
+            count=action.count
+        )
+
+        if new_item:
             self.response.items.new.append(new_item)
-
-            if not item.upd.StackObjectsCount:
-                self.response.items.del_.append(item)
-            else:
-                self.response.items.change.append(item)
-
-        elif action.fromOwner.type == 'Mail':
-            message = self.profile.notifier.get_message(action.fromOwner.id)
-            message_inventory = SimpleInventory(message.items.data)
-
-            item = message_inventory.get_item(action.item)
-            new_item = message_inventory.split_item(item, action.count)
-            new_item.location = cast(MoveLocation, action.count)
-
-            self.inventory.add_item(new_item)
-            self.response.items.new.append(new_item)
-            self.response.items.change.append(item)
-
-        else:
-            raise NotImplementedError
 
     def _examine(self, action: InventoryActions.Examine):
         item_id = action.item
@@ -140,33 +115,22 @@ class InventoryDispatcher(Dispatcher):
             self.profile.encyclopedia.examine(item_tpl_id)
 
     def _merge(self, action: InventoryActions.Merge):
-        if action.fromOwner is None:
-            item = self.inventory.get_item(action.item)
-            self.inventory.remove_item(item)
-
-        elif action.fromOwner.type == 'Mail':
-            message = self.profile.notifier.get_message(action.fromOwner.id)
-            assert isinstance(message.items, MailMessageItems)
-            message_inventory = SimpleInventory(message.items.data)
-            item = message_inventory.get_item(action.item)
-            message_inventory.remove_item(item)
-
-        else:
-            raise RuntimeError('Got unexpected action.fromOwner in InventoryDispatcher._merge')
-
+        donor_inventory = self.get_owner_inventory(action.fromOwner)
+        item = donor_inventory.get_item(item_id=action.item)
         with_ = self.inventory.get_item(action.with_)
 
-        self.inventory.merge(item, with_)
+        self.inventory.merge(item=item, with_=with_)
 
         self.response.items.del_.append(item)
         self.response.items.change.append(with_)
 
     def _transfer(self, action: InventoryActions.Transfer):
-        item = self.inventory.get_item(action.item)
+        donor_inventory = self.get_owner_inventory(action.fromOwner)
+        item = donor_inventory.get_item(item_id=action.item)
         with_ = self.inventory.get_item(action.with_)
-        self.inventory.transfer(item, with_, action.count)
 
-        self.response.items.change.extend([item, with_])
+        self.inventory.transfer(item=item, with_=with_, count=action.count)
+        self.response.items.change.extend((item, with_))
 
     def _fold(self, action: InventoryActions.Fold):
         item = self.inventory.get_item(action.item)
@@ -264,7 +228,7 @@ class HideoutDispatcher(Dispatcher):
             item = self.profile.inventory.get_item(item_id)
 
             if self.profile.inventory.can_split(item):
-                splitted_item = self.profile.inventory.split_item(item, count)
+                splitted_item = self.profile.inventory.simple_split_item(item=item, count=count)
                 self.profile.hideout.put_items_in_area_slots(area_type, int(slot_id), splitted_item)
             else:
                 self.profile.inventory.remove_item(item)
@@ -289,7 +253,7 @@ class HideoutDispatcher(Dispatcher):
                 self.response.items.del_.append(item)
                 continue
 
-            inventory.split_item(item=item, count=count)
+            inventory.simple_split_item(item=item, count=count)  # Simply throw away splitted item
             if not item.upd.StackObjectsCount:
                 self.response.items.del_.append(item)
             else:
@@ -334,20 +298,16 @@ class TradingDispatcher(Dispatcher):
     def __buy_from_trader(self, action: TradingActions.BuyFromTrader):
         trader_inventory = TraderInventory(Traders(action.tid), self.inventory)
 
-        items, children_items = trader_inventory.buy_item(action.item_id, action.count)
+        bought_items_list = trader_inventory.buy_item(action.item_id, action.count)
 
-        for item in itertools.chain(items, children_items):
-            item.upd.UnlimitedCount = False
+        for bought_item in bought_items_list:
+            item = bought_item.item
+            children = bought_item.children_items
 
-        # Place bought items in inventory
-        for item in items:
-            self.inventory.place_item(item)
+            self.inventory.place_item(item, children_items=children)
 
-        # Simply push all child items into inventory
-        self.inventory.add_items(children_items)
-        # Update the response
-        self.response.items.new.extend(items)
-        self.response.items.new.extend(children_items)
+            self.response.items.new.append(item)
+            self.response.items.new.extend(children)
 
         # Take required items from inventory
         for scheme_item in action.scheme_items:

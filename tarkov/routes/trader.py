@@ -1,12 +1,11 @@
 import ujson
 from flask import Blueprint, request
 
-import tarkov.profile.profile as lib_profile
 from server import db_dir, root_dir
 from server.utils import TarkovError
 from tarkov.lib.trader import TraderInventory, Traders
 from tarkov.profile import Profile
-from utils import tarkov_response, zlib_middleware
+from server.utils import tarkov_response, zlib_middleware
 
 blueprint = Blueprint(__name__, __name__)
 
@@ -44,10 +43,7 @@ def customization(trader_id):
 @zlib_middleware
 @tarkov_response
 def get_user_assort_price(trader_id):
-    profile_id = request.cookies['PHPSESSID']
-    player_profile = lib_profile.Profile(profile_id)
-
-    with player_profile:
+    with Profile.from_request(request) as player_profile:
         trader_inventory = TraderInventory(Traders(trader_id), player_inventory=player_profile.inventory)
         items = {}
         for item in player_profile.inventory.items:
@@ -80,7 +76,7 @@ def get_trader_list():
 @zlib_middleware
 @tarkov_response
 def get_trader_assort(trader_id):
-    with Profile(request.cookies['PHPSESSID']) as profile:
+    with Profile.from_request(request) as profile:
         trader_inventory = TraderInventory(Traders(trader_id), player_inventory=profile.inventory)
         return {
             'barter_scheme': trader_inventory.barter_scheme,

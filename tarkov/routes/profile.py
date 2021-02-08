@@ -6,7 +6,7 @@ from flask import Blueprint, request
 from server import root_dir
 from tarkov.inventory_dispatcher import DispatcherManager
 from tarkov.profile import Profile
-from utils import tarkov_response, zlib_middleware
+from server.utils import tarkov_response, zlib_middleware
 
 blueprint = Blueprint(__name__, __name__)
 
@@ -25,12 +25,10 @@ def client_game_profile_item_move():
 @zlib_middleware
 @tarkov_response
 def client_game_profile_list():
-    session_id = request.cookies['PHPSESSID']
-
-    with Profile(session_id) as profile:
+    with Profile.from_request(request) as profile:
         pmc_profile = profile.get_profile()
 
-        profile_dir = root_dir.joinpath('resources', 'profiles', session_id)
+        profile_dir = root_dir.joinpath('resources', 'profiles', profile.profile_id)
         scav_profile = ujson.load((profile_dir / 'character_scav.json').open('r'))
 
         return [

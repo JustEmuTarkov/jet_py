@@ -1,11 +1,11 @@
 import enum
 from types import SimpleNamespace
-from typing import List, Literal, Optional
+from typing import List, Literal, Optional, Union
 
 from pydantic import Extra, StrictBool, StrictInt
 
 from tarkov import models
-from tarkov.inventory import Item, ItemId, TemplateId
+from tarkov.inventory import AnyMoveLocation, CartridgesMoveLocation, InventoryMoveLocation, Item, ItemId, TemplateId
 
 
 class ActionType(enum.Enum):
@@ -90,13 +90,13 @@ class InventoryActions(SimpleNamespace):
 
     class Split(ActionModel):
         item: ItemId
-        container: dict  # MoveLocation
+        container: AnyMoveLocation
         count: StrictInt
         fromOwner: Optional[Owner] = None
 
     class Move(ActionModel):
         item: ItemId
-        to: dict  # MoveLocation
+        to: AnyMoveLocation
         fromOwner: Optional[Owner] = None
 
     class Merge(ActionModel):

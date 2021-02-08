@@ -7,7 +7,7 @@ from flask import Blueprint, request
 import tarkov.profile
 from server.utils import TarkovError
 from tarkov import notifier
-from utils import tarkov_response, zlib_middleware
+from server.utils import tarkov_response, zlib_middleware
 
 blueprint = Blueprint(__name__, __name__)
 

@@ -8,7 +8,7 @@ import ujson
 
 from server import db_dir
 from tarkov.exceptions import NoSpaceError
-from tarkov.inventory import (GridInventory, Item, ItemId, ItemLocation, StashMap, TemplateId,
+from tarkov.inventory import (AnyItemLocation, GridInventory, Item, ItemId, ItemInventoryLocation, StashMap, TemplateId,
                               item_templates_repository, )
 from tarkov.inventory.helpers import generate_item_id, regenerate_items_ids
 
@@ -33,7 +33,7 @@ class ContainerInventory(GridInventory):
     def items(self) -> List[Item]:
         return self.container['Items']
 
-    def place_item(self, item: Item, *, children_items: List[Item] = None, location: ItemLocation = None):
+    def place_item(self, item: Item, *, children_items: List[Item] = None, location: AnyItemLocation = None):
         super().place_item(item, children_items=children_items, location=location)
         item.slotId = 'main'
 

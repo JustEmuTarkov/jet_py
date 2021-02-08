@@ -2,12 +2,13 @@ import time
 from typing import Dict, List, cast
 
 import ujson
+from pydantic import parse_obj_as
 
 import tarkov.profile.profile as profile_
 from server import db_dir, logger
 from tarkov import inventory
 from .models import HideoutArea, HideoutAreaType, HideoutProduction
-from tarkov.inventory import item_templates_repository
+from tarkov.inventory import Item, item_templates_repository
 
 
 class Hideout:
@@ -63,14 +64,14 @@ class Hideout:
         if diff > 0:
             area_slots.extend([{'item': None} for _ in range(diff)])
 
-        area_slots[slot_id]['item'] = [item]
+        area_slots[slot_id]['item'] = [item.dict()]
 
     def take_item_from_area_slot(self, area_type: HideoutAreaType, slot_id: int) -> inventory.Item:
         area = self.get_area(area_type)
         slot = area['slots'][slot_id]
-        item = slot['item'][0]
+        item: dict = slot['item'][0]
         slot['item'] = None
-        return item
+        return parse_obj_as(Item, item)
 
     def start_single_production(self, recipe_id: str, timestamp: int = None):
         if not timestamp:
@@ -99,7 +100,6 @@ class Hideout:
             item.upd.SpawnedInSession = True
 
         del self.data['Production'][recipe_id]
-
         return items
 
     def toggle_area(self, area_type: HideoutAreaType, enabled: bool):

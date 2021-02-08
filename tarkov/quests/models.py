@@ -10,7 +10,7 @@ from tarkov.inventory import Item
 class QuestMessageType(enum.Enum):
     questStart = 10
     questFail = 11
-    questSuccess = 1
+    questSuccess = 12
 
     npcTrader = 2
 

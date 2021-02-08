@@ -61,7 +61,8 @@ class Quests:
                 self.profile.inventory.remove_item(item)
             else:
                 changed_items.append(item)
-                removed_items.append(self.profile.inventory.split_item(item=item, count=count))
+                self.profile.inventory.simple_split_item(item=item, count=count)
+                # removed_items.append(self.profile.inventory.split_item(item=item, count=count))
 
             condition['value'] += count
 

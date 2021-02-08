@@ -3,7 +3,7 @@ import itertools
 import random
 import time
 from enum import Enum
-from typing import List, Tuple, TypedDict, Union
+from typing import List, NamedTuple, Tuple, TypedDict, Union
 
 import pydantic
 import ujson
@@ -27,6 +27,11 @@ class Traders(Enum):
 
 class TraderBase(TypedDict):
     sell_category: List[TemplateId]
+
+
+class BoughtItems(NamedTuple):
+    item: Item
+    children_items: List[Item]
 
 
 class TraderInventory(ImmutableInventory):
@@ -139,40 +144,31 @@ class TraderInventory(ImmutableInventory):
     def items(self) -> List[Item]:
         return self.__items
 
-    def buy_item(self, item_id: str, count: int) -> Tuple[List[Item], List[Item]]:
-        """
-        :return: Tuple with two elements: first is bought items, second is children of these items
-        """
-        base_item = copy.deepcopy(self.get_item(item_id))
+    def buy_item(self, item_id: str, count: int) -> List[BoughtItems]:
+        base_item = self.get_item(item_id)
         item_template = item_templates_repository.get_template(base_item.tpl)
         item_stack_size = item_template.props.StackMaxSize
 
-        bought_items: List[Item] = []
-        bought_child_items: List[Item] = []
-
-        if item_stack_size == 1:
-            for _ in range(count):
-                item: Item = base_item.copy(deep=True)
-                item.upd.StackObjectsCount = 1
-                child_items: List[Item] = list(child.copy(deep=True) for child in self.iter_item_children_recursively(base_item))
-
-                all_items = child_items + [item]
-                regenerate_items_ids(all_items)
-
-                bought_items.append(item)
-                bought_child_items.extend(child_items)
-
-            return bought_items, bought_child_items
+        bought_items_list: List[BoughtItems] = []
 
         while count:
             stack_size = min(count, item_stack_size)
             count -= stack_size
-            item = copy.deepcopy(base_item)
-            item.id = generate_item_id()
-            item.upd = ItemUpd(StackObjectsCount=stack_size)
-            bought_items.append(item)
+            item: Item = base_item.copy(deep=True)
+            item.upd.StackObjectsCount = 1
+            children_items: List[Item] = [
+                child.copy(deep=True) for child in self.iter_item_children_recursively(base_item)
+            ]
 
-        return bought_items, []
+            all_items = children_items + [item]
+            regenerate_items_ids(all_items)
+            for item in all_items:
+                item.upd.UnlimitedCount = False
+
+            item.upd = ItemUpd(StackObjectsCount=stack_size)
+            bought_items_list.append(BoughtItems(item=item, children_items=children_items))
+
+        return bought_items_list
 
     def calculate_insurance_price(self, items: Union[Item, List[Item]]) -> int:
         if isinstance(items, Item):

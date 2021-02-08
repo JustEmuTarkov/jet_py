@@ -3,7 +3,7 @@ from flask import Blueprint, request
 
 from server import db_dir
 from tarkov.profile import Profile
-from utils import tarkov_response, zlib_middleware
+from server.utils import tarkov_response, zlib_middleware
 
 blueprint = Blueprint(__name__, __name__)
 
@@ -51,8 +51,7 @@ def available():
 @zlib_middleware
 @tarkov_response
 def join():
-    session_id: str = request.cookies['PHPSESSID']
-    with Profile(session_id) as profile:
+    with Profile.from_request(request) as profile:
         return [
             {
                 'profileid': profile.pmc_profile['_id'],

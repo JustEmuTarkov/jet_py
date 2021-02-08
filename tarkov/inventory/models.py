@@ -4,9 +4,10 @@ import datetime
 import enum
 from typing import Any, List, Literal, NewType, Optional, Union
 
-from pydantic import Extra, Field, StrictBool, StrictInt
+from pydantic import Extra, Field, PrivateAttr, StrictBool, StrictInt
 
 from tarkov.models import Base
+from . import inventory
 
 ItemId = NewType('ItemId', str)
 TemplateId = NewType('TemplateId', str)
@@ -313,7 +314,7 @@ class ItemUpd(Base):
     UnlimitedCount: StrictBool = False
 
 
-AmmoStackPosition = NewType('AmmoStackPosition', int)
+ItemAmmoStackPosition = NewType('ItemAmmoStackPosition', int)
 
 ItemOrientation = Literal['Horizontal', 'Vertical']
 
@@ -323,11 +324,14 @@ class ItemOrientationEnum(enum.Enum):
     Vertical = 'Vertical'
 
 
-class ItemLocation(Base):
+class ItemInventoryLocation(Base):
     x: int
     y: int
     r: str = ItemOrientationEnum.Vertical.value
     isSearched: Optional[bool] = None
+
+
+AnyItemLocation = Union[ItemInventoryLocation, ItemAmmoStackPosition]
 
 
 class Item(Base):
@@ -339,12 +343,32 @@ class Item(Base):
             'parent_id': 'parentId'
         }
 
+    __inventory__: Optional['inventory.MutableInventory'] = PrivateAttr(default=None)  # Link to the inventory
+
     id: ItemId
     tpl: TemplateId
     slotId: Optional[str] = None
     parent_id: Optional[ItemId] = None
-    location: Optional[Union[ItemLocation, AmmoStackPosition]] = None
+    location: Optional[AnyItemLocation] = None
     upd: ItemUpd = Field(default_factory=ItemUpd)
+
+    def get_inventory(self) -> 'inventory.MutableInventory':
+        if self.__inventory__ is None:
+            raise ValueError('Item does not have inventory')
+        return self.__inventory__
+
+    def copy(
+            self: Item,
+            **kwargs
+    ) -> Item:
+        item_inventory = self.__inventory__
+        # Avoid copying inventory
+        self.__inventory__ = None
+        item_copy: Item = super().copy(**kwargs)
+
+        self.__inventory__ = item_inventory
+
+        return item_copy
 
 
 class InventoryModel(Base):
@@ -354,3 +378,46 @@ class InventoryModel(Base):
     questStashItems: ItemId
     fastPanel: dict
     items: List[Item]
+
+
+class InventoryMoveLocation(Base):
+    id: ItemId
+    container: str
+    location: ItemInventoryLocation
+
+
+class CartridgesMoveLocation(Base):
+    id: ItemId  # Magazine id
+    container: Literal['cartridges']
+
+
+class PatronInWeaponMoveLocation(Base):
+    id: ItemId
+    container: Literal['patron_in_weapon']
+
+
+class ModMoveLocation(Base):
+    id: ItemId
+    container: str
+    # container: Literal[
+    #     'mod_handguard',
+    #     'mod_muzzle',
+    #     'mod_gas_block',
+    #     'mod_mount',
+    #     'mod_scope',
+    #     'mod_sight_rear',
+    #     'mod_sight_front',
+    #     'mod_tactical',
+    #     'mod_barrel',
+    #     'mod_pistol_grip',
+    #     'mod_magazine',
+    #     'mod_reciever',
+    #     'mod_stock',
+    #     'mod_charge',
+    #     'mod_mount_001',
+    #     'mod_mount_002',
+    #     'mod_foregrip'
+    # ]
+
+
+AnyMoveLocation = Union[InventoryMoveLocation, CartridgesMoveLocation, PatronInWeaponMoveLocation, ModMoveLocation]

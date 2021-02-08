@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 
 from server import logger
-from utils import tarkov_response, zlib_middleware
+from server.utils import tarkov_response, zlib_middleware
 
 blueprint = Blueprint(__name__, __name__)
 

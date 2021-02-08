@@ -1,6 +1,6 @@
 from flask import Blueprint, request
 
-from utils import zlib_middleware
+from server.utils import zlib_middleware
 
 blueprint = Blueprint(__name__, __name__)
 

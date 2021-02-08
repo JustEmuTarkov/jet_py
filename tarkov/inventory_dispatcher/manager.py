@@ -9,7 +9,6 @@ from tarkov.inventory import Item, PlayerInventory
 from tarkov.models import Base
 from tarkov.profile import Profile
 from . import dispatchers
-from .adapters import InventoryToRequestAdapter
 
 
 class DispatcherResponseItems(Base):
@@ -35,7 +34,6 @@ class DispatcherResponse(Base):
 class DispatcherManager:
     profile: Profile
     inventory: PlayerInventory
-    inventory_adapter: InventoryToRequestAdapter
 
     request: Request
     response: DispatcherResponse
@@ -59,7 +57,6 @@ class DispatcherManager:
     def dispatch(self) -> DispatcherResponse:
         with self.profile:
             self.inventory = self.profile.inventory
-            self.inventory_adapter = InventoryToRequestAdapter(self.inventory)
             self.__make_dispatchers()
 
             # request.data should be dict at this moment
