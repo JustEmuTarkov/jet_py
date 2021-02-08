@@ -17,7 +17,6 @@ blueprint = Blueprint(__name__, __name__)
 def client_game_profile_item_move():
     dispatcher = DispatcherManager(request.cookies['PHPSESSID'])
     response = dispatcher.dispatch()
-    print(ujson.dumps(response.dict(exclude_defaults=False, exclude_none=True, exclude_unset=False), indent=4))
     return response.dict(exclude_defaults=False, exclude_none=True, exclude_unset=False)
 
 

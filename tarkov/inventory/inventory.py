@@ -54,7 +54,7 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
         children_items = [] if children_items is None else children_items
 
         template = item_templates_repository.get_template(item)
-        if not template.props.MergesWithChildren:
+        if template.props.MergesWithChildren is False:
             return template.props.Width, template.props.Height
 
         extra_size: ItemExtraSize = {
@@ -184,7 +184,7 @@ class StashMap:
                 location = ItemInventoryLocation(x=x, y=y, r=orientation.value)
                 if self.can_place(item=item, children_items=children_items, location=location):
                     if auto_fill:
-                        self.fill(item, x, y, orientation)
+                        self.fill(item, x, y, orientation, children_items=children_items)
                     return location
 
         raise NoSpaceError('Cannot place item into inventory')
