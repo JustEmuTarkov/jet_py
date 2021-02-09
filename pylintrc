@@ -157,9 +157,6 @@ disable=print-statement,
         # pylint confuses some inner modules with 3rd party ones
         wrong-import-order,
 
-        # Cyclic imports. Yes, we have a lot of them
-        cyclic-import,
-
         # Comments
         fixme
 

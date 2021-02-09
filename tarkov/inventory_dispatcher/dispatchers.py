@@ -1,5 +1,5 @@
 import typing
-from typing import Callable, Dict, List, Optional
+from typing import Callable, Dict, List, Optional, TYPE_CHECKING
 
 from pydantic import StrictInt
 
@@ -15,17 +15,20 @@ from tarkov.lib.trader import TraderInventory, Traders
 from tarkov.notifier.models import MailDialogueMessage, MailMessageItems
 from tarkov.profile import Profile
 from tarkov.quests.models import QuestMessageType, QuestRewardItem
-from . import manager as manager_  # pylint: disable=unused-import
 from .models import ActionModel, ActionType, HideoutActions, InventoryActions, Owner, QuestActions, TradingActions
+
+if TYPE_CHECKING:
+    # pylint: disable=cyclic-import
+    from tarkov.inventory_dispatcher.manager import DispatcherManager, DispatcherResponse
 
 
 class Dispatcher:
     dispatch_map: Dict[ActionType, Callable]
     inventory: PlayerInventory
     profile: Profile
-    response: 'manager_.DispatcherResponse'
+    response: 'DispatcherResponse'
 
-    def __init__(self, manager: 'manager_.DispatcherManager'):
+    def __init__(self, manager: 'DispatcherManager'):
         self.manager = manager
         self.inventory = manager.inventory
         self.profile = manager.profile
@@ -48,7 +51,7 @@ class Dispatcher:
 
 
 class InventoryDispatcher(Dispatcher):
-    def __init__(self, manager: 'manager_.DispatcherManager'):
+    def __init__(self, manager: 'DispatcherManager'):
         super().__init__(manager)
         self.dispatch_map = {
             ActionType.Move: self._move,
@@ -186,7 +189,7 @@ class InventoryDispatcher(Dispatcher):
 
 
 class HideoutDispatcher(Dispatcher):
-    def __init__(self, manager: 'manager_.DispatcherManager'):
+    def __init__(self, manager: 'DispatcherManager'):
         super().__init__(manager)
         self.dispatch_map = {
             ActionType.HideoutUpgrade: self._hideout_upgrade_start,
@@ -281,7 +284,7 @@ class HideoutDispatcher(Dispatcher):
 
 
 class TradingDispatcher(Dispatcher):
-    def __init__(self, manager: 'manager_.DispatcherManager'):
+    def __init__(self, manager: 'DispatcherManager'):
         super().__init__(manager)
         self.dispatch_map = {
             ActionType.TradingConfirm: self._trading_confirm,
@@ -354,7 +357,7 @@ class TradingDispatcher(Dispatcher):
 
 
 class QuestDispatcher(Dispatcher):
-    def __init__(self, manager: 'manager_.DispatcherManager') -> None:
+    def __init__(self, manager: 'DispatcherManager') -> None:
         super().__init__(manager)
         self.dispatch_map = {
             ActionType.QuestAccept: self._quest_accept,

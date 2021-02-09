@@ -6,7 +6,7 @@ from flask import Blueprint, request
 
 import tarkov.profile
 from server.utils import TarkovError, tarkov_response, zlib_middleware
-from tarkov import notifier
+from tarkov.notifier.notifier import notifier_instance
 
 blueprint = Blueprint(__name__, __name__)
 
@@ -59,14 +59,14 @@ def mail_dialog_all_attachments() -> Dict:
 @blueprint.route('/notifierServer/get/<profile_id>', methods=['GET'])
 def notifierserver_get(profile_id: str) -> Union[dict, str]:
     for _ in range(15):  # Poll for 15 seconds
-        if notifier.notifier_instance.has_notifications(profile_id):
-            notifications = notifier.notifier_instance.get_notifications(profile_id)
+        if notifier_instance.has_notifications(profile_id):
+            notifications = notifier_instance.get_notifications(profile_id)
             response = '\n'.join([orjson.dumps(notification).decode('utf8') for notification in notifications])
             return response
 
         time.sleep(1)
 
-    return notifier.notifier_instance.get_empty_notification()
+    return notifier_instance.get_empty_notification()
 
 
 @blueprint.route('/client/notifier/channel/create', methods=['POST'])

@@ -2,12 +2,15 @@ from __future__ import annotations
 
 import datetime
 import enum
-from typing import Any, List, Literal, NewType, Optional, Union
+from typing import Any, List, Literal, NewType, Optional, TYPE_CHECKING, Union
 
 from pydantic import Extra, Field, PrivateAttr, StrictBool, StrictInt
 
-from tarkov import inventory  # pylint: disable=unused-import
 from tarkov.models import Base
+
+if TYPE_CHECKING:
+    # pylint: disable=cyclic-import
+    from tarkov.inventory import MutableInventory
 
 ItemId = NewType('ItemId', str)
 TemplateId = NewType('TemplateId', str)
@@ -347,7 +350,7 @@ class Item(Base):
             'parent_id': 'parentId'
         }
 
-    __inventory__: Optional['inventory.MutableInventory'] = PrivateAttr(default=None)  # Link to the inventory
+    __inventory__: Optional['MutableInventory'] = PrivateAttr(default=None)  # Link to the inventory
 
     id: ItemId
     tpl: TemplateId
@@ -356,7 +359,7 @@ class Item(Base):
     location: Optional[AnyItemLocation] = None
     upd: ItemUpd = Field(default_factory=ItemUpd)
 
-    def get_inventory(self) -> 'inventory.MutableInventory':
+    def get_inventory(self) -> 'MutableInventory':
         if self.__inventory__ is None:
             raise ValueError('Item does not have inventory')
         return self.__inventory__

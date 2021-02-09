@@ -1,22 +1,22 @@
 import time
-from typing import Dict, List, Tuple
+from typing import Dict, List, TYPE_CHECKING, Tuple
 
-import tarkov.profile as profile_
 from tarkov import inventory
 from tarkov.inventory.models import Item
 from .models import QuestRewardItem
 from .repositories import quests_repository
 
+if TYPE_CHECKING:
+    # pylint: disable=cyclic-import
+    from tarkov.profile import Profile
+
 
 class Quests:
-    profile: 'profile_.Profile'
+    profile: 'Profile'
     data: List[dict]
 
-    def __init__(
-            self,
-            profile: 'profile_.Profile',
-    ):
-        self.profile: profile_.Profile = profile
+    def __init__(self, profile: 'Profile', ):
+        self.profile: 'Profile' = profile
         self.data = self.profile.quests_data
 
     def get_quest(self, quest_id: str):

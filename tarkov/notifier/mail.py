@@ -1,16 +1,19 @@
 import datetime
-from typing import Dict, List
+from typing import Dict, List, TYPE_CHECKING
 
-import tarkov.profile  # pylint: disable=unused-import
-from .models import DialoguePreviewList, MailDialogue, MailDialogueMessage, MailDialoguePreview, MailDialogues
-from .notifier import notifier_instance
+from tarkov.notifier.models import (DialoguePreviewList, MailDialogue, MailDialogueMessage, MailDialoguePreview,
+                                    MailDialogues, )
+from tarkov.notifier.notifier import notifier_instance
+
+if TYPE_CHECKING:
+    from tarkov.profile import Profile
 
 
 class Mail:
-    profile: 'tarkov.profile.Profile'
+    profile: 'Profile'
     dialogues: MailDialogues
 
-    def __init__(self, profile: 'tarkov.profile.Profile'):
+    def __init__(self, profile: 'Profile'):
         self.profile = profile
         self.path = self.profile.profile_dir.joinpath('dialogue.json')
 

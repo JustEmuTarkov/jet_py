@@ -1,15 +1,17 @@
 import time
-from typing import Dict, List, cast
+from typing import Dict, List, TYPE_CHECKING, cast
 
 import ujson
 from pydantic import parse_obj_as
 
-import tarkov.profile.profile as profile_  # pylint: disable=unused-import
 from server import db_dir, logger
 from tarkov import inventory
 from tarkov.inventory import item_templates_repository
 from tarkov.inventory.models import Item
 from .models import HideoutArea, HideoutAreaType, HideoutProduction
+
+if TYPE_CHECKING:
+    from tarkov.profile import Profile
 
 
 class Hideout:
@@ -24,11 +26,11 @@ class Hideout:
     work_time_elapsed: int
     current_time: int
 
-    def __init__(self, profile: 'profile_.Profile'):
+    def __init__(self, profile: 'Profile'):
         self.path = profile.profile_dir.joinpath('pmc_hideout.json')
         self.meta_path = profile.profile_dir.joinpath('pmc_hideout.meta.json')
 
-        self.profile: 'profile_.Profile' = profile
+        self.profile: 'Profile' = profile
 
     @staticmethod
     def get_recipe(recipe_id):

@@ -3,11 +3,10 @@ from __future__ import annotations
 import abc
 import copy
 import itertools
-from typing import Dict, Iterable, List, Optional, Tuple, Union
+from typing import Dict, Iterable, List, Optional, TYPE_CHECKING, Tuple, Union
 
 import ujson
 
-import tarkov.profile  # pylint: disable=unused-import
 from server import root_dir
 from tarkov.exceptions import NoSpaceError, NotFoundError
 from tarkov.models import Base
@@ -17,6 +16,9 @@ from .models import (AnyItemLocation, AnyMoveLocation, CartridgesMoveLocation, I
                      Item, ItemAmmoStackPosition, ItemId, ItemInventoryLocation, ItemOrientationEnum, ItemUpdFoldable,
                      ModMoveLocation, PatronInWeaponMoveLocation, TemplateId, )
 from .repositories import item_templates_repository
+
+if TYPE_CHECKING:
+    from tarkov.profile import Profile
 
 
 class ImmutableInventory(metaclass=abc.ABCMeta):
@@ -633,7 +635,7 @@ class GridInventory(MutableInventory):
 class PlayerInventory(GridInventory):
     inventory: InventoryModel
 
-    def __init__(self, profile: 'tarkov.profile.Profile'):
+    def __init__(self, profile: 'Profile'):
         super().__init__()
         profile_id = profile.profile_id
         self.__path = root_dir.joinpath('resources', 'profiles', profile_id, 'pmc_inventory.json')

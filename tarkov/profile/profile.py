@@ -9,10 +9,11 @@ from flask import Request
 import tarkov.inventory.repositories
 from server import root_dir
 from server.utils import TarkovError
-from tarkov import inventory as inventory_, notifier, quests
+from tarkov import inventory as inventory_, quests
 from tarkov.hideout import Hideout
 from tarkov.inventory.models import Item, TemplateId
 from tarkov.lib.trader import Traders
+from tarkov.notifier import Mail
 
 
 class Encyclopedia:
@@ -51,7 +52,7 @@ class Profile:
     inventory: inventory_.PlayerInventory
     encyclopedia: Encyclopedia
 
-    notifier: notifier.Mail
+    notifier: Mail
 
     def __init__(self, profile_id: str):
         self.profile_id = profile_id
@@ -107,7 +108,7 @@ class Profile:
         self.hideout = Hideout(profile=self)
         self.hideout.read()
 
-        self.notifier = notifier.Mail(profile=self)
+        self.notifier = Mail(profile=self)
         self.notifier.read()
 
     def __write(self):
