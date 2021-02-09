@@ -53,8 +53,8 @@ class ContainerInventory(GridInventory):
     def items(self) -> List[Item]:
         return self.container.Items
 
-    def place_item(self, item: Item, *, children_items: List[Item] = None, location: AnyItemLocation = None):
-        super().place_item(item, children_items=children_items, location=location)
+    def place_item(self, item: Item, *, child_items: List[Item] = None, location: AnyItemLocation = None):
+        super().place_item(item, child_items=child_items, location=location)
         item.slotId = 'main'
 
 

@@ -151,10 +151,11 @@ class InventoryDispatcher(Dispatcher):
     def _apply_inventory_changes(self, action: InventoryActions.ApplyInventoryChanges):
         if action.changedItems is not None:
             for changed_item in action.changedItems:
-                item = self.profile.inventory.get_item(changed_item.id)
+                item = self.inventory.get_item(changed_item.id)
 
-                self.inventory.remove_item(item, remove_children=False)
-                self.inventory.add_item(changed_item)
+                child_items = list(self.inventory.iter_item_children_recursively(item))
+                self.inventory.remove_item(item, remove_children=True)
+                self.inventory.add_item(changed_item, child_items)
 
                 self.response.items.change.append(changed_item)
 
@@ -306,7 +307,7 @@ class TradingDispatcher(Dispatcher):
             item = bought_item.item
             children = bought_item.children_items
 
-            self.inventory.place_item(item, children_items=children)
+            self.inventory.place_item(item, child_items=children)
 
             self.response.items.new.append(item)
             self.response.items.new.extend(children)

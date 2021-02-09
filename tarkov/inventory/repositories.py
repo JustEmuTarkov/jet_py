@@ -52,7 +52,7 @@ class ItemTemplatesRepository:
                 f'Can not found ItemTemplate with id {item_template.id}, however NodeTemplate was found.'
             )
 
-        return cast(ItemTemplate, item_template)
+        return item_template
 
     def get_any_template(self, item: Union[Item, TemplateId]) -> Union[NodeTemplate, ItemTemplate]:
         if isinstance(item, Item):
