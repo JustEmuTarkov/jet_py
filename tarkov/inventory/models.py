@@ -155,7 +155,7 @@ class ItemTemplateProps(Base):
     # "BackgroundColor": "yellow",
 
 
-class NodeTemplate(Base):
+class NodeTemplateBase(Base):
     class Config:
         extra = Extra.allow
 
@@ -172,8 +172,11 @@ class NodeTemplate(Base):
     id: TemplateId
     name: str
     parent: str
-    type: str
     proto: Optional[str] = None
+
+
+class NodeTemplate(NodeTemplateBase):
+    type: Literal['Node']
 
 
 class FilterProp(Base):
@@ -229,7 +232,8 @@ class ItemGrid(NodeTemplate):
 ItemTemplateProps.update_forward_refs()
 
 
-class ItemTemplate(NodeTemplate):
+class ItemTemplate(NodeTemplateBase):
+    type: Literal['Item']
     props: ItemTemplateProps
 
 

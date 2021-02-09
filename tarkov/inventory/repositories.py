@@ -47,8 +47,10 @@ class ItemTemplatesRepository:
         """
         item_template = self.get_any_template(item)
 
-        if item_template.type == 'Node':
-            raise NotFoundError(f'Can not found ItemTemplate with id {item_template.id}, however node was found.')
+        if isinstance(item_template, NodeTemplate):
+            raise NotFoundError(
+                f'Can not found ItemTemplate with id {item_template.id}, however NodeTemplate was found.'
+            )
 
         return cast(ItemTemplate, item_template)
 
