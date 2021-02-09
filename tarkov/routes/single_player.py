@@ -2,10 +2,12 @@ from typing import List
 
 import ujson
 from flask import Blueprint, request
+from pydantic import parse_obj_as
 
 from server import db_dir, logger
 from server.utils import tarkov_response, zlib_middleware
 from tarkov.inventory.helpers import regenerate_items_ids
+from tarkov.inventory.models import Item
 from tarkov.lib import locations
 from tarkov.lib.bots import BotGenerator
 from tarkov.profile import Profile
@@ -118,16 +120,16 @@ def mode_offline():
 @blueprint.route('/raid/profile/save', methods=['PUT'])
 @zlib_middleware()
 @tarkov_response
-def singleplayer_raid_profile_save():
+def singleplayer_raid_profile_save() -> None:
     # TODO: Add Saving profile here
     # data struct {exit, isPlayerScav, profile, health}
     # update profile on this request
-    data = request.data
+    data: dict = request.data  # type: ignore
     raid_profile: dict = data['profile']
 
     with Profile(profile_id=raid_profile['aid']) as profile:
         # profile.pmc_profile['Health']['BodyParts'] = data['health']['Health']
-        # for body_part in profile.pmc_profile['Health']['BodyParts']:
+        # for body_part in profile.pmc_profile['HealtPh']['BodyParts']:
         #     del body_part['Effects']
         #
         # profile.pmc_profile['Health']['Hydration']['Current'] = data['health']['Hydration']
@@ -137,16 +139,16 @@ def singleplayer_raid_profile_save():
         # profile.pmc_profile['Encyclopedia'] = profile_data['Encyclopedia']
         # profile.pmc_profile['Skills'] = profile_data['Skills']
 
-        equipment = profile.inventory.get_item(profile.inventory.inventory.stash)
-        profile.inventory.remove_item(equipment)
-        profile.inventory.add_item(equipment)
-        # profile.inventory.remove_items(profile.inventory.iter_item_children_recursively(equipment))
+        raid_inventory_items = parse_obj_as(List[Item], raid_profile['Inventory']['items'])
+        equipment = profile.inventory.get_item(profile.inventory.inventory.equipment)
 
-        # Exclude root items like pockets, etc
-        equipment_items = [i for i in raid_profile['Inventory']['items']
-                           if i['_id'] not in raid_profile['Inventory'].values()]
-        regenerate_items_ids(equipment_items)
-        profile.inventory.items.extend(equipment_items)
+        # Remove all equipment children
+        profile.inventory.remove_item(equipment, remove_children=True)
+        profile.inventory.add_item(equipment)
+
+        items = list(item for item in raid_inventory_items if item.slotId is not None)
+        regenerate_items_ids(items)  # Regenerate item ids to be 100% safe
+        profile.inventory.add_items(items)
 
 
 @blueprint.route('/raid/profile/list', methods=['POST', 'GET'])
