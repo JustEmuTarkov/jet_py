@@ -148,13 +148,12 @@ class LocationGenerator:
 
     @staticmethod
     def __template_weight(template: ItemTemplate) -> Union[int, float]:
-        # rarity_coefficients = {
-        #     'Common': 1,
-        #     'Rare': 0.4,
-        #     'Superrare': 0.1,
-        #     'Not_exist': 0,
-        # }
-        # template_rarity = template.props.Rarity
-        # spawn_chance_coefficient = rarity_coefficients[template_rarity]
-        # return template['_props']['SpawnChance'] * spawn_chance_coefficient
-        return template.props.SpawnChance
+        rarity_coefficients = {
+            'Common': 1,
+            'Rare': 1,
+            'Superrare': 1,
+            'Not_exist': 0,
+        }
+        template_rarity = template.props.Rarity
+        spawn_chance_coefficient = rarity_coefficients[template_rarity]
+        return template.props.SpawnChance * spawn_chance_coefficient
