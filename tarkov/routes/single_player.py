@@ -63,10 +63,11 @@ def settings_bot_limit(bot_type: str):  # pylint: disable=unused-argument
 @tarkov_response
 def generate_bots() -> List[dict]:
     bots: List[dict] = []
+    request_data: dict = request.data  # type: ignore
 
     logger.debug(request.data)
     bot_generator = BotGenerator()
-    for condition in request.data['conditions']:
+    for condition in request_data['conditions']:
         bot_limit = condition['Limit']
 
         for _ in range(bot_limit):
