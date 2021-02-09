@@ -68,7 +68,8 @@ class Quests:
 
         return removed_items, changed_items
 
-    def get_quest_reward(self, quest_id: str) -> Tuple[List[Item], List[Item]]:
+    @staticmethod
+    def get_quest_reward(quest_id: str) -> Tuple[List[Item], List[Item]]:
         quest_template = quests_repository.get_quest_template(quest_id)
         rewards = quest_template.rewards.Success
 

@@ -44,8 +44,8 @@ def zlib_middleware(function: Optional[Callable] = None, /, send_browser_headers
     middleware = _ZlibMiddleware(send_browser_headers=send_browser_headers)
     if function is None:
         return middleware
-    else:
-        return middleware(function)
+
+    return middleware(function)
 
 
 class TarkovError(Exception):
@@ -83,5 +83,5 @@ def tarkov_response(function: Optional[Callable]):
     middleware = TarkovResponseStruct()
     if function is None:
         return middleware
-    else:
-        return middleware(function)
+
+    return middleware(function)

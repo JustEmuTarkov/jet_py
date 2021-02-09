@@ -72,7 +72,8 @@ class Mail:
         messages = [msg.dict(exclude_none=True) for msg in dialogue.messages if not self.__is_message_expired(msg)]
         return {'messages': messages}
 
-    def __is_message_expired(self, message: MailDialogueMessage) -> bool:
+    @staticmethod
+    def __is_message_expired(message: MailDialogueMessage) -> bool:
         datetime_now = datetime.datetime.now()
         message_expires_at = datetime.datetime.fromtimestamp(message.dt + message.maxStorageTime)
         return datetime_now > message_expires_at

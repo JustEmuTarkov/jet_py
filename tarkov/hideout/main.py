@@ -4,7 +4,7 @@ from typing import Dict, List, cast
 import ujson
 from pydantic import parse_obj_as
 
-import tarkov.profile.profile as profile_
+import tarkov.profile.profile as profile_  # pylint: disable=unused-import
 from server import db_dir, logger
 from tarkov import inventory
 from tarkov.inventory import item_templates_repository
@@ -151,7 +151,6 @@ class Hideout:
             self.toggle_area(HideoutAreaType.Generator, False)
 
         return int(fuel_consumed / self.__FUEL_BURN_RATE)
-        pass
 
     def read(self):
         self.data: dict = ujson.load(self.path.open('r', encoding='utf8'))

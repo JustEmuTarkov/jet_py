@@ -144,7 +144,7 @@ def singleplayer_raid_profile_save() -> None:
 
         # Remove all equipment children
         profile.inventory.remove_item(equipment, remove_children=True)
-        profile.inventory.add_item(equipment)
+        profile.inventory.add_item(equipment, child_items=[])
 
         items = list(item for item in raid_inventory_items if item.slotId is not None)
         regenerate_items_ids(items)  # Regenerate item ids to be 100% safe

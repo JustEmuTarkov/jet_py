@@ -168,7 +168,8 @@ class TraderInventory(ImmutableInventory):
 
         return bought_items_list
 
-    def calculate_insurance_price(self, items: Union[Item, List[Item]]) -> int:
+    @staticmethod
+    def calculate_insurance_price(items: Union[Item, List[Item]]) -> int:
         if isinstance(items, Item):
             items = [items]
 

@@ -155,7 +155,13 @@ disable=print-statement,
         logging-not-lazy,
 
         # pylint confuses some inner modules with 3rd party ones
-        wrong-import-order
+        wrong-import-order,
+
+        # Cyclic imports. Yes, we have a lot of them
+        cyclic-import,
+
+        # Comments
+        fixme
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option

@@ -128,8 +128,7 @@ class LocationGenerator:
             return
 
         for _ in range(amount_of_items_in_container):
-            retries = 10
-            for _ in range(retries):
+            for _ in range(10):
                 random_template = random.choices(item_templates, item_template_weights, k=1)[0]
 
                 item = Item(

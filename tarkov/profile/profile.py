@@ -38,6 +38,9 @@ class Encyclopedia:
 
 
 class Profile:
+    # pylint: disable=too-many-instance-attributes
+    # Disabling that in case of profile is reasonable
+
     pmc_profile: dict
 
     hideout: Hideout

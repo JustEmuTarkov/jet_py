@@ -7,7 +7,7 @@ from typing import Dict, Iterable, List, Optional, Tuple, Union
 
 import ujson
 
-import tarkov.profile
+import tarkov.profile  # pylint: disable=unused-import
 from server import root_dir
 from tarkov.exceptions import NoSpaceError, NotFoundError
 from tarkov.models import Base
@@ -128,20 +128,20 @@ class StashMapItemFootprint(Base):
     height: int
 
     @property
-    def x1(self) -> int:
+    def x_high(self) -> int:
         return self.x + self.width
 
     @property
-    def y1(self) -> int:
+    def y_high(self) -> int:
         return self.y + self.height
 
     def overlaps(self, other: 'StashMapItemFootprint') -> bool:
         if self == other:
             return True
 
-        if self.y >= other.y1 or self.y1 <= other.y:
+        if self.y >= other.y_high or self.y_high <= other.y:
             return False
-        if self.x >= other.x1 or self.x1 <= other.x:
+        if self.x >= other.x_high or self.x_high <= other.x:
             return False
 
         return True
@@ -265,7 +265,6 @@ class StashMap:
             item: Item,
             *,
             child_items: List[Item] = None,
-            auto_fill=False,
     ) -> ItemInventoryLocation:
         """
         Finds location for an item or raises NoSpaceError if there's not space in inventory
@@ -333,7 +332,8 @@ class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
         for item in items:
             item.__inventory__ = self
 
-    def merge(self, item: Item, with_: Item) -> None:
+    @staticmethod
+    def merge(item: Item, with_: Item) -> None:
         """
         Merges item with target item, item template ids should be same
 
@@ -446,7 +446,7 @@ class GridInventory(MutableInventory):
         item.parent_id = self.root_id
 
         if location is None:
-            item.location = self.stash_map.find_location_for_item(item, child_items=child_items, auto_fill=True)
+            item.location = self.stash_map.find_location_for_item(item, child_items=child_items)
 
         elif isinstance(location, ItemInventoryLocation):
             if not self.stash_map.can_place(item, child_items, location):
@@ -577,7 +577,7 @@ class GridInventory(MutableInventory):
             self.add_item(new_item, child_items=[])
             return new_item
 
-        elif isinstance(split_location, CartridgesMoveLocation):
+        if isinstance(split_location, CartridgesMoveLocation):
             magazine = self.get_item(split_location.id)
             ammo = item
 
@@ -595,8 +595,7 @@ class GridInventory(MutableInventory):
                 return self.__place_ammo_into_magazine(ammo=ammo, move_location=split_location)
 
             # Else if stack is too big to fit into magazine copy ammo and assign it new id and proper stack count
-            else:
-                splitted_ammo = self.simple_split_item(ammo, count)
+            splitted_ammo = self.simple_split_item(ammo, count)
 
             self.__place_ammo_into_magazine(
                 ammo=splitted_ammo,
@@ -605,14 +604,15 @@ class GridInventory(MutableInventory):
 
             return splitted_ammo
 
-        elif isinstance(split_location, PatronInWeaponMoveLocation):
+        if isinstance(split_location, PatronInWeaponMoveLocation):
             ammo = self.simple_split_item(item=item, count=1)
             return self.__place_ammo_into_weapon(ammo=ammo, move_location=split_location)
         # TODO: I'm not checking for ModMoveLocation there since i don't know if it might cause any problems
-        else:
-            raise ValueError(f'Unknown split location: {split_location}')
 
-    def simple_split_item(self, item: Item, count: int) -> Item:
+        raise ValueError(f'Unknown split location: {split_location}')
+
+    @staticmethod
+    def simple_split_item(item: Item, count: int) -> Item:
         donor_inventory = item.get_inventory()
 
         if item.upd.StackObjectsCount < count:
