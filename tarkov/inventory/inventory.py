@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import abc
 import copy
-from typing import Generator, Iterable, List, Optional, Tuple, Union, cast
+from typing import Iterable, List, Optional, Tuple, Union, cast
 
 import ujson
 
@@ -119,6 +119,9 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
 
 
 class StashMap:
+    class StashMapWarning(Warning):
+        pass
+
     inventory: GridInventory
     width: int
     height: int
@@ -130,35 +133,74 @@ class StashMap:
         self.map = [[False for _ in range(self.height)] for _ in range(self.width)]
         inventory_root = inventory.get_item(inventory.root_id)
 
-        for item in (i for i in inventory.iter_item_children(inventory_root) if i.slotId == 'hideout'):
-            if not item.slotId:
-                continue
+        for item in (i for i in inventory.iter_item_children(inventory_root)):
 
-            if not isinstance(item.location, ItemInventoryLocation):
-                continue
-
-            item_x, item_y = item.location.x, item.location.y
             children_items = list(self.inventory.iter_item_children_recursively(item=item))
-            width, height = self.inventory.get_item_size(item=item, children_items=children_items)
+            self.add(item, children_items)
 
-            if item.location.r == 'Vertical':
-                width, height = height, width
-
-            for x in range(item_x, item_x + width):
-                for y in range(item_y, item_y + height):
-                    self.map[x][y] = True
-
-    def iter_cells(self) -> Generator[Tuple[int, int], None, None]:
+    def iter_cells(self) -> Iterable[Tuple[int, int]]:
         for y in range(self.height):
             for x in range(self.width):
                 yield x, y
 
-    def can_place(self, item: Item, children_items: List[Item], location: ItemInventoryLocation) -> bool:
-        x, y = location.x, location.y
+    def get_item_size_in_stash(
+            self,
+            item: Item,
+            children_items: List[Item],
+            location: ItemInventoryLocation
+    ) -> Tuple[int, int]:
+        """
+        Returns footprint (width, height) that item takes in inventory, takes rotation into account
+        """
         width, height = self.inventory.get_item_size(item=item, children_items=children_items)
-
         if location.r == ItemOrientationEnum.Vertical.value:
             width, height = height, width
+
+        return width, height
+
+    def _fill(
+            self,
+            item: Item,
+            children_items: List[Item],
+            item_location: ItemInventoryLocation,
+            with_: bool
+    ) -> None:
+        """
+        Fills item footprint with flag with_
+        """
+        children_items = [] if children_items is None else children_items
+        width, height = self.get_item_size_in_stash(item, children_items, item_location)
+
+        x, y = item_location.x, item_location.y
+        for x_ in range(x, x + width):
+            for y_ in range(y, y + height):
+                if self.map[x_][y_] == with_:
+                    raise StashMap.StashMapWarning(f'Cell [x={x_}, y={y_}] already has state {with_}')
+                self.map[x_][y_] = with_
+
+    def remove(self, item: Item, children_items: List[Item]) -> None:
+        if self.is_item_in_root(item):
+            # Using cast because item.location should be of type
+            # ItemInventoryLocation since it's checked in __is_item_in_root
+            self._fill(item, children_items, cast(ItemInventoryLocation, item.location), False)
+
+    def add(self, item: Item, children_items: List[Item]) -> None:
+        if self.is_item_in_root(item):
+            self._fill(item, children_items, cast(ItemInventoryLocation, item.location), True)
+
+    @staticmethod
+    def is_item_in_root(item: Item) -> bool:
+        """
+        Determines if item is in inventory root
+        """
+        return isinstance(item.location, ItemInventoryLocation) and item.slotId == 'hideout'
+
+    def can_place(self, item: Item, children_items: List[Item], location: ItemInventoryLocation) -> bool:
+        """
+        Checks if item can be placed into location
+        """
+        x, y = location.x, location.y
+        width, height = self.get_item_size_in_stash(item, children_items, location)
 
         for x_ in range(x, x + width):
             for y_ in range(y, y + height):
@@ -176,6 +218,9 @@ class StashMap:
             children_items: List[Item] = None,
             auto_fill=False,
     ) -> ItemInventoryLocation:
+        """
+        Finds location for an item or raises NoSpaceError if there's not space in inventory
+        """
         if children_items is None:
             children_items = []
 
@@ -184,46 +229,10 @@ class StashMap:
                 location = ItemInventoryLocation(x=x, y=y, r=orientation.value)
                 if self.can_place(item=item, children_items=children_items, location=location):
                     if auto_fill:
-                        self.fill(item, x, y, orientation, children_items=children_items)
+                        self._fill(item, children_items, location, True)
                     return location
 
         raise NoSpaceError('Cannot place item into inventory')
-
-    def fill(self, item: Item, x: int, y: int, orientation: ItemOrientationEnum, children_items: List[Item] = None):
-        children_items = [] if children_items is None else children_items
-
-        width, height = self.inventory.get_item_size(item=item, children_items=children_items)
-        if orientation == ItemOrientationEnum.Vertical:
-            width, height = height, width
-
-        for x_ in range(x, x + width):
-            for y_ in range(y, y + height):
-                self.map[x_][y_] = True
-
-    def remove(self, item: Item, children_items: List[Item]):
-        if isinstance(item.location, ItemInventoryLocation):
-            self.__fill_item(item, children_items, False)
-
-    def add(self, item: Item, children_items: List[Item]):
-        if isinstance(item.location, ItemInventoryLocation):
-            self.__fill_item(item, children_items, True)
-
-    def __fill_item(self, item: Item, children_items: List[Item], with_: bool):
-        if not item.location:
-            return
-
-        if item.slotId != 'hideout':
-            return
-
-        location: ItemInventoryLocation = cast(ItemInventoryLocation, item.location)
-        width, height = self.inventory.get_item_size(item=item, children_items=children_items)
-
-        if location.r == ItemOrientationEnum.Vertical.value:
-            width, height = height, width
-
-        for x in range(location.x, location.x + width):
-            for y in range(location.y, location.y + height):
-                self.map[x][y] = with_
 
 
 class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
