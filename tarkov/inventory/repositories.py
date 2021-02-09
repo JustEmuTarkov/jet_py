@@ -84,10 +84,10 @@ class ItemTemplatesRepository:
         :param template_id:
         :return: All items of a category
         """
-        template = self.get_template(template_id)
-        if template.type == 'Item':
+        template = self.get_any_template(template_id)
+        if isinstance(template, ItemTemplate):
             return [template]
-        return cast(List[ItemTemplate], [tpl for tpl in self.iter_template_children(template_id) if tpl.type == 'Item'])
+        return [tpl for tpl in self.iter_template_children(template_id) if isinstance(tpl, ItemTemplate)]
 
     def get_category(self, item: Item):
         return self.__item_categories[item.tpl]['ParentId']
