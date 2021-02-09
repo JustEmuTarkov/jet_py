@@ -212,7 +212,7 @@ class GridInventoryStashMap:
 
     def remove(self, item: Item, child_items: List[Item]) -> None:
         parent_item = item
-        while not self._is_item_in_root(parent_item) and item.parent_id is not None:
+        while not self._is_item_in_root(parent_item) and parent_item.parent_id is not None:
             parent_item = self.inventory.get_item(parent_item.parent_id)
 
         # Recalculate parent item footprint, needed for disassembling
