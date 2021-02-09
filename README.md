@@ -7,13 +7,11 @@ Install:
 - [Pipenv](https://pypi.org/project/pipenv/)
 - Project dependencies by running `pipenv install`
 
-To start server use `main.py`  
-To bundle application into `.exe` run `build.py`
+##### How to start server
+To start server run `main.py`
 
-#### How to build
-
-Project can be built by running `build.py`
-
+##### How to bundle application into `.exe`
+To bundle application run `build.py`
 
 #### Client
 
