@@ -9,7 +9,7 @@ from pydantic import parse_obj_as
 
 from server import db_dir
 from tarkov.exceptions import NoSpaceError
-from tarkov.inventory import GridInventory, StashMap, item_templates_repository
+from tarkov.inventory import GridInventory, GridInventoryStashMap, item_templates_repository
 from tarkov.inventory.helpers import generate_item_id, regenerate_item_ids_dict
 from tarkov.inventory.models import AnyItemLocation, Item, ItemId, ItemTemplate, TemplateId
 from tarkov.models import Base
@@ -36,7 +36,7 @@ class ContainerInventory(GridInventory):
 
         root_item = self.get_item(self.container.Root)
         self.template = item_templates_repository.get_template(root_item.tpl)
-        self.stash_map = StashMap(self)
+        self.stash_map = GridInventoryStashMap(self)
 
     @property
     def root_id(self) -> ItemId:

@@ -7,7 +7,7 @@ from typing import Dict, Iterable, List, Optional, TYPE_CHECKING, Tuple, Union
 
 import ujson
 
-from server import root_dir
+from server import logger, root_dir
 from tarkov.exceptions import NoSpaceError, NotFoundError
 from tarkov.models import Base
 from .dict_models import ItemExtraSize
@@ -149,7 +149,7 @@ class StashMapItemFootprint(Base):
         return True
 
 
-class StashMap:
+class GridInventoryStashMap:
     class StashMapWarning(Warning):
         pass
 
@@ -212,23 +212,33 @@ class StashMap:
 
     def remove(self, item: Item, child_items: List[Item]) -> None:
         parent_item = item
-        while not self._is_item_in_root(parent_item):
-            assert parent_item.parent_id is not None
+        while not self._is_item_in_root(parent_item) and item.parent_id is not None:
             parent_item = self.inventory.get_item(parent_item.parent_id)
 
         # Recalculate parent item footprint, needed for disassembling
-        del self.footprints[parent_item.id]
-        self.add(parent_item, child_items)
+        try:
+            del self.footprints[parent_item.id]
+        except KeyError:
+            pass
 
-        if self._is_item_in_root(item):
-            del self.footprints[item.id]
+        if parent_item != item:
+            self.add(parent_item, child_items)
+            if self._is_item_in_root(item) and parent_item != item:
+                del self.footprints[item.id]
 
     def add(self, item: Item, child_items: List[Item]) -> None:
         if self._is_item_in_root(item):
+            if item.location is None:
+                return
+
             if not isinstance(item.location, ItemInventoryLocation):
                 raise ValueError('Item has no location')
 
+            if isinstance(item.location, int):  # ItemAmmoStackPosition
+                return
+
             if not self.can_place(item, child_items, item.location):
+                logger.debug(item)
                 raise ValueError('Item location is taken')
 
             if item.id in self.footprints:
@@ -415,7 +425,7 @@ class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
 
 
 class GridInventory(MutableInventory):
-    stash_map: StashMap
+    stash_map: GridInventoryStashMap
 
     @property
     @abc.abstractmethod
@@ -629,7 +639,19 @@ class GridInventory(MutableInventory):
         if item.upd.StackObjectsCount == 0:
             donor_inventory.remove_item(item)
 
+        item_copy.location = None
+
         return item_copy
+
+
+class PlayerInventoryStashMap(GridInventoryStashMap):
+    inventory: PlayerInventory
+
+    def _is_item_in_root(self, item: Item) -> bool:
+        return item.parent_id in {
+            self.inventory.root_id,
+            self.inventory.equipment_id
+        }
 
 
 class PlayerInventory(GridInventory):
@@ -673,14 +695,14 @@ class PlayerInventory(GridInventory):
         for item in self.items:
             item.__inventory__ = self
 
-        self.stash_map = StashMap(inventory=self)
+        self.stash_map = PlayerInventoryStashMap(inventory=self)
 
     def write(self):
         """
         Writes inventory file to disk
         """
         ujson.dump(
-            self.inventory.dict(exclude_defaults=True, exclude_none=False, exclude_unset=False),
+            self.inventory.dict(exclude_unset=True),
             self.__path.open('w', encoding='utf8'),
             indent=4
         )
