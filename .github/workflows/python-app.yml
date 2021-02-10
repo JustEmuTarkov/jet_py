@@ -38,17 +38,21 @@ jobs:
           python -m pipenv install --dev
 
       - name: Run MyPy
+        continue-on-error: true
         run: |
           python -m pipenv run tox -e mypy
 
       - name: Run PyTest
+        continue-on-error: true
         run: |
           python -m pipenv run tox -e pytest
 
       - name: Run PyLint
+        continue-on-error: true
         run: |
           python -m pipenv run tox -e pylint
 
       - name: Run Flake8
+        continue-on-error: true
         run: |
           python -m pipenv run tox -e flake8
