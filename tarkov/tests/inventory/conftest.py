@@ -4,7 +4,7 @@ import unittest.mock
 from pathlib import Path
 from typing import List
 
-import pytest
+import pytest  # type: ignore
 
 from tarkov.inventory import PlayerInventory, item_templates_repository
 from tarkov.inventory.models import Item, ItemTemplate

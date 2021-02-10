@@ -3,6 +3,7 @@ from typing import Dict, Iterable, List, Union
 
 import pydantic
 import ujson
+from pydantic import parse_obj_as
 
 from server import db_dir
 from tarkov.exceptions import NotFoundError
@@ -138,7 +139,8 @@ class ItemTemplatesRepository:
 
         #  Try to return a preset if it exists
         try:
-            return item_templates_repository.get_preset(template_id)
+            item: dict = item_templates_repository.get_preset(template_id)
+            return [parse_obj_as(Item, item)]
         except NotFoundError:
             pass
 

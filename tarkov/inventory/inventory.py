@@ -245,7 +245,6 @@ class GridInventoryStashMap:
                 raise ValueError
 
             self.footprints[item.id] = self._calculate_item_footprint(item, child_items, item.location)
-            pass
 
     def can_place(self, item: Item, child_items: List[Item], location: ItemInventoryLocation) -> bool:
         """
