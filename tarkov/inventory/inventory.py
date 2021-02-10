@@ -642,7 +642,6 @@ class GridInventory(MutableInventory):
 
     @staticmethod
     def simple_split_item(item: Item, count: int) -> Item:
-        donor_inventory = item.get_inventory()
 
         if item.upd.StackObjectsCount < count:
             raise ValueError(
@@ -654,7 +653,11 @@ class GridInventory(MutableInventory):
         item.upd.StackObjectsCount -= count
 
         if item.upd.StackObjectsCount == 0:
-            donor_inventory.remove_item(item)
+            try:
+                donor_inventory = item.get_inventory()
+                donor_inventory.remove_item(item)
+            except ValueError:
+                pass
 
         item_copy.location = None
 
