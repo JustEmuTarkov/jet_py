@@ -12,7 +12,7 @@ if str(root_dir) not in sys.path:
 mods_dir = root_dir.joinpath('mods')
 
 if __name__ == '__main__':
-    app.register_blueprint(blueprint=friend.blueprint)
+    app.register_blueprint(blueprint=friend.blue
     app.register_blueprint(blueprint=hideout.blueprint)
     app.register_blueprint(blueprint=lang.blueprint)
     app.register_blueprint(blueprint=profile.blueprint)
