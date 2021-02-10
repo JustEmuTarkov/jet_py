@@ -14,8 +14,8 @@ AnyTemplate = Union[ItemTemplate, NodeTemplate]
 
 class ItemTemplatesRepository:
     def __init__(self):
-        self.__item_templates: Dict[TemplateId, AnyTemplate] = self.__read_item_templates()
-        self.__item_categories: dict = self.__read_item_categories()
+        self._item_templates: Dict[TemplateId, AnyTemplate] = self.__read_item_templates()
+        self._item_categories: dict = self.__read_item_categories()
 
         self.globals = ujson.load(db_dir.joinpath('base', 'globals.json').open(encoding='utf8'))
 
@@ -39,7 +39,7 @@ class ItemTemplatesRepository:
 
     @property
     def templates(self):
-        return self.__item_templates
+        return self._item_templates
 
     def get_template(self, item: Union[Item, TemplateId]) -> ItemTemplate:
         """
@@ -61,7 +61,7 @@ class ItemTemplatesRepository:
             template_id = item
 
         try:
-            item_template = self.__item_templates[template_id]
+            item_template = self._item_templates[template_id]
         except KeyError as error:
             raise NotFoundError(f'Can not found any template with id {template_id}') from error
 
@@ -73,7 +73,7 @@ class ItemTemplatesRepository:
             template = templates.pop()
             yield template
 
-            for child in self.__item_templates.values():
+            for child in self._item_templates.values():
                 if child.parent == template.id:
                     templates.append(child)
 
@@ -90,9 +90,9 @@ class ItemTemplatesRepository:
         return [tpl for tpl in self.iter_template_children(template_id) if isinstance(tpl, ItemTemplate)]
 
     def get_category(self, item: Item):
-        return self.__item_categories[item.tpl]['ParentId']
+        return self._item_categories[item.tpl]['ParentId']
 
-    def get_preset(self, template_id: TemplateId) -> List[Item]:
+    def get_preset(self, template_id: TemplateId) -> dict:
         """
         :param template_id:
         :return: Preset of an item from globals

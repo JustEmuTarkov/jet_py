@@ -1,0 +1,32 @@
+{
+    "equipment": "5df7b9abef12bf7a252437a1",
+    "stash": "5df7b9abef12bf7a2524385f",
+    "questRaidItems": "5df7b9abef12bf7a25243860",
+    "questStashItems": "5df7b9abef12bf7a25243861",
+    "fastPanel": {
+    },
+    "items": [
+        {
+            "_id": "5df7b9abef12bf7a2524385f",
+            "_tpl": "5811ce772459770e9e5f9532"
+        },
+        {
+            "_id": "5df7b9abef12bf7a252437a1",
+            "_tpl": "55d7217a4bdc2d86028b456d"
+        },
+        {
+            "_id": "5df7b9abef12bf7a25243860",
+            "_tpl": "5963866286f7747bf429b572"
+        },
+        {
+            "_id": "5df7b9abef12bf7a25243861",
+            "_tpl": "5963866b86f7747bfa1c4462"
+        },
+        {
+            "_id": "I10211939786801944064Ylf",
+            "_tpl": "557ffd194bdc2d28148b457f",
+            "parentId": "5df7b9abef12bf7a252437a1",
+            "slotId": "Pockets"
+        }
+    ]
+}
