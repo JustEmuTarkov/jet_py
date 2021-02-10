@@ -13,6 +13,9 @@ jobs:
   Test:
 
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        toxenv: ['mypy', 'pytest', 'pylint', 'flake8']
 
     steps:
       - uses: actions/checkout@v2
@@ -32,27 +35,12 @@ jobs:
           path: ~/.local/share/virtualenvs
           key: ${{ runner.os }}-pipenv-${{ hashFiles('**/Pipfile.lock') }}
 
-      - name: Install pipnv and dev dependencies
+      - name: Install pipenv and dev dependencies
         if: steps.cache-pipenv.outputs.cache-hit != 'true'
         run: |
           python -m pipenv install --dev
 
-      - name: Run MyPy
+      - name: Run ${{ matrix.toxenv }}
         continue-on-error: true
         run: |
-          python -m pipenv run tox -e mypy
-
-      - name: Run PyTest
-        continue-on-error: true
-        run: |
-          python -m pipenv run tox -e pytest
-
-      - name: Run PyLint
-        continue-on-error: true
-        run: |
-          python -m pipenv run tox -e pylint
-
-      - name: Run Flake8
-        continue-on-error: true
-        run: |
-          python -m pipenv run tox -e flake8
+          python -m pipenv run tox -e ${{ matrix.toxenv }}
