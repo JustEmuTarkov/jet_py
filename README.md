@@ -5,7 +5,7 @@ Alternative server emulator for EFT
 Install:
 - Python of version 3.8.*
 - [Pipenv](https://pypi.org/project/pipenv/)
-- Project dependencies by running `pipenv install`
+- Project dependencies by running `pipenv install --dev`
 
 ##### How to start server
 To start server run `main.py`
