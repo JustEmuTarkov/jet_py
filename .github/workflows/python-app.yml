@@ -10,7 +10,7 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  test:
 
     runs-on: ubuntu-latest
 
@@ -28,6 +28,18 @@ jobs:
           pip install pipenv
           python -m pipenv install --dev
 
-      - name: Run tox
+      - name: Run MyPy
         run: |
-          python -m pipenv run tox -p
+          python -m pipenv run tox -e mypy
+
+      - name: Run PyTest
+        run: |
+          python -m pipenv run tox -e pytest
+
+      - name: Run PyLint
+        run: |
+          python -m pipenv run tox -e pylint
+
+      - name: Run Flake8
+        run: |
+          python -m pipenv run tox -e flake8
