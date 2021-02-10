@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import datetime
 import enum
-from typing import Any, List, Literal, NewType, Optional, TYPE_CHECKING, Union
+from typing import Any, List, Literal, NewType, Optional, TYPE_CHECKING, Union, cast
 
-from pydantic import Extra, Field, PrivateAttr, StrictBool, StrictInt
+from pydantic import Extra, Field, PrivateAttr, StrictBool, StrictInt, root_validator
 
+import tarkov.inventory
 from tarkov.models import Base
 
 if TYPE_CHECKING:
@@ -363,6 +364,24 @@ class Item(Base):
         if self.__inventory__ is None:
             raise ValueError('Item does not have inventory')
         return self.__inventory__
+
+    @root_validator(pre=False, skip_on_failure=True)
+    def validate_medkit_hp(cls, values: dict):  # pylint: disable=no-self-argument,no-self-use
+        if 'id' not in values:
+            return values
+
+        item_tpl_id: TemplateId = cast(TemplateId, values.get('tpl'))
+        item_template = tarkov.inventory.item_templates_repository.get_template(item_tpl_id)
+        if item_template.parent == '5448f39d4bdc2d0a728b4568':
+            upd: ItemUpd = cast(ItemUpd, values.get('upd'))
+            if not isinstance(item_template.props.MaxHpResource, int):
+                raise ResourceWarning(
+                    f'''Item template that inherits directly form MedKit does not have MaxHpResource property
+                    template id: {item_template.id}
+                    ''')
+            upd.MedKit = upd.MedKit if upd.MedKit else ItemUpdMedKit(HpResource=item_template.props.MaxHpResource)
+
+        return values
 
     def copy(
             self: Item,
