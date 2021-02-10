@@ -5,6 +5,7 @@ import orjson
 from flask import Blueprint, request
 
 import tarkov.profile
+from server import logger
 from server.utils import TarkovError, tarkov_response, zlib_middleware
 from tarkov.notifier.notifier import notifier_instance
 
@@ -58,6 +59,7 @@ def mail_dialog_all_attachments() -> Dict:
 
 @blueprint.route('/notifierServer/get/<profile_id>', methods=['GET'])
 def notifierserver_get(profile_id: str) -> Union[dict, str]:
+    logger.debug(request.data)
     for _ in range(15):  # Poll for 15 seconds
         if notifier_instance.has_notifications(profile_id):
             notifications = notifier_instance.get_notifications(profile_id)
