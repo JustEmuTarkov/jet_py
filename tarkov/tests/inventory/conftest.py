@@ -1,6 +1,7 @@
 import random
 import unittest
 import unittest.mock
+from unittest.mock import patch
 from pathlib import Path
 from typing import List
 
@@ -17,12 +18,23 @@ def player_profile() -> Profile:
 
 
 @pytest.fixture()
-def empty_inventory(player_profile) -> PlayerInventory:
+def inventory(player_profile: Profile) -> PlayerInventory:
     empty_inventory_path = Path('tarkov/tests/inventory/empty_inventory.json').absolute()
     inventory = PlayerInventory(player_profile)
     with unittest.mock.patch('pathlib.Path.open', empty_inventory_path.open):
         inventory.read()
     return inventory
+
+
+@pytest.fixture()
+def make_inventory(player_profile: Profile):
+    def _make_inventory(inventory_path: str):
+        file_path = Path(f'tarkov/tests/inventory/{inventory_path}').absolute()
+        inventory = PlayerInventory(player_profile)
+        with patch.object(inventory, '_path', file_path):
+            inventory.read()
+        return inventory
+    return _make_inventory
 
 
 @pytest.fixture()

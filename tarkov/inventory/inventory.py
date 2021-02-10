@@ -49,7 +49,8 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
         except StopIteration as error:
             raise NotFoundError from error
 
-    def get_item_size(self, item: Item, children_items: List[Item] = None) -> Tuple[int, int]:
+    @staticmethod
+    def get_item_size(item: Item, children_items: List[Item] = None) -> Tuple[int, int]:
         """
         Return size of the item according to it's attachments, etc.
 
@@ -89,14 +90,13 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
         width: int = template.props.Width + extra_size['left'] + extra_size['right']
         height: int = template.props.Height + extra_size['up'] + extra_size['down']
 
-        if not item.upd.Foldable:
-            return width, height
+        folded = any(
+            isinstance(child.upd.Foldable, ItemUpdFoldable) and child.upd.Foldable.Folded is True
+            for child in itertools.chain([item], children_items)
+        )
 
-        folded = item.upd.Foldable.Folded
-        has_stock = any(c.slotId == 'mod_stock' for c in self.iter_item_children_recursively(item))
-        if folded and has_stock:
+        if folded:
             width -= 1
-
         return width, height
 
     def iter_item_children(self, item: Item) -> Iterable[Item]:
@@ -268,6 +268,7 @@ class GridInventoryStashMap:
 
         for other_footprint in self.footprints.values():
             if item_footprint.overlaps(other_footprint):
+                print(item_footprint, other_footprint, sep='\n')
                 return False
         return True
 
@@ -676,7 +677,7 @@ class PlayerInventory(GridInventory):
     def __init__(self, profile: 'Profile'):
         super().__init__()
         profile_id = profile.profile_id
-        self.__path = root_dir.joinpath('resources', 'profiles', profile_id, 'pmc_inventory.json')
+        self._path = root_dir.joinpath('resources', 'profiles', profile_id, 'pmc_inventory.json')
 
     @property
     def grid_size(self) -> Tuple[int, int]:
@@ -707,7 +708,7 @@ class PlayerInventory(GridInventory):
         """
         Reads inventory file from disk
         """
-        self.inventory = InventoryModel(**ujson.load(self.__path.open('r', encoding='utf8')))
+        self.inventory = InventoryModel(**ujson.load(self._path.open('r', encoding='utf8')))
         for item in self.items:
             item.__inventory__ = self
 
@@ -719,7 +720,7 @@ class PlayerInventory(GridInventory):
         """
         ujson.dump(
             self.inventory.dict(exclude_unset=True),
-            self.__path.open('w', encoding='utf8'),
+            self._path.open('w', encoding='utf8'),
             indent=4
         )
 
