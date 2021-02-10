@@ -10,7 +10,8 @@ on:
     branches: [ main ]
 
 jobs:
-  install-tox:
+  Test:
+
     runs-on: ubuntu-latest
 
     steps:
@@ -36,47 +37,18 @@ jobs:
         run: |
           python -m pipenv install --dev
 
-
-      - name: Run PyTest
-        run: |
-          python -m pipenv run tox -e pytest
-
-
-  mypy:
-    runs-on: ubuntu-latest
-    needs: install-tox
-    steps:
       - name: Run MyPy
         run: |
           python -m pipenv run tox -e mypy
 
-
-  pytest:
-    runs-on: ubuntu-latest
-    needs: install-tox
-    steps:
       - name: Run PyTest
         run: |
           python -m pipenv run tox -e pytest
 
-
-  pylint:
-    runs-on: ubuntu-latest
-    needs: install-tox
-    steps:
       - name: Run PyLint
         run: |
           python -m pipenv run tox -e pylint
 
-
-  flake8:
-    runs-on: ubuntu-latest
-    needs: install-tox
-    steps:
       - name: Run Flake8
         run: |
           python -m pipenv run tox -e flake8
-
-
-
-
