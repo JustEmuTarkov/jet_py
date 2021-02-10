@@ -148,9 +148,21 @@ class StashMapItemFootprint(Base):
 
         return True
 
+    def is_out_of_bounds(self, inventory_width: int, inventory_height: int) -> bool:
+        if self.x < 0 or inventory_width < self.x_high:
+            return True
+
+        if self.y < 0 or inventory_height < self.y_high:
+            return True
+
+        return False
+
 
 class GridInventoryStashMap:
     class StashMapWarning(Warning):
+        pass
+
+    class OutOfBoundsError(Exception):
         pass
 
     inventory: GridInventory
@@ -251,6 +263,9 @@ class GridInventoryStashMap:
         Checks if item can be placed into location
         """
         item_footprint = self._calculate_item_footprint(item, child_items, location)
+        if item_footprint.is_out_of_bounds(inventory_width=self.width, inventory_height=self.height):
+            raise GridInventoryStashMap.OutOfBoundsError
+
         for other_footprint in self.footprints.values():
             if item_footprint.overlaps(other_footprint):
                 return False
@@ -260,6 +275,7 @@ class GridInventoryStashMap:
     def can_place_fast(x: int, y: int, width: int, height: int, stash_map: List[List[bool]]) -> bool:
         for item_x in range(x, x + width):
             for item_y in range(y, y + height):
+                # TODO: Possible IndexError here
                 if stash_map[item_x][item_y] is True:
                     return False
         return True
