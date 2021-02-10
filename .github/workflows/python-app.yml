@@ -41,6 +41,5 @@ jobs:
           python -m pipenv install --dev
 
       - name: Run ${{ matrix.toxenv }}
-        continue-on-error: true
         run: |
           python -m pipenv run tox -e ${{ matrix.toxenv }}
