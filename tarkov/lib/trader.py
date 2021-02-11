@@ -58,6 +58,19 @@ class TraderInventory(ImmutableInventory):
         self.__barter_scheme = ujson.load(self.__path.joinpath('barter_scheme.json').open('r', encoding='utf8'))
         self.loyal_level_items = ujson.load(self.__path.joinpath('loyal_level_items.json').open('r', encoding='utf8'))
 
+    def _generate_fence_assort(self) -> List[Item]:
+        root_items = [item for item in self.__items if item.slotId == 'hideout']
+        assort = random.sample(root_items, k=min(len(root_items), 500))
+
+        child_items: List[Item] = []
+
+        for item in assort:
+            child_items.extend(self.iter_item_children_recursively(item))
+
+        assort.extend(child_items)
+
+        return assort
+
     @property
     def assort(self) -> List[Item]:
         if self.trader == Traders.Fence:
@@ -65,17 +78,7 @@ class TraderInventory(ImmutableInventory):
             expired = current_time > TraderInventory.__fence_assort_created_at + TraderInventory.FENCE_ASSORT_LIFETIME
 
             if not TraderInventory.__fence_assort or expired:
-                root_items = [item for item in self.__items if item.slotId == 'hideout']
-                assort = random.sample(root_items, k=min(len(root_items), 500))
-
-                child_items: List[Item] = []
-
-                for item in assort:
-                    child_items.extend(self.iter_item_children_recursively(item))
-
-                assort.extend(child_items)
-
-                TraderInventory.__fence_assort = assort
+                TraderInventory.__fence_assort = self._generate_fence_assort()
                 TraderInventory.__fence_assort_created_at = int(time.time())
 
             return TraderInventory.__fence_assort
