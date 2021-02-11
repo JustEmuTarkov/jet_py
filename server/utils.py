@@ -1,6 +1,6 @@
 import zlib
 from functools import wraps
-from typing import Callable, Optional
+from typing import Callable, Optional, Union
 
 import ujson
 from flask import make_response, request
@@ -79,7 +79,10 @@ class TarkovResponseStruct:
         return wrapper
 
 
-def tarkov_response(function: Optional[Callable]):
+ViewReturnType = Union[dict, list, tuple, None]
+
+
+def tarkov_response(function: Optional[Callable[..., ViewReturnType]]):
     middleware = TarkovResponseStruct()
     if function is None:
         return middleware
