@@ -4,7 +4,7 @@ from typing import List, NamedTuple, TypedDict
 from tarkov.inventory.models import Item, TemplateId
 
 
-class Traders(Enum):
+class TraderType(Enum):
     Mechanic = '5a7c2eca46aef81a7ca2145d'
     Ragman = '5ac3b934156ae10c4430e83c'
     Jaeger = '5c0647fdd443bc2504c2d371'

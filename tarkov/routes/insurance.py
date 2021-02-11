@@ -4,7 +4,7 @@ from flask import Blueprint, request
 
 from server.utils import tarkov_response, zlib_middleware
 from tarkov.inventory.models import TemplateId
-from tarkov.trader import TraderInventory, Traders
+from tarkov.trader import TraderInventory, TraderType
 from tarkov.profile import Profile
 
 blueprint = Blueprint(__name__, __name__)
@@ -23,7 +23,7 @@ def items_list_cost():
 
     with Profile.from_request(request=request) as profile:
         for trader_id in traders_list:
-            trader_inventory = TraderInventory(Traders(trader_id), profile=profile)
+            trader_inventory = TraderInventory(TraderType(trader_id), profile=profile)
             trader_items: Dict[TemplateId, int] = {}
 
             for item_id in item_ids:

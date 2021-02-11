@@ -3,7 +3,7 @@ from flask import Blueprint, request
 
 from server import db_dir, root_dir
 from server.utils import TarkovError, tarkov_response, zlib_middleware
-from tarkov.trader import TraderInventory, Traders, get_trader_base, get_trader_bases
+from tarkov.trader import TraderInventory, TraderType, get_trader_base, get_trader_bases
 from tarkov.profile import Profile
 
 blueprint = Blueprint(__name__, __name__)
@@ -43,7 +43,7 @@ def customization(trader_id):
 @tarkov_response
 def get_user_assort_price(trader_id):
     with Profile.from_request(request) as player_profile:
-        trader_inventory = TraderInventory(Traders(trader_id), profile=player_profile)
+        trader_inventory = TraderInventory(TraderType(trader_id), profile=player_profile)
         items = {}
         for item in player_profile.inventory.items:
             if not trader_inventory.can_sell(item):
@@ -69,7 +69,7 @@ def get_trader_list():
 @tarkov_response
 def get_trader_assort(trader_id):
     with Profile.from_request(request) as profile:
-        trader_inventory = TraderInventory(Traders(trader_id), profile=profile)
+        trader_inventory = TraderInventory(TraderType(trader_id), profile=profile)
         return {
             'barter_scheme': trader_inventory.barter_scheme,
             'items': [item.dict() for item in trader_inventory.assort],

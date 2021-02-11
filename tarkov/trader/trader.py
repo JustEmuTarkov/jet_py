@@ -12,7 +12,7 @@ import ujson
 from server import db_dir
 from tarkov.inventory import ImmutableInventory, item_templates_repository, regenerate_items_ids
 from tarkov.inventory.models import Item, ItemUpd
-from tarkov.trader.models import BoughtItems, Traders
+from tarkov.trader.models import BoughtItems, TraderType
 
 if TYPE_CHECKING:
     from tarkov.profile import Profile
@@ -21,7 +21,7 @@ FENCE_ASSORT_LIFETIME = 10 * 60
 
 
 class TraderInventory(ImmutableInventory):
-    trader: Traders
+    trader: TraderType
     profile: Profile
     assort_items: List[Item]
     base: dict
@@ -32,7 +32,7 @@ class TraderInventory(ImmutableInventory):
     __fence_assort: List[Item] = []
     __fence_assort_created_at: int = 0
 
-    def __init__(self, trader: Traders, profile: Profile):
+    def __init__(self, trader: TraderType, profile: Profile):
         self.trader = trader
         self.profile = profile
 
@@ -53,7 +53,7 @@ class TraderInventory(ImmutableInventory):
 
     @property
     def assort(self) -> List[Item]:
-        if self.trader == Traders.Fence:
+        if self.trader == TraderType.Fence:
             current_time = time.time()
             expired = current_time > TraderInventory.__fence_assort_created_at + FENCE_ASSORT_LIFETIME
 
@@ -66,7 +66,7 @@ class TraderInventory(ImmutableInventory):
 
     @property
     def barter_scheme(self):
-        if self.trader == Traders.Fence:
+        if self.trader == TraderType.Fence:
             self._get_fence_barter_scheme()
 
         return self._barter_scheme

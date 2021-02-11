@@ -6,7 +6,7 @@ from pydantic import StrictInt
 from tarkov import inventory
 from tarkov.inventory import PlayerInventory, item_templates_repository
 from tarkov.inventory.models import Item
-from tarkov.trader import TraderInventory, Traders
+from tarkov.trader import TraderInventory, TraderType
 from tarkov.notifier.models import MailDialogueMessage, MailMessageItems
 from .models import (QuestMessageType, QuestRewardAssortUnlock, QuestRewardExperience, QuestRewardItem,
                      QuestRewardTraderStanding, )
@@ -107,7 +107,7 @@ class Quests:
                 standing_change = float(reward.value)
                 trader_id = reward.target
 
-                trader = TraderInventory(Traders(trader_id), self.profile)
+                trader = TraderInventory(TraderType(trader_id), self.profile)
                 standing = trader.standing
                 standing['currentStanding'] += standing_change
 

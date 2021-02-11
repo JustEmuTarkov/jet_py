@@ -13,7 +13,7 @@ from tarkov import inventory as inventory_, quests
 from tarkov.hideout import Hideout
 from tarkov.inventory.models import Item, TemplateId
 from tarkov.notifier import Mail
-from tarkov.trader import Traders
+from tarkov.trader import TraderType
 from .models import ProfileModel
 
 
@@ -86,7 +86,7 @@ class Profile:
 
         return profile_base.dict()
 
-    def add_insurance(self, item: Item, trader: Traders):
+    def add_insurance(self, item: Item, trader: TraderType):
         insurance_info = {
             'itemId': item.id,
             'tid': trader.value
