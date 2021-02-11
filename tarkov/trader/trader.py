@@ -29,16 +29,16 @@ class TraderInventory(ImmutableInventory):
         self.trader = trader
         self.profile = profile
 
-        self.__path = db_dir.joinpath('traders', self.trader.value)
+        trader_path = db_dir.joinpath('traders', self.trader.value)
 
         self.__items: List[Item] = pydantic.parse_obj_as(
             List[Item],
-            ujson.load(self.__path.joinpath('items.json').open('r', encoding='utf8'))
+            ujson.load(trader_path.joinpath('items.json').open('r', encoding='utf8'))
         )
-        self.__base = ujson.load(self.__path.joinpath('base.json').open('r', encoding='utf8'))
-        self.__barter_scheme = ujson.load(self.__path.joinpath('barter_scheme.json').open('r', encoding='utf8'))
-        self.loyal_level_items = ujson.load(self.__path.joinpath('loyal_level_items.json').open('r', encoding='utf8'))
-        self._quest_assort: dict = ujson.load(self.__path.joinpath('questassort.json').open('r', encoding='utf8'))
+        self.__base = ujson.load(trader_path.joinpath('base.json').open('r', encoding='utf8'))
+        self.__barter_scheme = ujson.load(trader_path.joinpath('barter_scheme.json').open('r', encoding='utf8'))
+        self.loyal_level_items = ujson.load(trader_path.joinpath('loyal_level_items.json').open('r', encoding='utf8'))
+        self._quest_assort: dict = ujson.load(trader_path.joinpath('questassort.json').open('r', encoding='utf8'))
 
     def _generate_fence_assort(self) -> List[Item]:
         root_items = [item for item in self.__items if item.slotId == 'hideout']
