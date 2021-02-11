@@ -63,21 +63,24 @@ class TraderInventory(ImmutableInventory):
     @property
     def barter_scheme(self):
         if self.trader == Traders.Fence:
-            barter_scheme = {}
-
-            for item in self.items:
-                item_price = self.get_item_price(item)
-
-                barter_scheme[item.id] = [[
-                    {
-                        'count': item_price,
-                        "_tpl": "5449016a4bdc2d6f028b456f",
-                    }
-                ]]
-
-            return barter_scheme
+            self._get_fence_barter_scheme()
 
         return self._barter_scheme
+
+    def _get_fence_barter_scheme(self):
+        barter_scheme = {}
+
+        for item in self.items:
+            item_price = self.get_item_price(item)
+
+            barter_scheme[item.id] = [[
+                {
+                    'count': item_price,
+                    "_tpl": "5449016a4bdc2d6f028b456f",
+                }
+            ]]
+
+        return barter_scheme
 
     def _generate_fence_assort(self) -> List[Item]:
         root_items = [item for item in self.items if item.slotId == 'hideout']
