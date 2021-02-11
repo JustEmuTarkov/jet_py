@@ -76,10 +76,10 @@ class TraderInventory(ImmutableInventory):
         items = self.__items
 
         def filter_quest_assort(item: Item):
-            if item.id not in self._quest_assort:
+            if item.id not in self._quest_assort['success']:
                 return True
 
-            quest_id = self._quest_assort[item.id]
+            quest_id = self._quest_assort['success'][item.id]
             quest = self.profile.quests.get_quest(quest_id)
             return quest['status'] == 'Success'  # TODO: Extract into enum
 
