@@ -1,8 +1,9 @@
+import copy
 import itertools
 import random
 import time
 from enum import Enum
-from typing import List, NamedTuple, TypedDict, Union
+from typing import List, NamedTuple, TYPE_CHECKING, TypedDict, Union
 
 import pydantic
 import ujson
@@ -10,6 +11,9 @@ import ujson
 from server import db_dir
 from tarkov.inventory import ImmutableInventory, PlayerInventory, item_templates_repository, regenerate_items_ids
 from tarkov.inventory.models import Item, ItemUpd, TemplateId
+
+if TYPE_CHECKING:
+    from tarkov.profile import Profile
 
 
 class Traders(Enum):
@@ -40,9 +44,9 @@ class TraderInventory(ImmutableInventory):
     __fence_assort: List[Item] = []
     __fence_assort_created_at: int = 0
 
-    def __init__(self, trader: Traders, player_inventory: PlayerInventory):
+    def __init__(self, trader: Traders, profile: 'Profile'):
         self.trader = trader
-        self.player_inventory = player_inventory
+        self.profile = profile
 
         self.__path = db_dir.joinpath('traders', self.trader.value)
 
@@ -127,7 +131,7 @@ class TraderInventory(ImmutableInventory):
         tpl = item_templates_repository.get_template(item)
         price = tpl.props.CreditsPrice
 
-        for child in self.player_inventory.iter_item_children_recursively(item):
+        for child in self.profile.inventory.iter_item_children_recursively(item):
             child_tpl = item_templates_repository.get_template(child)
             child_price = child_tpl.props.CreditsPrice
             if self.can_sell(child):
@@ -179,3 +183,33 @@ class TraderInventory(ImmutableInventory):
             #  Todo account for trader standing (subtract standing from insurance price, 0.5 (50%) max)
 
         return int(price)
+
+    def _increase_sales_sum(self, amount: int):
+        raise NotImplementedError
+
+    @property
+    def standing(self) -> dict:
+        trader_id = self.trader.value
+
+        if self.trader.value not in self.profile.pmc_profile['TraderStandings']:
+            self.profile.pmc_profile['TraderStandings'][trader_id] = copy.deepcopy(self.base['loyalty'])
+
+        return self.profile.pmc_profile['TraderStandings'][trader_id]
+
+
+def get_trader_bases() -> List[dict]:
+    traders_path = db_dir.joinpath('traders')
+
+    paths = set(traders_path.rglob('*/base.json')) - set(traders_path.rglob('ragfair/base.json'))
+
+    traders_data = [ujson.load(file.open('r', encoding='utf8')) for file in paths]
+    traders_data = sorted(traders_data, key=lambda trader: trader['_id'])
+
+    return traders_data
+
+
+def get_trader_base(trader_id: str) -> dict:
+    base_path = db_dir.joinpath('traders', trader_id, 'base.json')
+    if not base_path.exists():
+        raise ValueError(f'Path {base_path} does not exists')
+    return ujson.load(base_path.open('r', encoding='utf8'))

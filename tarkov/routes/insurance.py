@@ -23,7 +23,7 @@ def items_list_cost():
 
     with Profile.from_request(request=request) as profile:
         for trader_id in traders_list:
-            trader_inventory = TraderInventory(Traders(trader_id), player_inventory=profile.inventory)
+            trader_inventory = TraderInventory(Traders(trader_id), profile=profile)
             trader_items: Dict[TemplateId, int] = {}
 
             for item_id in item_ids:
