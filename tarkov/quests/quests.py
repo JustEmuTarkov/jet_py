@@ -1,10 +1,14 @@
 import time
 from typing import Dict, List, TYPE_CHECKING, Tuple
 
+from pydantic import StrictInt
+
 from tarkov import inventory
 from tarkov.inventory.models import Item
-from .models import QuestRewardItem
+from .models import QuestMessageType, QuestRewardItem
 from .repositories import quests_repository
+from ..inventory import PlayerInventory, item_templates_repository
+from ..notifier.models import MailDialogueMessage, MailMessageItems
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
@@ -78,3 +82,27 @@ class Quests:
                 pass
 
         return [], []
+
+    def complete_quest(self, quest_id: str):
+        quest_template = quests_repository.get_quest_template(quest_id)
+
+        reward_items: List[Item] = []
+        for reward in quest_template.rewards.Success:
+            if isinstance(reward, QuestRewardItem):
+                for reward_item in reward.items:
+                    item_template = item_templates_repository.get_template(reward_item)
+                    stack_size: int = item_template.props.StackMaxSize
+
+                    while reward_item.upd.StackObjectsCount > 0:
+                        amount_to_split = min(reward_item.upd.StackObjectsCount, stack_size)
+                        reward_items.append(PlayerInventory.simple_split_item(reward_item, amount_to_split))
+
+        message = MailDialogueMessage(
+            uid=quest_template.traderId,
+            type=StrictInt(QuestMessageType.questSuccess.value),
+            templateId='5ab0f32686f7745dd409f56b',  # TODO: Right now this is a placeholder
+            systemData={},
+            items=MailMessageItems.from_items(reward_items),
+            hasRewards=True,
+        )
+        self.profile.notifier.add_message(message)

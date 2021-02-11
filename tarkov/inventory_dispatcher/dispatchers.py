@@ -1,20 +1,14 @@
 import typing
-from typing import Callable, Dict, List, Optional, TYPE_CHECKING
-
-from pydantic import StrictInt
+from typing import Callable, Dict, Optional, TYPE_CHECKING
 
 import tarkov.inventory
-from server import logger
-from tarkov import quests
 from tarkov.hideout.models import HideoutAreaType
 from tarkov.inventory import (MutableInventory, PlayerInventory, generate_item_id,
                               item_templates_repository, )
 from tarkov.inventory.implementations import SimpleInventory
-from tarkov.inventory.models import Item, TemplateId
+from tarkov.inventory.models import TemplateId
 from tarkov.lib.trader import TraderInventory, Traders
-from tarkov.notifier.models import MailDialogueMessage, MailMessageItems
 from tarkov.profile import Profile
-from tarkov.quests.models import QuestMessageType, QuestRewardItem
 from .models import ActionModel, ActionType, HideoutActions, InventoryActions, Owner, QuestActions, TradingActions
 
 if TYPE_CHECKING:
@@ -376,30 +370,4 @@ class QuestDispatcher(Dispatcher):
         self.response.items.del_.extend(removed)
 
     def _quest_complete(self, action: QuestActions.Complete) -> None:
-        quest = self.profile.quests.get_quest(action.qid)
-        quest_template = quests.quests_repository.get_quest_template(action.qid)
-
-        logger.debug(action)
-        logger.debug(quest)
-        logger.debug(quest_template)
-
-        reward_items: List[Item] = []
-        for reward in quest_template.rewards.Success:
-            if isinstance(reward, QuestRewardItem):
-                for reward_item in reward.items:
-                    item_template = item_templates_repository.get_template(reward_item)
-                    stack_size: int = item_template.props.StackMaxSize
-
-                    while reward_item.upd.StackObjectsCount > 0:
-                        amount_to_split = min(reward_item.upd.StackObjectsCount, stack_size)
-                        reward_items.append(PlayerInventory.simple_split_item(reward_item, amount_to_split))
-
-        message = MailDialogueMessage(
-            uid=quest_template.traderId,
-            type=StrictInt(QuestMessageType.questSuccess.value),
-            templateId='5ab0f32686f7745dd409f56b',  # TODO: Right now this is a placeholder
-            systemData={},
-            items=MailMessageItems.from_items(reward_items),
-            hasRewards=True,
-        )
-        self.profile.notifier.add_message(message)
+        self.profile.quests.complete_quest(action.qid)
