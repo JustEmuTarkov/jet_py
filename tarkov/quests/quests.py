@@ -6,9 +6,10 @@ from pydantic import StrictInt
 from tarkov import inventory
 from tarkov.inventory import PlayerInventory, item_templates_repository
 from tarkov.inventory.models import Item
-from tarkov.lib.trader import TraderInventory, Traders
+from tarkov.trader import TraderInventory, Traders
 from tarkov.notifier.models import MailDialogueMessage, MailMessageItems
-from .models import QuestMessageType, QuestRewardExperience, QuestRewardItem, QuestRewardTraderStanding
+from .models import (QuestMessageType, QuestRewardAssortUnlock, QuestRewardExperience, QuestRewardItem,
+                     QuestRewardTraderStanding, )
 from .repositories import quests_repository
 
 if TYPE_CHECKING:
@@ -47,14 +48,14 @@ class Quests:
             -> Tuple[List[inventory.models.Item], List[inventory.models.Item]]:
 
         try:
-            condition = self.profile.pmc_profile['BackendCounters'][condition_id]
+            condition = self.profile.pmc_profile.BackendCounters[condition_id]
         except KeyError:
             condition = {
                 'id': condition_id,
                 'qid': quest_id,
                 'value': 0
             }
-            self.profile.pmc_profile['BackendCounters'][condition_id] = condition
+            self.profile.pmc_profile.BackendCounters[condition_id] = condition
 
         removed_items = []
         changed_items = []
@@ -109,6 +110,9 @@ class Quests:
                 trader = TraderInventory(Traders(trader_id), self.profile)
                 standing = trader.standing
                 standing['currentStanding'] += standing_change
+
+            elif isinstance(reward, QuestRewardAssortUnlock):
+                raise ValueError
 
             else:
                 raise ValueError(f'Unknown reward: {reward.__class__.__name__} {reward}')

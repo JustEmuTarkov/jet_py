@@ -1,5 +1,9 @@
+from pathlib import Path
+
 import pydantic
 from pydantic import Extra
+
+from server.utils import atomic_write
 
 
 class Base(pydantic.BaseModel):
@@ -16,3 +20,9 @@ class Base(pydantic.BaseModel):
             exclude_unset=exclude_unset,
             **kwargs,
         )
+
+    def json(self, *args, indent=4, **kwargs, ) -> str:  # pylint: disable=useless-super-delegation
+        return super().json(*args, indent=indent, **kwargs)
+
+    def atomic_write(self, path: Path):
+        atomic_write(path=path, str_=self)

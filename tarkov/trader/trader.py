@@ -23,7 +23,7 @@ FENCE_ASSORT_LIFETIME = 10 * 60
 class TraderInventory(ImmutableInventory):
     trader: Traders
     profile: Profile
-    items: List[Item]
+    _items: List[Item]
     base: dict
     _barter_scheme: dict
     _loyal_level_items: dict
@@ -38,7 +38,7 @@ class TraderInventory(ImmutableInventory):
 
         trader_path = db_dir.joinpath('traders', self.trader.value)
 
-        self.items = pydantic.parse_obj_as(
+        self._items = pydantic.parse_obj_as(
             List[Item],
             ujson.load(trader_path.joinpath('items.json').open('r', encoding='utf8'))
         )
@@ -46,6 +46,10 @@ class TraderInventory(ImmutableInventory):
         self._barter_scheme = ujson.load(trader_path.joinpath('barter_scheme.json').open('r', encoding='utf8'))
         self.loyal_level_items = ujson.load(trader_path.joinpath('loyal_level_items.json').open('r', encoding='utf8'))
         self._quest_assort = ujson.load(trader_path.joinpath('questassort.json').open('r', encoding='utf8'))
+
+    @property
+    def items(self):
+        return self._items
 
     @property
     def assort(self) -> List[Item]:
@@ -199,10 +203,10 @@ class TraderInventory(ImmutableInventory):
     def standing(self) -> dict:
         trader_id = self.trader.value
 
-        if self.trader.value not in self.profile.pmc_profile['TraderStandings']:
-            self.profile.pmc_profile['TraderStandings'][trader_id] = copy.deepcopy(self.base['loyalty'])
+        if self.trader.value not in self.profile.pmc_profile.TraderStandings:
+            self.profile.pmc_profile.TraderStandings[trader_id] = copy.deepcopy(self.base['loyalty'])
 
-        return self.profile.pmc_profile['TraderStandings'][trader_id]
+        return self.profile.pmc_profile.TraderStandings[trader_id]
 
 
 def get_trader_bases() -> List[dict]:

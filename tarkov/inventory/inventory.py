@@ -718,14 +718,7 @@ class PlayerInventory(GridInventory):
         self.stash_map = PlayerInventoryStashMap(inventory=self)
 
     def write(self):
-        """
-        Writes inventory file to disk
-        """
-        ujson.dump(
-            self.inventory.dict(exclude_unset=True),
-            self._path.open('w', encoding='utf8'),
-            indent=4
-        )
+        self.inventory.atomic_write(self._path)
 
 
 def merge_extra_size(first: ItemExtraSize, second: ItemExtraSize) -> ItemExtraSize:

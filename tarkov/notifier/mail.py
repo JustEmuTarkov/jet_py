@@ -1,6 +1,7 @@
 import datetime
 from typing import Dict, List, TYPE_CHECKING
 
+from server.utils import atomic_write
 from tarkov.notifier.models import (DialoguePreviewList, MailDialogue, MailDialogueMessage, MailDialoguePreview,
                                     MailDialogues, )
 from tarkov.notifier.notifier import notifier_instance
@@ -88,5 +89,7 @@ class Mail:
             self.dialogues = MailDialogues()
 
     def write(self):
-        with self.path.open('w', encoding='utf8') as file:
-            file.write(self.dialogues.json(by_alias=True, exclude_unset=False, exclude_none=True, indent=4))
+        atomic_write(
+            self.dialogues.json(by_alias=True, exclude_unset=False, exclude_none=True, indent=4),
+            self.path
+        )
