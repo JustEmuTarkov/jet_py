@@ -94,6 +94,9 @@ class Profile:
 
         #  Todo remove insurance from items that aren't present in inventory after raid
 
+    def receive_experience(self, amount: int):
+        self.pmc_profile['Info']['Experience'] += amount
+
     def __read(self):
         self.pmc_profile: dict = ujson.load(self.pmc_profile_path.open('r', encoding='utf8'))
 

@@ -1,3 +1,4 @@
+import copy
 import time
 from typing import Dict, List, TYPE_CHECKING, Tuple
 
@@ -5,10 +6,11 @@ from pydantic import StrictInt
 
 from tarkov import inventory
 from tarkov.inventory.models import Item
-from .models import QuestMessageType, QuestRewardItem
+from .models import QuestMessageType, QuestRewardExperience, QuestRewardItem, QuestRewardTraderStanding
 from .repositories import quests_repository
-from ..inventory import PlayerInventory, item_templates_repository
-from ..notifier.models import MailDialogueMessage, MailMessageItems
+from tarkov.inventory import PlayerInventory, item_templates_repository
+from tarkov.lib.trader import TraderInventory, Traders
+from tarkov.notifier.models import MailDialogueMessage, MailMessageItems
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
@@ -96,6 +98,23 @@ class Quests:
                     while reward_item.upd.StackObjectsCount > 0:
                         amount_to_split = min(reward_item.upd.StackObjectsCount, stack_size)
                         reward_items.append(PlayerInventory.simple_split_item(reward_item, amount_to_split))
+
+            elif isinstance(reward, QuestRewardExperience):
+                exp_amount: str = reward.value
+                self.profile.receive_experience(int(exp_amount))
+
+            elif isinstance(reward, QuestRewardTraderStanding):
+                standing_change = float(reward.value)
+                trader_id = reward.target
+
+                if trader_id not in self.profile.pmc_profile['TraderStandings']:
+                    trader = TraderInventory(Traders(trader_id), self.profile.inventory)
+                    standings = self.profile.pmc_profile['TraderStandings']
+                    standings[trader_id] = copy.deepcopy(trader.base['loyalty'])
+                    standings[trader_id]['currentStanding'] += standing_change
+
+            else:
+                raise ValueError(f'Unknown reward: {reward.__class__.__name__} {reward}')
 
         message = MailDialogueMessage(
             uid=quest_template.traderId,

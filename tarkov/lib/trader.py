@@ -44,16 +44,15 @@ class TraderInventory(ImmutableInventory):
         self.trader = trader
         self.player_inventory = player_inventory
 
-        assort_path = db_dir.joinpath('assort', self.trader.value)
+        self.__path = db_dir.joinpath('traders', self.trader.value)
+
         self.__items: List[Item] = pydantic.parse_obj_as(
             List[Item],
-            ujson.load(assort_path.joinpath('items.json').open('r', encoding='utf8'))
+            ujson.load(self.__path.joinpath('items.json').open('r', encoding='utf8'))
         )
-        base_path = db_dir.joinpath('base', 'traders', self.trader.value, 'base.json')
-        self.__base = ujson.load(base_path.open('r', encoding='utf8'))
-
-        self.__barter_scheme = ujson.load(assort_path.joinpath('barter_scheme.json').open('r', encoding='utf8'))
-        self.loyal_level_items = ujson.load(assort_path.joinpath('loyal_level_items.json').open('r', encoding='utf8'))
+        self.__base = ujson.load(self.__path.joinpath('base.json').open('r', encoding='utf8'))
+        self.__barter_scheme = ujson.load(self.__path.joinpath('barter_scheme.json').open('r', encoding='utf8'))
+        self.loyal_level_items = ujson.load(self.__path.joinpath('loyal_level_items.json').open('r', encoding='utf8'))
 
     @property
     def assort(self) -> List[Item]:
