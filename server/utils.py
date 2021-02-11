@@ -7,7 +7,6 @@ from typing import Callable, Optional, Union
 
 import ujson
 from flask import make_response, request
-from pydantic import BaseModel
 
 
 class _ZlibMiddleware:
@@ -94,12 +93,11 @@ def tarkov_response(function: Optional[Callable[..., ViewReturnType]]):
     return middleware(function)
 
 
-def atomic_write(str_: Union[str, BaseModel], path: Path, *, encoding='utf8'):
+def atomic_write(str_: Union[str], path: Path, *, encoding='utf8'):
     random_str = ''.join(random.choices([*string.ascii_lowercase, *string.digits], k=16))
     tmp_path = Path(str(path) + random_str)
 
     try:
-        str_ = str_.json() if isinstance(str_, BaseModel) else str_
         with tmp_path.open(mode='w', encoding=encoding) as tmp_file:
             tmp_file.write(str_)
 

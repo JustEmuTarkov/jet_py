@@ -6,11 +6,12 @@ from pydantic import StrictInt
 from tarkov import inventory
 from tarkov.inventory import PlayerInventory, item_templates_repository
 from tarkov.inventory.models import Item
-from tarkov.trader import TraderInventory, TraderType
 from tarkov.notifier.models import MailDialogueMessage, MailMessageItems
+from tarkov.trader import TraderInventory, TraderType
 from .models import (QuestMessageType, QuestRewardAssortUnlock, QuestRewardExperience, QuestRewardItem,
                      QuestRewardTraderStanding, )
 from .repositories import quests_repository
+from tarkov.profile.models import BackendCounter
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
@@ -50,11 +51,11 @@ class Quests:
         try:
             condition = self.profile.pmc_profile.BackendCounters[condition_id]
         except KeyError:
-            condition = {
-                'id': condition_id,
-                'qid': quest_id,
-                'value': 0
-            }
+            condition = BackendCounter(
+                id=condition_id,
+                qid=quest_id,
+                value=0
+            )
             self.profile.pmc_profile.BackendCounters[condition_id] = condition
 
         removed_items = []
@@ -70,7 +71,7 @@ class Quests:
                 self.profile.inventory.simple_split_item(item=item, count=count)
                 # removed_items.append(self.profile.inventory.split_item(item=item, count=count))
 
-            condition['value'] += count
+            condition.value += count
 
         return removed_items, changed_items
 

@@ -718,7 +718,7 @@ class PlayerInventory(GridInventory):
         self.stash_map = PlayerInventoryStashMap(inventory=self)
 
     def write(self):
-        self.inventory.atomic_write(self._path)
+        self.inventory.atomic_write(self._path, exclude_none=True, exclude_defaults=True)
 
 
 def merge_extra_size(first: ItemExtraSize, second: ItemExtraSize) -> ItemExtraSize:

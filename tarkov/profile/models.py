@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Any, Dict, List
 
 from pydantic import Extra, Field, StrictBool, StrictInt, root_validator
 
@@ -41,9 +41,44 @@ class ProfileCustomization(Base):
     Feet: str
 
 
+class SkillCommon(Base):
+    Id: str
+    Progress: float
+    PointsEarnedDuringSession: float
+    LastAccess: int
+
+
+class SkillMastering(Base):
+    Id: str
+    Progress: float
+
+
+class Skills(Base):
+    Common: List[SkillCommon]
+    Mastering: List[SkillMastering]
+    Bonuses: Any
+    Points: int = 0
+
+
+class Counter(Base):
+    id: str
+    value: int
+
+
+class _ConditionCounters(Base):
+    Counters: List[Counter] = Field(default_factory=list)
+
+
+class BackendCounter(Base):
+    id: str
+    qid: str
+    value: int
+
+
 class ProfileModel(Base):
     class Config:
         extra = Extra.allow
+        exclude = {'Inventory', }
 
     id: str = Field(alias='_id')
     aid: str
@@ -52,12 +87,12 @@ class ProfileModel(Base):
 
     Customization: ProfileCustomization
     Inventory: InventoryModel
-    Skills: dict
+    Skills: Skills
     Stats: Dict
 
     Encyclopedia: Dict[TemplateId, StrictBool] = Field(default_factory=dict)
-    ConditionCounters: dict
-    BackendCounters: dict
+    ConditionCounters: _ConditionCounters = Field(default_factory=_ConditionCounters)
+    BackendCounters: Dict[str, BackendCounter] = Field(default_factory=dict)  # Dict key is the same as counter id
     InsuredItems: list
     Hideout: dict
     Bonuses: list
@@ -72,3 +107,9 @@ class ProfileModel(Base):
             inventory_path = root_dir.joinpath('resources', 'profiles', values.get('aid'), 'pmc_inventory.json')
             values['Inventory'] = InventoryModel.parse_file(inventory_path)
         return values
+
+    def json(self, *args, **kwargs) -> str:
+        if kwargs.get('exclude', None) is None:
+            kwargs['exclude'] = self.Config.exclude
+
+        return super().json(*args, **kwargs)

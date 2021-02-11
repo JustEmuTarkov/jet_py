@@ -24,5 +24,5 @@ class Base(pydantic.BaseModel):
     def json(self, *args, indent=4, **kwargs, ) -> str:  # pylint: disable=useless-super-delegation
         return super().json(*args, indent=indent, **kwargs)
 
-    def atomic_write(self, path: Path):
-        atomic_write(path=path, str_=self)
+    def atomic_write(self, path: Path, **dump_kwargs):
+        atomic_write(path=path, str_=self.json(**dump_kwargs))

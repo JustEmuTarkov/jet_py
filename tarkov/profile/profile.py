@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import copy
 from typing import List, Union
 
 import ujson
@@ -77,7 +76,7 @@ class Profile:
         for file in self.profile_dir.glob('pmc_*.json'):
             profile_data[file.stem] = ujson.load(file.open('r', encoding='utf8'))
 
-        profile_base = copy.deepcopy(self.pmc_profile)
+        profile_base = self.pmc_profile.copy()
         profile_base.Hideout = self.hideout.data
         # profile_base['Inventory'] = self.inventory.inventory.dict()
         profile_base.Quests = profile_data['pmc_quests']
