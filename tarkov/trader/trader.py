@@ -12,7 +12,7 @@ import ujson
 from server import db_dir
 from tarkov.inventory import ImmutableInventory, item_templates_repository, regenerate_items_ids
 from tarkov.inventory.models import Item, ItemUpd
-from tarkov.trader.models import BoughtItems, TraderType
+from tarkov.trader.models import BoughtItems, TraderStanding, TraderType
 
 if TYPE_CHECKING:
     from tarkov.profile import Profile
@@ -115,7 +115,7 @@ class TraderInventory(ImmutableInventory):
                 return True
 
             required_standing = self.loyal_level_items[item.id]
-            return self.standing['currentLevel'] >= required_standing
+            return self.standing.current_level >= required_standing
 
         items = filter(filter_quest_assort, items)
         items = filter(filter_loyal_level, items)
@@ -200,13 +200,12 @@ class TraderInventory(ImmutableInventory):
         raise NotImplementedError
 
     @property
-    def standing(self) -> dict:
-        trader_id = self.trader.value
+    def standing(self) -> TraderStanding:
+        if self.trader not in self.profile.pmc_profile.TraderStandings:
+            standings_copy: dict = copy.deepcopy(self.base['loyalty'])
+            self.profile.pmc_profile.TraderStandings[self.trader] = TraderStanding.parse_obj(standings_copy)
 
-        if self.trader.value not in self.profile.pmc_profile.TraderStandings:
-            self.profile.pmc_profile.TraderStandings[trader_id] = copy.deepcopy(self.base['loyalty'])
-
-        return self.profile.pmc_profile.TraderStandings[trader_id]
+        return self.profile.pmc_profile.TraderStandings[self.trader]
 
 
 def get_trader_bases() -> List[dict]:

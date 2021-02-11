@@ -110,7 +110,7 @@ class Quests:
 
                 trader = TraderInventory(TraderType(trader_id), self.profile)
                 standing = trader.standing
-                standing['currentStanding'] += standing_change
+                standing.current_standing += standing_change
 
             elif isinstance(reward, QuestRewardAssortUnlock):
                 raise ValueError

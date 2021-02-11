@@ -13,7 +13,7 @@ from tarkov.hideout import Hideout
 from tarkov.inventory.models import Item, TemplateId
 from tarkov.notifier import Mail
 from tarkov.trader import TraderType
-from .models import ProfileModel
+from .models import ProfileModel, ItemInsurance
 
 
 class Encyclopedia:
@@ -81,16 +81,14 @@ class Profile:
         # profile_base['Inventory'] = self.inventory.inventory.dict()
         profile_base.Quests = profile_data['pmc_quests']
         profile_base.Stats = profile_data['pmc_stats']
-        profile_base.TraderStandings = profile_data['pmc_traders']
 
         return profile_base.dict()
 
     def add_insurance(self, item: Item, trader: TraderType):
-        insurance_info = {
-            'itemId': item.id,
-            'tid': trader.value
-        }
-        self.pmc_profile.InsuredItems.append(insurance_info)
+        self.pmc_profile.InsuredItems.append(ItemInsurance(
+            item_id=item.id,
+            trader_id=trader.value
+        ))
 
         #  Todo remove insurance from items that aren't present in inventory after raid
 

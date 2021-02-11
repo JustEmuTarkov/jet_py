@@ -5,6 +5,8 @@ from pydantic import Extra, Field, StrictBool, StrictInt, root_validator
 from server import root_dir
 from tarkov.inventory.models import InventoryModel, TemplateId
 from tarkov.models import Base
+from tarkov.trader import TraderType
+from tarkov.trader.models import ItemInsurance, TraderStanding
 
 
 class OfflineRaidSettings(Base):
@@ -93,13 +95,13 @@ class ProfileModel(Base):
     Encyclopedia: Dict[TemplateId, StrictBool] = Field(default_factory=dict)
     ConditionCounters: _ConditionCounters = Field(default_factory=_ConditionCounters)
     BackendCounters: Dict[str, BackendCounter] = Field(default_factory=dict)  # Dict key is the same as counter id
-    InsuredItems: list
+    InsuredItems: List[ItemInsurance] = Field(default_factory=list)
     Hideout: dict
     Bonuses: list
     Notes: dict
-    TraderStandings: dict
+    TraderStandings: Dict[TraderType, TraderStanding]
     Quests: list
-    WishList: list  # TODO
+    WishList: list
 
     @root_validator(pre=True)
     def collect_files(cls, values):  # pylint: disable=no-self-argument,no-self-use

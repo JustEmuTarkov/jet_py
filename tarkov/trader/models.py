@@ -1,7 +1,10 @@
 from enum import Enum
-from typing import List, NamedTuple, TypedDict
+from typing import Any, Dict, List, Literal, NamedTuple, Optional, TypedDict
 
-from tarkov.inventory.models import Item, TemplateId
+from pydantic import Field, StrictBool
+
+from tarkov.inventory.models import Item, ItemId, TemplateId
+from tarkov.models import Base
 
 
 class TraderType(Enum):
@@ -15,10 +18,30 @@ class TraderType(Enum):
     Skier = '58330581ace78e27b8b10cee'
 
 
-class TraderBase(TypedDict):
-    sell_category: List[TemplateId]
-
-
 class BoughtItems(NamedTuple):
     item: Item
     children_items: List[Item]
+
+
+class ItemInsurance(Base):
+    item_id: ItemId = Field(alias='itemId')
+    trader_id: str = Field(alias='tid')
+
+
+class TraderLoyaltyLevel(Base):
+    min_level: int = Field(alias='minLevel')
+    min_sales_sum: int = Field(alias='minSalesSum')
+    minStanding: float = Field(alias='minStanding')
+
+
+class TraderStanding(Base):
+    current_level: int = Field(alias='currentLevel')
+    current_standing: float = Field(alias='currentStanding')
+    current_sales_sum: int = Field(alias='currentSalesSum')
+    next_loyalty: Any = Field(alias='NextLoyalty', const=None)
+    loyalty_levels: Dict[Literal['0', '1', '2', '3'], TraderLoyaltyLevel] = Field(alias='loyaltyLevels')
+    display: Optional[StrictBool] = None
+
+
+class TraderBase(TypedDict):
+    sell_category: List[TemplateId]
