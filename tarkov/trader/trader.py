@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import itertools
 import random
@@ -8,7 +10,7 @@ import pydantic
 import ujson
 
 from server import db_dir
-from tarkov.inventory import ImmutableInventory, PlayerInventory, item_templates_repository, regenerate_items_ids
+from tarkov.inventory import ImmutableInventory, item_templates_repository, regenerate_items_ids
 from tarkov.inventory.models import Item, ItemUpd
 from tarkov.trader.models import BoughtItems, Traders
 
@@ -20,60 +22,30 @@ FENCE_ASSORT_LIFETIME = 10 * 60
 
 class TraderInventory(ImmutableInventory):
     trader: Traders
-    player_inventory: PlayerInventory
+    profile: Profile
+    items: List[Item]
+    base: dict
+    _barter_scheme: dict
+    _loyal_level_items: dict
+    quest_assort: dict
 
     __fence_assort: List[Item] = []
     __fence_assort_created_at: int = 0
 
-    def __init__(self, trader: Traders, profile: 'Profile'):
+    def __init__(self, trader: Traders, profile: Profile):
         self.trader = trader
         self.profile = profile
 
         trader_path = db_dir.joinpath('traders', self.trader.value)
 
-        self.__items: List[Item] = pydantic.parse_obj_as(
+        self.items = pydantic.parse_obj_as(
             List[Item],
             ujson.load(trader_path.joinpath('items.json').open('r', encoding='utf8'))
         )
-        self.__base = ujson.load(trader_path.joinpath('base.json').open('r', encoding='utf8'))
-        self.__barter_scheme = ujson.load(trader_path.joinpath('barter_scheme.json').open('r', encoding='utf8'))
+        self.base = ujson.load(trader_path.joinpath('base.json').open('r', encoding='utf8'))
+        self._barter_scheme = ujson.load(trader_path.joinpath('barter_scheme.json').open('r', encoding='utf8'))
         self.loyal_level_items = ujson.load(trader_path.joinpath('loyal_level_items.json').open('r', encoding='utf8'))
-        self._quest_assort: dict = ujson.load(trader_path.joinpath('questassort.json').open('r', encoding='utf8'))
-
-    def _generate_fence_assort(self) -> List[Item]:
-        root_items = [item for item in self.__items if item.slotId == 'hideout']
-        assort = random.sample(root_items, k=min(len(root_items), 500))
-
-        child_items: List[Item] = []
-
-        for item in assort:
-            child_items.extend(self.iter_item_children_recursively(item))
-
-        assort.extend(child_items)
-
-        return assort
-
-    def _trader_assort(self) -> List[Item]:
-        items: Iterable[Item] = self.__items
-
-        def filter_quest_assort(item: Item) -> bool:
-            if item.id not in self._quest_assort['success']:
-                return True
-
-            quest_id = self._quest_assort['success'][item.id]
-            quest = self.profile.quests.get_quest(quest_id)
-            return quest['status'] == 'Success'  # TODO: Extract into enum
-
-        def filter_loyal_level(item: Item) -> bool:
-            if item.id not in self.loyal_level_items:
-                return True
-
-            required_standing = self.loyal_level_items[item.id]
-            return self.standing['currentLevel'] >= required_standing
-
-        items = filter(filter_quest_assort, items)
-        items = filter(filter_loyal_level, items)
-        return list(items)
+        self._quest_assort = ujson.load(trader_path.joinpath('questassort.json').open('r', encoding='utf8'))
 
     @property
     def assort(self) -> List[Item]:
@@ -105,18 +77,49 @@ class TraderInventory(ImmutableInventory):
 
             return barter_scheme
 
-        return self.__barter_scheme
+        return self._barter_scheme
 
-    @property
-    def base(self):
-        return self.__base
+    def _generate_fence_assort(self) -> List[Item]:
+        root_items = [item for item in self.items if item.slotId == 'hideout']
+        assort = random.sample(root_items, k=min(len(root_items), 500))
+
+        child_items: List[Item] = []
+
+        for item in assort:
+            child_items.extend(self.iter_item_children_recursively(item))
+
+        assort.extend(child_items)
+
+        return assort
+
+    def _trader_assort(self) -> List[Item]:
+        items: Iterable[Item] = self.items
+
+        def filter_quest_assort(item: Item) -> bool:
+            if item.id not in self._quest_assort['success']:
+                return True
+
+            quest_id = self._quest_assort['success'][item.id]
+            quest = self.profile.quests.get_quest(quest_id)
+            return quest['status'] == 'Success'  # TODO: Extract into enum
+
+        def filter_loyal_level(item: Item) -> bool:
+            if item.id not in self.loyal_level_items:
+                return True
+
+            required_standing = self.loyal_level_items[item.id]
+            return self.standing['currentLevel'] >= required_standing
+
+        items = filter(filter_quest_assort, items)
+        items = filter(filter_loyal_level, items)
+        return list(items)
 
     def can_sell(self, item: Item) -> bool:
         try:
             category_id = item_templates_repository.get_category(item)
         except KeyError:
             return False
-        return category_id in self.__base['sell_category']
+        return category_id in self.base['sell_category']
 
     def get_item_price(self, item: Item) -> int:
         price: float = 0
@@ -146,10 +149,6 @@ class TraderInventory(ImmutableInventory):
                 price += child_price * 0.85
 
         return int(price)
-
-    @property
-    def items(self) -> List[Item]:
-        return self.__items
 
     def buy_item(self, item_id: str, count: int) -> List[BoughtItems]:
         base_item = self.get_item(item_id)
