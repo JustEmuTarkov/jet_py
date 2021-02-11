@@ -23,7 +23,7 @@ FENCE_ASSORT_LIFETIME = 10 * 60
 class TraderInventory(ImmutableInventory):
     trader: Traders
     profile: Profile
-    _items: List[Item]
+    assort_items: List[Item]
     base: dict
     _barter_scheme: dict
     _loyal_level_items: dict
@@ -38,7 +38,7 @@ class TraderInventory(ImmutableInventory):
 
         trader_path = db_dir.joinpath('traders', self.trader.value)
 
-        self._items = pydantic.parse_obj_as(
+        self.assort_items = pydantic.parse_obj_as(
             List[Item],
             ujson.load(trader_path.joinpath('items.json').open('r', encoding='utf8'))
         )
@@ -49,7 +49,7 @@ class TraderInventory(ImmutableInventory):
 
     @property
     def items(self):
-        return self._items
+        return self.assort_items
 
     @property
     def assort(self) -> List[Item]:
