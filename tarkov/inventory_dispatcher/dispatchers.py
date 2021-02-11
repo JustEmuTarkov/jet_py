@@ -7,7 +7,7 @@ from tarkov.inventory import (MutableInventory, PlayerInventory, generate_item_i
                               item_templates_repository, )
 from tarkov.inventory.implementations import SimpleInventory
 from tarkov.inventory.models import TemplateId
-from tarkov.lib.trader import TraderInventory, Traders
+from tarkov.trader import TraderInventory, Traders
 from tarkov.profile import Profile
 from .models import ActionModel, ActionType, HideoutActions, InventoryActions, Owner, QuestActions, TradingActions
 

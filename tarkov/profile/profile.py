@@ -12,7 +12,7 @@ from server.utils import TarkovError
 from tarkov import inventory as inventory_, quests
 from tarkov.hideout import Hideout
 from tarkov.inventory.models import Item, TemplateId
-from tarkov.lib.trader import Traders
+from tarkov.trader import Traders
 from tarkov.notifier import Mail
 
 

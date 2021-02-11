@@ -2,39 +2,18 @@ import copy
 import itertools
 import random
 import time
-from enum import Enum
-from typing import Iterable, List, NamedTuple, TYPE_CHECKING, TypedDict, Union
+from typing import Iterable, List, TYPE_CHECKING, Union
 
 import pydantic
 import ujson
 
 from server import db_dir
 from tarkov.inventory import ImmutableInventory, PlayerInventory, item_templates_repository, regenerate_items_ids
-from tarkov.inventory.models import Item, ItemUpd, TemplateId
+from tarkov.inventory.models import Item, ItemUpd
+from tarkov.trader.models import BoughtItems, Traders
 
 if TYPE_CHECKING:
     from tarkov.profile import Profile
-
-
-class Traders(Enum):
-    Mechanic = '5a7c2eca46aef81a7ca2145d'
-    Ragman = '5ac3b934156ae10c4430e83c'
-    Jaeger = '5c0647fdd443bc2504c2d371'
-    Prapor = '54cb50c76803fa8b248b4571'
-    Therapist = '54cb57776803fa99248b456e'
-    Fence = '579dc571d53a0658a154fbec'
-    Peacekeeper = '5935c25fb3acc3127c3d8cd9'
-    Skier = '58330581ace78e27b8b10cee'
-
-
-class TraderBase(TypedDict):
-    sell_category: List[TemplateId]
-
-
-class BoughtItems(NamedTuple):
-    item: Item
-    children_items: List[Item]
-
 
 FENCE_ASSORT_LIFETIME = 10 * 60
 
