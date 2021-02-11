@@ -3,7 +3,7 @@ import itertools
 import random
 import time
 from enum import Enum
-from typing import List, NamedTuple, TYPE_CHECKING, TypedDict, Union
+from typing import Iterable, List, NamedTuple, TYPE_CHECKING, TypedDict, Union
 
 import pydantic
 import ujson
@@ -36,11 +36,13 @@ class BoughtItems(NamedTuple):
     children_items: List[Item]
 
 
+FENCE_ASSORT_LIFETIME = 10 * 60
+
+
 class TraderInventory(ImmutableInventory):
     trader: Traders
     player_inventory: PlayerInventory
 
-    FENCE_ASSORT_LIFETIME = 10 * 60
     __fence_assort: List[Item] = []
     __fence_assort_created_at: int = 0
 
@@ -73,9 +75,9 @@ class TraderInventory(ImmutableInventory):
         return assort
 
     def _trader_assort(self) -> List[Item]:
-        items = self.__items
+        items: Iterable[Item] = self.__items
 
-        def filter_quest_assort(item: Item):
+        def filter_quest_assort(item: Item) -> bool:
             if item.id not in self._quest_assort['success']:
                 return True
 
@@ -83,7 +85,7 @@ class TraderInventory(ImmutableInventory):
             quest = self.profile.quests.get_quest(quest_id)
             return quest['status'] == 'Success'  # TODO: Extract into enum
 
-        def filter_loyal_level(item: Item):
+        def filter_loyal_level(item: Item) -> bool:
             if item.id not in self.loyal_level_items:
                 return True
 
@@ -98,7 +100,7 @@ class TraderInventory(ImmutableInventory):
     def assort(self) -> List[Item]:
         if self.trader == Traders.Fence:
             current_time = time.time()
-            expired = current_time > TraderInventory.__fence_assort_created_at + TraderInventory.FENCE_ASSORT_LIFETIME
+            expired = current_time > TraderInventory.__fence_assort_created_at + FENCE_ASSORT_LIFETIME
 
             if not TraderInventory.__fence_assort or expired:
                 TraderInventory.__fence_assort = self._generate_fence_assort()
