@@ -1,35 +1,37 @@
-from typing import Dict, List
+from typing import Dict, List, Optional
 
-from flask import Blueprint, request
+from fastapi import APIRouter
+from fastapi.params import Cookie
+from flask import request
 
-from server.utils import tarkov_response, zlib_middleware
-from tarkov.inventory.models import TemplateId
-from tarkov.trader import TraderInventory, TraderType
+from tarkov.inventory.models import ItemId, TemplateId
+from tarkov.models import TarkovSuccessResponse
 from tarkov.profile import Profile
+from tarkov.trader import TraderInventory, TraderType
 
-blueprint = Blueprint(__name__, __name__)
+router = APIRouter(prefix='', tags=['Insurance'])
 
 INSURANCE_PRICE_MODIFIER = 0.1
 
 
-@blueprint.route('/client/insurance/items/list/cost', methods=['POST', 'GET'])
-@zlib_middleware
-@tarkov_response
-def items_list_cost():
-    traders_list: List[str] = request.data['traders']
-    item_ids: List[str] = request.data['items']
+@router.post('/client/insurance/items/list/cost')
+def items_list_cost(
+        traders: List[str],
+        items: List[ItemId],
+        profile_id: Optional[str] = Cookie(alias='PHPSESSID', default=None),
 
-    response: Dict[str, dict] = {}
+) -> TarkovSuccessResponse[Dict[str, dict]]:
+    insurance_data: Dict[str, dict] = {}
 
     with Profile.from_request(request=request) as profile:
-        for trader_id in traders_list:
+        for trader_id in traders:
             trader_inventory = TraderInventory(TraderType(trader_id), profile=profile)
             trader_items: Dict[TemplateId, int] = {}
 
-            for item_id in item_ids:
+            for item_id in items:
                 item = profile.inventory.get_item(item_id)
                 trader_items[item.tpl] = trader_inventory.calculate_insurance_price(item)
 
-            response[trader_id] = trader_items
+            insurance_data[trader_id] = trader_items
 
-        return response
+    return TarkovSuccessResponse(data=insurance_data)
