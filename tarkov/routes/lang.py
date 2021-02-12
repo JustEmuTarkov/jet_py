@@ -1,18 +1,16 @@
 from functools import lru_cache
 
 import ujson
-from flask import Blueprint
+from fastapi import APIRouter
 
 from server import db_dir
 from server.utils import tarkov_response, zlib_middleware
 from tarkov.library import load_locale
 
-blueprint = Blueprint(__name__, __name__)
+router = APIRouter(prefix='', tags=['Locale'])
 
 
-@blueprint.route('/client/menu/locale/<locale_type>', methods=['POST', 'GET'])  # TODO Change to dynamic
-@zlib_middleware
-@tarkov_response
+@router.post('/client/menu/locale/{locale_type}')  # TODO Change to dynamic
 @lru_cache(8)
 def client_menu_locale_en(locale_type: str):
     locale_path = db_dir / 'locales' / locale_type / 'menu.json'
@@ -20,9 +18,7 @@ def client_menu_locale_en(locale_type: str):
     return locale
 
 
-@blueprint.route('/client/languages', methods=['GET', 'POST'])
-@zlib_middleware
-@tarkov_response
+@router.post('/client/languages')
 def client_languages():
     languages_data_list = []
     languages_dir = db_dir / 'locales'
@@ -33,9 +29,7 @@ def client_languages():
     return languages_data_list
 
 
-@blueprint.route('/client/locale/<locale_name>', methods=['POST', 'GET'])
-@zlib_middleware
-@tarkov_response
+@router.post('/client/locale/{locale_name}')
 @lru_cache(8)
 def client_locale(locale_name: str):
     return load_locale(locale_name)

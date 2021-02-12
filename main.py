@@ -13,7 +13,7 @@ mods_dir = root_dir.joinpath('mods')
 if __name__ == '__main__':
     # app.register_blueprint(blueprint=friend.blueprint)
     # app.register_blueprint(blueprint=hideout.blueprint)
-    app.register_blueprint(blueprint=lang.blueprint)
+    # app.register_blueprint(blueprint=lang.blueprint)
     app.register_blueprint(blueprint=profile.blueprint)
     app.register_blueprint(blueprint=single_player.blueprint)
     # app.register_blueprint(blueprint=trader.blueprint)
