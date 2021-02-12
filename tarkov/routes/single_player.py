@@ -1,6 +1,7 @@
 from typing import List
 
 import ujson
+from fastapi import APIRouter
 from flask import Blueprint, request
 from pydantic import parse_obj_as
 
@@ -12,10 +13,11 @@ from tarkov.lib import locations
 from tarkov.lib.bots import BotGenerator
 from tarkov.profile import Profile
 
+router = APIRouter(prefix='', tags=['Singleplayer'])
 blueprint = Blueprint(__name__, __name__)
 
 
-@blueprint.route('/singleplayer/bundles', methods=['POST', 'GET'])
+@router.get('/singleplayer/bundles')
 def singleplayer_bundles():
     return ujson.dumps([])
 
@@ -79,11 +81,9 @@ def generate_bots() -> List[dict]:
     return bots
 
 
-@blueprint.route('/mode/offline', methods=['POST', 'GET'])
-@zlib_middleware
+@router.get('/mode/offline')
 def mode_offline():
     # TODO: Put that into Server config file
-    # return str(True)
     return {
         "OfflineLootPatch": True,
         "InsuranceScreenPatch": True,

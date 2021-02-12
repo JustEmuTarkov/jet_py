@@ -1,14 +1,18 @@
 import datetime
 import random
+from typing import Type
 
 import ujson
+from fastapi import APIRouter
 from flask import Blueprint, request
 
 from server import app, db_dir, start_time
 from server.utils import tarkov_response, zlib_middleware
 from tarkov.inventory import item_templates_repository
+from tarkov.models import TarkovSuccessResponse
 
 blueprint = Blueprint(__name__, __name__)
+router = APIRouter(prefix='', tags=['Misc/Bootstrap'])
 
 
 @app.route('/client/locations', methods=['GET', 'POST'])
@@ -26,11 +30,10 @@ def client_locations():
     return locations_base
 
 
-@app.route('/client/game/start', methods=['POST', 'GET'])
-@zlib_middleware
-@tarkov_response
-def client_game_start():
-    return None  # TODO Add account data, check if character exists
+@router.post('/client/game/start')
+def client_game_start() -> str:
+
+    return TarkovSuccessResponse(data=None).json()  # TODO Add account data, check if character exists
 
 
 @app.route('/client/game/version/validate', methods=['POST'])

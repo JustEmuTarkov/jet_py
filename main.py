@@ -3,7 +3,8 @@ import sys
 from server import app, logger, root_dir
 from server.package_lib import PackageManager
 from tarkov import launcher, notifier
-from tarkov.routes import (flea_market, lang, match, misc, profile, single_player)
+from tarkov.routes import (flea_market, match, misc, single_player)
+from tarkov.profile import routes
 
 if str(root_dir) not in sys.path:
     sys.path.append(str(root_dir))
@@ -14,7 +15,7 @@ if __name__ == '__main__':
     # app.register_blueprint(blueprint=friend.blueprint)
     # app.register_blueprint(blueprint=hideout.blueprint)
     # app.register_blueprint(blueprint=lang.blueprint)
-    app.register_blueprint(blueprint=profile.blueprint)
+    # app.register_blueprint(blueprint=routes.blueprint)
     app.register_blueprint(blueprint=single_player.blueprint)
     # app.register_blueprint(blueprint=trader.blueprint)
     app.register_blueprint(blueprint=misc.blueprint)

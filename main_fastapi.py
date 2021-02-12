@@ -12,6 +12,7 @@ if __name__ == '__main__':
         generate_ssl_certificate()
     uvicorn.run(
         app,
+        port=443,
         ssl_keyfile='certificates/private.key',
         ssl_certfile='certificates/cert.crt'
     )

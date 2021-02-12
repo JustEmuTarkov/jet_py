@@ -1,30 +1,33 @@
 from __future__ import annotations
 
+from typing import Optional
+
 import ujson
-from flask import Blueprint, request
+from fastapi import APIRouter
+from fastapi.params import Cookie
+from flask import request
 
 from server import root_dir
-from server.utils import tarkov_response, zlib_middleware
 from tarkov.inventory_dispatcher import DispatcherManager
 from tarkov.profile import Profile
 
-blueprint = Blueprint(__name__, __name__)
+router = APIRouter(prefix='', tags=['Profile'])
 
 
-@blueprint.route('/client/game/profile/items/moving', methods=['POST', 'GET'])
-@zlib_middleware
-@tarkov_response
-def client_game_profile_item_move():
-    dispatcher = DispatcherManager(request.cookies['PHPSESSID'])
+@router.post('/client/game/profile/items/moving')
+def client_game_profile_item_move(
+        profile_id: Optional[str] = Cookie(alias='PHPSESSID', default=None)
+):
+    dispatcher = DispatcherManager(profile_id)
     response = dispatcher.dispatch()
     return response.dict(exclude_defaults=False, exclude_none=True, exclude_unset=False)
 
 
-@blueprint.route('/client/game/profile/list', methods=['POST', 'GET'])
-@zlib_middleware
-@tarkov_response
-def client_game_profile_list():
-    with Profile.from_request(request) as profile:
+@router.post('/client/game/profile/list')
+def client_game_profile_list(
+        profile_id: Optional[str] = Cookie(alias='PHPSESSID', default=None)
+):
+    with Profile(profile_id) as profile:
         pmc_profile = profile.get_profile()
 
         profile_dir = root_dir.joinpath('resources', 'profiles', profile.profile_id)
@@ -36,9 +39,7 @@ def client_game_profile_list():
         ]
 
 
-@blueprint.route('/client/game/profile/select', methods=['POST', 'GET'])
-@zlib_middleware
-@tarkov_response
+@router.post('/client/game/profile/select')
 def client_game_profile_list_select():
     return {
         'status': 'ok',
@@ -49,9 +50,7 @@ def client_game_profile_list_select():
     }
 
 
-@blueprint.route('/client/profile/status', methods=['POST', 'GET'])
-@zlib_middleware
-@tarkov_response
+@router.post('/client/profile/status')
 def client_profile_status():
     session_id = request.cookies['PHPSESSID']
     response = []

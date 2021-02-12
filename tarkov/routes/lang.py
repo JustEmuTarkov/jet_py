@@ -18,7 +18,7 @@ def _client_menu_locale(locale_type: str):
 
 @router.post('/client/menu/locale/{locale_type}')
 def client_menu_locale(locale_type: str):
-    return client_menu_locale(locale_type)
+    return _client_menu_locale(locale_type)
 
 
 @router.post('/client/languages')
