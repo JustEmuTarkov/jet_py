@@ -5,7 +5,6 @@ from pydantic import Extra, Field, StrictBool, StrictInt, root_validator
 from server import root_dir
 from tarkov.inventory.models import InventoryModel, TemplateId
 from tarkov.models import Base
-from tarkov.trader import TraderType
 from tarkov.trader.models import ItemInsurance, TraderStanding
 
 
@@ -99,7 +98,7 @@ class ProfileModel(Base):
     Hideout: dict
     Bonuses: list
     Notes: dict
-    TraderStandings: Dict[TraderType, TraderStanding]
+    TraderStandings: Dict[str, TraderStanding]
     Quests: list
     WishList: list
 

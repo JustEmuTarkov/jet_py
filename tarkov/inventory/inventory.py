@@ -8,6 +8,7 @@ from typing import Dict, Iterable, List, Optional, TYPE_CHECKING, Tuple, Union
 import ujson
 
 from server import logger, root_dir
+from server.utils import atomic_write
 from tarkov.exceptions import NoSpaceError, NotFoundError
 from tarkov.models import Base
 from .dict_models import ItemExtraSize
@@ -718,7 +719,7 @@ class PlayerInventory(GridInventory):
         self.stash_map = PlayerInventoryStashMap(inventory=self)
 
     def write(self):
-        self.inventory.atomic_write(self._path, exclude_none=True, exclude_defaults=True)
+        atomic_write(self.inventory.json(exclude_none=True, exclude_defaults=True), self._path)
 
 
 def merge_extra_size(first: ItemExtraSize, second: ItemExtraSize) -> ItemExtraSize:

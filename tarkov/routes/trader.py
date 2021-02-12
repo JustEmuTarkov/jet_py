@@ -3,8 +3,8 @@ from flask import Blueprint, request
 
 from server import db_dir, root_dir
 from server.utils import TarkovError, tarkov_response, zlib_middleware
-from tarkov.trader import TraderInventory, TraderType, get_trader_base, get_trader_bases
 from tarkov.profile import Profile
+from tarkov.trader import TraderInventory, TraderType, get_trader_base, get_trader_bases
 
 blueprint = Blueprint(__name__, __name__)
 

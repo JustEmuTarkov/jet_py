@@ -43,6 +43,7 @@ class TraderInventory(ImmutableInventory):
             ujson.load(trader_path.joinpath('items.json').open('r', encoding='utf8'))
         )
         self.base = ujson.load(trader_path.joinpath('base.json').open('r', encoding='utf8'))
+
         self._barter_scheme = ujson.load(trader_path.joinpath('barter_scheme.json').open('r', encoding='utf8'))
         self.loyal_level_items = ujson.load(trader_path.joinpath('loyal_level_items.json').open('r', encoding='utf8'))
         self._quest_assort = ujson.load(trader_path.joinpath('questassort.json').open('r', encoding='utf8'))
@@ -201,11 +202,11 @@ class TraderInventory(ImmutableInventory):
 
     @property
     def standing(self) -> TraderStanding:
-        if self.trader not in self.profile.pmc_profile.TraderStandings:
+        if self.trader.value not in self.profile.pmc_profile.TraderStandings:
             standings_copy: dict = copy.deepcopy(self.base['loyalty'])
-            self.profile.pmc_profile.TraderStandings[self.trader] = TraderStanding.parse_obj(standings_copy)
+            self.profile.pmc_profile.TraderStandings[self.trader.value] = TraderStanding.parse_obj(standings_copy)
 
-        return self.profile.pmc_profile.TraderStandings[self.trader]
+        return self.profile.pmc_profile.TraderStandings[self.trader.value]
 
 
 def get_trader_bases() -> List[dict]:

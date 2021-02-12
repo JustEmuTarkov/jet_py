@@ -82,7 +82,7 @@ class Profile:
         profile_base.Quests = profile_data['pmc_quests']
         profile_base.Stats = profile_data['pmc_stats']
 
-        return profile_base.dict()
+        return profile_base.dict(exclude_none=True)
 
     def add_insurance(self, item: Item, trader: TraderType):
         self.pmc_profile.InsuredItems.append(ItemInsurance(
@@ -115,7 +115,7 @@ class Profile:
         self.notifier.read()
 
     def __write(self):
-        self.pmc_profile.atomic_write(self.pmc_profile_path)
+        atomic_write(self.pmc_profile.json(exclude_defaults=True), self.pmc_profile_path)
         #
         self.inventory.write()
         self.hideout.write()

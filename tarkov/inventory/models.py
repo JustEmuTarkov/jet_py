@@ -398,6 +398,9 @@ class Item(Base):
 
 
 class InventoryModel(Base):
+    class Config(Base.Config):
+        pass
+
     equipment: ItemId
     stash: ItemId
     questRaidItems: ItemId

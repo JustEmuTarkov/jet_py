@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Any, Dict, List, Literal, NamedTuple, Optional, TypedDict
+from typing import Any, Dict, List, Literal, NamedTuple, Optional
 
 from pydantic import Field, StrictBool
 
@@ -32,6 +32,7 @@ class TraderLoyaltyLevel(Base):
     min_level: int = Field(alias='minLevel')
     min_sales_sum: int = Field(alias='minSalesSum')
     minStanding: float = Field(alias='minStanding')
+    heal_price_coef: Optional[float] = None
 
 
 class TraderStanding(Base):
@@ -43,5 +44,47 @@ class TraderStanding(Base):
     display: Optional[StrictBool] = None
 
 
-class TraderBase(TypedDict):
+class TraderInsurance(Base):
+    availability: StrictBool
+    min_payment: int
+    min_return_hour: int
+    max_return_hour: int
+    max_storage_time: int
+    excluded_category: list
+
+
+class TraderRepair(Base):
+    availability: StrictBool
+    quality: str
+    excluded_id_list: list
+    excluded_category: list
+    currency: Optional[TemplateId]
+    currency_coefficient: Optional[int]
+    price_rate: int
+
+
+class TraderBase(Base):
+    id: str = Field(alias='_id')
+    working: StrictBool
+    customization_seller: StrictBool
+    name: str
+    surname: str
+    nickname: str
+    location: str
+    avatar: str
+    balance_rub: int
+    balance_dol: int
+    balance_eur: int
+    display: StrictBool
+    discount: int
+    discount_end: int
+    buyer_up: StrictBool
+    currency: Literal['RUB', 'USD']
+    supply_next_time: int
+
+    grid_height: int = Field(alias='gridHeight')
+
+    repair: TraderRepair
+    insurance: TraderInsurance
+    loyalty: TraderStanding
     sell_category: List[TemplateId]
