@@ -13,7 +13,7 @@ from tarkov.hideout import Hideout
 from tarkov.inventory.models import Item, TemplateId
 from tarkov.notifier import Mail
 from tarkov.trader import TraderType
-from .models import ProfileModel, ItemInsurance
+from .models import ItemInsurance, ProfileModel
 
 
 class Encyclopedia:
@@ -62,6 +62,10 @@ class Profile:
         self.pmc_profile_path = self.profile_dir.joinpath('pmc_profile.json')
 
         self.quests_path = self.profile_dir.joinpath('pmc_quests.json')
+
+    @staticmethod
+    def exists(profile_id: str):
+        return root_dir.joinpath('resources', 'profiles', profile_id).exists() and profile_id
 
     @staticmethod
     def from_request(request: Request) -> Profile:

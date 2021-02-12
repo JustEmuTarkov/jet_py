@@ -1,7 +1,9 @@
 from pathlib import Path
+from typing import Generic, Optional, TypeVar
 
 import pydantic
 from pydantic import Extra
+from pydantic.generics import GenericModel
 
 from server.utils import atomic_write
 
@@ -26,3 +28,18 @@ class Base(pydantic.BaseModel):
 
     def atomic_write(self, path: Path, **dump_kwargs):
         atomic_write(path=path, str_=self.json(**dump_kwargs))
+
+
+ResponseType = TypeVar('ResponseType')
+
+
+class TarkovSuccessResponse(GenericModel, Generic[ResponseType]):
+    err: int = 0
+    errmsg: Optional[str] = None
+    data: ResponseType
+
+
+class TarkovErrorResponse(GenericModel, Generic[ResponseType]):
+    err: int = True
+    errmsg: Optional[str]
+    data: str

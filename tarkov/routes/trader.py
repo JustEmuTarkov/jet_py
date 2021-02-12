@@ -1,48 +1,61 @@
-import ujson
-from flask import Blueprint, request
+from typing import Dict, List, Optional, Union
 
-from server import db_dir, root_dir
-from server.utils import TarkovError, tarkov_response, zlib_middleware
+from fastapi import APIRouter, HTTPException
+from fastapi.params import Cookie
+
+from tarkov.inventory.models import ItemId
+from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
 from tarkov.profile import Profile
 from tarkov.trader import TraderInventory, TraderType, get_trader_base, get_trader_bases
 
-blueprint = Blueprint(__name__, __name__)
+router = APIRouter(prefix='', tags=['Traders'])
 
 
-@blueprint.route('/client/trading/customization/storage', methods=['POST', 'GET'])
-@zlib_middleware
-@tarkov_response
-def customization_storage():
-    if 'PHPSESSID' not in request.cookies:
-        raise TarkovError(1, "No Session")
-    session_id = request.cookies['PHPSESSID']
-    return ujson.load(
-        root_dir.joinpath('resources', 'profiles', session_id, 'storage.json').open('r', encoding='utf8'))
+@router.post(
+    '/client/trading/customization/storage',
+    response_model=TarkovSuccessResponse[dict],
+)
+def customization_storage(
+        profile_id: Optional[str] = Cookie(alias='PHPSESSID', default=None)  # type: ignore
+) -> Union[TarkovSuccessResponse[dict], TarkovErrorResponse]:
+    if profile_id is None:
+        return TarkovErrorResponse(
+            data='',
+            err=True,
+            errmsg='No session cookie provided'
+        )
+    # customization_data = ujson.load(
+    #     root_dir.joinpath('resources', 'profiles', profile_id, 'storage.json').open('r', encoding='utf8')
+    # )
+    return TarkovSuccessResponse(data={})
 
 
-@blueprint.route('/client/trading/customization/<string:trader_id>', methods=['POST', 'GET'])
-@zlib_middleware
-@tarkov_response
-def customization(trader_id):
-    suits_path = db_dir.joinpath('assort', trader_id, 'suits.json')
-    if not suits_path.exists():
-        return TarkovError(600, "This Trader Doesn't have any suits for sale")
-
+@router.post('/client/trading/customization/{trader_id}')
+def customization(trader_id: str):
+    # suits_path = db_dir.joinpath('assort', trader_id, 'suits.json')
+    # if not suits_path.exists():
+    #     return TarkovError(600, "This Trader Doesn't have any suits for sale")
     # profile_data = {"Info": {"Side": "Bear"}}  # TODO: After making profile handler load profile here
     # suits_data = ujson.load(suits_path.open('r', encoding='utf8'))
     # for suit in suits_data:
     #     is_suit = suit_side for suit_side in suits_data[suit]['_props']['Side']
     #       if suit_side == profile_data['Info']['Side']:
-
     # output is { "item._id": [[{ "_tpl": "", "count": 0 }]] }
-    return []
+    return TarkovSuccessResponse(data=[])
 
 
-@blueprint.route('/client/trading/api/getUserAssortPrice/trader/<string:trader_id>', methods=['POST', 'GET'])
-@zlib_middleware
-@tarkov_response
-def get_user_assort_price(trader_id):
-    with Profile.from_request(request) as player_profile:
+@router.post(
+    '/client/trading/api/getUserAssortPrice/trader/{trader_id}',
+    response_model=TarkovSuccessResponse[Dict[ItemId, List[List[dict]]]]
+)
+def get_user_assort_price(
+        trader_id: str,
+        profile_id: str = Cookie('', alias='PHPSESSID'),  # type: ignore
+):
+    if not Profile.exists(profile_id):
+        raise HTTPException(status_code=404, detail=fr'Profile with id {profile_id} was not found')
+
+    with Profile(profile_id) as player_profile:
         trader_inventory = TraderInventory(TraderType(trader_id), profile=player_profile)
         items = {}
         for item in player_profile.inventory.items:
@@ -57,20 +70,18 @@ def get_user_assort_price(trader_id):
     return items
 
 
-@blueprint.route('/client/trading/api/getTradersList', methods=['POST', 'GET'])
-@zlib_middleware
-@tarkov_response
+@router.post('/client/trading/api/getTradersList')
 def get_trader_list():
     return get_trader_bases()
 
 
-@blueprint.route('/client/trading/api/getTraderAssort/<string:trader_id>', methods=['POST', 'GET'])
-@zlib_middleware
-@tarkov_response
-def get_trader_assort(trader_id):
-    with Profile.from_request(request) as profile:
+@router.post('/client/trading/api/getTraderAssort/{trader_id}')
+def get_trader_assort(
+        trader_id: str,
+        profile_id: str = Cookie(None, alias='PHPSESSID'),  # type: ignore
+):
+    with Profile(profile_id) as profile:
         trader_inventory = TraderInventory(TraderType(trader_id), profile=profile)
-
         return {
             'barter_scheme': trader_inventory.barter_scheme.dict()['__root__'],
             'items': [item.dict() for item in trader_inventory.assort],
@@ -78,8 +89,6 @@ def get_trader_assort(trader_id):
         }
 
 
-@blueprint.route('/client/trading/api/getTrader/<string:trader_id>', methods=['POST', 'GET'])
-@zlib_middleware
-@tarkov_response
-def trader_base(trader_id):
+@router.post('/client/trading/api/getTrader/{trader_id}')
+def trader_base(trader_id: str):
     return get_trader_base(trader_id=trader_id)
