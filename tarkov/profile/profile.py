@@ -3,17 +3,16 @@ from __future__ import annotations
 from typing import List, Union
 
 import ujson
-from flask import Request
 
 import tarkov.inventory.repositories
 from server import root_dir
-from server.utils import TarkovError, atomic_write
+from server.utils import atomic_write
 from tarkov import inventory as inventory_, quests
 from tarkov.hideout import Hideout
 from tarkov.inventory.models import Item, TemplateId
 from tarkov.notifier import Mail
 from tarkov.trader import TraderType
-from .models import ProfileModel, ItemInsurance
+from .models import ItemInsurance, ProfileModel
 
 
 class Encyclopedia:
@@ -64,12 +63,8 @@ class Profile:
         self.quests_path = self.profile_dir.joinpath('pmc_quests.json')
 
     @staticmethod
-    def from_request(request: Request) -> Profile:
-        if not request.cookies['PHPSESSID']:
-            raise TarkovError(err=401, errmsg='PHPSESSID cookie was not provided')
-
-        profile_id = request.cookies['PHPSESSID']
-        return Profile(profile_id=profile_id)
+    def exists(profile_id: str):
+        return root_dir.joinpath('resources', 'profiles', profile_id).exists() and profile_id
 
     def get_profile(self) -> dict:
         profile_data = {}

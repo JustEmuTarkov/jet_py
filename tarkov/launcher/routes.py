@@ -1,22 +1,18 @@
-from flask import Blueprint, request
+from fastapi import APIRouter
+from starlette.requests import Request
 
-from server.utils import zlib_middleware
+from server.utils import get_request_url_root
 
-blueprint = Blueprint(__name__, __name__)
-
-
-# Launcher doesn't work atm
+launcher_router = APIRouter(tags=['Launcher'])
 
 
-@blueprint.route('/launcher/server/connect', methods=['POST', 'GET'])
-@zlib_middleware
-def connect():
-    response = {
-        'backendUrl': request.host_url.rstrip('/'),
+@launcher_router.post('/launcher/server/connect')
+def connect(request: Request) -> dict:
+    return {
+        'backendUrl': get_request_url_root(request).rstrip('/'),
         'name': 'Jet Py',
         'editions': ['Edge Of Darkness']
     }
-    return response
 
 
 def server_info():

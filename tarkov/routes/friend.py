@@ -1,30 +1,24 @@
-from flask import Blueprint
+from fastapi import APIRouter
 
-from server.utils import tarkov_response, zlib_middleware
+from tarkov.models import TarkovSuccessResponse
 
-blueprint = Blueprint(__name__, __name__)
+friend_router = APIRouter(prefix='', tags=['Friends'])
 
 
-@blueprint.route('/client/friend/list', methods=['POST', 'GET'])
-@zlib_middleware
-@tarkov_response
-def client_friend_list():
-    return {
+@friend_router.post('/client/friend/list')
+def client_friend_list() -> TarkovSuccessResponse[dict]:
+    return TarkovSuccessResponse(data={
         'Friends': [],
         'Ignore': [],
         'InIgnoreList': []
-    }
+    })
 
 
-@blueprint.route('/client/friend/request/list/inbox', methods=['POST', 'GET'])
-@zlib_middleware
-@tarkov_response
-def client_friend_request_list_inbox():
-    return []
+@friend_router.post('/client/friend/request/list/inbox')
+def client_friend_request_list_inbox() -> TarkovSuccessResponse[list]:
+    return TarkovSuccessResponse(data=[])
 
 
-@blueprint.route('/client/friend/request/list/outbox', methods=['POST', 'GET'])
-@zlib_middleware
-@tarkov_response
-def client_friend_request_list_outbox():
-    return []
+@friend_router.post('/client/friend/request/list/outbox')
+def client_friend_request_list_outbox() -> TarkovSuccessResponse[list]:
+    return TarkovSuccessResponse(data=[])

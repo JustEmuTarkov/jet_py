@@ -1,7 +1,5 @@
 from typing import Dict, Iterable, List
 
-import ujson
-from flask import Request, request
 from pydantic import Field
 
 from server import logger
@@ -36,7 +34,6 @@ class DispatcherManager:
     profile: Profile
     inventory: PlayerInventory
 
-    request: Request
     response: DispatcherResponse
 
     dispatchers: Iterable['dispatchers.Dispatcher']
@@ -44,7 +41,6 @@ class DispatcherManager:
     def __init__(self, session_id: str):
         self.profile: Profile = Profile(session_id)
 
-        self.request = request
         self.response: DispatcherResponse = DispatcherResponse()
 
     def __make_dispatchers(self):
@@ -55,18 +51,16 @@ class DispatcherManager:
             dispatchers.QuestDispatcher(self),
         )
 
-    def dispatch(self) -> DispatcherResponse:
+    def dispatch(self, request_data: dict) -> DispatcherResponse:
         with self.profile:
             self.inventory = self.profile.inventory
             self.__make_dispatchers()
 
             # request.data should be dict at this moment
             # noinspection PyTypeChecker
-            actions: List[dict] = request.data['data']  # type: ignore
+            actions: List[dict] = request_data  # type: ignore
 
             for action in actions:
-                logger.debug(ujson.dumps(action, indent=4))
-
                 for dispatcher in self.dispatchers:
                     try:
                         dispatcher.dispatch(action)

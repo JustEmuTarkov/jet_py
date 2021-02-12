@@ -1,65 +1,79 @@
 import time
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 import orjson
-from flask import Blueprint, request
+from fastapi import APIRouter
+from fastapi.params import Cookie, Param
+from starlette.requests import Request
 
 import tarkov.profile
-from server import logger
-from server.utils import TarkovError, tarkov_response, zlib_middleware
+from server.utils import get_request_url_root
+from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
 from tarkov.notifier.notifier import notifier_instance
 
-blueprint = Blueprint(__name__, __name__)
+notifier_router = APIRouter(tags=['Notifier'])
 
 
-@blueprint.route('/client/mail/dialog/list', methods=['POST'])
-@zlib_middleware
-@tarkov_response
-def mail_dialog_list() -> List[Dict]:
-    with tarkov.profile.Profile.from_request(request) as profile:
-        return profile.notifier.view_dialogue_preview_list()
+@notifier_router.post('/client/mail/dialog/list')
+def mail_dialog_list(
+        profile_id: Optional[str] = Cookie(alias='PHPSESSID', default=None)  # type: ignore
+) -> Union[TarkovSuccessResponse[List[Dict]], TarkovErrorResponse]:
+    if not profile_id:
+        return TarkovErrorResponse.profile_id_is_none()
+
+    with tarkov.profile.Profile(profile_id) as profile:
+        return TarkovSuccessResponse(
+            data=profile.notifier.view_dialogue_preview_list()
+        )
 
 
-@blueprint.route('/client/mail/dialog/info', methods=['POST'])
-@zlib_middleware
-@tarkov_response
-def mail_dialog_info() -> dict:
-    request_data: dict = request.data  # type: ignore
-    dialogue_id = request_data['dialogId']
+@notifier_router.post('/client/mail/dialog/info')
+def mail_dialog_info(
+        dialogue_id: str = Param(alias='dialogId', default=None),  # type: ignore
+        profile_id: Optional[str] = Cookie(alias='PHPSESSID', default=None),  # type: ignore
+) -> Union[TarkovSuccessResponse[dict], TarkovErrorResponse]:
+    if not dialogue_id:
+        return TarkovErrorResponse(errmsg='No dialogue_id was provided')
 
-    with tarkov.profile.Profile.from_request(request) as profile:
-        return profile.notifier.view_dialog_preview(dialogue_id=dialogue_id)
+    if not profile_id:
+        return TarkovErrorResponse.profile_id_is_none()
 
-
-@blueprint.route('/client/mail/dialog/view', methods=['POST'])
-@zlib_middleware
-@tarkov_response
-def mail_dialog_view() -> Dict:
-    request_data: dict = request.data  # type: ignore
-
-    # type_: int = request_data['type']
-    dialogue_id: str = request_data['dialogId']
-    # limit: int = request_data['limit']
-    time_: float = request_data['time']
-
-    with tarkov.profile.Profile.from_request(request) as profile:
-        return profile.notifier.view_dialog(dialogue_id=dialogue_id, time_=time_)
+    with tarkov.profile.Profile(profile_id) as profile:
+        dialogue_preview = profile.notifier.view_dialog_preview(dialogue_id=dialogue_id)
+        return TarkovSuccessResponse(data=dialogue_preview)
 
 
-@blueprint.route('/client/mail/dialog/getAllAttachments', methods=['POST'])
-@zlib_middleware
-@tarkov_response
-def mail_dialog_all_attachments() -> Dict:
-    request_data: dict = request.data  # type: ignore
-    dialogue_id = request_data['dialogId']
+@notifier_router.post('/client/mail/dialog/view')
+def mail_dialog_view(
+        dialogue_id: str = Param(alias='dialogId', default=...),  # type: ignore
+        time_: float = Param(alias='time', default=...),  # type: ignore
+        profile_id: Optional[str] = Cookie(alias='PHPSESSID', default=None),  # type: ignore
+) -> Union[TarkovSuccessResponse[dict], TarkovErrorResponse]:
+    # dialogue_id: str = dialogId
 
-    with tarkov.profile.Profile.from_request(request) as profile:
+    if not profile_id:
+        return TarkovErrorResponse.profile_id_is_none()
+
+    with tarkov.profile.Profile(profile_id) as profile:
+        return TarkovSuccessResponse(
+            data=profile.notifier.view_dialog(dialogue_id=dialogue_id, time_=time_)
+        )
+
+
+@notifier_router.post('/client/mail/dialog/getAllAttachments')
+def mail_dialog_all_attachments(
+        dialogue_id: str = Param(..., alias='dialogId'),  # type: ignore
+        profile_id: Optional[str] = Cookie(alias='PHPSESSID', default=None),  # type: ignore
+) -> Union[TarkovSuccessResponse[dict], TarkovErrorResponse]:
+    if profile_id is None:
+        return TarkovErrorResponse.profile_id_is_none()
+
+    with tarkov.profile.Profile(profile_id) as profile:
         return profile.notifier.all_attachments_view(dialogue_id=dialogue_id)
 
 
-@blueprint.route('/notifierServer/get/<profile_id>', methods=['GET'])
+@notifier_router.get('/notifierServer/get/{profile_id}')
 def notifierserver_get(profile_id: str) -> Union[dict, str]:
-    logger.debug(request.data)
     for _ in range(15):  # Poll for 15 seconds
         if notifier_instance.has_notifications(profile_id):
             notifications = notifier_instance.get_notifications(profile_id)
@@ -71,21 +85,21 @@ def notifierserver_get(profile_id: str) -> Union[dict, str]:
     return notifier_instance.get_empty_notification()
 
 
-@blueprint.route('/client/notifier/channel/create', methods=['POST'])
-@zlib_middleware
-@tarkov_response
-def client_notifier_channel_create():
-    session_id = request.cookies.get('PHPSESSID', None)
-    if session_id is None:
-        raise TarkovError(err=1, errmsg='No session')
-    root_url = request.url_root
-    notifier_server_url = f'{root_url}/notifierServer/get/{session_id}'
+@notifier_router.post('/client/notifier/channel/create')
+def client_notifier_channel_create(
+        request: Request,
+        profile_id: Optional[str] = Cookie(alias='PHPSESSID', default=None),  # type: ignore
+) -> TarkovSuccessResponse[dict]:
+    url_root = get_request_url_root(request).rstrip('/')
+    notifier_server_url = f'{url_root}/notifierServer/get/{profile_id}'
     response = {
         'notifier': {
-            'server': f'{root_url}/',
+            'server': f'{url_root}/',
             'channel_id': 'testChannel',
             'url': notifier_server_url,
         },
         'notifierServer': notifier_server_url
     }
-    return response
+    return TarkovSuccessResponse(
+        data=response
+    )

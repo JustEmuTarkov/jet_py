@@ -1,41 +1,44 @@
 from functools import lru_cache
 
 import ujson
-from flask import Blueprint
+from fastapi import APIRouter
 
 from server import db_dir
-from server.utils import tarkov_response, zlib_middleware
 from tarkov.library import load_locale
+from tarkov.models import TarkovSuccessResponse
 
-blueprint = Blueprint(__name__, __name__)
+lang_router = APIRouter(prefix='', tags=['Locale'])
 
 
-@blueprint.route('/client/menu/locale/<locale_type>', methods=['POST', 'GET'])  # TODO Change to dynamic
-@zlib_middleware
-@tarkov_response
 @lru_cache(8)
-def client_menu_locale_en(locale_type: str):
+def _client_menu_locale(locale_type: str) -> dict:
     locale_path = db_dir / 'locales' / locale_type / 'menu.json'
-    locale = ujson.load(locale_path.open('r', encoding='utf8'))['data']
-    return locale
+    return ujson.load(locale_path.open('r', encoding='utf8'))['data']
 
 
-@blueprint.route('/client/languages', methods=['GET', 'POST'])
-@zlib_middleware
-@tarkov_response
-def client_languages():
+@lang_router.post('/client/menu/locale/{locale_type}')
+def client_menu_locale(locale_type: str) -> TarkovSuccessResponse[dict]:
+    return TarkovSuccessResponse(
+        data=_client_menu_locale(locale_type)
+    )
+
+
+@lang_router.post('/client/languages')
+def client_languages() -> TarkovSuccessResponse[list]:
     languages_data_list = []
     languages_dir = db_dir / 'locales'
     for dir_ in languages_dir.glob('*'):
         language_file = dir_ / f'{dir_.stem}.json'
         languages_data_list.append(ujson.load(language_file.open('r', encoding='utf8')))
 
-    return languages_data_list
+    return TarkovSuccessResponse(data=languages_data_list)
 
 
-@blueprint.route('/client/locale/<locale_name>', methods=['POST', 'GET'])
-@zlib_middleware
-@tarkov_response
 @lru_cache(8)
-def client_locale(locale_name: str):
+def _client_locale(locale_name: str) -> dict:
     return load_locale(locale_name)
+
+
+@lang_router.post('/client/locale/{locale_name}')
+def client_locale(locale_name: str) -> TarkovSuccessResponse[dict]:
+    return TarkovSuccessResponse(data=_client_locale(locale_name))
