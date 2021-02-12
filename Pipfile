@@ -11,6 +11,7 @@ werkzeug = "==1.0.1"
 pydantic = "==1.7.3"
 pyyaml = "==5.4.1"
 orjson = "*"
+fastapi = {extras = ["standard"], version = "*"}
 
 [dev-packages]
 pyinstaller = "==4.1"
