@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import copy
 import itertools
 import random
 import time
@@ -12,7 +11,7 @@ import ujson
 from server import db_dir
 from tarkov.inventory import ImmutableInventory, item_templates_repository, regenerate_items_ids
 from tarkov.inventory.models import Item, ItemUpd
-from tarkov.trader.models import BoughtItems, TraderStanding, TraderType
+from tarkov.trader.models import BoughtItems, TraderBase, TraderStanding, TraderType
 
 if TYPE_CHECKING:
     from tarkov.profile import Profile
@@ -24,7 +23,7 @@ class TraderInventory(ImmutableInventory):
     trader: TraderType
     profile: Profile
     assort_items: List[Item]
-    base: dict
+    base: TraderBase
     _barter_scheme: dict
     _loyal_level_items: dict
     quest_assort: dict
@@ -42,7 +41,7 @@ class TraderInventory(ImmutableInventory):
             List[Item],
             ujson.load(trader_path.joinpath('items.json').open('r', encoding='utf8'))
         )
-        self.base = ujson.load(trader_path.joinpath('base.json').open('r', encoding='utf8'))
+        self.base = TraderBase.parse_file(trader_path.joinpath('base.json'))
 
         self._barter_scheme = ujson.load(trader_path.joinpath('barter_scheme.json').open('r', encoding='utf8'))
         self.loyal_level_items = ujson.load(trader_path.joinpath('loyal_level_items.json').open('r', encoding='utf8'))
@@ -127,7 +126,7 @@ class TraderInventory(ImmutableInventory):
             category_id = item_templates_repository.get_category(item)
         except KeyError:
             return False
-        return category_id in self.base['sell_category']
+        return category_id in self.base.sell_category
 
     def get_item_price(self, item: Item) -> int:
         price: float = 0
@@ -203,8 +202,8 @@ class TraderInventory(ImmutableInventory):
     @property
     def standing(self) -> TraderStanding:
         if self.trader.value not in self.profile.pmc_profile.TraderStandings:
-            standings_copy: dict = copy.deepcopy(self.base['loyalty'])
-            self.profile.pmc_profile.TraderStandings[self.trader.value] = TraderStanding.parse_obj(standings_copy)
+            standing_copy: TraderStanding = self.base.loyalty.copy(deep=True)
+            self.profile.pmc_profile.TraderStandings[self.trader.value] = TraderStanding.parse_obj(standing_copy)
 
         return self.profile.pmc_profile.TraderStandings[self.trader.value]
 
