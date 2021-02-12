@@ -2,29 +2,27 @@ from typing import List
 
 import ujson
 from fastapi import APIRouter
-from flask import Blueprint, request
-from pydantic import parse_obj_as
+from flask import request
 
 from server import db_dir, logger
 from server.utils import tarkov_response, zlib_middleware
 from tarkov.inventory.helpers import regenerate_items_ids
-from tarkov.inventory.models import Item
 from tarkov.lib import locations
 from tarkov.lib.bots import BotGenerator
+from tarkov.models import TarkovSuccessResponse
 from tarkov.profile import Profile
+from tarkov.profile.models import ProfileModel
 
-router = APIRouter(prefix='', tags=['Singleplayer'])
-blueprint = Blueprint(__name__, __name__)
+singleplayer_router = APIRouter(prefix='', tags=['Singleplayer'])
 
 
-@router.get('/singleplayer/bundles')
+@singleplayer_router.get('/singleplayer/bundles')
 def singleplayer_bundles():
     return ujson.dumps([])
 
 
-@blueprint.route('/singleplayer/settings/raid/menu')
-@zlib_middleware
-def singleplayer_settings_raid_menu():
+@singleplayer_router.get('/singleplayer/settings/raid/menu')
+def singleplayer_settings_raid_menu() -> dict:
     # TODO: Put that into the config file !
     return {
         "aiAmount": "AsOnline",
@@ -35,9 +33,9 @@ def singleplayer_settings_raid_menu():
     }
 
 
-@blueprint.route('/api/location/<string:location_name>', methods=['POST', 'GET'])
+@singleplayer_router.post('/api/location/<string:location_name>')
 @zlib_middleware
-def location(location_name: str):
+def location(location_name: str) -> dict:
     location_name = location_name.lower()
 
     location_generator = locations.LocationGenerator(location_name)
@@ -45,9 +43,8 @@ def location(location_name: str):
     return location_generator.generate_location()
 
 
-@blueprint.route('/singleplayer/settings/bot/difficulty/<string:type_>/<string:difficulty>')
-@zlib_middleware
-def bot_difficulty_settings(type_: str, difficulty: str):
+@singleplayer_router.get('/singleplayer/settings/bot/difficulty/{type_}/{difficulty}')
+def bot_difficulty_settings(type_: str, difficulty: str) -> dict:
     if type_ == 'core':
         return ujson.load(db_dir.joinpath('base', 'botCore.json').open(encoding='utf8'))
 
@@ -56,16 +53,13 @@ def bot_difficulty_settings(type_: str, difficulty: str):
     return ujson.load(bot_file)
 
 
-@blueprint.route('/singleplayer/settings/bot/limit/<string:bot_type>')
-@zlib_middleware
-def settings_bot_limit(bot_type: str):  # pylint: disable=unused-argument
+@singleplayer_router.get('/singleplayer/settings/bot/limit/<string:bot_type>')
+def settings_bot_limit(bot_type: str) -> int:  # pylint: disable=unused-argument
     return 30
 
 
-@blueprint.route('/client/game/bot/generate', methods=['POST', 'GET'])
-@zlib_middleware
-@tarkov_response
-def generate_bots() -> List[dict]:
+@singleplayer_router.post('/client/game/bot/generate')
+def generate_bots() -> TarkovSuccessResponse[List[dict]]:
     bots: List[dict] = []
     request_data: dict = request.data  # type: ignore
 
@@ -78,10 +72,10 @@ def generate_bots() -> List[dict]:
             bot = bot_generator.generate_bot(role=condition['Role'], difficulty=condition['Difficulty'])
             bots.append(bot)
 
-    return bots
+    return TarkovSuccessResponse(data=bots)
 
 
-@router.get('/mode/offline')
+@singleplayer_router.get('/mode/offline')
 def mode_offline():
     # TODO: Put that into Server config file
     return {
@@ -117,17 +111,17 @@ def mode_offline():
     }
 
 
-@blueprint.route('/raid/profile/save', methods=['PUT'])
+@singleplayer_router.put('/raid/profile/save')
 @zlib_middleware()
 @tarkov_response
-def singleplayer_raid_profile_save() -> None:
+def singleplayer_raid_profile_save(profile: ProfileModel) -> None:
     # TODO: Add Saving profile here
     # data struct {exit, isPlayerScav, profile, health}
     # update profile on this request
-    data: dict = request.data  # type: ignore
-    raid_profile: dict = data['profile']
 
-    with Profile(profile_id=raid_profile['aid']) as profile:
+    raid_profile = profile
+
+    with Profile(profile_id=raid_profile.aid) as player_profile:
         # profile.pmc_profile['Health']['BodyParts'] = data['health']['Health']
         # for body_part in profile.pmc_profile['HealtPh']['BodyParts']:
         #     del body_part['Effects']
@@ -139,41 +133,36 @@ def singleplayer_raid_profile_save() -> None:
         # profile.pmc_profile['Encyclopedia'] = profile_data['Encyclopedia']
         # profile.pmc_profile['Skills'] = profile_data['Skills']
 
-        raid_inventory_items = parse_obj_as(List[Item], raid_profile['Inventory']['items'])
-        equipment = profile.inventory.get_item(profile.inventory.inventory.equipment)
+        raid_inventory_items = raid_profile.Inventory.items
+        equipment = player_profile.inventory.get_item(player_profile.inventory.inventory.equipment)
 
         # Remove all equipment children
-        profile.inventory.remove_item(equipment, remove_children=True)
-        profile.inventory.add_item(equipment, child_items=[])
+        player_profile.inventory.remove_item(equipment, remove_children=True)
+        player_profile.inventory.add_item(equipment, child_items=[])
 
         items = list(item for item in raid_inventory_items if item.slotId is not None)
         regenerate_items_ids(items)  # Regenerate item ids to be 100% safe
-        profile.inventory.add_items(items)
+        player_profile.inventory.add_items(items)
 
 
-@blueprint.route('/raid/profile/list', methods=['POST', 'GET'])
-@zlib_middleware
-@tarkov_response
-def singleplayer_raid_profile_list():
+@singleplayer_router.post('/raid/profile/list')
+def singleplayer_raid_profile_list() -> TarkovSuccessResponse[dict]:
     # TODO: Put that into the config file !
-    return {
+    return TarkovSuccessResponse(data={
         "aiAmount": "AsOnline",
         "aiDifficulty": "AsOnline",
         "bossEnabled": True,
         "scavWars": False,
         "taggedAndCursed": False
-    }
+    })
 
 
-@blueprint.route('/raid/map/name', methods=['POST', 'GET'])
-@zlib_middleware
-@tarkov_response
-def singleplayer_raid_menu_name():
+@singleplayer_router.post('/raid/map/name')
+def singleplayer_raid_menu_name() -> TarkovSuccessResponse:
     # TODO: This should get a Map Name and store that with profile ID(session id)
-    return None
+    return TarkovSuccessResponse(data=None)
 
 
-@blueprint.route('/singleplayer/settings/weapon/durability')
-@zlib_middleware
-def weapon_durability():
+@singleplayer_router.get('/singleplayer/settings/weapon/durability')
+def weapon_durability() -> bool:
     return True

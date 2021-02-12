@@ -1,36 +1,34 @@
+from typing import Literal, Optional, Union
+
 import ujson
-from flask import Blueprint, request
+from fastapi import APIRouter
+from fastapi.params import Cookie
+from flask import request
 
 from server import db_dir
-from server.utils import tarkov_response, zlib_middleware
+from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
 from tarkov.profile import Profile
 
-blueprint = Blueprint(__name__, __name__)
+match_router = APIRouter(prefix='', tags=['Match'])
 
 
-@blueprint.route('/client/match/group/status', methods=['POST', 'GET'])
-@zlib_middleware
-@tarkov_response
-def group_status():
-    return {
+@match_router.post('/client/match/group/status')
+def group_status() -> TarkovSuccessResponse[dict]:
+    return TarkovSuccessResponse(data={
         'players': [],
         'invite': [],
         'group': [],
-    }
+    })
 
 
-@blueprint.route('/client/match/group/exit_from_menu', methods=['POST', 'GET'])
-@zlib_middleware
-@tarkov_response
-def exit_from_menu():
-    return None
+@match_router.post('/client/match/group/exit_from_menu')
+def exit_from_menu() -> TarkovSuccessResponse[Literal[None]]:
+    return TarkovSuccessResponse(data=None)
 
 
-@blueprint.route('/client/match/available', methods=['POST', 'GET'])
-@zlib_middleware
-@tarkov_response
-def available():
-    return True
+@match_router.post('/client/match/available')
+def available() -> TarkovSuccessResponse[Literal[True]]:
+    return TarkovSuccessResponse(data=True)
 
 
 # {
@@ -47,12 +45,15 @@ def available():
 #     ],
 #     'keyId': ''
 # }
-@blueprint.route('/client/match/join', methods=['POST', 'GET'])
-@zlib_middleware
-@tarkov_response
-def join():
-    with Profile.from_request(request) as profile:
-        return [
+@match_router.post('/client/match/join')
+def join(
+        profile_id: Optional[str] = Cookie(alias='PHPSESSID', default=None),  # type: ignore
+) -> Union[TarkovSuccessResponse[list], TarkovErrorResponse]:
+    if profile_id is None:
+        return TarkovErrorResponse.profile_id_is_none()
+
+    with Profile(profile_id) as profile:
+        return TarkovSuccessResponse(data=[
             {
                 'profileid': profile.pmc_profile['_id'],
                 'status': 'busy',
@@ -64,18 +65,16 @@ def join():
                 'gamemode': 'deathmatch',
                 'shortid': 'TEST',
             }
-        ]
+        ])
 
 
-@blueprint.route('/client/match/exit', methods=['POST', 'GET'])
-@zlib_middleware
-@tarkov_response
-def exit_():
-    return None
+@match_router.post('/client/match/exit')
+def exit_() -> TarkovSuccessResponse[Literal[None]]:
+    return TarkovSuccessResponse(data=None)
 
 
-@blueprint.route('/client/getMetricsConfig', methods=['POST', 'GET'])
-@zlib_middleware
-@tarkov_response
-def get_metrics_config():
-    return ujson.load(db_dir.joinpath('base', 'matchMetrics.json').open(encoding='utf8'))
+@match_router.post('/client/getMetricsConfig')
+def get_metrics_config() -> TarkovSuccessResponse[dict]:
+    return TarkovSuccessResponse(
+        data=ujson.load(db_dir.joinpath('base', 'matchMetrics.json').open(encoding='utf8'))
+    )

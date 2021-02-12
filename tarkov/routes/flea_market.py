@@ -1,20 +1,18 @@
-from flask import Blueprint, request
+from fastapi import APIRouter
+from flask import request
 
 from server import logger
-from server.utils import tarkov_response, zlib_middleware
+from tarkov.models import TarkovSuccessResponse
 
-blueprint = Blueprint(__name__, __name__)
+flea_market_router = APIRouter(prefix='', tags=['FleaMarket'])
 
 
-@blueprint.route('/client/ragfair/find', methods=['POST', 'GET'])
-@zlib_middleware
-@tarkov_response
-def find():
+@flea_market_router.post('/client/ragfair/find')
+def find() -> TarkovSuccessResponse:
     logger.debug(request.data)
-    response = {
+    return TarkovSuccessResponse(data={
         'categories': {},
         'offers': [],
         'offersCount': 10,
         'selectedCategory': '5b5f78dc86f77409407a7f8e'
-    }
-    return response
+    })

@@ -1,22 +1,24 @@
 from fastapi import APIRouter
 
-router = APIRouter(prefix='', tags=['Friends'])
+from tarkov.models import TarkovSuccessResponse
+
+friend_router = APIRouter(prefix='', tags=['Friends'])
 
 
-@router.post('/client/friend/list')
-def client_friend_list():
-    return {
+@friend_router.post('/client/friend/list')
+def client_friend_list() -> TarkovSuccessResponse[dict]:
+    return TarkovSuccessResponse(data={
         'Friends': [],
         'Ignore': [],
         'InIgnoreList': []
-    }
+    })
 
 
-@router.post('/client/friend/request/list/inbox')
-def client_friend_request_list_inbox():
-    return []
+@friend_router.post('/client/friend/request/list/inbox')
+def client_friend_request_list_inbox() -> TarkovSuccessResponse[list]:
+    return TarkovSuccessResponse(data=[])
 
 
-@router.post('/client/friend/request/list/outbox')
-def client_friend_request_list_outbox():
-    return []
+@friend_router.post('/client/friend/request/list/outbox')
+def client_friend_request_list_outbox() -> TarkovSuccessResponse[list]:
+    return TarkovSuccessResponse(data=[])

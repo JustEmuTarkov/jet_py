@@ -185,7 +185,7 @@ class NodeTemplate(NodeTemplateBase):
 
 class FilterProp(Base):
     Filter: List[str] = Field(default_factory=list)
-    ExcludedFilter: List[str] = Field(default_factory=list)
+    ExcludedFilter: Optional[List[str]]
 
 
 class CartridgesProps(Base):
@@ -345,18 +345,13 @@ AnyItemLocation = Union[ItemInventoryLocation, ItemAmmoStackPosition]
 class Item(Base):
     class Config:
         extra = Extra.forbid
-        fields = {
-            'id': '_id',
-            'tpl': '_tpl',
-            'parent_id': 'parentId'
-        }
 
     __inventory__: Optional['MutableInventory'] = PrivateAttr(default=None)  # Link to the inventory
 
-    id: ItemId
-    tpl: TemplateId
+    id: ItemId = Field(alias='_id')
+    tpl: TemplateId = Field(alias='_tpl')
     slotId: Optional[str] = None
-    parent_id: Optional[ItemId] = None
+    parent_id: Optional[ItemId] = Field(alias='parentId', default=None)
     location: Optional[AnyItemLocation] = None
     upd: ItemUpd = Field(default_factory=ItemUpd)
 
@@ -380,6 +375,13 @@ class Item(Base):
                     template id: {item_template.id}
                     ''')
             upd.MedKit = upd.MedKit if upd.MedKit else ItemUpdMedKit(HpResource=item_template.props.MaxHpResource)
+
+        return values
+
+    @root_validator(pre=False, skip_on_failure=True)
+    def validate_upd_none(cls, values: dict):  # pylint: disable=no-self-argument,no-self-use
+        if 'upd' in values and values['upd'] is None:
+            values['upd'] = ItemUpd()
 
         return values
 

@@ -3,15 +3,16 @@ from typing import Dict, List, Optional, Union
 from fastapi import APIRouter, HTTPException
 from fastapi.params import Cookie
 
-from tarkov.inventory.models import ItemId
-from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
+from tarkov.inventory.models import Item, ItemId
+from tarkov.models import Base, TarkovErrorResponse, TarkovSuccessResponse
 from tarkov.profile import Profile
 from tarkov.trader import TraderInventory, TraderType, get_trader_base, get_trader_bases
+from tarkov.trader.models import BarterSchemeEntry
 
-router = APIRouter(prefix='', tags=['Traders'])
+trader_router = APIRouter(prefix='', tags=['Traders'])
 
 
-@router.post(
+@trader_router.post(
     '/client/trading/customization/storage',
     response_model=TarkovSuccessResponse[dict],
 )
@@ -30,7 +31,7 @@ def customization_storage(
     return TarkovSuccessResponse(data={})
 
 
-@router.post('/client/trading/customization/{trader_id}')
+@trader_router.post('/client/trading/customization/{trader_id}')
 def customization(trader_id: str):  # pylint: disable=unused-argument
     # suits_path = db_dir.joinpath('assort', trader_id, 'suits.json')
     # if not suits_path.exists():
@@ -44,14 +45,16 @@ def customization(trader_id: str):  # pylint: disable=unused-argument
     return TarkovSuccessResponse(data=[])
 
 
-@router.post(
+@trader_router.post(
     '/client/trading/api/getUserAssortPrice/trader/{trader_id}',
-    response_model=TarkovSuccessResponse[Dict[ItemId, List[List[dict]]]]
+    response_model=TarkovSuccessResponse[Dict[ItemId, List[List[dict]]]],
+    response_model_exclude_unset=True,
+    response_model_exclude_none=True,
 )
 def get_user_assort_price(
         trader_id: str,
         profile_id: Optional[str] = Cookie('', alias='PHPSESSID'),  # type: ignore
-):
+) -> TarkovSuccessResponse[Dict[ItemId, List[List[dict]]]]:
     if profile_id is None:
         return TarkovErrorResponse(errmsg="Profile id is None", data=None)
 
@@ -70,31 +73,47 @@ def get_user_assort_price(
 
         # TODO: Calculate price for items to sell in specified trader
         # output is { "item._id": [[{ "_tpl": "", "count": 0 }]] }
-    return items
+    return TarkovSuccessResponse(data=items)
 
 
-@router.post('/client/trading/api/getTradersList')
-def get_trader_list():
-    return get_trader_bases()
+@trader_router.post('/client/trading/api/getTradersList')
+def get_trader_list() -> TarkovSuccessResponse[List[dict]]:
+    return TarkovSuccessResponse(
+        data=get_trader_bases()
+    )
 
 
-@router.post('/client/trading/api/getTraderAssort/{trader_id}')
+class TraderAssortResponse(Base):
+    barter_scheme: Dict[ItemId, List[List[BarterSchemeEntry]]]
+    items: List[Item]
+    loyal_level_items: dict
+
+
+@trader_router.post(
+    '/client/trading/api/getTraderAssort/{trader_id}',
+    response_model=TarkovSuccessResponse[TraderAssortResponse],
+    response_model_exclude_none=True,
+)
 def get_trader_assort(
         trader_id: str,
-        profile_id: Optional[str] = Cookie(None, alias='PHPSESSID'),  # type: ignore
-):
-    if profile_id is None:
-        return TarkovErrorResponse.profile_id_is_none()
+        # profile_id: Optional[str] = Cookie(None, alias='PHPSESSID'),  # type: ignore
+) -> Union[TarkovSuccessResponse[dict], TarkovErrorResponse]:
+    # if profile_id is None:
+    #     return TarkovErrorResponse.profile_id_is_none()
 
-    with Profile(profile_id) as profile:
+    # with Profile(profile_id) as profile:
+    with Profile('AID8131647517931710690RF') as profile:
         trader_inventory = TraderInventory(TraderType(trader_id), profile=profile)
-        return {
-            'barter_scheme': trader_inventory.barter_scheme.dict()['__root__'],
-            'items': [item.dict() for item in trader_inventory.assort],
-            'loyal_level_items': trader_inventory.loyal_level_items,
-        }
+        assort_response = TraderAssortResponse(
+            barter_scheme=trader_inventory.barter_scheme.__root__,
+            items=trader_inventory.assort,
+            loyal_level_items=trader_inventory.loyal_level_items
+        )
+        return TarkovSuccessResponse(data=assort_response)
 
 
-@router.post('/client/trading/api/getTrader/{trader_id}')
-def trader_base(trader_id: str):
-    return get_trader_base(trader_id=trader_id)
+@trader_router.post('/client/trading/api/getTrader/{trader_id}')
+def trader_base(trader_id: str) -> TarkovSuccessResponse[dict]:
+    return TarkovSuccessResponse(
+        data=get_trader_base(trader_id=trader_id)
+    )

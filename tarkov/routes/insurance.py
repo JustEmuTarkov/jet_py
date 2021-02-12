@@ -8,12 +8,12 @@ from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
 from tarkov.profile import Profile
 from tarkov.trader import TraderInventory, TraderType
 
-router = APIRouter(prefix='', tags=['Insurance'])
+insurance_router = APIRouter(prefix='', tags=['Insurance'])
 
 INSURANCE_PRICE_MODIFIER = 0.1
 
 
-@router.post('/client/insurance/items/list/cost')
+@insurance_router.post('/client/insurance/items/list/cost')
 def items_list_cost(
         traders: List[str],
         items: List[ItemId],
