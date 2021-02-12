@@ -81,6 +81,7 @@ class TraderBase(Base):
     buyer_up: StrictBool
     currency: Literal['RUB', 'USD']
     supply_next_time: int
+    medic: bool = False
 
     grid_height: int = Field(alias='gridHeight')
 
@@ -88,3 +89,20 @@ class TraderBase(Base):
     insurance: TraderInsurance
     loyalty: TraderStanding
     sell_category: List[TemplateId]
+
+
+class BarterSchemeEntry(Base):
+    count: int
+    item_required: TemplateId = Field(alias='_tpl')
+    level: Optional[int] = None
+    side: Optional[str] = None
+
+
+class BarterScheme(Base):
+    __root__: Dict[ItemId, List[List[BarterSchemeEntry]]] = Field(default_factory=dict)
+
+    def __getitem__(self, item_id: ItemId):
+        return self.__root__[item_id]
+
+    def __setitem__(self, key: ItemId, value: List[List[BarterSchemeEntry]]):
+        self.__root__[key] = value

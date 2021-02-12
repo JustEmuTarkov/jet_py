@@ -10,8 +10,8 @@ import ujson
 
 from server import db_dir
 from tarkov.inventory import ImmutableInventory, item_templates_repository, regenerate_items_ids
-from tarkov.inventory.models import Item, ItemUpd
-from tarkov.trader.models import BoughtItems, TraderBase, TraderStanding, TraderType
+from tarkov.inventory.models import Item, ItemUpd, TemplateId
+from tarkov.trader.models import BarterScheme, BarterSchemeEntry, BoughtItems, TraderBase, TraderStanding, TraderType
 
 if TYPE_CHECKING:
     from tarkov.profile import Profile
@@ -24,7 +24,7 @@ class TraderInventory(ImmutableInventory):
     profile: Profile
     assort_items: List[Item]
     base: TraderBase
-    _barter_scheme: dict
+    _barter_scheme: BarterScheme
     _loyal_level_items: dict
     quest_assort: dict
 
@@ -43,7 +43,7 @@ class TraderInventory(ImmutableInventory):
         )
         self.base = TraderBase.parse_file(trader_path.joinpath('base.json'))
 
-        self._barter_scheme = ujson.load(trader_path.joinpath('barter_scheme.json').open('r', encoding='utf8'))
+        self._barter_scheme = BarterScheme.parse_file(trader_path.joinpath('barter_scheme.json'))
         self.loyal_level_items = ujson.load(trader_path.joinpath('loyal_level_items.json').open('r', encoding='utf8'))
         self._quest_assort = ujson.load(trader_path.joinpath('questassort.json').open('r', encoding='utf8'))
 
@@ -65,23 +65,23 @@ class TraderInventory(ImmutableInventory):
         return self._trader_assort()
 
     @property
-    def barter_scheme(self):
+    def barter_scheme(self) -> BarterScheme:
         if self.trader == TraderType.Fence:
             self._get_fence_barter_scheme()
 
         return self._barter_scheme
 
-    def _get_fence_barter_scheme(self):
-        barter_scheme = {}
+    def _get_fence_barter_scheme(self) -> BarterScheme:
+        barter_scheme = BarterScheme()
 
         for item in self.items:
             item_price = self.get_item_price(item)
 
             barter_scheme[item.id] = [[
-                {
-                    'count': item_price,
-                    "_tpl": "5449016a4bdc2d6f028b456f",
-                }
+                BarterSchemeEntry(
+                    count=item_price,
+                    item_required=TemplateId("5449016a4bdc2d6f028b456f")
+                )
             ]]
 
         return barter_scheme

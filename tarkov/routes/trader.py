@@ -70,8 +70,9 @@ def get_trader_list():
 def get_trader_assort(trader_id):
     with Profile.from_request(request) as profile:
         trader_inventory = TraderInventory(TraderType(trader_id), profile=profile)
+
         return {
-            'barter_scheme': trader_inventory.barter_scheme,
+            'barter_scheme': trader_inventory.barter_scheme.dict()['__root__'],
             'items': [item.dict() for item in trader_inventory.assort],
             'loyal_level_items': trader_inventory.loyal_level_items,
         }
