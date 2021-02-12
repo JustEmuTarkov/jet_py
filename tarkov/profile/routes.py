@@ -9,7 +9,7 @@ from starlette.requests import Request
 
 from server import root_dir
 from server.utils import get_request_url_root
-from server_fastapi.requests import ZLibRequest, ZLibRoute
+from server.requests import ZLibRequest, ZLibRoute
 from tarkov.inventory_dispatcher import DispatcherManager
 from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
 from tarkov.profile import Profile

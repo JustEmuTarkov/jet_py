@@ -7,6 +7,7 @@ from starlette.datastructures import MutableHeaders
 
 
 class ZLibRequest(Request):
+    # pylint: disable=too-many-ancestors, attribute-defined-outside-init
     async def body(self) -> bytes:
         if not hasattr(self, "_body"):
             body = await super().body()

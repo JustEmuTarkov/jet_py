@@ -1,30 +1,18 @@
-import sys
+import uvicorn  # type: ignore
 
-from server import app, logger, root_dir
-from server.package_lib import PackageManager
-
-if str(root_dir) not in sys.path:
-    sys.path.append(str(root_dir))
-
-mods_dir = root_dir.joinpath('mods')
+from server.app import app
+from server.certs import generate_ssl_certificate, is_ssl_certificate_expired
 
 if __name__ == '__main__':
-    # app.register_blueprint(blueprint=friend.blueprint)
-    # app.register_blueprint(blueprint=hideout.blueprint)
-    # app.register_blueprint(blueprint=lang.blueprint)
-    # app.register_blueprint(blueprint=routes.blueprint)
-    # app.register_blueprint(blueprint=single_player.blueprint)
-    # app.register_blueprint(blueprint=trader.blueprint)
-    # app.register_blueprint(blueprint=misc.blueprint)
-    # app.register_blueprint(blueprint=flea_market.blueprint)
-    # app.register_blueprint(blueprint=insurance.blueprint)
-    # app.register_blueprint(blueprint=match.blueprint)
+    try:
+        if is_ssl_certificate_expired():
+            generate_ssl_certificate()
 
-    # app.register_blueprint(blueprint=launcher.blueprint)
-    # app.register_blueprint(blueprint=notifier.blueprint)
-
-    logger.debug(f'Searching for packages in: {mods_dir}')
-    package_manager = PackageManager(mods_dir)
-    package_manager.load_packages()
-
-    app.run(ssl_context='adhoc', port=443, threaded=True)
+    except FileNotFoundError:
+        generate_ssl_certificate()
+    uvicorn.run(
+        app,
+        port=443,
+        ssl_keyfile='certificates/private.key',
+        ssl_certfile='certificates/cert.crt'
+    )
