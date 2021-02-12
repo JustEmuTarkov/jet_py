@@ -1,11 +1,10 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 from fastapi import APIRouter
 from fastapi.params import Cookie
-from flask import request
 
 from tarkov.inventory.models import ItemId, TemplateId
-from tarkov.models import TarkovSuccessResponse
+from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
 from tarkov.profile import Profile
 from tarkov.trader import TraderInventory, TraderType
 
@@ -18,12 +17,14 @@ INSURANCE_PRICE_MODIFIER = 0.1
 def items_list_cost(
         traders: List[str],
         items: List[ItemId],
-        profile_id: Optional[str] = Cookie(alias='PHPSESSID', default=None),
+        profile_id: Optional[str] = Cookie(alias='PHPSESSID', default=None),  # type: ignore
 
-) -> TarkovSuccessResponse[Dict[str, dict]]:
+) -> Union[TarkovSuccessResponse[Dict[str, dict]], TarkovErrorResponse]:
     insurance_data: Dict[str, dict] = {}
+    if profile_id is None:
+        return TarkovErrorResponse.profile_id_is_none()
 
-    with Profile.from_request(request=request) as profile:
+    with Profile(profile_id) as profile:
         for trader_id in traders:
             trader_inventory = TraderInventory(TraderType(trader_id), profile=profile)
             trader_items: Dict[TemplateId, int] = {}

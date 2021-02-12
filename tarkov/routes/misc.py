@@ -1,15 +1,19 @@
 import datetime
 import random
-from typing import Type
+from typing import Dict, Optional, Type, Union
 
 import ujson
 from fastapi import APIRouter
+from fastapi.params import Cookie
 from flask import Blueprint, request
+from starlette.requests import Request
 
 from server import app, db_dir, start_time
-from server.utils import tarkov_response, zlib_middleware
+from server.utils import get_request_url_root, tarkov_response, zlib_middleware
 from tarkov.inventory import item_templates_repository
-from tarkov.models import TarkovSuccessResponse
+from tarkov.inventory.models import TemplateId
+from tarkov.inventory.repositories import AnyTemplate
+from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
 
 blueprint = Blueprint(__name__, __name__)
 router = APIRouter(prefix='', tags=['Misc/Bootstrap'])
@@ -31,35 +35,35 @@ def client_locations():
 
 
 @router.post('/client/game/start')
-def client_game_start() -> str:
-
-    return TarkovSuccessResponse(data=None).json()  # TODO Add account data, check if character exists
-
-
-@app.route('/client/game/version/validate', methods=['POST'])
-@zlib_middleware
-@tarkov_response
-def client_game_version_validate():
-    return None
+def client_game_start() -> TarkovSuccessResponse[Type[None]]:
+    return TarkovSuccessResponse(data=None)  # TODO Add account data, check if character exists
 
 
-@app.route('/client/game/config', methods=['GET', 'POST'])
-@zlib_middleware
-@tarkov_response
-def client_game_config():
-    url_root = request.url_root
-    session_id = request.cookies['PHPSESSID']
+@router.post('/client/game/version/validate')
+def client_game_version_validate() -> TarkovSuccessResponse[Type[None]]:
+    return TarkovSuccessResponse(data=None)
 
-    return {
+
+@router.post('/client/game/config')
+def client_game_config(
+        request: Request,
+        profile_id: Optional[str] = Cookie(alias='PHPSESSID', default=None),  # type: ignore
+) -> Union[TarkovSuccessResponse[dict], TarkovErrorResponse]:
+    url_root = get_request_url_root(request)
+
+    if profile_id is None:
+        return TarkovErrorResponse.profile_id_is_none()
+
+    return TarkovSuccessResponse(data={
         "queued": False,
         "banTime": 0,
         "hash": "BAN0",
         "lang": "en",
-        "aid": session_id,
-        "token": "token_" + session_id,
+        "aid": profile_id,
+        "token": "token_" + profile_id,
         "taxonomy": "341",
         "activeProfileId":
-            "user" + session_id + "pmc",
+            "user" + profile_id + "pmc",
         "nickname": "user",
         "backend": {
             "Trading": url_root,
@@ -68,48 +72,43 @@ def client_game_config():
             "RagFair": url_root
         },
         "totalInGame": 0
-    }
+    })
 
 
-@app.route('/client/game/keepalive', methods=['GET', 'POST'])
-@zlib_middleware
-@tarkov_response
-def client_game_keepalive():
-    if 'PHPSESSID' in request.cookies:
-        return {"msg": "OK"}
-    return {"msg": "No Session"}
+@router.post('/client/game/keepalive')
+def client_game_keepalive(
+        profile_id: Optional[str] = Cookie(alias='PHPSESSID', default=None),  # type: ignore
+) -> Union[TarkovSuccessResponse[dict], TarkovErrorResponse]:
+    if not profile_id:
+        return TarkovErrorResponse(err=True, errmsg='No Session', data=None)
+
+    return TarkovSuccessResponse(data={'msg': 'ok'})
 
 
-@app.route('/client/items', methods=['GET', 'POST'])
-@zlib_middleware
-@tarkov_response
-def client_items():
-    return {
-        template.id: template.dict()
-        for template in item_templates_repository.templates.values()
-    }
+@router.post(
+    '/client/items',
+    response_model=TarkovSuccessResponse[Dict[TemplateId, AnyTemplate]]
+)
+def client_items() -> TarkovSuccessResponse[Dict[TemplateId, AnyTemplate]]:
+    return TarkovSuccessResponse(data=item_templates_repository.templates)
 
 
-@app.route('/client/customization', methods=['GET', 'POST'])
-@zlib_middleware
-@tarkov_response
-def client_customization():
+@router.post('/client/customization')
+def client_customization() -> TarkovSuccessResponse[dict]:
     customization = {}
     for customization_file_path in (db_dir / 'customization').glob('*'):
         customization_data = ujson.load(customization_file_path.open('r', encoding='utf8'))
         customization_id = customization_data['_id']
         customization[customization_id] = customization_data
 
-    return customization
+    return TarkovSuccessResponse(data=customization)
 
 
-@app.route('/client/globals', methods=['POST', 'GET'])
-@zlib_middleware
-@tarkov_response
-def client_globals():
-    globals_base = db_dir / 'base' / 'globals.json'
-    globals_base = ujson.load(globals_base.open('r', encoding='utf8'))
-    return globals_base
+@router.post('/client/globals')
+def client_globals() -> TarkovSuccessResponse[dict]:
+    globals_path = db_dir.joinpath('base', 'globals.json')
+    globals_base = ujson.load(globals_path.open(encoding='utf8'))
+    return TarkovSuccessResponse(data=globals_base)
 
 
 @app.route('/client/weather', methods=['POST', 'GET'])

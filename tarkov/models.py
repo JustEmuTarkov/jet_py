@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Generic, Optional, TypeVar
+from typing import Any, Generic, Optional, TypeVar
 
 import pydantic
 from pydantic import Extra
@@ -36,10 +36,16 @@ ResponseType = TypeVar('ResponseType')
 class TarkovSuccessResponse(GenericModel, Generic[ResponseType]):
     err: int = 0
     errmsg: Optional[str] = None
-    data: ResponseType
+    data: Optional[ResponseType] = None
 
 
 class TarkovErrorResponse(GenericModel, Generic[ResponseType]):
     err: int = True
     errmsg: Optional[str]
-    data: str
+    data: Any = None
+
+    @staticmethod
+    def profile_id_is_none() -> 'TarkovErrorResponse':
+        return TarkovErrorResponse(
+            errmsg="Profile id is None"
+        )

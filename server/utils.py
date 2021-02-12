@@ -7,6 +7,7 @@ from typing import Callable, Optional, Union
 
 import ujson
 from flask import make_response, request
+from starlette.requests import Request
 
 
 class _ZlibMiddleware:
@@ -105,3 +106,7 @@ def atomic_write(str_: Union[str], path: Path, *, encoding='utf8'):
         tmp_path.rename(path)
     finally:
         tmp_path.unlink(missing_ok=True)
+
+
+def get_request_url_root(request: Request) -> str:
+    return f'{str(request.base_url).rstrip("/")}:443'

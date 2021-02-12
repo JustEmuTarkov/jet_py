@@ -50,8 +50,11 @@ def customization(trader_id: str):  # pylint: disable=unused-argument
 )
 def get_user_assort_price(
         trader_id: str,
-        profile_id: str = Cookie('', alias='PHPSESSID'),  # type: ignore
+        profile_id: Optional[str] = Cookie('', alias='PHPSESSID'),  # type: ignore
 ):
+    if profile_id is None:
+        return TarkovErrorResponse(errmsg="Profile id is None", data=None)
+
     if not Profile.exists(profile_id):
         raise HTTPException(status_code=404, detail=fr'Profile with id {profile_id} was not found')
 
@@ -78,8 +81,11 @@ def get_trader_list():
 @router.post('/client/trading/api/getTraderAssort/{trader_id}')
 def get_trader_assort(
         trader_id: str,
-        profile_id: str = Cookie(None, alias='PHPSESSID'),  # type: ignore
+        profile_id: Optional[str] = Cookie(None, alias='PHPSESSID'),  # type: ignore
 ):
+    if profile_id is None:
+        return TarkovErrorResponse.profile_id_is_none()
+
     with Profile(profile_id) as profile:
         trader_inventory = TraderInventory(TraderType(trader_id), profile=profile)
         return {

@@ -4,7 +4,6 @@ from server import app, logger, root_dir
 from server.package_lib import PackageManager
 from tarkov import launcher, notifier
 from tarkov.routes import (flea_market, match, misc, single_player)
-from tarkov.profile import routes
 
 if str(root_dir) not in sys.path:
     sys.path.append(str(root_dir))
