@@ -5,7 +5,6 @@ from fastapi import APIRouter
 from flask import request
 
 from server import db_dir, logger
-from server.utils import tarkov_response, zlib_middleware
 from tarkov.inventory.helpers import regenerate_items_ids
 from tarkov.lib import locations
 from tarkov.lib.bots import BotGenerator
@@ -34,7 +33,6 @@ def singleplayer_settings_raid_menu() -> dict:
 
 
 @singleplayer_router.post('/api/location/<string:location_name>')
-@zlib_middleware
 def location(location_name: str) -> dict:
     location_name = location_name.lower()
 
@@ -112,9 +110,7 @@ def mode_offline():
 
 
 @singleplayer_router.put('/raid/profile/save')
-@zlib_middleware()
-@tarkov_response
-def singleplayer_raid_profile_save(profile: ProfileModel) -> None:
+def singleplayer_raid_profile_save(profile: ProfileModel) -> TarkovSuccessResponse:
     # TODO: Add Saving profile here
     # data struct {exit, isPlayerScav, profile, health}
     # update profile on this request
@@ -143,6 +139,8 @@ def singleplayer_raid_profile_save(profile: ProfileModel) -> None:
         items = list(item for item in raid_inventory_items if item.slotId is not None)
         regenerate_items_ids(items)  # Regenerate item ids to be 100% safe
         player_profile.inventory.add_items(items)
+
+    return TarkovSuccessResponse(data=None)
 
 
 @singleplayer_router.post('/raid/profile/list')

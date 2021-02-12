@@ -45,11 +45,11 @@ def mail_dialog_info(
 
 @notifier_router.post('/client/mail/dialog/view')
 def mail_dialog_view(
-        dialogId: str,
-        time_: float = Param(alias='time', default=0.0),  # type: ignore
+        dialogue_id: str = Param(alias='dialogId', default=...),  # type: ignore
+        time_: float = Param(alias='time', default=...),  # type: ignore
         profile_id: Optional[str] = Cookie(alias='PHPSESSID', default=None),  # type: ignore
 ) -> Union[TarkovSuccessResponse[dict], TarkovErrorResponse]:
-    dialogue_id: str = dialogId
+    # dialogue_id: str = dialogId
 
     if not profile_id:
         return TarkovErrorResponse.profile_id_is_none()
@@ -62,11 +62,9 @@ def mail_dialog_view(
 
 @notifier_router.post('/client/mail/dialog/getAllAttachments')
 def mail_dialog_all_attachments(
-        dialogId: str,
+        dialogue_id: str = Param(..., alias='dialogId'),  # type: ignore
         profile_id: Optional[str] = Cookie(alias='PHPSESSID', default=None),  # type: ignore
 ) -> Union[TarkovSuccessResponse[dict], TarkovErrorResponse]:
-    dialogue_id = dialogId
-
     if profile_id is None:
         return TarkovErrorResponse.profile_id_is_none()
 

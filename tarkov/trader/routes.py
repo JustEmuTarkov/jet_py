@@ -17,7 +17,7 @@ trader_router = APIRouter(prefix='', tags=['Traders'])
     response_model=TarkovSuccessResponse[dict],
 )
 def customization_storage(
-        profile_id: Optional[str] = Cookie(alias='PHPSESSID', default=None)  # type: ignore
+        profile_id: Optional[str] = Cookie(alias='PHPSESSID', default=None),  # type: ignore
 ) -> Union[TarkovSuccessResponse[dict], TarkovErrorResponse]:
     if profile_id is None:
         return TarkovErrorResponse(
@@ -54,7 +54,7 @@ def customization(trader_id: str):  # pylint: disable=unused-argument
 def get_user_assort_price(
         trader_id: str,
         profile_id: Optional[str] = Cookie('', alias='PHPSESSID'),  # type: ignore
-) -> TarkovSuccessResponse[Dict[ItemId, List[List[dict]]]]:
+) -> Union[TarkovSuccessResponse[Dict[ItemId, List[List[dict]]]], TarkovErrorResponse]:
     if profile_id is None:
         return TarkovErrorResponse(errmsg="Profile id is None", data=None)
 
@@ -96,13 +96,12 @@ class TraderAssortResponse(Base):
 )
 def get_trader_assort(
         trader_id: str,
-        # profile_id: Optional[str] = Cookie(None, alias='PHPSESSID'),  # type: ignore
-) -> Union[TarkovSuccessResponse[dict], TarkovErrorResponse]:
-    # if profile_id is None:
-    #     return TarkovErrorResponse.profile_id_is_none()
+        profile_id: Optional[str] = Cookie(None, alias='PHPSESSID'),  # type: ignore
+) -> Union[TarkovSuccessResponse[TraderAssortResponse], TarkovErrorResponse]:
+    if profile_id is None:
+        return TarkovErrorResponse.profile_id_is_none()
 
-    # with Profile(profile_id) as profile:
-    with Profile('AID8131647517931710690RF') as profile:
+    with Profile(profile_id) as profile:
         trader_inventory = TraderInventory(TraderType(trader_id), profile=profile)
         assort_response = TraderAssortResponse(
             barter_scheme=trader_inventory.barter_scheme.__root__,
