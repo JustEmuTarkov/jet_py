@@ -14,6 +14,7 @@ from tarkov.inventory.models import Item, ItemUpd, TemplateId
 from tarkov.trader.models import BarterScheme, BarterSchemeEntry, BoughtItems, TraderBase, TraderStanding, TraderType
 
 if TYPE_CHECKING:
+    # pylint: disable=cyclic-import
     from tarkov.profile import Profile
 
 FENCE_ASSORT_LIFETIME = 10 * 60

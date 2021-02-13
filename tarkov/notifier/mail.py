@@ -7,6 +7,7 @@ from tarkov.notifier.models import (DialoguePreviewList, MailDialogue, MailDialo
 from tarkov.notifier.notifier import notifier_instance
 
 if TYPE_CHECKING:
+    # pylint: disable=cyclic-import
     from tarkov.profile import Profile
 
 

@@ -12,6 +12,7 @@ from tarkov.inventory.models import Item
 from .models import HideoutArea, HideoutAreaType, HideoutProduction
 
 if TYPE_CHECKING:
+    # pylint: disable=cyclic-import
     from tarkov.profile import Profile
 
 
