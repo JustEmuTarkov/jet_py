@@ -16,24 +16,7 @@ if TYPE_CHECKING:
 ItemId = NewType('ItemId', str)
 TemplateId = NewType('TemplateId', str)
 
-Color = Union[
-    Literal['default'],
-    Literal['black'],
-    Literal['red'],
-    Literal['grey'],
-    Literal['blue'],
-    Literal['orange'],
-    Literal['yellow'],
-    Literal['green'],
-    Literal['violet'],
-]
-TracerColor = Union[
-    Color,
-    Literal['tracerRed'],
-    Literal['tracerGreen'],
-    Literal['tracerYellow'],
-    Literal['tracerGreen'],
-]
+
 
 
 class ItemTemplateProps(Base):
