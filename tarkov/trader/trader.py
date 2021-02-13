@@ -100,7 +100,6 @@ class TraderInventory(ImmutableInventory):
         return assort
 
     def _trader_assort(self) -> List[Item]:
-        items: Iterable[Item] = self.items
 
         def filter_quest_assort(item: Item) -> bool:
             if item.id not in self._quest_assort['success']:
@@ -117,9 +116,20 @@ class TraderInventory(ImmutableInventory):
             required_standing = self.loyal_level_items[item.id]
             return self.standing.current_level >= required_standing
 
-        items = filter(filter_quest_assort, items)
-        items = filter(filter_loyal_level, items)
-        return list(items)
+        def filter_in_root(item: Item) -> bool:
+            return item.slotId == 'hideout'
+
+        items = filter(filter_in_root, self.items)  # Filter root items
+        items = filter(filter_quest_assort, items)  # Filter items that require quest completion
+        items = filter(filter_loyal_level, items)  # Filter items that require loyalty level
+
+        def assort_inner(items_list: Iterable[Item]) -> Iterable[Item]:
+            """Return item and it's children from trader inventory"""
+            for item in items_list:
+                yield item
+                yield from self.iter_item_children(item)
+
+        return list(assort_inner(items))
 
     def can_sell(self, item: Item) -> bool:
         try:

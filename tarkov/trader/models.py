@@ -106,3 +106,6 @@ class BarterScheme(Base):
 
     def __setitem__(self, key: ItemId, value: List[List[BarterSchemeEntry]]):
         self.__root__[key] = value
+
+    def values(self):
+        return self.__root__.values()
