@@ -287,7 +287,7 @@ class ItemUpdFireMode(Base):
 
 
 class ItemUpdResource(Base):
-    Value: Union[int, float]
+    Value: float
 
 
 class ItemUpdFoodDrink(Base):
