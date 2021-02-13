@@ -1,10 +1,17 @@
 import time
 from typing import Dict, List, TYPE_CHECKING, Tuple
 
+from pydantic import StrictInt
+
 from tarkov import inventory
+from tarkov.inventory import PlayerInventory, item_templates_repository
 from tarkov.inventory.models import Item
-from .models import QuestRewardItem
+from tarkov.notifier.models import MailDialogueMessage, MailMessageItems
+from tarkov.trader import TraderInventory, TraderType
+from .models import (QuestMessageType, QuestRewardAssortUnlock, QuestRewardExperience, QuestRewardItem,
+                     QuestRewardTraderStanding, )
 from .repositories import quests_repository
+from tarkov.profile.models import BackendCounter
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
@@ -42,14 +49,14 @@ class Quests:
             -> Tuple[List[inventory.models.Item], List[inventory.models.Item]]:
 
         try:
-            condition = self.profile.pmc_profile['BackendCounters'][condition_id]
+            condition = self.profile.pmc_profile.BackendCounters[condition_id]
         except KeyError:
-            condition = {
-                'id': condition_id,
-                'qid': quest_id,
-                'value': 0
-            }
-            self.profile.pmc_profile['BackendCounters'][condition_id] = condition
+            condition = BackendCounter(
+                id=condition_id,
+                qid=quest_id,
+                value=0
+            )
+            self.profile.pmc_profile.BackendCounters[condition_id] = condition
 
         removed_items = []
         changed_items = []
@@ -64,7 +71,7 @@ class Quests:
                 self.profile.inventory.simple_split_item(item=item, count=count)
                 # removed_items.append(self.profile.inventory.split_item(item=item, count=count))
 
-            condition['value'] += count
+            condition.value += count
 
         return removed_items, changed_items
 
@@ -78,3 +85,45 @@ class Quests:
                 pass
 
         return [], []
+
+    def complete_quest(self, quest_id: str):
+        quest_template = quests_repository.get_quest_template(quest_id)
+
+        reward_items: List[Item] = []
+        for reward in quest_template.rewards.Success:
+            if isinstance(reward, QuestRewardItem):
+                for reward_item in reward.items:
+                    item_template = item_templates_repository.get_template(reward_item)
+                    stack_size: int = item_template.props.StackMaxSize
+
+                    while reward_item.upd.StackObjectsCount > 0:
+                        amount_to_split = min(reward_item.upd.StackObjectsCount, stack_size)
+                        reward_items.append(PlayerInventory.simple_split_item(reward_item, amount_to_split))
+
+            elif isinstance(reward, QuestRewardExperience):
+                exp_amount: str = reward.value
+                self.profile.receive_experience(int(exp_amount))
+
+            elif isinstance(reward, QuestRewardTraderStanding):
+                standing_change = float(reward.value)
+                trader_id = reward.target
+
+                trader = TraderInventory(TraderType(trader_id), self.profile)
+                standing = trader.standing
+                standing.current_standing += standing_change
+
+            elif isinstance(reward, QuestRewardAssortUnlock):
+                raise ValueError
+
+            else:
+                raise ValueError(f'Unknown reward: {reward.__class__.__name__} {reward}')
+
+        message = MailDialogueMessage(
+            uid=quest_template.traderId,
+            type=StrictInt(QuestMessageType.questSuccess.value),
+            templateId='5ab0f32686f7745dd409f56b',  # TODO: Right now this is a placeholder
+            systemData={},
+            items=MailMessageItems.from_items(reward_items),
+            hasRewards=True,
+        )
+        self.profile.notifier.add_message(message)

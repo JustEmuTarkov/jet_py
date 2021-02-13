@@ -8,6 +8,7 @@ from typing import Dict, Iterable, List, Optional, TYPE_CHECKING, Tuple, Union
 import ujson
 
 from server import logger, root_dir
+from server.utils import atomic_write
 from tarkov.exceptions import NoSpaceError, NotFoundError
 from tarkov.models import Base
 from .dict_models import ItemExtraSize
@@ -18,6 +19,7 @@ from .models import (AnyItemLocation, AnyMoveLocation, CartridgesMoveLocation, I
 from .repositories import item_templates_repository
 
 if TYPE_CHECKING:
+    # pylint: disable=cyclic-import
     from tarkov.profile import Profile
 
 
@@ -642,7 +644,6 @@ class GridInventory(MutableInventory):
 
     @staticmethod
     def simple_split_item(item: Item, count: int) -> Item:
-        donor_inventory = item.get_inventory()
 
         if item.upd.StackObjectsCount < count:
             raise ValueError(
@@ -654,7 +655,11 @@ class GridInventory(MutableInventory):
         item.upd.StackObjectsCount -= count
 
         if item.upd.StackObjectsCount == 0:
-            donor_inventory.remove_item(item)
+            try:
+                donor_inventory = item.get_inventory()
+                donor_inventory.remove_item(item)
+            except ValueError:
+                pass
 
         item_copy.location = None
 
@@ -715,14 +720,7 @@ class PlayerInventory(GridInventory):
         self.stash_map = PlayerInventoryStashMap(inventory=self)
 
     def write(self):
-        """
-        Writes inventory file to disk
-        """
-        ujson.dump(
-            self.inventory.dict(exclude_unset=True),
-            self._path.open('w', encoding='utf8'),
-            indent=4
-        )
+        atomic_write(self.inventory.json(exclude_none=True, exclude_defaults=True), self._path)
 
 
 def merge_extra_size(first: ItemExtraSize, second: ItemExtraSize) -> ItemExtraSize:

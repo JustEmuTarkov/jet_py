@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import datetime
 import enum
-from typing import Any, List, Literal, NewType, Optional, TYPE_CHECKING, Union
+from typing import Any, List, Literal, NewType, Optional, TYPE_CHECKING, Union, cast
 
-from pydantic import Extra, Field, PrivateAttr, StrictBool, StrictInt
+from pydantic import Extra, Field, PrivateAttr, StrictBool, StrictInt, root_validator
 
+import tarkov.inventory
 from tarkov.models import Base
 
 if TYPE_CHECKING:
@@ -184,7 +185,7 @@ class NodeTemplate(NodeTemplateBase):
 
 class FilterProp(Base):
     Filter: List[str] = Field(default_factory=list)
-    ExcludedFilter: List[str] = Field(default_factory=list)
+    ExcludedFilter: Optional[List[str]]
 
 
 class CartridgesProps(Base):
@@ -286,7 +287,7 @@ class ItemUpdFireMode(Base):
 
 
 class ItemUpdResource(Base):
-    Value: Union[int, float]
+    Value: float
 
 
 class ItemUpdFoodDrink(Base):
@@ -344,18 +345,13 @@ AnyItemLocation = Union[ItemInventoryLocation, ItemAmmoStackPosition]
 class Item(Base):
     class Config:
         extra = Extra.forbid
-        fields = {
-            'id': '_id',
-            'tpl': '_tpl',
-            'parent_id': 'parentId'
-        }
 
     __inventory__: Optional['MutableInventory'] = PrivateAttr(default=None)  # Link to the inventory
 
-    id: ItemId
-    tpl: TemplateId
+    id: ItemId = Field(alias='_id')
+    tpl: TemplateId = Field(alias='_tpl')
     slotId: Optional[str] = None
-    parent_id: Optional[ItemId] = None
+    parent_id: Optional[ItemId] = Field(alias='parentId', default=None)
     location: Optional[AnyItemLocation] = None
     upd: ItemUpd = Field(default_factory=ItemUpd)
 
@@ -363,6 +359,31 @@ class Item(Base):
         if self.__inventory__ is None:
             raise ValueError('Item does not have inventory')
         return self.__inventory__
+
+    @root_validator(pre=False, skip_on_failure=True)
+    def validate_medkit_hp(cls, values: dict):  # pylint: disable=no-self-argument,no-self-use
+        if 'id' not in values:
+            return values
+
+        item_tpl_id: TemplateId = cast(TemplateId, values.get('tpl'))
+        item_template = tarkov.inventory.item_templates_repository.get_template(item_tpl_id)
+        if item_template.parent == '5448f39d4bdc2d0a728b4568':
+            upd: ItemUpd = cast(ItemUpd, values.get('upd'))
+            if not isinstance(item_template.props.MaxHpResource, int):
+                raise ResourceWarning(
+                    f'''Item template that inherits directly form MedKit does not have MaxHpResource property
+                    template id: {item_template.id}
+                    ''')
+            upd.MedKit = upd.MedKit if upd.MedKit else ItemUpdMedKit(HpResource=item_template.props.MaxHpResource)
+
+        return values
+
+    @root_validator(pre=False, skip_on_failure=True)
+    def validate_upd_none(cls, values: dict):  # pylint: disable=no-self-argument,no-self-use
+        if 'upd' in values and values['upd'] is None:
+            values['upd'] = ItemUpd()
+
+        return values
 
     def copy(
             self: Item,
@@ -379,6 +400,9 @@ class Item(Base):
 
 
 class InventoryModel(Base):
+    class Config(Base.Config):
+        pass
+
     equipment: ItemId
     stash: ItemId
     questRaidItems: ItemId

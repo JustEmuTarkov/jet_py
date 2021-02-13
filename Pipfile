@@ -6,17 +6,21 @@ name = "pypi"
 [packages]
 flask = ">=1.1.*"
 pyopenssl = "==20.0.0"
-ujson = ">=4.0.*"
 werkzeug = "==1.0.1"
 pydantic = "==1.7.3"
 pyyaml = "==5.4.1"
 orjson = "*"
+fastapi = {extras = ["all"], version = "*"}
+uvicorn = "*"
+aiofiles = "*"
 
 [dev-packages]
 pyinstaller = "==4.1"
+pylint = "*"
 flake8 = "*"
 tox = "*"
 pytest = "*"
+mypy = "*"
 
 [requires]
 python_version = "3.8"

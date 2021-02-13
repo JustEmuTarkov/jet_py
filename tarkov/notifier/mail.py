@@ -1,11 +1,13 @@
 import datetime
 from typing import Dict, List, TYPE_CHECKING
 
+from server.utils import atomic_write
 from tarkov.notifier.models import (DialoguePreviewList, MailDialogue, MailDialogueMessage, MailDialoguePreview,
                                     MailDialogues, )
 from tarkov.notifier.notifier import notifier_instance
 
 if TYPE_CHECKING:
+    # pylint: disable=cyclic-import
     from tarkov.profile import Profile
 
 
@@ -69,7 +71,7 @@ class Mail:
 
         return {'messages': [msg.dict() for msg in dialogue.messages]}
 
-    def all_attachments_view(self, dialogue_id):
+    def all_attachments_view(self, dialogue_id) -> dict:
         dialogue = self.get_dialogue(dialogue_id)
 
         messages = [msg.dict(exclude_none=True) for msg in dialogue.messages if not self.__is_message_expired(msg)]
@@ -88,5 +90,7 @@ class Mail:
             self.dialogues = MailDialogues()
 
     def write(self):
-        with self.path.open('w', encoding='utf8') as file:
-            file.write(self.dialogues.json(by_alias=True, exclude_unset=False, exclude_none=True, indent=4))
+        atomic_write(
+            self.dialogues.json(by_alias=True, exclude_unset=False, exclude_none=True, indent=4),
+            self.path
+        )

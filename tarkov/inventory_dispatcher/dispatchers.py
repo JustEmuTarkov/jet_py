@@ -1,20 +1,14 @@
 import typing
-from typing import Callable, Dict, List, Optional, TYPE_CHECKING
-
-from pydantic import StrictInt
+from typing import Callable, Dict, Optional, TYPE_CHECKING
 
 import tarkov.inventory
-from server import logger
-from tarkov import quests
 from tarkov.hideout.models import HideoutAreaType
 from tarkov.inventory import (MutableInventory, PlayerInventory, generate_item_id,
                               item_templates_repository, )
 from tarkov.inventory.implementations import SimpleInventory
-from tarkov.inventory.models import Item, TemplateId
-from tarkov.lib.trader import TraderInventory, Traders
-from tarkov.notifier.models import MailDialogueMessage, MailMessageItems
+from tarkov.inventory.models import TemplateId
+from tarkov.trader import TraderInventory, TraderType
 from tarkov.profile import Profile
-from tarkov.quests.models import QuestMessageType, QuestRewardItem
 from .models import ActionModel, ActionType, HideoutActions, InventoryActions, Owner, QuestActions, TradingActions
 
 if TYPE_CHECKING:
@@ -111,7 +105,7 @@ class InventoryDispatcher(Dispatcher):
         if action.fromOwner.type == 'Trader':
             trader_id = action.fromOwner.id
 
-            trader_inventory = TraderInventory(Traders(trader_id), self.inventory)
+            trader_inventory = TraderInventory(TraderType(trader_id), self.profile)
             item = trader_inventory.get_item(item_id)
             self.profile.encyclopedia.examine(item)
 
@@ -169,10 +163,10 @@ class InventoryDispatcher(Dispatcher):
                 self.response.items.del_.append(item)
 
     def _insure(self, action: InventoryActions.Insure):
-        trader = Traders(action.tid)
+        trader = TraderType(action.tid)
         trader_inventory = TraderInventory(
             trader=trader,
-            player_inventory=self.profile.inventory,
+            profile=self.profile,
         )
 
         rubles_tpl_id = tarkov.inventory.models.TemplateId('5449016a4bdc2d6f028b456f')
@@ -302,7 +296,7 @@ class TradingDispatcher(Dispatcher):
         raise NotImplementedError(f'Trading action {action} not implemented')
 
     def __buy_from_trader(self, action: TradingActions.BuyFromTrader):
-        trader_inventory = TraderInventory(Traders(action.tid), self.inventory)
+        trader_inventory = TraderInventory(TraderType(action.tid), self.profile)
 
         bought_items_list = trader_inventory.buy_item(action.item_id, action.count)
 
@@ -328,7 +322,7 @@ class TradingDispatcher(Dispatcher):
     def __sell_to_trader(self, action: TradingActions.SellToTrader):
         trader_id = action.tid
         items_to_sell = action.items
-        trader_inventory = TraderInventory(Traders(trader_id), self.inventory)
+        trader_inventory = TraderInventory(TraderType(trader_id), self.profile)
 
         items = list(self.inventory.get_item(i.id) for i in items_to_sell)
         price_sum: int = sum(trader_inventory.get_sell_price(item) for item in items)
@@ -376,25 +370,4 @@ class QuestDispatcher(Dispatcher):
         self.response.items.del_.extend(removed)
 
     def _quest_complete(self, action: QuestActions.Complete) -> None:
-        quest = self.profile.quests.get_quest(action.qid)
-        quest_template = quests.quests_repository.get_quest_template(action.qid)
-
-        logger.debug(action)
-        logger.debug(quest)
-        logger.debug(quest_template)
-
-        reward_items: List[Item] = []
-        for reward in quest_template.rewards.Success:
-            if isinstance(reward, QuestRewardItem):
-                reward_items.extend(reward.items)
-
-        message = MailDialogueMessage(
-            uid=quest_template.traderId,
-            type=StrictInt(QuestMessageType.questSuccess.value),
-            templateId='5ab0f32686f7745dd409f56b',  # TODO: Right now this is a placeholder
-            systemData={},
-            items=MailMessageItems.from_items(reward_items),
-            hasRewards=True,
-        )
-        self.profile.notifier.add_message(message)
-        # raise NotImplementedError
+        self.profile.quests.complete_quest(action.qid)

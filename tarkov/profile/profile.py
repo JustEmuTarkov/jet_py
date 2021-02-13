@@ -1,29 +1,28 @@
 from __future__ import annotations
 
-import copy
 from typing import List, Union
 
 import ujson
-from flask import Request
 
 import tarkov.inventory.repositories
 from server import root_dir
-from server.utils import TarkovError
+from server.utils import atomic_write
 from tarkov import inventory as inventory_, quests
 from tarkov.hideout import Hideout
 from tarkov.inventory.models import Item, TemplateId
-from tarkov.lib.trader import Traders
 from tarkov.notifier import Mail
+from tarkov.trader import TraderType
+from .models import ItemInsurance, ProfileModel
 
 
 class Encyclopedia:
     def __init__(self, profile: Profile):
         self.profile = profile
-        self.data = profile.pmc_profile['Encyclopedia']
+        self.data = profile.pmc_profile.Encyclopedia
 
     def examine(self, item: Union[Item, TemplateId]):
         if isinstance(item, Item):
-            self.data[item.id] = False
+            self.data[item.tpl] = False
 
         else:
             item_template_id = item
@@ -42,7 +41,7 @@ class Profile:
     # pylint: disable=too-many-instance-attributes
     # Disabling that in case of profile is reasonable
 
-    pmc_profile: dict
+    pmc_profile: ProfileModel
 
     hideout: Hideout
 
@@ -64,38 +63,37 @@ class Profile:
         self.quests_path = self.profile_dir.joinpath('pmc_quests.json')
 
     @staticmethod
-    def from_request(request: Request) -> Profile:
-        if not request.cookies['PHPSESSID']:
-            raise TarkovError(err=401, errmsg='PHPSESSID cookie was not provided')
-
-        profile_id = request.cookies['PHPSESSID']
-        return Profile(profile_id=profile_id)
+    def exists(profile_id: str):
+        return root_dir.joinpath('resources', 'profiles', profile_id).exists() and profile_id
 
     def get_profile(self) -> dict:
         profile_data = {}
         for file in self.profile_dir.glob('pmc_*.json'):
             profile_data[file.stem] = ujson.load(file.open('r', encoding='utf8'))
 
-        profile_base = copy.deepcopy(self.pmc_profile)
-        profile_base['Hideout'] = self.hideout.data
-        profile_base['Inventory'] = self.inventory.inventory.dict()
-        profile_base['Quests'] = profile_data['pmc_quests']
-        profile_base['Stats'] = profile_data['pmc_stats']
-        profile_base['TraderStandings'] = profile_data['pmc_traders']
+        profile_base = self.pmc_profile.copy()
+        profile_base.Hideout = self.hideout.data
+        # profile_base['Inventory'] = self.inventory.inventory.dict()
+        profile_base.Quests = profile_data['pmc_quests']
+        profile_base.Stats = profile_data['pmc_stats']
 
-        return profile_base
+        return profile_base.dict(exclude_none=True)
 
-    def add_insurance(self, item: Item, trader: Traders):
-        insurance_info = {
-            'itemId': item.id,
-            'tid': trader.value
-        }
-        self.pmc_profile['InsuredItems'].append(insurance_info)
+    def add_insurance(self, item: Item, trader: TraderType):
+        self.pmc_profile.InsuredItems.append(ItemInsurance(
+            item_id=item.id,
+            trader_id=trader.value
+        ))
 
         #  Todo remove insurance from items that aren't present in inventory after raid
 
+    def receive_experience(self, amount: int):
+        self.pmc_profile.Info.Experience += amount
+
     def __read(self):
-        self.pmc_profile: dict = ujson.load(self.pmc_profile_path.open('r', encoding='utf8'))
+        self.pmc_profile: ProfileModel = ProfileModel.parse_file(self.pmc_profile_path)
+
+        # self.pmc_profile: dict = ujson.load(self.pmc_profile_path.open('r', encoding='utf8'))
 
         self.encyclopedia = Encyclopedia(profile=self)
 
@@ -112,13 +110,13 @@ class Profile:
         self.notifier.read()
 
     def __write(self):
-        ujson.dump(self.pmc_profile, self.pmc_profile_path.open('w', encoding='utf8'), indent=4)
-
+        atomic_write(self.pmc_profile.json(exclude_defaults=True), self.pmc_profile_path)
+        #
         self.inventory.write()
         self.hideout.write()
-
-        ujson.dump(self.quests_data, self.quests_path.open('w', encoding='utf8'), indent=4)
-
+        #
+        atomic_write(ujson.dumps(self.quests_data, indent=4), self.quests_path)
+        #
         self.notifier.write()
 
     def __enter__(self):

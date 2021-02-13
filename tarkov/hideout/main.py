@@ -5,12 +5,14 @@ import ujson
 from pydantic import parse_obj_as
 
 from server import db_dir, logger
+from server.utils import atomic_write
 from tarkov import inventory
 from tarkov.inventory import item_templates_repository
 from tarkov.inventory.models import Item
 from .models import HideoutArea, HideoutAreaType, HideoutProduction
 
 if TYPE_CHECKING:
+    # pylint: disable=cyclic-import
     from tarkov.profile import Profile
 
 
@@ -175,5 +177,5 @@ class Hideout:
         self.metadata['updated_at'] = self.current_time
 
     def write(self):
-        ujson.dump(self.data, self.path.open('w', encoding='utf8'), indent=4)
-        ujson.dump(self.metadata, self.meta_path.open('w', encoding='utf8'), indent=4)
+        atomic_write(ujson.dumps(self.data, indent=4), self.path)
+        atomic_write(ujson.dumps(self.metadata, indent=4), self.meta_path)
