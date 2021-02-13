@@ -16,10 +16,29 @@ if TYPE_CHECKING:
 ItemId = NewType('ItemId', str)
 TemplateId = NewType('TemplateId', str)
 
+Color = Union[
+    Literal['default'],
+    Literal['black'],
+    Literal['red'],
+    Literal['grey'],
+    Literal['blue'],
+    Literal['orange'],
+    Literal['yellow'],
+    Literal['green'],
+    Literal['violet'],
+]
+TracerColor = Union[
+    Color,
+    Literal['tracerRed'],
+    Literal['tracerGreen'],
+    Literal['tracerYellow'],
+    Literal['tracerGreen'],
+]
+
 
 class ItemTemplateProps(Base):
     class Config:
-        extra = Extra.allow
+        # extra = Extra.allow
         allow_mutation = False
 
     Name: str
@@ -68,10 +87,71 @@ class ItemTemplateProps(Base):
     # UnlootableFromSide: []
 
     ChangePriceCoef: float
-    # AllowSpawnOnLocations": [],
+    AllowSpawnOnLocations: List[Literal['laboratory', 'Shoreline', 'Interchange', 'RezervBase', 'bigmap', 'Woods']]
     # "SendToClient": false,
     # "AnimationVariantsNumber": 0,
     # "DiscardingBlock": false,
+    ammoDist: Optional[StrictInt]
+    ammoAccr: Optional[StrictInt]
+    ammoHear: Optional[StrictInt]
+    ammoRec: Optional[StrictInt]
+    ammoSfx: Optional[str]
+    ammoShiftChance: Optional[StrictInt]
+    ammoType: Optional[str]
+    ammoCaliber: Optional[str]
+    StackSlots: Optional[list]
+    Slots: Optional[list]
+    buckshotBullets: Optional[StrictInt]
+    casingEjectPower: Optional[StrictInt]
+    casingMass: Optional[float]
+    casingSounds: Optional[str]
+    casingName: Optional[str]
+
+    AmmoLifeTimeSec: Optional[StrictInt]
+    AnimationVariantsNumber: Optional[StrictInt]
+    ArmorDamage: Optional[StrictInt]
+    ArmorDistanceDistanceDamage: Optional[dict]
+    BallisticCoeficient: Optional[float]
+    Blindness: Optional[dict]
+    Contusion: Optional[dict]
+    Caliber: Optional[str]
+    Damage: Optional[StrictInt]
+    Deterioration: Optional[StrictInt]
+    DiscardingBlock: StrictBool
+    ExplosionStrength: Optional[StrictInt]
+    ExplosionType: Optional[str]
+    FragmentType: Optional[TemplateId]
+    FragmentationChance: Optional[float]
+    FragmentsCount: Optional[int]
+    FuzeArmTimeSec: Optional[float]
+    HasGrenaderComponent: Optional[StrictBool]
+    InitialSpeed: Optional[float]
+    IsLightAndSoundShot: Optional[StrictBool]
+    LightAndSoundShotAngle: Optional[StrictInt]
+    LightAndSoundShotSelfContusionStrength: Optional[float]
+    LightAndSoundShotSelfContusionTime: Optional[StrictInt]
+    MaxExplosionDistance: Optional[StrictInt]
+    MinFragmentsCount: Optional[StrictInt]
+    MaxFragmentsCount: Optional[StrictInt]
+    MinExplosionDistance: Optional[float]
+    MisfireChance: Optional[float]
+    PenetrationChance: Optional[float]
+    PenetrationPower: Optional[StrictInt]
+    PenetrationPowerDiviation: Optional[float]
+    ProjectileCount: Optional[StrictInt]
+    RicochetChance: Optional[float]
+    SendToClient: Optional[StrictBool]
+    ShowBullet: Optional[StrictBool]
+    ShowHitEffectOnExplode: Optional[StrictBool]
+    SpeedRetardation: Optional[float]
+    StaminaBurnPerDamage: Optional[float]
+    Tracer: Optional[StrictBool]
+    TracerColor: Optional[TracerColor]
+    TracerDistance: Optional[float]
+    Prefab: dict
+    UsePrefab: dict
+
+    BackgroundColor: Color
 
     StackMinRandom: Optional[StrictInt] = None
     StackMaxRandom: Optional[StrictInt] = None
@@ -86,77 +166,236 @@ class ItemTemplateProps(Base):
     Grids: Optional[List[ItemGrid]] = None
     SpawnFilter: Optional[List[TemplateId]] = None
     Cartridges: Optional[List[Cartridges]] = None
-    # "ammoType": "bullet",
-    # "Damage": 67,
-    # "ammoAccr": 0,
-    # "ammoRec": 0,
-    # "ammoDist": 0,
-    # "buckshotBullets": 0,
-    # "PenetrationPower": 1,
-    # "PenetrationPowerDiviation": 0,
-    # "ammoHear": 0,
-    # "ammoSfx": "standart",
-    # "MisfireChance": 0.01,
-    # "MinFragmentsCount": 1,
-    # "MaxFragmentsCount": 2,
-    # "ammoShiftChance": 0,
-    # "casingName": "",
-    # "casingEjectPower": 1,
-    # "casingMass": 10,
-    # "casingSounds": "pistol_small",
-    # "ProjectileCount": 1,
-    # "InitialSpeed": 250,
-    # "PenetrationChance": 0.01,
-    # "RicochetChance": 0.05,
-    # "FragmentationChance": 0.6,
-    # "BallisticCoeficient": 1,
-    # "Deterioration": 1,
-    # "SpeedRetardation": 0.00007,
-    # "Tracer": false,
-    # "TracerColor": "red",
-    # "TracerDistance": 0,
-    # "ArmorDamage": 2,
-    # "Caliber": "Caliber9x18PM",
-    # "StaminaBurnPerDamage": 0.7,
-    # "ShowBullet": false,
-    # "HasGrenaderComponent": false,
-    # "FuzeArmTimeSec": 0,
-    # "ExplosionStrength": 0,
-    # "MinExplosionDistance": 0,
-    # "MaxExplosionDistance": 0,
-    # "FragmentsCount": 0,
-    # "FragmentType": "5996f6d686f77467977ba6cc",
-    # "ShowHitEffectOnExplode": false,
-    # "ExplosionType": "",
-    # "AmmoLifeTimeSec": 5,
-    # "Contusion": {
-    #     "x": 0,
-    #     "y": 0,
-    #     "z": 0
-    # },
-    # "ArmorDistanceDistanceDamage": {
-    #     "x": 0,
-    #     "y": 0,
-    #     "z": 0
-    # },
-    # "Blindness": {
-    #     "x": 0,
-    #     "y": 0,
-    #     "z": 0
-    # },
-    # "IsLightAndSoundShot": false,
-    # "LightAndSoundShotAngle": 0,
-    # "LightAndSoundShotSelfContusionTime": 0,
-    # "LightAndSoundShotSelfContusionStrength": 0
-    # "Prefab": {
-    #     "path": "assets/content/items/ammo/patrons/patron_9x18pm
-    #             "rcid": ""
-    # },
-    # "UsePrefab": {
-    #     "path": "",
-    #     "rcid": ""
-    # },
-    # "BackgroundColor": "yellow",
+
+    CantRemoveFromSlotsDuringRaid: Optional[list]
+    UnlootableFromSide: list
+
+    BlocksEarpiece: Optional[StrictBool]
+    BlocksEyewear: Optional[StrictBool]
+    BlocksFaceCover: Optional[StrictBool]
+    BlocksHeadwear: Optional[StrictBool]
+    CanPutIntoDuringTheRaid: Optional[StrictBool]
+
+    ArmorMaterial: Optional[str]
+    BluntThroughput: Optional[float]
+    DeafStrength: Optional[str]
+    Durability: Optional[StrictInt]
+    FaceShieldComponent: Optional[StrictBool]
+    FaceShieldMask: Optional[str]
+    HasHinge: Optional[StrictBool]
+    Indestructibility: Optional[float]
+    MaterialType: Optional[str]
+    MaxDurability: Optional[StrictInt]
+    RicochetParams: Optional[dict]
+    armorClass: Optional[str]
+    armorZone: Optional[List[str]]
+    headSegments: Optional[List[str]]
+    mousePenalty: Optional[StrictInt]
+    speedPenaltyPercent: Optional[StrictInt]
+    weaponErgonomicPenalty: Optional[StrictInt]
+
+    IsSilencer: Optional[StrictBool]
+
+    BlocksArmorVest: Optional[StrictBool]
+    GridLayoutName: Optional[str]
+    SearchSound: Optional[str]
+
+    AimPlane: Optional[float]
+    BoltAction: Optional[StrictBool]
+    CameraRecoil: Optional[float]
+    CameraSnap: Optional[float]
+    CenterOfImpact: Optional[float]
+    Chambers: Optional[List]
+    CompactHandling: Optional[StrictBool]
+    Convergence: Optional[float]
+    DeviationCurve: Optional[StrictInt]
+    DeviationMax: Optional[StrictInt]
+    Ergonomics: Optional[Union[StrictInt, float]]
+    FoldedSlot: Optional[str]
+    HipAccuracyRestorationDelay: Optional[float]
+    HipAccuracyRestorationSpeed: Optional[StrictInt]
+    HipInnaccuracyGain: Optional[float]
+    IronSightRange: Optional[StrictInt]
+    ManualBoltCatch: Optional[StrictBool]
+    MustBoltBeOpennedForExternalReload: Optional[StrictBool]
+    MustBoltBeOpennedForInternalReload: Optional[StrictBool]
+    OperatingResource: Optional[StrictInt]
+    RecoilAngle: Optional[StrictInt]
+    RecoilCenter: Optional[dict]
+    RecoilForceBack: Optional[StrictInt]
+    MaxRepairDegradation: Optional[float]
+    MinRepairDegradation: Optional[float]
+    RecoilForceUp: Optional[StrictInt]
+    RecolDispersion: Optional[StrictInt]
+    ReloadMode: Optional[str]
+    RepairComplexity: Optional[StrictInt]
+    Retractable: Optional[StrictBool]
+    RotationCenter: Optional[dict]
+    RotationCenterNoStock: Optional[dict]
+    SightingRange: Optional[StrictInt]
+    SizeReduceRight: Optional[StrictInt]
+    TacticalReloadFixation: Optional[float]
+    TacticalReloadStiffnes: Optional[dict]
+    Velocity: Optional[float]
+    bEffDist: Optional[StrictInt]
+    bFirerate: Optional[StrictInt]
+    bHearDist: Optional[StrictInt]
+    chamberAmmoCount: Optional[StrictInt]
+    defAmmo: Optional[TemplateId]
+    defMagType: Optional[TemplateId]
+    durabSpawnMax: Optional[StrictInt]
+    durabSpawnMin: Optional[StrictInt]
+    isBoltCatch: Optional[StrictBool]
+    isChamberLoad: Optional[StrictBool]
+    isFastReload: Optional[StrictBool]
+    shotgunDispersion: Optional[StrictInt]
+    ShotgunDispersion: Optional[float]
+    weapClass: Optional[str]
+    weapFireType: Optional[List[str]]
+    weapUseType: Optional[str]
+    Accuracy: Optional[StrictInt]
+    AimSensitivity: Optional[list]
+    BlocksCollapsible: Optional[StrictBool]
+    BlocksFolding: Optional[StrictBool]
+    CalibrationDistances: Optional[List[List[Union[StrictInt, float]]]]
+    OpticCalibrationDistances: Optional[List[StrictInt]]
+    RaidModdable: Optional[StrictBool]
+    ScopesCount: Optional[StrictInt]
+    SightModesCount: Optional[StrictInt]
+    ToolModdable: Optional[StrictBool]
+    Zooms: Optional[List[List[Union[StrictInt, float]]]]
+    Recoil: Optional[Union[StrictInt, float]]
+    EffectiveDistance: Optional[StrictInt]
+    HasShoulderContact: Optional[StrictBool]
+    IsAnimated: Optional[StrictBool]
+    Loudness: Optional[StrictInt]
+    ModesCount: Optional[List[StrictInt]]
+    aimingSensitivity: Optional[float]
+    sightModType: Optional[str]
+
+    MaxResource: Optional[StrictInt]
+    Resource: Optional[StrictInt]
+
+    apResource: Optional[StrictInt]
+    krResource: Optional[StrictInt]
+
+    foodUseTime: Optional[StrictInt]
+    foodEffectType: Optional[str]
+    effects_health: Optional[dict]
+    effects_damage: Optional[Union[list, dict]]
+    StimulatorBuffs: Optional[str]
+
+    muzzleModType: Optional[str]
+    ModesCount: Optional[Union[List[StrictInt], StrictInt]]
+
+    # Probably headsets related
+    AmbientVolume: Optional[StrictInt]
+    CompressorAttack: Optional[StrictInt]
+    CompressorGain: Optional[StrictInt]
+    CompressorRelease: Optional[StrictInt]
+    CompressorTreshold: Optional[StrictInt]
+    CompressorVolume: Optional[StrictInt]
+    CutoffFreq: Optional[StrictInt]
+    Distortion: Optional[float]
+    DryVolume: Optional[StrictInt]
+    Resonance: Optional[float]
+
+    MaximumNumberOfUsage: Optional[StrictInt]
+
+    knifeHitDelay: Optional[StrictInt]
+    knifeHitSlashRate: Optional[StrictInt]
+    knifeHitStabRate: Optional[StrictInt]
+    knifeHitRadius: Optional[float]
+    knifeHitSlashDam: Optional[StrictInt]
+    knifeHitStabDam: Optional[StrictInt]
+    knifeDurab: Optional[StrictInt]
+    Durability: Optional[StrictInt]
+    MaxDurability: Optional[StrictInt]
+    PrimaryDistance: Optional[StrictInt]
+    SecondryDistance: Optional[StrictInt]
+    SlashPenetration: Optional[StrictInt]
+    StabPenetration: Optional[StrictInt]
+    MinRepairDegradation: Optional[float]
+    MaxRepairDegradation: Optional[float]
+    PrimaryConsumption: Optional[StrictInt]
+    SecondryConsumption: Optional[StrictInt]
+    DeflectionConsumption: Optional[StrictInt]
+    PrimaryDistance: Optional[float]
+    SecondryDistance: Optional[float]
+
+    KeyIds: Optional[List[TemplateId]]
+    TagColor: Optional[StrictInt]
+    TagName: Optional[str]
+
+    magAnimationIndex: Optional[StrictInt]
+    CanFast: Optional[StrictBool]
+    CanHit: Optional[StrictBool]
+    CanAdmin: Optional[StrictBool]
+    LoadUnloadModifier: Optional[StrictInt]
+    CheckTimeModifier: Optional[StrictInt]
+    CheckOverride: Optional[StrictInt]
+    ReloadMagType: Optional[str]
+    VisibleAmmoRangesString: Optional[str]
+
+    ConfigPathStr: Optional[str]
+    MaxMarkersCount: Optional[StrictInt]
+    scaleMax: Optional[float]
+    scaleMin: Optional[float]
+
+    containType: Optional[list]
+    isSecured: Optional[StrictBool]
+    lootFilter: Optional[list]
+    maxCountSpawn: Optional[Literal[0]]
+    minCountSpawn: Optional[Literal[0]]
+    openedByKeyID: Optional[list]
+    sizeHeight: Optional[StrictInt]
+    sizeWidth: Optional[StrictInt]
+    spawnRarity: Optional[str]
+    spawnTypes: Optional[str]
+    eqMax: Optional[StrictInt]
+    eqMin: Optional[StrictInt]
+    rate: Optional[StrictInt]
+    type: Optional[Any]
+
+    Color: Optional[Union[dict, str]]
+    DiffuseIntensity: Optional[float]
+    Intensity: Optional[float]
+    Mask: Optional[str]
+    MaskSize: Optional[float]
+    NoiseIntensity: Optional[float]
+    NoiseScale: Optional[StrictInt]
+
+    DogTagQualities: Optional[StrictBool]
+
+    IsShoulderContact: Optional[StrictBool]
+
+    # Probably thermal scopes
+    ColdMax: Optional[float]
+    DepthFade: Optional[float]
+    HeatMin: Optional[float]
+    IsFpsStuck: Optional[StrictBool]
+    IsGlitch: Optional[StrictBool]
+    IsMotionBlurred: Optional[StrictBool]
+    IsNoisy: Optional[StrictBool]
+    IsPixelated: Optional[StrictBool]
+    MainTexColorCoef: Optional[float]
+    MinimumTemperatureValue: Optional[float]
+    PixelationBlockCount: Optional[StrictInt]
+    RampPalette: Optional[str]
+    RampShift: Optional[float]
+    RoughnessCoef: Optional[float]
+    SpecularCoef: Optional[float]
+
+    CanBeHiddenDuringThrow: Optional[StrictBool]
+    ContusionDistance: Optional[StrictInt]
+    EmitTime: Optional[StrictInt]
+    ExplDelay: Optional[float]
+    Strength: Optional[StrictInt]
+    ThrowType: Optional[str]
+    explDelay: Optional[float]
+    throwDamMax: Optional[float]
+
+    RigLayoutName: Optional[str]
 
 
 class NodeTemplateBase(Base):
