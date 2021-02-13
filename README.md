@@ -13,6 +13,9 @@ To start server run `main.py`
 ##### How to bundle application into `.exe`
 To bundle application run `build.py`
 
+#### Launcher  
+JET Launcher partially works and can login you with static profile id
+
 #### Client
 
 Required client version: `12.8.9767`
