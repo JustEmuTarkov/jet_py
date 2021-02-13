@@ -12,6 +12,7 @@ pyyaml = "==5.4.1"
 orjson = "*"
 fastapi = {extras = ["all"], version = "*"}
 uvicorn = "*"
+aiofiles = "*"
 
 [dev-packages]
 pyinstaller = "==4.1"
