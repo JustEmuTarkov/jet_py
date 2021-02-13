@@ -70,7 +70,7 @@ class Mail:
 
         return {'messages': [msg.dict() for msg in dialogue.messages]}
 
-    def all_attachments_view(self, dialogue_id):
+    def all_attachments_view(self, dialogue_id) -> dict:
         dialogue = self.get_dialogue(dialogue_id)
 
         messages = [msg.dict(exclude_none=True) for msg in dialogue.messages if not self.__is_message_expired(msg)]

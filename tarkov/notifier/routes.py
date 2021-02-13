@@ -1,17 +1,34 @@
-import time
+import asyncio
 from typing import Dict, List, Optional, Union
 
 import orjson
 from fastapi import APIRouter
 from fastapi.params import Cookie, Param
 from starlette.requests import Request
+from starlette.responses import PlainTextResponse
 
 import tarkov.profile
+from server.requests import ZLibRoute
 from server.utils import get_request_url_root
 from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
 from tarkov.notifier.notifier import notifier_instance
+from tarkov.notifier.requests import GetAllAttachmentsRequest, MailDialogViewRequest
 
 notifier_router = APIRouter(tags=['Notifier'])
+notifier_router.route_class = ZLibRoute
+
+
+@notifier_router.get('/notifierServer/get/{profile_id}', response_class=PlainTextResponse)
+async def notifierserver_get(profile_id: str) -> bytes:
+    for _ in range(15):  # Poll for 15 seconds
+        print('poll')
+        if notifier_instance.has_notifications(profile_id):
+            notifications = notifier_instance.get_notifications(profile_id)
+            response = '\n'.join([orjson.dumps(notification).decode('utf8') for notification in notifications])
+            return response.encode('utf8')
+
+        await asyncio.sleep(1)
+    return orjson.dumps(notifier_instance.get_empty_notification())
 
 
 @notifier_router.post('/client/mail/dialog/list')
@@ -44,45 +61,31 @@ def mail_dialog_info(
 
 
 @notifier_router.post('/client/mail/dialog/view')
-def mail_dialog_view(
-        dialogue_id: str = Param(alias='dialogId', default=...),  # type: ignore
-        time_: float = Param(alias='time', default=...),  # type: ignore
-        profile_id: Optional[str] = Cookie(alias='PHPSESSID', default=None),  # type: ignore
+async def mail_dialog_view(
+        request: MailDialogViewRequest,
+        profile_id: Optional[str] = Cookie(..., alias='PHPSESSID'),  # type: ignore
 ) -> Union[TarkovSuccessResponse[dict], TarkovErrorResponse]:
-    # dialogue_id: str = dialogId
-
     if not profile_id:
         return TarkovErrorResponse.profile_id_is_none()
 
     with tarkov.profile.Profile(profile_id) as profile:
         return TarkovSuccessResponse(
-            data=profile.notifier.view_dialog(dialogue_id=dialogue_id, time_=time_)
+            data=profile.notifier.view_dialog(dialogue_id=request.dialogue_id, time_=request.time)
         )
 
 
 @notifier_router.post('/client/mail/dialog/getAllAttachments')
 def mail_dialog_all_attachments(
-        dialogue_id: str = Param(..., alias='dialogId'),  # type: ignore
+        request: GetAllAttachmentsRequest,
         profile_id: Optional[str] = Cookie(alias='PHPSESSID', default=None),  # type: ignore
 ) -> Union[TarkovSuccessResponse[dict], TarkovErrorResponse]:
     if profile_id is None:
         return TarkovErrorResponse.profile_id_is_none()
 
     with tarkov.profile.Profile(profile_id) as profile:
-        return profile.notifier.all_attachments_view(dialogue_id=dialogue_id)
-
-
-@notifier_router.get('/notifierServer/get/{profile_id}')
-def notifierserver_get(profile_id: str) -> Union[dict, str]:
-    for _ in range(15):  # Poll for 15 seconds
-        if notifier_instance.has_notifications(profile_id):
-            notifications = notifier_instance.get_notifications(profile_id)
-            response = '\n'.join([orjson.dumps(notification).decode('utf8') for notification in notifications])
-            return response
-
-        time.sleep(1)
-
-    return notifier_instance.get_empty_notification()
+        return TarkovSuccessResponse(
+            data=profile.notifier.all_attachments_view(dialogue_id=request.dialogue_id)
+        )
 
 
 @notifier_router.post('/client/notifier/channel/create')
