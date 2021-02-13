@@ -3,18 +3,17 @@ import random
 from typing import Dict, Optional, Type, Union
 
 import ujson
-from fastapi import APIRouter
 from fastapi.params import Cookie
 from starlette.requests import Request
 
 from server import db_dir, start_time
-from server.utils import get_request_url_root
+from server.utils import get_request_url_root, make_router
 from tarkov.inventory import item_templates_repository
 from tarkov.inventory.models import TemplateId
 from tarkov.inventory.repositories import AnyTemplate
 from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
 
-misc_router = APIRouter(prefix='', tags=['Misc/Bootstrap'])
+misc_router = make_router(tags=['Misc/Bootstrap'])
 
 
 @misc_router.post('/client/locations')

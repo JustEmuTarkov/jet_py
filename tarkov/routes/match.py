@@ -1,15 +1,15 @@
 from typing import Literal, Optional, Union
 
 import ujson
-from fastapi import APIRouter
 from fastapi.params import Cookie
 from flask import request
 
 from server import db_dir
+from server.utils import make_router
 from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
 from tarkov.profile import Profile
 
-match_router = APIRouter(prefix='', tags=['Match'])
+match_router = make_router(tags=['Match'])
 
 
 @match_router.post('/client/match/group/status')

@@ -45,25 +45,21 @@ class TarkovGZipMiddleware(BaseHTTPMiddleware):
         )
 
 
-tarkov_router = APIRouter()
-tarkov_router.route_class = ZLibRoute
-tarkov_router.default_response_class = ZLibORJSONResponse
-
-tarkov_router.include_router(notifier_router)
-
-tarkov_router.include_router(trader_router)
-tarkov_router.include_router(profile_router)
-
-tarkov_router.include_router(friend_router)
-tarkov_router.include_router(hideout_router)
-tarkov_router.include_router(lang_router)
-tarkov_router.include_router(insurance_router)
-tarkov_router.include_router(singleplayer_router)
-tarkov_router.include_router(misc_router)
-tarkov_router.include_router(flea_market_router)
-tarkov_router.include_router(match_router)
-tarkov_router.include_router(launcher_router)
-
 app = FastAPI()
-app.include_router(tarkov_router)
+
+app.include_router(notifier_router)
+
+app.include_router(trader_router)
+app.include_router(profile_router)
+
+app.include_router(friend_router)
+app.include_router(hideout_router)
+app.include_router(lang_router)
+app.include_router(insurance_router)
+app.include_router(singleplayer_router)
+app.include_router(misc_router)
+app.include_router(flea_market_router)
+app.include_router(match_router)
+app.include_router(launcher_router)
+
 app.mount('/files', StaticFiles(directory=str(root_dir.joinpath('resources', 'static'))), name='static')

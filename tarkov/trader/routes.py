@@ -1,15 +1,16 @@
 from typing import Dict, List, Optional, Union
 
-from fastapi import APIRouter, HTTPException
+from fastapi import HTTPException
 from fastapi.params import Cookie
 
+from server.utils import make_router
 from tarkov.inventory.models import Item, ItemId
 from tarkov.models import Base, TarkovErrorResponse, TarkovSuccessResponse
 from tarkov.profile import Profile
 from tarkov.trader import TraderInventory, TraderType, get_trader_base, get_trader_bases
 from tarkov.trader.models import BarterSchemeEntry
 
-trader_router = APIRouter(prefix='', tags=['Traders'])
+trader_router = make_router(tags=['Traders'])
 
 
 @trader_router.post(

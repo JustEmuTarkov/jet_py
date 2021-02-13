@@ -1,10 +1,10 @@
 from typing import List
 
 import ujson
-from fastapi import APIRouter
 from flask import request
 
 from server import db_dir, logger
+from server.utils import make_router
 from tarkov.inventory.helpers import regenerate_items_ids
 from tarkov.lib import locations
 from tarkov.lib.bots import BotGenerator
@@ -12,7 +12,7 @@ from tarkov.models import TarkovSuccessResponse
 from tarkov.profile import Profile
 from tarkov.profile.models import ProfileModel
 
-singleplayer_router = APIRouter(prefix='', tags=['Singleplayer'])
+singleplayer_router = make_router(tags=['Singleplayer'])
 
 
 @singleplayer_router.get('/singleplayer/bundles')

@@ -2,20 +2,17 @@ import asyncio
 from typing import Dict, List, Optional, Union
 
 import orjson
-from fastapi import APIRouter
 from fastapi.params import Cookie, Param
 from starlette.requests import Request
 from starlette.responses import PlainTextResponse
 
 import tarkov.profile
-from server.requests import ZLibRoute
-from server.utils import get_request_url_root
+from server.utils import get_request_url_root, make_router
 from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
 from tarkov.notifier.notifier import notifier_instance
 from tarkov.notifier.requests import GetAllAttachmentsRequest, MailDialogViewRequest
 
-notifier_router = APIRouter(tags=['Notifier'])
-notifier_router.route_class = ZLibRoute
+notifier_router = make_router(tags=['Notifier'])
 
 
 @notifier_router.get('/notifierServer/get/{profile_id}', response_class=PlainTextResponse)

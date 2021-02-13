@@ -1,9 +1,8 @@
-from fastapi import APIRouter
-
+from server.utils import make_router
 from tarkov.lib import hideout
 from tarkov.models import TarkovSuccessResponse
 
-hideout_router = APIRouter(prefix='', tags=['Hideout'])
+hideout_router = make_router(tags=['Hideout'])
 
 
 @hideout_router.post('/client/hideout/areas')

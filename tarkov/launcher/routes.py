@@ -1,11 +1,8 @@
-from fastapi import APIRouter
 from starlette.requests import Request
 
-from server.requests import ZLibRoute
-from server.utils import get_request_url_root
+from server.utils import get_request_url_root, make_router
 
-launcher_router = APIRouter(tags=['Launcher'])
-launcher_router.route_class = ZLibRoute
+launcher_router = make_router(tags=['Launcher'])
 
 
 @launcher_router.get('/launcher/server/connect')
@@ -32,7 +29,6 @@ async def get_profile():
         "wipe": False,
         "edition": "Edge Of Darkness"
     }
-
 
 # async def server_info():
 #     return {

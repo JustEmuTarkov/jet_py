@@ -3,18 +3,18 @@ from __future__ import annotations
 from typing import List, Optional, Union
 
 import ujson
-from fastapi import APIRouter
 from fastapi.params import Cookie
 from starlette.requests import Request
 
 from server import root_dir
-from server.utils import get_request_url_root
-from server.requests import ZLibRequest, ZLibRoute
+from server.requests import ZLibRequest
+from server.utils import get_request_url_root, make_router
 from tarkov.inventory_dispatcher import DispatcherManager
 from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
 from tarkov.profile import Profile
+from tarkov.profile.models import ProfileModel
 
-profile_router = APIRouter(tags=['Profile'], route_class=ZLibRoute)
+profile_router = make_router(tags=['Profile'])
 
 
 @profile_router.post('/client/game/profile/items/moving')
@@ -44,10 +44,11 @@ def client_game_profile_list(
         pmc_profile = profile.get_profile()
 
         profile_dir = root_dir.joinpath('resources', 'profiles', profile.profile_id)
+
         scav_profile = ujson.load((profile_dir / 'character_scav.json').open('r'))
 
         return TarkovSuccessResponse(data=[
-            pmc_profile,
+            ProfileModel.parse_obj(pmc_profile).dict(exclude_unset=False, exclude_defaults=False, exclude_none=True),
             scav_profile,
         ])
 

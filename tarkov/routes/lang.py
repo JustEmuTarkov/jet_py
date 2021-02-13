@@ -1,13 +1,13 @@
 from functools import lru_cache
 
 import ujson
-from fastapi import APIRouter
 
 from server import db_dir
+from server.utils import make_router
 from tarkov.library import load_locale
 from tarkov.models import TarkovSuccessResponse
 
-lang_router = APIRouter(prefix='', tags=['Locale'])
+lang_router = make_router(tags=['Locale'])
 
 
 @lru_cache(8)

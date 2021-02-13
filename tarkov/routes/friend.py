@@ -1,8 +1,7 @@
-from fastapi import APIRouter
-
+from server.utils import make_router
 from tarkov.models import TarkovSuccessResponse
 
-friend_router = APIRouter(prefix='', tags=['Friends'])
+friend_router = make_router(tags=['Friends'])
 
 
 @friend_router.post('/client/friend/list')
