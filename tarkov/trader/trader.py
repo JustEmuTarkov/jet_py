@@ -127,7 +127,7 @@ class TraderInventory(ImmutableInventory):
             """Return item and it's children from trader inventory"""
             for item in items_list:
                 yield item
-                yield from self.iter_item_children(item)
+                yield from self.iter_item_children_recursively(item)
 
         return list(assort_inner(items))
 
