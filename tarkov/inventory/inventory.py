@@ -19,6 +19,7 @@ from .models import (AnyItemLocation, AnyMoveLocation, CartridgesMoveLocation, I
 from .repositories import item_templates_repository
 
 if TYPE_CHECKING:
+    # pylint: disable=cyclic-import
     from tarkov.profile import Profile
 
 
