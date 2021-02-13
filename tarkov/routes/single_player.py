@@ -1,11 +1,13 @@
-from typing import List
+from typing import Any, List
 
 import ujson
-from flask import request
+from fastapi import Request
+from pydantic import BaseModel, parse_obj_as
 
 from server import db_dir, logger
 from server.utils import make_router
 from tarkov.inventory.helpers import regenerate_items_ids
+from tarkov.inventory.models import Item
 from tarkov.lib import locations
 from tarkov.lib.bots import BotGenerator
 from tarkov.models import TarkovSuccessResponse
@@ -16,8 +18,8 @@ singleplayer_router = make_router(tags=['Singleplayer'])
 
 
 @singleplayer_router.get('/singleplayer/bundles')
-def singleplayer_bundles():
-    return ujson.dumps([])
+def singleplayer_bundles() -> List:
+    return []
 
 
 @singleplayer_router.get('/singleplayer/settings/raid/menu')
@@ -32,7 +34,7 @@ def singleplayer_settings_raid_menu() -> dict:
     }
 
 
-@singleplayer_router.post('/api/location/<string:location_name>')
+@singleplayer_router.get('/api/location/{location_name}')
 def location(location_name: str) -> dict:
     location_name = location_name.lower()
 
@@ -51,17 +53,19 @@ def bot_difficulty_settings(type_: str, difficulty: str) -> dict:
     return ujson.load(bot_file)
 
 
-@singleplayer_router.get('/singleplayer/settings/bot/limit/<string:bot_type>')
+@singleplayer_router.get('/singleplayer/settings/bot/limit/{bot_type}')
 def settings_bot_limit(bot_type: str) -> int:  # pylint: disable=unused-argument
     return 30
 
 
 @singleplayer_router.post('/client/game/bot/generate')
-def generate_bots() -> TarkovSuccessResponse[List[dict]]:
+async def generate_bots(
+        request: Request
+) -> TarkovSuccessResponse[List[dict]]:
     bots: List[dict] = []
-    request_data: dict = request.data  # type: ignore
+    request_data: dict = await request.json()
 
-    logger.debug(request.data)
+    logger.debug(request_data)
     bot_generator = BotGenerator()
     for condition in request_data['conditions']:
         bot_limit = condition['Limit']
@@ -103,21 +107,27 @@ def mode_offline():
         "LoadOfflineRaidScreenPatch": True,
         "ScavPrefabLoadPatch": True,
         "ScavProfileLoadPatch": True,
-        "ScavSpawnPointPatch": False,
+        "ScavSpawnPointPatch": True,
         "ScavExfilPatch": True,
         "EndByTimerPatch": True
     }
 
 
+class ProfileSaveRequest(BaseModel):
+    profile: ProfileModel
+    isPlayerScav: bool
+    exit: Any
+    health: Any
+
+
 @singleplayer_router.put('/raid/profile/save')
-def singleplayer_raid_profile_save(profile: ProfileModel) -> TarkovSuccessResponse:
+async def singleplayer_raid_profile_save(request: Request) -> TarkovSuccessResponse:
     # TODO: Add Saving profile here
     # data struct {exit, isPlayerScav, profile, health}
     # update profile on this request
+    body = await request.json()
 
-    raid_profile = profile
-
-    with Profile(profile_id=raid_profile.aid) as player_profile:
+    with Profile(profile_id=body['profile']['aid']) as profile:
         # profile.pmc_profile['Health']['BodyParts'] = data['health']['Health']
         # for body_part in profile.pmc_profile['HealtPh']['BodyParts']:
         #     del body_part['Effects']
@@ -129,16 +139,16 @@ def singleplayer_raid_profile_save(profile: ProfileModel) -> TarkovSuccessRespon
         # profile.pmc_profile['Encyclopedia'] = profile_data['Encyclopedia']
         # profile.pmc_profile['Skills'] = profile_data['Skills']
 
-        raid_inventory_items = raid_profile.Inventory.items
-        equipment = player_profile.inventory.get_item(player_profile.inventory.inventory.equipment)
+        raid_inventory_items: List[Item] = parse_obj_as(List[Item], body['profile']['Inventory']['items'])
+        equipment = profile.inventory.get_item(profile.inventory.inventory.equipment)
 
         # Remove all equipment children
-        player_profile.inventory.remove_item(equipment, remove_children=True)
-        player_profile.inventory.add_item(equipment, child_items=[])
+        profile.inventory.remove_item(equipment, remove_children=True)
+        profile.inventory.add_item(equipment, child_items=[])
 
         items = list(item for item in raid_inventory_items if item.slotId is not None)
         regenerate_items_ids(items)  # Regenerate item ids to be 100% safe
-        player_profile.inventory.add_items(items)
+        profile.inventory.add_items(items)
 
     return TarkovSuccessResponse(data=None)
 

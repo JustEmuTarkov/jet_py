@@ -2,8 +2,8 @@ from typing import Literal, Optional, Union
 
 import ujson
 from fastapi.params import Cookie
-from flask import request
 
+from fastapi import Request
 from server import db_dir
 from server.utils import make_router
 from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
@@ -46,22 +46,24 @@ def available() -> TarkovSuccessResponse[Literal[True]]:
 #     'keyId': ''
 # }
 @match_router.post('/client/match/join')
-def join(
+async def join(
+        request: Request,
         profile_id: Optional[str] = Cookie(alias='PHPSESSID', default=None),  # type: ignore
 ) -> Union[TarkovSuccessResponse[list], TarkovErrorResponse]:
     if profile_id is None:
         return TarkovErrorResponse.profile_id_is_none()
 
+    request_data: dict = await request.json()
     with Profile(profile_id) as profile:
         return TarkovSuccessResponse(data=[
             {
-                'profileid': profile.pmc_profile['_id'],
+                'profileid': profile.pmc_profile.id,
                 'status': 'busy',
                 'sid': '',
                 'ip': '127.0.0.1',
                 'port': 9909,
                 'version': 'live',
-                'location': request.data['location'],  # type: ignore
+                'location``': request_data['location'],
                 'gamemode': 'deathmatch',
                 'shortid': 'TEST',
             }

@@ -32,7 +32,12 @@ class TraderLoyaltyLevel(Base):
     min_level: int = Field(alias='minLevel')
     min_sales_sum: int = Field(alias='minSalesSum')
     minStanding: float = Field(alias='minStanding')
+
     heal_price_coef: Optional[float] = None
+    buy_price_coef: Optional[float] = None
+    exchange_price_coef: Optional[float] = None
+    insurance_price_coef: Optional[float] = None
+    repair_price_coef: Optional[float] = None
 
 
 class TraderStanding(Base):
@@ -42,6 +47,7 @@ class TraderStanding(Base):
     next_loyalty: Any = Field(alias='NextLoyalty', const=None)
     loyalty_levels: Dict[Literal['0', '1', '2', '3'], TraderLoyaltyLevel] = Field(alias='loyaltyLevels')
     display: Optional[StrictBool] = None
+    current_loyalty: Optional[float] = Field(alias='CurrentLoyalty', default=None)
 
 
 class TraderInsurance(Base):

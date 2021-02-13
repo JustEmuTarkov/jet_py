@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from pydantic import Extra, Field, StrictBool, StrictInt, root_validator
 
@@ -71,8 +71,8 @@ class _ConditionCounters(Base):
 
 
 class BackendCounter(Base):
-    id: str
-    qid: str
+    id: Optional[str]
+    qid: Optional[str]
     value: int
 
 

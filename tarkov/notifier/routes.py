@@ -18,7 +18,6 @@ notifier_router = make_router(tags=['Notifier'])
 @notifier_router.get('/notifierServer/get/{profile_id}', response_class=PlainTextResponse)
 async def notifierserver_get(profile_id: str) -> bytes:
     for _ in range(15):  # Poll for 15 seconds
-        print('poll')
         if notifier_instance.has_notifications(profile_id):
             notifications = notifier_instance.get_notifications(profile_id)
             response = '\n'.join([orjson.dumps(notification).decode('utf8') for notification in notifications])

@@ -119,7 +119,7 @@ class Profile:
         #
         self.notifier.write()
 
-    def __enter__(self):
+    def __enter__(self) -> Profile:
         self.__read()
         return self
 
