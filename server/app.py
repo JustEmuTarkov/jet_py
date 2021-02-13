@@ -1,15 +1,13 @@
 import typing
 import zlib
 
-from fastapi import APIRouter, FastAPI
+from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request
 from starlette.responses import Response, StreamingResponse
 
 from server import root_dir
-from server.requests import ZLibRoute
-from server.responses import ZLibORJSONResponse
 from tarkov.launcher.routes import launcher_router
 from tarkov.notifier.routes import notifier_router
 from tarkov.profile.routes import profile_router
