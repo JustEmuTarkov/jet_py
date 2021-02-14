@@ -48,7 +48,9 @@ def bot_difficulty_settings(type_: str, difficulty: str) -> dict:
     if type_ == "core":
         return ujson.load(db_dir.joinpath("base", "botCore.json").open(encoding="utf8"))
 
-    bot_file = db_dir.joinpath("bots", type_, "difficulty", f"{difficulty}.json").open(encoding="utf8")
+    bot_file = db_dir.joinpath("bots", type_, "difficulty", f"{difficulty}.json").open(
+        encoding="utf8"
+    )
 
     return ujson.load(bot_file)
 
@@ -69,7 +71,9 @@ async def generate_bots(request: Request) -> TarkovSuccessResponse[List[dict]]:
         bot_limit = condition["Limit"]
 
         for _ in range(bot_limit):
-            bot = bot_generator.generate_bot(role=condition["Role"], difficulty=condition["Difficulty"])
+            bot = bot_generator.generate_bot(
+                role=condition["Role"], difficulty=condition["Difficulty"]
+            )
             bots.append(bot)
 
     return TarkovSuccessResponse(data=bots)
@@ -137,7 +141,9 @@ async def singleplayer_raid_profile_save(request: Request) -> TarkovSuccessRespo
         # profile.pmc_profile['Encyclopedia'] = profile_data['Encyclopedia']
         # profile.pmc_profile['Skills'] = profile_data['Skills']
 
-        raid_inventory_items: List[Item] = parse_obj_as(List[Item], body["profile"]["Inventory"]["items"])
+        raid_inventory_items: List[Item] = parse_obj_as(
+            List[Item], body["profile"]["Inventory"]["items"]
+        )
         equipment = profile.inventory.get_item(profile.inventory.inventory.equipment)
 
         # Remove all equipment children

@@ -9,34 +9,44 @@ from server import db_dir
 from tarkov.exceptions import NotFoundError
 from .helpers import generate_item_id, regenerate_items_ids
 from .models import Item, ItemTemplate, ItemUpdMedKit, NodeTemplate
+from .prop_models import MedsProps
 from .types import TemplateId
-from .prop_models import MedsProp
 
 AnyTemplate = Union[ItemTemplate, NodeTemplate]
 
 
 class ItemTemplatesRepository:
     def __init__(self):
-        self._item_templates: Dict[TemplateId, AnyTemplate] = self.__read_item_templates()
+        self._item_templates: Dict[
+            TemplateId, AnyTemplate
+        ] = self.__read_item_templates()
         self._item_categories: dict = self.__read_item_categories()
-
-        self.globals = ujson.load(db_dir.joinpath("base", "globals.json").open(encoding="utf8"))
+        self.globals = ujson.load(
+            db_dir.joinpath("base", "globals.json").open(encoding="utf8")
+        )
 
     @staticmethod
-    def __read_item_templates() -> Dict[TemplateId, AnyTemplate]:
+    def __read_item_templates() -> Dict[TemplateId, ItemTemplate]:
+
         item_templates: List[AnyTemplate] = []
 
         # Read every file from db/items
         for item_file_path in db_dir.joinpath("items").glob("*"):
-            file_data = ujson.load(item_file_path.open("r", encoding="utf8"))
-            items: List[AnyTemplate] = pydantic.parse_obj_as(List[AnyTemplate], file_data)
+            file_data: List[dict] = ujson.load(
+                item_file_path.open("r", encoding="utf8")
+            )
+            items: List[ItemTemplate] = pydantic.parse_obj_as(
+                List[ItemTemplate],
+                (item for item in file_data if item["_type"] == "Item"),
+            )
             item_templates.extend(items)
-
         return {tpl.id: tpl for tpl in item_templates}
 
     @staticmethod
     def __read_item_categories():
-        items = ujson.load(db_dir.joinpath("templates", "items.json").open("r", encoding="utf8"))
+        items = ujson.load(
+            db_dir.joinpath("templates", "items.json").open("r", encoding="utf8")
+        )
         items = {item["Id"]: item for item in items}
         return items
 
@@ -57,7 +67,9 @@ class ItemTemplatesRepository:
 
         return item_template
 
-    def get_any_template(self, item: Union[Item, TemplateId]) -> Union[NodeTemplate, ItemTemplate]:
+    def get_any_template(
+            self, item: Union[Item, TemplateId]
+    ) -> Union[NodeTemplate, ItemTemplate]:
         if isinstance(item, Item):
             template_id = item.tpl
         else:
@@ -66,12 +78,18 @@ class ItemTemplatesRepository:
         try:
             item_template = self._item_templates[template_id]
         except KeyError as error:
-            raise NotFoundError(f"Can not found any template with id {template_id}") from error
+            raise NotFoundError(
+                f"Can not found any template with id {template_id}"
+            ) from error
 
         return item_template
 
-    def iter_template_children(self, template_id: TemplateId) -> Iterable[Union[NodeTemplate, ItemTemplate]]:
-        templates: List[Union[NodeTemplate, ItemTemplate]] = [self.get_any_template(template_id)]
+    def iter_template_children(
+            self, template_id: TemplateId
+    ) -> Iterable[Union[NodeTemplate, ItemTemplate]]:
+        templates: List[Union[NodeTemplate, ItemTemplate]] = [
+            self.get_any_template(template_id)
+        ]
         while templates:
             template = templates.pop()
             yield template
@@ -90,7 +108,11 @@ class ItemTemplatesRepository:
         template = self.get_any_template(template_id)
         if isinstance(template, ItemTemplate):
             return [template]
-        return [tpl for tpl in self.iter_template_children(template_id) if isinstance(tpl, ItemTemplate)]
+        return [
+            tpl
+            for tpl in self.iter_template_children(template_id)
+            if isinstance(tpl, ItemTemplate)
+        ]
 
     def get_category(self, item: Item):
         return self._item_categories[item.tpl]["ParentId"]
@@ -127,10 +149,10 @@ class ItemTemplatesRepository:
 
         #  Item is either medkit or a painkiller
         if item_template.parent in (
-            "5448f39d4bdc2d0a728b4568",
-            "5448f3a14bdc2d27728b4569",
+                "5448f39d4bdc2d0a728b4568",
+                "5448f3a14bdc2d27728b4569",
         ):
-            assert isinstance(item_template.props, MedsProp)
+            assert isinstance(item_template.props, MedsProps)
 
             medkit_max_hp = item_template.props.MaxHpResource
             assert medkit_max_hp is not None
@@ -165,7 +187,9 @@ class ItemTemplatesRepository:
             items.append(ItemTemplatesRepository.__create_item(item_template, count))
 
         if stack_size % count:
-            items.append(ItemTemplatesRepository.__create_item(item_template, stack_size % count))
+            items.append(
+                ItemTemplatesRepository.__create_item(item_template, stack_size % count)
+            )
 
         return items
 

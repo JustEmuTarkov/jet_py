@@ -17,7 +17,11 @@ class QuestsRepository:
         try:
             return self.__quests[quest_id]
         except KeyError as e:
-            raise NotFoundError(f"Quest template with id {quest_id} was not found") from e
+            raise NotFoundError(
+                f"Quest template with id {quest_id} was not found"
+            ) from e
 
 
-quests_repository = QuestsRepository(quests=ujson.load(db_dir.joinpath("quests", "all.json").open(encoding="utf8")))
+quests_repository = QuestsRepository(
+    quests=ujson.load(db_dir.joinpath("quests", "all.json").open(encoding="utf8"))
+)

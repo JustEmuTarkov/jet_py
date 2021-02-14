@@ -44,8 +44,12 @@ class MailDialogueMessage(Base):
     templateId: str  # Locale template id
     hasRewards: StrictBool = False
     rewardCollected: StrictBool = False
-    items: MailMessageItems = Field(default_factory=MailMessageItems)  # Empty if it has no items
-    maxStorageTime: int = StrictInt(datetime.timedelta(days=3).total_seconds())  # Storage time in seconds
+    items: MailMessageItems = Field(
+        default_factory=MailMessageItems
+    )  # Empty if it has no items
+    maxStorageTime: int = StrictInt(
+        datetime.timedelta(days=3).total_seconds()
+    )  # Storage time in seconds
     systemData: dict = Field(default_factory=dict)
 
 
@@ -56,7 +60,9 @@ class MailDialogue(Base):
         }
 
     id: str  # Trader id
-    messages: List[MailDialogueMessage] = Field(default_factory=list)  # List of messages in this dialogue
+    messages: List[MailDialogueMessage] = Field(
+        default_factory=list
+    )  # List of messages in this dialogue
     pinned: StrictBool = False
     new: int = 0
     attachmentsNew: int = 0
@@ -122,4 +128,6 @@ class DialoguePreviewList(Base):
     @staticmethod
     def from_dialogues(dialogue_list: MailDialogues) -> "DialoguePreviewList":
         dialogues = [d for d in dialogue_list.__root__.values() if d.messages]
-        return DialoguePreviewList(__root__=[MailDialoguePreview.from_dialogue(d) for d in dialogues])
+        return DialoguePreviewList(
+            __root__=[MailDialoguePreview.from_dialogue(d) for d in dialogues]
+        )

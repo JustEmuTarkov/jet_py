@@ -1,6 +1,7 @@
-from typing import Any, List, Literal, Optional, Union
+import typing
+from typing import Any, Dict, List, Literal, Optional, Union
 
-from pydantic import BaseModel, Extra, StrictBool, StrictFloat, StrictInt
+from pydantic import BaseModel, Extra, Field, StrictBool, StrictFloat, StrictInt
 
 from tarkov.inventory.types import TemplateId
 
@@ -30,6 +31,56 @@ TracerColor = Union[
 ]
 
 
+class FilterProps(Base):
+    Filter: List[str] = Field(default_factory=list)
+    ExcludedFilter: Optional[List[str]]
+
+
+class _GridProps(Base):
+    class Config:
+        allow_mutation = False
+        fields = {"width": "cellsH", "height": "cellsV"}
+
+    filters: List[FilterProps]
+    width: StrictInt
+    height: StrictInt
+    minCount: StrictInt
+    maxCount: StrictInt
+    maxWeight: StrictInt
+
+
+class Grid(Base):
+    name: str = Field(alias="_name")
+    id: TemplateId = Field(alias="_id")
+    parent: TemplateId = Field(alias="_parent")
+    proto: TemplateId = Field(alias="_proto")
+    props: _GridProps = Field(alias="_props")
+
+
+class _CartridgesProps(Base):
+    filters: List[FilterProps]
+
+
+class Cartridges(Base):
+    class Config:
+        allow_mutation = False
+        fields = {
+            "name": "_name",
+            "id": "_id",
+            "parent": "_parent",
+            "max_count": "_max_count",
+            "props": "_props",
+            "proto": "_proto",
+        }
+
+    name: Literal["cartridges"]
+    id: TemplateId
+    parent: TemplateId
+    max_count: StrictInt
+    props: _CartridgesProps
+    proto: str
+
+
 class Vector(Base):
     x: float
     y: float
@@ -41,7 +92,7 @@ class PrefabModel(Base):
     rcid: str
 
 
-class BaseItemProp(BaseModel):
+class BaseItemProps(BaseModel):
     __template_id__: str = "54009119af1c881c07000029"
 
     class Config:
@@ -91,20 +142,24 @@ class BaseItemProp(BaseModel):
     UnlootableFromSlot: str
     UnlootableFromSide: List[str]
     ChangePriceCoef: float
-    AllowSpawnOnLocations: List[Literal["laboratory", "Shoreline", "Interchange", "RezervBase", "bigmap", "Woods"]]
+    AllowSpawnOnLocations: List[
+        Literal[
+            "laboratory", "Shoreline", "Interchange", "RezervBase", "bigmap", "Woods"
+        ]
+    ]
     SendToClient: StrictBool
     AnimationVariantsNumber: StrictInt
     DiscardingBlock: StrictBool
 
 
-class StackableItemProp(BaseItemProp):
+class StackableItemProps(BaseItemProps):
     __template_id__: str = "5661632d4bdc2d903d8b456b"
 
     StackMinRandom: StrictInt
     StackMaxRandom: StrictInt
 
 
-class MoneyProp(StackableItemProp):
+class MoneyProps(StackableItemProps):
     __template_id__: str = "543be5dd4bdc2deb348b4569"
     type: str
     eqMin: StrictInt
@@ -112,14 +167,14 @@ class MoneyProp(StackableItemProp):
     rate: StrictInt
 
 
-class AmmoBoxProp(StackableItemProp):
+class AmmoBoxProps(StackableItemProps):
     __template_id__: str = "543be5cb4bdc2deb348b4568"
 
     ammoCaliber: str
     StackSlots: list
 
 
-class AmmoProp(StackableItemProp):
+class AmmoProps(StackableItemProps):
     class Config:
         extra = Extra.forbid
 
@@ -176,35 +231,35 @@ class AmmoProp(StackableItemProp):
     LightAndSoundShotSelfContusionStrength: float
 
 
-class SpecItemProp(BaseItemProp):
+class SpecItemProps(BaseItemProps):
     __template_id__: str = "5447e0e74bdc2d3c308b4567"
     apResource: StrictInt
     krResource: StrictInt
 
 
-class CompoundProp(BaseItemProp):
+class CompoundProps(BaseItemProps):
     __template_id__: str = "566162e44bdc2d3f298b4573"
 
-    Grids: List  # TODO: Add List[ItemGrid]
+    Grids: List[Grid]
     Slots: list
     CanPutIntoDuringTheRaid: StrictBool
     CantRemoveFromSlotsDuringRaid: list
 
 
-class SearchableProp(CompoundProp):
+class SearchableProps(CompoundProps):
     __template_id__: str = "566168634bdc2d144c8b456c"
 
     SearchSound: str
     BlocksArmorVest: StrictBool
 
 
-class LootContainerProp(SearchableProp):
+class LootContainerProps(SearchableProps):
     __template_id__: str = "566965d44bdc2d814c8b4571"
 
     SpawnFilter: List[Union[TemplateId]]
 
 
-class VestProps(SearchableProp):
+class VestProps(SearchableProps):
     __template_id__: str = "5448e5284bdc2dcb718b4567"
 
     RigLayoutName: str
@@ -219,14 +274,14 @@ class VestProps(SearchableProp):
     ArmorMaterial: str
 
 
-class BackpackProps(SearchableProp):
+class BackpackProps(SearchableProps):
     __template_id__: str = "5448e53e4bdc2d60728b4567"
 
     speedPenaltyPercent: StrictInt
     GridLayoutName: str
 
 
-class MobContainerProp(SearchableProp):
+class MobContainerProps(SearchableProps):
     __template_id__: str = "5448bf274bdc2dfc2f8b456a"
 
     containType: list
@@ -241,14 +296,14 @@ class MobContainerProp(SearchableProp):
     openedByKeyID: list
 
 
-class SimpleContainerProp(CompoundProp):
+class SimpleContainerProps(CompoundProps):
     __template_id__: str = "5795f317245977243854e041"
 
     TagColor: StrictInt
     TagName: str
 
 
-class ModProps(CompoundProp):
+class ModProps(CompoundProps):
     __template_id__: str = "5448fe124bdc2da5018b4567"
 
     Durability: StrictInt
@@ -268,19 +323,19 @@ class ModProps(CompoundProp):
     SightingRange: StrictInt
 
 
-class MasterModProp(ModProps):
+class MasterModProps(ModProps):
     __template_id__: str = "55802f4a4bdc2ddb688b4569"
 
 
-class HandguardProp(MasterModProp):
+class HandguardProps(MasterModProps):
     __template_id__: str = "55818a104bdc2db9688b4569"
 
 
-class PistolGripProp(MasterModProp):
+class PistolGripProps(MasterModProps):
     __template_id__: str = "55818a684bdc2ddd698b456d"
 
 
-class BarrelModProp(MasterModProp):
+class BarrelModProps(MasterModProps):
     __template_id__: str = "555ef6e44bdc2de9068b457e"
 
     CenterOfImpact: float
@@ -288,11 +343,11 @@ class BarrelModProp(MasterModProp):
     IsSilencer: bool
 
 
-class GearModProp(ModProps):
+class GearModProps(ModProps):
     __template_id__: str = "55802f3e4bdc2de7118b4584"
 
 
-class StockProp(GearModProp):
+class StockProps(GearModProps):
     __template_id__: str = "55818a594bdc2db9688b456a"
     IsShoulderContact: StrictBool
     Foldable: StrictBool
@@ -300,26 +355,26 @@ class StockProp(GearModProp):
     SizeReduceRight: StrictInt
 
 
-class ChargeProp(GearModProp):
+class ChargeProps(GearModProps):
     __template_id__: str = "55818a6f4bdc2db9688b456b"
 
 
-class MountProp(GearModProp):
+class MountProps(GearModProps):
     __template_id__: str = "55818b224bdc2dde698b456f"
 
 
-class LauncherProp(GearModProp):
+class LauncherProps(GearModProps):
     __template_id__: str = "55818b014bdc2ddc698b456b"
 
 
-class ShaftProp(GearModProp):
+class ShaftProps(GearModProps):
     __template_id__: str = "55818a604bdc2db5418b457e"
 
 
-class MagazineProp(GearModProp):
+class MagazineProps(GearModProps):
     __template_id__: str = "5448bc234bdc2d3c308b4569"
     magAnimationIndex: StrictInt
-    Cartridges: list
+    Cartridges: List[Cartridges]
     CanFast: StrictBool
     CanHit: StrictBool
     CanAdmin: StrictBool
@@ -330,51 +385,51 @@ class MagazineProp(GearModProp):
     VisibleAmmoRangesString: str
 
 
-class FunctionalModProp(ModProps):
+class FunctionalModProps(ModProps):
     __template_id__: str = "550aa4154bdc2dd8348b456b"
 
 
-class BipodProp(FunctionalModProp):
+class BipodProps(FunctionalModProps):
     __template_id__: str = "55818afb4bdc2dde698b456d"
 
 
-class LightLaserProp(FunctionalModProp):
+class LightLaserProps(FunctionalModProps):
     __template_id__: str = "55818b0e4bdc2dde698b456e"
 
 
-class TacticalComboProp(FunctionalModProp):
+class TacticalComboProps(FunctionalModProps):
     __template_id__: str = "55818b164bdc2ddc698b456c"
     ModesCount: StrictInt
 
 
-class FlashlightProp(FunctionalModProp):
+class FlashlightProps(FunctionalModProps):
     __template_id__: str = "55818b084bdc2d5b648b4571"
-    ModesCount: StrictInt
+    ModesCount: StrictInt = 0
 
 
-class ForegripProp(FunctionalModProp):
+class ForegripProps(FunctionalModProps):
     __template_id__: str = "55818af64bdc2d5b648b4570"
 
 
-class RailCoverProp(FunctionalModProp):
+class RailCoverProps(FunctionalModProps):
     __template_id__: str = "55818b1d4bdc2d5b648b4572"
 
 
-class GasBlockProp(FunctionalModProp):
+class GasBlockProps(FunctionalModProps):
     __template_id__: str = "56ea9461d2720b67698b456f"
 
 
-class AuxiliaryModProp(FunctionalModProp):
+class AuxiliaryModProps(FunctionalModProps):
     __template_id__: str = "5a74651486f7744e73386dd1"
 
 
-class MuzzleProp(FunctionalModProp):
+class MuzzleProps(FunctionalModProps):
     __template_id__: str = "5448fe394bdc2d0d028b456c"
 
     muzzleModType: str
 
 
-class SightProp(FunctionalModProp):
+class SightProps(FunctionalModProps):
     __template_id__: str = "5448fe7a4bdc2d6f028b456b"
 
     sightModType: str
@@ -389,11 +444,11 @@ class SightProp(FunctionalModProp):
     CalibrationDistances: List[List[float]]
 
 
-class SpecialScopeProp(SightProp):
+class SpecialScopeProps(SightProps):
     __template_id__: str = "55818aeb4bdc2ddc698b456a"
 
 
-class NightVisionScopeProp(SpecialScopeProp):
+class NightVisionScopeProps(SpecialScopeProps):
     __template_id__: str = "5a2c3a9486f774688b05e574"
     Intensity: float
     Mask: str
@@ -405,7 +460,7 @@ class NightVisionScopeProp(SpecialScopeProp):
     HasHinge: StrictBool
 
 
-class ThermalVisionProp(SpecialScopeProp):
+class ThermalVisionProps(SpecialScopeProps):
     __template_id__: str = "5d21f59b6dbe99052b54ef83"
 
     RampPalette: str
@@ -428,7 +483,7 @@ class ThermalVisionProp(SpecialScopeProp):
     PixelationBlockCount: StrictInt
 
 
-class LockableContainerProp(CompoundProp):
+class LockableContainerProps(CompoundProps):
     __template_id__: str = "5671435f4bdc2d96058b4569"
 
     KeyIds: List[TemplateId]
@@ -436,19 +491,19 @@ class LockableContainerProp(CompoundProp):
     TagName: str
 
 
-class StationaryContainerProp(CompoundProp):
+class StationaryContainerProps(CompoundProps):
     __template_id__: str = "567583764bdc2d98058b456e"
 
 
-class InventoryProp(CompoundProp):
+class InventoryProps(CompoundProps):
     __template_id__: str = "55d720f24bdc2d88028b456d"
 
 
-class StashProp(CompoundProp):
+class StashProps(CompoundProps):
     __template_id__: str = "566abbb64bdc2d144c8b457d"
 
 
-class EquipmentProp(CompoundProp):
+class EquipmentProps(CompoundProps):
     __template_id__: str = "543be5f84bdc2dd4348b456a"
 
     BlocksEarpiece: StrictBool
@@ -457,11 +512,11 @@ class EquipmentProp(CompoundProp):
     BlocksFaceCover: StrictBool
 
 
-class ArmbandProp(EquipmentProp):
+class ArmbandProps(EquipmentProps):
     __template_id__: str = "5b3f15d486f77432d0509248"
 
 
-class ArmoredEquipmentProp(EquipmentProp):
+class ArmoredEquipmentProps(EquipmentProps):
     __template_id__: str = "57bef4c42459772e8d35a53b"
 
     Durability: float
@@ -483,7 +538,7 @@ class ArmoredEquipmentProp(EquipmentProp):
     ArmorMaterial: str
 
 
-class HeadphonesProp(EquipmentProp):
+class HeadphonesProps(EquipmentProps):
     __template_id__: str = "5645bcb74bdc2ded0b8b4578"
 
     Distortion: float
@@ -498,7 +553,7 @@ class HeadphonesProp(EquipmentProp):
     DryVolume: float
 
 
-class WeaponProp(CompoundProp):
+class WeaponProps(CompoundProps):
     __template_id__: str = "5422acb9af1c889c16000029"
 
     weapClass: str
@@ -560,12 +615,12 @@ class WeaponProp(CompoundProp):
     ManualBoltCatch: StrictBool
 
 
-class ShotgunProp(WeaponProp):
+class ShotgunProps(WeaponProps):
     __template_id__: str = "5447b6094bdc2dc3278b4567"
     ShotgunDispersion: float
 
 
-class MapProp(BaseItemProp):
+class MapProps(BaseItemProps):
     __template_id__: str = "567849dd4bdc2d150f8b456e"
     ConfigPathStr: str
     MaxMarkersCount: StrictInt
@@ -573,7 +628,7 @@ class MapProp(BaseItemProp):
     scaleMax: float
 
 
-class KnifeProp(BaseItemProp):
+class KnifeProps(BaseItemProps):
     __template_id__: str = "5447e1d04bdc2dff2f8b4567"
     knifeHitDelay: float
     knifeHitSlashRate: float
@@ -595,24 +650,20 @@ class KnifeProp(BaseItemProp):
     DeflectionConsumption: float
 
 
-class BarterItemProp(BaseItemProp):
+class BarterItemProps(BaseItemProps):
     __template_id__: str = "5448eb774bdc2d0a728b4567"
 
     MaxResource: float
     Resource: float
 
 
-class BarterItemOtherProp(BarterItemProp):
-    DogTagQualities: StrictBool
-
-
-class KeyProp(BaseItemProp):
+class KeyProps(BaseItemProps):
     __template_id__: str = "543be5e94bdc2df1348b4568"
 
     MaximumNumberOfUsage: StrictInt
 
 
-class FoodDrinkProp(BaseItemProp):
+class FoodDrinkProps(BaseItemProps):
     __template_id__: str = "543be6674bdc2df1348b4569"
 
     foodUseTime: StrictInt
@@ -623,7 +674,7 @@ class FoodDrinkProp(BaseItemProp):
     effects_health: Any
 
 
-class MedsProp(BaseItemProp):
+class MedsProps(BaseItemProps):
     __template_id__: str = "543be5664bdc2dd4348b4569"
     medUseTime: StrictInt
     medEffectType: str
@@ -634,7 +685,7 @@ class MedsProp(BaseItemProp):
     effects_health: Any
 
 
-class ThrowingProp(BaseItemProp):
+class ThrowingProps(BaseItemProps):
     __template_id__: str = "543be6564bdc2df4348b4568"
 
     ThrowType: str
@@ -654,82 +705,276 @@ class ThrowingProp(BaseItemProp):
     CanBeHiddenDuringThrow: StrictBool
 
 
+class ArmorProps(ArmoredEquipmentProps):
+    __template_id__: str = "5448e54d4bdc2dcc718b4568"
+
+
+class AssaultCarbineProps(WeaponProps):
+    __template_id__: str = "5447b5fc4bdc2d87278b4567"
+
+
+class AssaultRifleProps(WeaponProps):
+    __template_id__: str = "5447b5f14bdc2d61278b4567"
+
+
+class AssaultScopeProps(SightProps):
+    __template_id__: str = "55818add4bdc2d5b648b456f"
+
+
+class BatteryProps(BarterItemProps):
+    __template_id__: str = "57864ee62459775490116fc1"
+
+
+class BuildingMaterialProps(BarterItemProps):
+    __template_id__: str = "57864ada245977548638de91"
+
+
+class CollimatorProps(SightProps):
+    __template_id__: str = "55818ad54bdc2ddc698b4569"
+
+
+class CompactCollimatorProps(SightProps):
+    __template_id__: str = "55818acf4bdc2dde698b456b"
+
+
+class CompassProps(SpecItemProps):
+    __template_id__: str = "5f4fbaaca5573a5ac31db429"
+
+
+class DrinkProps(FoodDrinkProps):
+    __template_id__: str = "5448e8d64bdc2dce718b4568"
+
+
+class FoodProps(FoodDrinkProps):
+    __template_id__: str = "5448e8d04bdc2ddf718b4569"
+
+
+class DrugsProps(MedsProps):
+    __template_id__: str = "5448f3a14bdc2d27728b4569"
+
+
+class ElectronicsProps(BarterItemProps):
+    __template_id__: str = "57864a66245977548f04a81f"
+
+
+class FaceCoverProps(ArmoredEquipmentProps):
+    __template_id__: str = "5a341c4686f77469e155819e"
+
+
+class FlashHiderProps(MuzzleProps):
+    __template_id__: str = "550aa4bf4bdc2dd6348b456b"
+
+
+class LubricantProps(BarterItemProps):
+    __template_id__: str = "57864e4c24597754843f8723"
+
+
+class FuelProps(LubricantProps):
+    __template_id__: str = "5d650c3e815116009f6201d2"
+
+
+class GrenadeLauncherProps(WeaponProps):
+    __template_id__: str = "5447bedf4bdc2d87278b4568"
+
+
+class HeadwearProps(ArmorProps):
+    __template_id__: str = "5a341c4086f77401f2541505"
+
+
+class HouseholdGoodsProps(BarterItemProps):
+    __template_id__: str = "57864c322459775490116fbf"
+
+
+class InfoProps(BaseItemProps):
+    __template_id__: str = "5448ecbe4bdc2d60728b4568"
+
+
+class IronSightProps(SightProps):
+    __template_id__: str = "55818ac54bdc2d5b648b456e"
+
+
+class JewelryProps(BarterItemProps):
+    __template_id__: str = "57864a3d24597754843f8721"
+
+
+class KeycardProps(KeyProps):
+    __template_id__: str = "5c164d2286f774194c5e69fa"
+
+
+class KeyMechanicalProps(KeyProps):
+    __template_id__: str = "5c99f98d86f7745c314214b3"
+
+
+class MachineGunProps(WeaponProps):
+    __template_id__: str = "5447bed64bdc2d97278b4568"
+
+
+class MarksmanRifleProps(WeaponProps):
+    __template_id__: str = "5447b6194bdc2d67278b4567"
+
+
+class MedicalProps(MedsProps):
+    __template_id__: str = "5448f3ac4bdc2dce718b4569"
+
+
+class MedicalSuppliesProps(BarterItemProps):
+    __template_id__: str = "57864c8c245977548867e7f1"
+
+
+class MedKitProps(MedsProps):
+    __template_id__: str = "5448f39d4bdc2d0a728b4568"
+
+
+class MuzzleComboProps(MuzzleProps):
+    __template_id__: str = "550aa4dd4bdc2dc9348b4569"
+
+
+class OpticScopeProps(SightProps):
+    __template_id__: str = "55818ae44bdc2dde698b456c"
+
+
+class OtherProps(BarterItemProps):
+    __template_id__: str = "590c745b86f7743cc433c5f2"
+    DogTagQualities: StrictBool
+
+
+class PistolProps(WeaponProps):
+    __template_id__: str = "5447b5cf4bdc2d65278b4567"
+
+
+class PocketsProps(SearchableProps):
+    __template_id__: str = "557596e64bdc2dc2118b4571"
+
+
+class ReceiverProps(MasterModProps):
+    __template_id__: str = "55818a304bdc2db5418b457d"
+
+
+class SilencerProps(MuzzleProps):
+    __template_id__: str = "550aa4cd4bdc2dd8348b456c"
+
+
+class SmgProps(WeaponProps):
+    __template_id__: str = "5447b5e04bdc2d62278b4567"
+
+
+class SniperRifleProps(WeaponProps):
+    __template_id__: str = "5447b6254bdc2dc3278b4568"
+
+
+class StimulatorProps(MedsProps):
+    __template_id__: str = "5448f3a64bdc2d60728b456a"
+
+
+class ToolProps(BarterItemProps):
+    __template_id__: str = "57864bb7245977548b3b66c2"
+
+
+class VisorsProps(ArmoredEquipmentProps):
+    __template_id__: str = "5448e5724bdc2ddf718b4568"
+
+
 AnyProp = Union[
-    BaseItemProp,
-    StackableItemProp,
-    MoneyProp,
-    AmmoProp,
-    AmmoBoxProp,
-    SpecItemProp,
-    CompoundProp,
-    SearchableProp,
-    LootContainerProp,
+    BaseItemProps,
+    StackableItemProps,
+    MoneyProps,
+    AmmoProps,
+    AmmoBoxProps,
+    SpecItemProps,
+    CompoundProps,
+    SearchableProps,
+    LootContainerProps,
     VestProps,
     BackpackProps,
-    MobContainerProp,
-    SimpleContainerProp,
+    MobContainerProps,
+    SimpleContainerProps,
     ModProps,
-    # MasterModProp,
-    # HandguardProp,
-    # PistolGripProp,
-    BarrelModProp,
-    # GearModProp,
-    StockProp,
-    # ChargeProp,
-    # MountProp,
-    # LauncherProp,
-    # ShaftProp,
-    MagazineProp,
-    # FunctionalModProp,
-    # BipodProp,
-    # LightLaserProp,
-    TacticalComboProp,
-    FlashlightProp,
-    # ForegripProp,
-    # RailCoverProp,
-    # GasBlockProp,
-    # AuxiliaryModProp,
-    MuzzleProp,
-    SightProp,
-    # SpecialScopeProp,
-    NightVisionScopeProp,
-    ThermalVisionProp,
-    LockableContainerProp,
-    # StationaryContainerProp,
-    # InventoryProp,
-    # StashProp,
-    EquipmentProp,
-    # ArmbandProp,
-    ArmoredEquipmentProp,
-    HeadphonesProp,
-    WeaponProp,
-    ShotgunProp,
-    MapProp,
-    KnifeProp,
-    BarterItemProp,
-    BarterItemOtherProp,
-    KeyProp,
-    FoodDrinkProp,
-    MedsProp,
-    ThrowingProp,
+    MasterModProps,
+    HandguardProps,
+    PistolGripProps,
+    BarrelModProps,
+    GearModProps,
+    StockProps,
+    ChargeProps,
+    MountProps,
+    LauncherProps,
+    ShaftProps,
+    MagazineProps,
+    FunctionalModProps,
+    BipodProps,
+    LightLaserProps,
+    TacticalComboProps,
+    FlashlightProps,
+    ForegripProps,
+    RailCoverProps,
+    GasBlockProps,
+    AuxiliaryModProps,
+    MuzzleProps,
+    SightProps,
+    SpecialScopeProps,
+    NightVisionScopeProps,
+    ThermalVisionProps,
+    LockableContainerProps,
+    StationaryContainerProps,
+    InventoryProps,
+    StashProps,
+    EquipmentProps,
+    ArmbandProps,
+    ArmoredEquipmentProps,
+    HeadphonesProps,
+    WeaponProps,
+    ShotgunProps,
+    MapProps,
+    KnifeProps,
+    BarterItemProps,
+    KeyProps,
+    FoodDrinkProps,
+    MedsProps,
+    ThrowingProps,
+    ArmorProps,
+    AssaultCarbineProps,
+    AssaultRifleProps,
+    AssaultScopeProps,
+    BatteryProps,
+    BuildingMaterialProps,
+    CollimatorProps,
+    CompactCollimatorProps,
+    CompassProps,
+    DrinkProps,
+    FoodProps,
+    DrugsProps,
+    ElectronicsProps,
+    FaceCoverProps,
+    FlashHiderProps,
+    LubricantProps,
+    FuelProps,
+    GrenadeLauncherProps,
+    HeadwearProps,
+    HouseholdGoodsProps,
+    InfoProps,
+    IronSightProps,
+    JewelryProps,
+    KeycardProps,
+    KeyMechanicalProps,
+    MachineGunProps,
+    MarksmanRifleProps,
+    MedicalProps,
+    MedicalSuppliesProps,
+    MedKitProps,
+    MuzzleComboProps,
+    OpticScopeProps,
+    OtherProps,
+    PistolProps,
+    PocketsProps,
+    ReceiverProps,
+    SilencerProps,
+    SmgProps,
+    SniperRifleProps,
+    StimulatorProps,
+    ToolProps,
+    VisorsProps,
 ]
 
-# def collect_templates_file(path: Path):
-#     file_data = orjson.loads(path.open('r', encoding='utf8').read())
-#     item_templates = (item for item in file_data if item['_type'] == 'Item')
-#     tpls: List[AnyProp] = []
-#     for tpl in item_templates:
-#         prop: AnyProp = pydantic.parse_obj_as(AnyProp, tpl['_props'])
-#         tpls.append(prop)
-#     return tpls
-#
-#
-# if __name__ == '__main__':
-#     import multiprocessing
-#
-#     start = time.time()
-#
-#     paths = list(db_dir.joinpath('items').glob('*'))
-#     with multiprocessing.Pool(processes=6) as pool:
-#         templates = pool.map(collect_templates_file, paths)
-#     print(time.time() - start)
+props_models_map: Dict[str, AnyProp] = {
+    model.__template_id__: model for model in typing.get_args(AnyProp)
+}

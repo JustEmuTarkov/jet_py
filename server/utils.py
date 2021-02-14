@@ -11,7 +11,9 @@ from server.responses import ZLibORJSONResponse
 
 
 def atomic_write(str_: Union[str], path: Path, *, encoding="utf8"):
-    random_str = "".join(random.choices([*string.ascii_lowercase, *string.digits], k=16))
+    random_str = "".join(
+        random.choices([*string.ascii_lowercase, *string.digits], k=16)
+    )
     tmp_path = Path(str(path) + random_str)
 
     try:

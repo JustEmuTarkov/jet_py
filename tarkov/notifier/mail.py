@@ -38,7 +38,9 @@ class Mail:
         category: MailDialogue = self.get_dialogue(message.uid)
         category.messages.insert(0, message)
 
-        notifier_instance.add_message_notification(profile_id=self.profile.profile_id, message=message)
+        notifier_instance.add_message_notification(
+            profile_id=self.profile.profile_id, message=message
+        )
 
     def get_message(self, message_id: str) -> MailDialogueMessage:
         """Returns MailDialogueMessage by it's id"""
@@ -76,13 +78,19 @@ class Mail:
     def all_attachments_view(self, dialogue_id) -> dict:
         dialogue = self.get_dialogue(dialogue_id)
 
-        messages = [msg.dict(exclude_none=True) for msg in dialogue.messages if not self.__is_message_expired(msg)]
+        messages = [
+            msg.dict(exclude_none=True)
+            for msg in dialogue.messages
+            if not self.__is_message_expired(msg)
+        ]
         return {"messages": messages}
 
     @staticmethod
     def __is_message_expired(message: MailDialogueMessage) -> bool:
         datetime_now = datetime.datetime.now()
-        message_expires_at = datetime.datetime.fromtimestamp(message.dt + message.maxStorageTime)
+        message_expires_at = datetime.datetime.fromtimestamp(
+            message.dt + message.maxStorageTime
+        )
         return datetime_now > message_expires_at
 
     def read(self):
@@ -93,6 +101,8 @@ class Mail:
 
     def write(self):
         atomic_write(
-            self.dialogues.json(by_alias=True, exclude_unset=False, exclude_none=True, indent=4),
+            self.dialogues.json(
+                by_alias=True, exclude_unset=False, exclude_none=True, indent=4
+            ),
             self.path,
         )

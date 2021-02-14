@@ -15,12 +15,19 @@ from tarkov.notifier.requests import GetAllAttachmentsRequest, MailDialogViewReq
 notifier_router = make_router(tags=["Notifier"])
 
 
-@notifier_router.get("/notifierServer/get/{profile_id}", response_class=PlainTextResponse)
+@notifier_router.get(
+    "/notifierServer/get/{profile_id}", response_class=PlainTextResponse
+)
 async def notifierserver_get(profile_id: str) -> bytes:
     for _ in range(15):  # Poll for 15 seconds
         if notifier_instance.has_notifications(profile_id):
             notifications = notifier_instance.get_notifications(profile_id)
-            response = "\n".join([orjson.dumps(notification).decode("utf8") for notification in notifications])
+            response = "\n".join(
+                [
+                    orjson.dumps(notification).decode("utf8")
+                    for notification in notifications
+                ]
+            )
             return response.encode("utf8")
 
         await asyncio.sleep(1)
@@ -64,7 +71,9 @@ async def mail_dialog_view(
 
     with tarkov.profile.Profile(profile_id) as profile:
         return TarkovSuccessResponse(
-            data=profile.notifier.view_dialog(dialogue_id=request.dialogue_id, time_=request.time)
+            data=profile.notifier.view_dialog(
+                dialogue_id=request.dialogue_id, time_=request.time
+            )
         )
 
 
@@ -77,7 +86,9 @@ def mail_dialog_all_attachments(
         return TarkovErrorResponse.profile_id_is_none()
 
     with tarkov.profile.Profile(profile_id) as profile:
-        return TarkovSuccessResponse(data=profile.notifier.all_attachments_view(dialogue_id=request.dialogue_id))
+        return TarkovSuccessResponse(
+            data=profile.notifier.all_attachments_view(dialogue_id=request.dialogue_id)
+        )
 
 
 @notifier_router.post("/client/notifier/channel/create")

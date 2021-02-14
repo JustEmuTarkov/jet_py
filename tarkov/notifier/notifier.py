@@ -16,7 +16,9 @@ class Notifier:
         self.notifications[profile_id] = []
         return notifications
 
-    def add_message_notification(self, profile_id: str, message: MailDialogueMessage) -> None:
+    def add_message_notification(
+        self, profile_id: str, message: MailDialogueMessage
+    ) -> None:
         notification = {
             "type": "new_message",
             "eventId": message.id,

@@ -10,7 +10,9 @@ def load_locale(locale_name: str):
     locale_data = {}
     excluded_files = ("menu", locale_name)
     locale_dir = db_dir.joinpath("locales", locale_name)
-    for file in (path for path in locale_dir.glob("*.json") if path.stem not in excluded_files):
+    for file in (
+        path for path in locale_dir.glob("*.json") if path.stem not in excluded_files
+    ):
         locale_data[file.stem] = ujson.load(file.open("r", encoding="utf8"))
     return locale_data
 

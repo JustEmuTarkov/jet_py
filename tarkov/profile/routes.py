@@ -28,7 +28,11 @@ async def client_game_profile_item_move(
     data = await request.json()
     dispatcher = DispatcherManager(profile_id)
     response = dispatcher.dispatch(data["data"])
-    return TarkovSuccessResponse(data=response.dict(exclude_defaults=False, exclude_none=True, exclude_unset=False))
+    return TarkovSuccessResponse(
+        data=response.dict(
+            exclude_defaults=False, exclude_none=True, exclude_unset=False
+        )
+    )
 
 
 @profile_router.post("/client/game/profile/list")

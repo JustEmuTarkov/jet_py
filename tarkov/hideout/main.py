@@ -48,7 +48,9 @@ class Hideout:
 
     def area_upgrade_start(self, area_type: HideoutAreaType):
         area = self.get_area(area_type)
-        area["completeTime"] = 0  # Todo: grab construction time from db/hideout/areas and current time
+        area[
+            "completeTime"
+        ] = 0  # Todo: grab construction time from db/hideout/areas and current time
         area["constructing"] = True
 
     def area_upgrade_finish(self, area_type: HideoutAreaType):
@@ -57,7 +59,9 @@ class Hideout:
         area["completeTime"] = 0
         area["level"] += 1
 
-    def put_items_in_area_slots(self, area_type: HideoutAreaType, slot_id: int, item: inventory.models.Item):
+    def put_items_in_area_slots(
+        self, area_type: HideoutAreaType, slot_id: int, item: inventory.models.Item
+    ):
         area = self.get_area(area_type)
 
         item.location = None
@@ -71,7 +75,9 @@ class Hideout:
 
         area_slots[slot_id]["item"] = [item.dict()]
 
-    def take_item_from_area_slot(self, area_type: HideoutAreaType, slot_id: int) -> inventory.models.Item:
+    def take_item_from_area_slot(
+        self, area_type: HideoutAreaType, slot_id: int
+    ) -> inventory.models.Item:
         area = self.get_area(area_type)
         slot = area["slots"][slot_id]
         item: dict = slot["item"][0]
@@ -119,7 +125,9 @@ class Hideout:
             if generator_didnt_work_for < 0:
                 raise AssertionError("generator_didnt_work_for < 0")
 
-            production["Progress"] += generator_worked + time_elapsed * self.__GENERATOR_SPEED_WITHOUT_FUEL
+            production["Progress"] += (
+                generator_worked + time_elapsed * self.__GENERATOR_SPEED_WITHOUT_FUEL
+            )
             # production['SkipTime'] += skip_time
 
     def __update_fuel(self) -> int:

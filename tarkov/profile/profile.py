@@ -65,7 +65,10 @@ class Profile:
 
     @staticmethod
     def exists(profile_id: str):
-        return root_dir.joinpath("resources", "profiles", profile_id).exists() and profile_id
+        return (
+            root_dir.joinpath("resources", "profiles", profile_id).exists()
+            and profile_id
+        )
 
     def get_profile(self) -> dict:
         profile_data = {}
@@ -81,7 +84,9 @@ class Profile:
         return profile_base.dict(exclude_none=True)
 
     def add_insurance(self, item: Item, trader: TraderType):
-        self.pmc_profile.InsuredItems.append(ItemInsurance(item_id=item.id, trader_id=trader.value))
+        self.pmc_profile.InsuredItems.append(
+            ItemInsurance(item_id=item.id, trader_id=trader.value)
+        )
 
         #  Todo remove insurance from items that aren't present in inventory after raid
 
@@ -98,7 +103,9 @@ class Profile:
         self.inventory = tarkov.inventory.PlayerInventory(profile=self)
         self.inventory.read()
 
-        self.quests_data: List[dict] = ujson.load(self.quests_path.open("r", encoding="utf8"))
+        self.quests_data: List[dict] = ujson.load(
+            self.quests_path.open("r", encoding="utf8")
+        )
         self.quests = quests.Quests(profile=self)
 
         self.hideout = Hideout(profile=self)
@@ -108,7 +115,9 @@ class Profile:
         self.notifier.read()
 
     def __write(self):
-        atomic_write(self.pmc_profile.json(exclude_defaults=True), self.pmc_profile_path)
+        atomic_write(
+            self.pmc_profile.json(exclude_defaults=True), self.pmc_profile_path
+        )
         #
         self.inventory.write()
         self.hideout.write()

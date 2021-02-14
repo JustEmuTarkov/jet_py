@@ -22,7 +22,9 @@ def customization_storage(
     profile_id: Optional[str] = Cookie(alias="PHPSESSID", default=None),  # type: ignore
 ) -> Union[TarkovSuccessResponse[dict], TarkovErrorResponse]:
     if profile_id is None:
-        return TarkovErrorResponse(data="", err=True, errmsg="No session cookie provided")
+        return TarkovErrorResponse(
+            data="", err=True, errmsg="No session cookie provided"
+        )
     # customization_data = ujson.load(
     #     root_dir.joinpath('resources', 'profiles', profile_id, 'storage.json').open('r', encoding='utf8')
     # )
@@ -57,10 +59,14 @@ def get_user_assort_price(
         return TarkovErrorResponse(errmsg="Profile id is None", data=None)
 
     if not Profile.exists(profile_id):
-        raise HTTPException(status_code=404, detail=fr"Profile with id {profile_id} was not found")
+        raise HTTPException(
+            status_code=404, detail=fr"Profile with id {profile_id} was not found"
+        )
 
     with Profile(profile_id) as player_profile:
-        trader_inventory = TraderInventory(TraderType(trader_id), profile=player_profile)
+        trader_inventory = TraderInventory(
+            TraderType(trader_id), profile=player_profile
+        )
         items = {}
         for item in player_profile.inventory.items:
             if not trader_inventory.can_sell(item):

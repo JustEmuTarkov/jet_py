@@ -4,10 +4,17 @@ import datetime
 import enum
 from typing import Any, List, Literal, NewType, Optional, TYPE_CHECKING, Union, cast
 
-from pydantic import Extra, Field, PrivateAttr, StrictBool, StrictInt, root_validator
+from pydantic import (
+    Extra,
+    Field,
+    PrivateAttr,
+    StrictBool,
+    ValidationError,
+    root_validator,
+)
 
 import tarkov.inventory
-from tarkov.inventory.prop_models import AnyProp, MedsProp
+from tarkov.inventory.prop_models import AnyProp, MedsProps, props_models_map
 from tarkov.inventory.types import ItemId, TemplateId
 from tarkov.models import Base
 
@@ -40,56 +47,27 @@ class NodeTemplate(NodeTemplateBase):
     type: Literal["Node"]
 
 
-class FilterProp(Base):
-    Filter: List[str] = Field(default_factory=list)
-    ExcludedFilter: Optional[List[str]]
-
-
-class CartridgesProps(Base):
-    filters: List[FilterProp]
-
-
-class Cartridges(Base):
-    class Config:
-        allow_mutation = False
-        fields = {
-            "name": "_name",
-            "id": "_id",
-            "parent": "_parent",
-            "max_count": "_max_count",
-            "props": "_props",
-            "proto": "_proto",
-        }
-
-    name: Literal["cartridges"]
-    id: TemplateId
-    parent: TemplateId
-    max_count: StrictInt
-    props: CartridgesProps
-    proto: str
-
-
-class GridProps(Base):
-    class Config:
-        allow_mutation = False
-        fields = {"width": "cellsH", "height": "cellsV"}
-
-    filters: List[FilterProp]
-    width: StrictInt
-    height: StrictInt
-    minCount: StrictInt
-    maxCount: StrictInt
-    maxWeight: StrictInt
-
-
-class ItemGrid(NodeTemplate):
-    type: Optional[str] = None  # type: ignore
-    props: GridProps
-
-
 class ItemTemplate(NodeTemplateBase):
     type: Literal["Item"]
     props: AnyProp
+
+    @root_validator(pre=True)
+    def assign_prop(cls, values: dict):
+        assert "_props" in values
+        props = values["_props"]
+        try:
+            model = props_models_map[values["_parent"]]
+        except KeyError as e:
+            raise KeyError(
+                f"Props class for node with id {values['_parent']} was not found"
+            ) from e
+        try:
+            values["_props"] = model.parse_obj(props)
+        except ValidationError as e:
+            print(values["_id"])
+            print(e)
+            raise
+        return values
 
 
 class ItemUpdDogtag(Base):
@@ -125,7 +103,9 @@ class ItemUpdLockable(Base):
 
 
 class ItemUpdRepairable(Base):
-    MaxDurability: Optional[int] = None  # TODO: Some items in bot inventories don't have MaxDurability
+    MaxDurability: Optional[
+        int
+    ] = None  # TODO: Some items in bot inventories don't have MaxDurability
     Durability: int
 
 
@@ -197,7 +177,9 @@ class Item(Base):
     class Config:
         extra = Extra.forbid
 
-    __inventory__: Optional["MutableInventory"] = PrivateAttr(default=None)  # Link to the inventory
+    __inventory__: Optional["MutableInventory"] = PrivateAttr(
+        default=None
+    )  # Link to the inventory
 
     id: ItemId = Field(alias="_id")
     tpl: TemplateId = Field(alias="_tpl")
@@ -212,14 +194,18 @@ class Item(Base):
         return self.__inventory__
 
     @root_validator(pre=False, skip_on_failure=True)
-    def validate_medkit_hp(cls, values: dict):  # pylint: disable=no-self-argument,no-self-use
+    def validate_medkit_hp(
+        cls, values: dict
+    ):  # pylint: disable=no-self-argument,no-self-use
         if "id" not in values:
             return values
 
         item_tpl_id: TemplateId = cast(TemplateId, values.get("tpl"))
-        item_template = tarkov.inventory.item_templates_repository.get_template(item_tpl_id)
+        item_template = tarkov.inventory.item_templates_repository.get_template(
+            item_tpl_id
+        )
         if item_template.parent == "5448f39d4bdc2d0a728b4568":  # Medkit Id
-            assert isinstance(item_template.props, MedsProp)
+            assert isinstance(item_template.props, MedsProps)
             upd: ItemUpd = cast(ItemUpd, values.get("upd"))
             if not isinstance(item_template.props.MaxHpResource, int):
                 raise ResourceWarning(
@@ -227,12 +213,18 @@ class Item(Base):
                     template id: {item_template.id}
                     """
                 )
-            upd.MedKit = upd.MedKit if upd.MedKit else ItemUpdMedKit(HpResource=item_template.props.MaxHpResource)
+            upd.MedKit = (
+                upd.MedKit
+                if upd.MedKit
+                else ItemUpdMedKit(HpResource=item_template.props.MaxHpResource)
+            )
 
         return values
 
     @root_validator(pre=False, skip_on_failure=True)
-    def validate_upd_none(cls, values: dict):  # pylint: disable=no-self-argument,no-self-use
+    def validate_upd_none(
+        cls, values: dict
+    ):  # pylint: disable=no-self-argument,no-self-use
         if "upd" in values and values["upd"] is None:
             values["upd"] = ItemUpd()
 

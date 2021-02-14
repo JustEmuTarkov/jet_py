@@ -96,7 +96,9 @@ class ProfileModel(Base):
 
     Encyclopedia: Dict[TemplateId, StrictBool] = Field(default_factory=dict)
     ConditionCounters: _ConditionCounters = Field(default_factory=_ConditionCounters)
-    BackendCounters: Dict[str, BackendCounter] = Field(default_factory=dict)  # Dict key is the same as counter id
+    BackendCounters: Dict[str, BackendCounter] = Field(
+        default_factory=dict
+    )  # Dict key is the same as counter id
     InsuredItems: List[ItemInsurance] = Field(default_factory=list)
     Hideout: dict
     Bonuses: list
@@ -108,7 +110,9 @@ class ProfileModel(Base):
     @root_validator(pre=True)
     def collect_files(cls, values):  # pylint: disable=no-self-argument,no-self-use
         if "Inventory" not in values or not values["Inventory"]:
-            inventory_path = root_dir.joinpath("resources", "profiles", values.get("aid"), "pmc_inventory.json")
+            inventory_path = root_dir.joinpath(
+                "resources", "profiles", values.get("aid"), "pmc_inventory.json"
+            )
             values["Inventory"] = InventoryModel.parse_file(inventory_path)
         return values
 

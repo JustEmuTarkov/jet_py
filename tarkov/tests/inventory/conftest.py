@@ -19,7 +19,9 @@ def player_profile() -> Profile:
 
 @pytest.fixture()
 def inventory(player_profile: Profile) -> PlayerInventory:
-    empty_inventory_path = Path("tarkov/tests/inventory/empty_inventory.json").absolute()
+    empty_inventory_path = Path(
+        "tarkov/tests/inventory/empty_inventory.json"
+    ).absolute()
     inventory = PlayerInventory(player_profile)
     with unittest.mock.patch("pathlib.Path.open", empty_inventory_path.open):
         inventory.read()
@@ -41,9 +43,17 @@ def make_inventory(player_profile: Profile):
 @pytest.fixture()
 def random_items() -> List[Item]:
     random_templates = random.choices(
-        [tpl for tpl in item_templates_repository._item_templates.values() if isinstance(tpl, ItemTemplate)],
+        [
+            tpl
+            for tpl in item_templates_repository._item_templates.values()
+            if isinstance(tpl, ItemTemplate)
+        ],
         k=100,
     )
 
-    items: List[Item] = [item for tpl in random_templates for item in item_templates_repository.create_item(tpl.id)]
+    items: List[Item] = [
+        item
+        for tpl in random_templates
+        for item in item_templates_repository.create_item(tpl.id)
+    ]
     return items
