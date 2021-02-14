@@ -3,6 +3,7 @@ from typing import List, Optional
 
 from pydantic import Field, StrictBool, StrictInt
 
+from tarkov._repositories.categories import CategoryId
 from tarkov.inventory.models import Item
 from tarkov.inventory.types import ItemId, TemplateId
 from tarkov.models import Base
@@ -22,7 +23,7 @@ class FleaMarketRequest(Base):
     conditionFrom: StrictInt
     conditionTo: StrictInt
     currency: StrictInt
-    handbookId: str
+    handbookId: CategoryId
     limit: StrictInt
     linkedSearchId: str
     neededSearchId: str
