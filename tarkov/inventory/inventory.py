@@ -13,9 +13,22 @@ from tarkov.exceptions import NoSpaceError, NotFoundError
 from tarkov.models import Base
 from .dict_models import ItemExtraSize
 from .helpers import generate_item_id
-from .models import (AnyItemLocation, AnyMoveLocation, CartridgesMoveLocation, InventoryModel, InventoryMoveLocation,
-                     Item, ItemAmmoStackPosition, ItemId, ItemInventoryLocation, ItemOrientationEnum, ItemUpdFoldable,
-                     ModMoveLocation, PatronInWeaponMoveLocation, TemplateId, )
+from .models import (
+    AnyItemLocation,
+    AnyMoveLocation,
+    CartridgesMoveLocation,
+    InventoryModel,
+    InventoryMoveLocation,
+    Item,
+    ItemAmmoStackPosition,
+    ItemInventoryLocation,
+    ItemOrientationEnum,
+    ItemUpdFoldable,
+    ModMoveLocation,
+    PatronInWeaponMoveLocation,
+)
+from .types import ItemId, TemplateId
+from .prop_models import CompoundProp, MagazineProp, WeaponProp
 from .repositories import item_templates_repository
 
 if TYPE_CHECKING:
@@ -43,7 +56,7 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
         try:
             return next(item for item in self.items if item.id == item_id)
         except StopIteration as error:
-            raise NotFoundError(f'Item with id {item_id} was not found in {self.__class__.__name__}') from error
+            raise NotFoundError(f"Item with id {item_id} was not found in {self.__class__.__name__}") from error
 
     def get_item_by_template(self, template_id: TemplateId) -> Item:
         try:
@@ -65,10 +78,10 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
             return template.props.Width, template.props.Height
 
         extra_size: ItemExtraSize = {
-            'left': 0,
-            'right': 0,
-            'up': 0,
-            'down': 0,
+            "left": 0,
+            "right": 0,
+            "up": 0,
+            "down": 0,
         }
 
         for child in children_items:
@@ -76,21 +89,21 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
 
             child_props = child_template.props
             child_extra_size: ItemExtraSize = {
-                'left': child_props.ExtraSizeLeft,
-                'right': child_props.ExtraSizeRight,
-                'up': child_props.ExtraSizeUp,
-                'down': child_props.ExtraSizeDown,
+                "left": child_props.ExtraSizeLeft,
+                "right": child_props.ExtraSizeRight,
+                "up": child_props.ExtraSizeUp,
+                "down": child_props.ExtraSizeDown,
             }
             if child_props.ExtraSizeForceAdd:
-                extra_size['left'] += child_extra_size['left']
-                extra_size['right'] += child_extra_size['right']
-                extra_size['up'] += child_extra_size['up']
-                extra_size['down'] += child_extra_size['down']
+                extra_size["left"] += child_extra_size["left"]
+                extra_size["right"] += child_extra_size["right"]
+                extra_size["up"] += child_extra_size["up"]
+                extra_size["down"] += child_extra_size["down"]
             else:
                 extra_size = merge_extra_size(extra_size, child_extra_size)
 
-        width: int = template.props.Width + extra_size['left'] + extra_size['right']
-        height: int = template.props.Height + extra_size['up'] + extra_size['down']
+        width: int = template.props.Width + extra_size["left"] + extra_size["right"]
+        height: int = template.props.Height + extra_size["up"] + extra_size["down"]
 
         folded = any(
             isinstance(child.upd.Foldable, ItemUpdFoldable) and child.upd.Foldable.Folded is True
@@ -126,6 +139,7 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
 
 class StashMapItemFootprint(Base):
     """Basically a rectangle"""
+
     x: int
     y: int
     width: int
@@ -139,7 +153,7 @@ class StashMapItemFootprint(Base):
     def y_high(self) -> int:
         return self.y + self.height
 
-    def overlaps(self, other: 'StashMapItemFootprint') -> bool:
+    def overlaps(self, other: "StashMapItemFootprint") -> bool:
         if self == other:
             return True
 
@@ -185,10 +199,7 @@ class GridInventoryStashMap:
                 self.add(item, children_items)
 
     def _get_item_size_in_stash(
-            self,
-            item: Item,
-            children_items: List[Item],
-            location: ItemInventoryLocation
+        self, item: Item, children_items: List[Item], location: ItemInventoryLocation
     ) -> Tuple[int, int]:
         """
         Returns footprint (width, height) that item takes in inventory, takes rotation into account
@@ -200,10 +211,7 @@ class GridInventoryStashMap:
         return width, height
 
     def _calculate_item_footprint(
-            self,
-            item: Item,
-            child_items: List[Item],
-            location: ItemInventoryLocation
+        self, item: Item, child_items: List[Item], location: ItemInventoryLocation
     ) -> StashMapItemFootprint:
         width, height = self._get_item_size_in_stash(item, child_items, location)
         return StashMapItemFootprint(
@@ -246,14 +254,14 @@ class GridInventoryStashMap:
                 return
 
             if not isinstance(item.location, ItemInventoryLocation):
-                raise ValueError('Item has no location')
+                raise ValueError("Item has no location")
 
             if isinstance(item.location, int):  # ItemAmmoStackPosition
                 return
 
             if not self.can_place(item, child_items, item.location):
                 logger.debug(item)
-                raise ValueError('Item location is taken')
+                raise ValueError("Item location is taken")
 
             if item.id in self.footprints:
                 raise ValueError
@@ -270,7 +278,7 @@ class GridInventoryStashMap:
 
         for other_footprint in self.footprints.values():
             if item_footprint.overlaps(other_footprint):
-                print(item_footprint, other_footprint, sep='\n')
+                print(item_footprint, other_footprint, sep="\n")
                 return False
         return True
 
@@ -292,10 +300,10 @@ class GridInventoryStashMap:
         return stash_map
 
     def find_location_for_item(
-            self,
-            item: Item,
-            *,
-            child_items: List[Item] = None,
+        self,
+        item: Item,
+        *,
+        child_items: List[Item] = None,
     ) -> ItemInventoryLocation:
         """
         Finds location for an item or raises NoSpaceError if there's not space in inventory
@@ -313,16 +321,16 @@ class GridInventoryStashMap:
                 if self.can_place_fast(x, y, width, height, stash_map):
                     return location
 
-        raise NoSpaceError('Cannot place item into inventory')
+        raise NoSpaceError("Cannot place item into inventory")
 
     def debug_print(self):
         stash_map = self._construct_map()
         lines = []
         for y in range(self.height):
-            line = ' '.join('■' if stash_map[x][y] else '□' for x in range(self.width))
+            line = " ".join("■" if stash_map[x][y] else "□" for x in range(self.width))
             lines.append(line)
 
-        print(*lines, sep='\n')
+        print(*lines, sep="\n")
 
 
 class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
@@ -342,7 +350,7 @@ class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
             try:
                 self.remove_item(item, remove_children=remove_children)
             except ValueError as e:
-                raise ValueError(f'Item with id {item.id} is not present in {self.__class__.__name__}') from e
+                raise ValueError(f"Item with id {item.id} is not present in {self.__class__.__name__}") from e
 
     def add_item(self, item: Item, child_items: List[Item]):
         """
@@ -350,7 +358,7 @@ class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
         """
         for item_to_add in itertools.chain([item], child_items):
             if item_to_add in self.items:
-                raise ValueError(f'Item is already present in {self.__class__.__name__}')
+                raise ValueError(f"Item is already present in {self.__class__.__name__}")
             self.items.append(item_to_add)
             item_to_add.__inventory__ = self
 
@@ -372,7 +380,7 @@ class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
         :param with_: Target item
         """
         if not item.tpl == with_.tpl:
-            raise ValueError('Item templates don\'t match')
+            raise ValueError("Item templates don't match")
 
         item.get_inventory().remove_item(item)
 
@@ -389,7 +397,7 @@ class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
         with_.upd.StackObjectsCount += count
 
         if item.upd.StackObjectsCount < 0:
-            raise ValueError('item.upd.StackObjectsCount < 0')
+            raise ValueError("item.upd.StackObjectsCount < 0")
 
         if item.upd.StackObjectsCount == 0:
             item.get_inventory().remove_item(item)
@@ -401,10 +409,11 @@ class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
         """
         item_template = item_templates_repository.get_template(item)
 
+        assert isinstance(item_template.props, WeaponProp)
         foldable = item_template.props.Foldable
 
         if not foldable:
-            raise ValueError('Item is not foldable')
+            raise ValueError("Item is not foldable")
 
         item.upd.Foldable = ItemUpdFoldable(Folded=folded)
 
@@ -434,7 +443,7 @@ class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
                 break
 
         if amount_to_take > 0:
-            raise ValueError('Not enough items in inventory')
+            raise ValueError("Not enough items in inventory")
 
         return affected_items, deleted_items
 
@@ -467,13 +476,19 @@ class GridInventory(MutableInventory):
         self.stash_map.add(item, child_items)
         super().add_item(item=item, child_items=child_items)
 
-    def place_item(self, item: Item, *, child_items: List[Item] = None, location: AnyItemLocation = None):
+    def place_item(
+        self,
+        item: Item,
+        *,
+        child_items: List[Item] = None,
+        location: AnyItemLocation = None,
+    ):
         if child_items is None:
             child_items = []
         #  This is kinda tricky but item given to StashMap should have
         #  slotId and parent_id otherwise it won't be considered as being in inventory
         item.location = location
-        item.slotId = 'hideout'
+        item.slotId = "hideout"
         item.parent_id = self.root_id
 
         if location is None:
@@ -481,14 +496,14 @@ class GridInventory(MutableInventory):
 
         elif isinstance(location, ItemInventoryLocation):
             if not self.stash_map.can_place(item, child_items, location):
-                raise ValueError('Cannot place item into location since it is taken')
+                raise ValueError("Cannot place item into location since it is taken")
 
         self.add_item(item, child_items)
 
     def move_item(
-            self,
-            item: Item,
-            move_location: AnyMoveLocation,
+        self,
+        item: Item,
+        move_location: AnyMoveLocation,
     ):
         """
         Moves item to location
@@ -513,17 +528,17 @@ class GridInventory(MutableInventory):
             self._move_item(item=item, child_items=children_items, move_location=move_location)
 
         else:
-            raise ValueError(f'Unknown item location: {move_location}')
+            raise ValueError(f"Unknown item location: {move_location}")
 
     def _move_item(
-            self,
-            item: Item,
-            child_items: List[Item],
-            move_location: Union[InventoryMoveLocation, ModMoveLocation]
+        self,
+        item: Item,
+        child_items: List[Item],
+        move_location: Union[InventoryMoveLocation, ModMoveLocation],
     ) -> None:
-        if isinstance(move_location, InventoryMoveLocation) and move_location.container == 'hideout':
+        if isinstance(move_location, InventoryMoveLocation) and move_location.container == "hideout":
             if not self.stash_map.can_place(item, child_items, move_location.location):
-                raise ValueError('Cannot place item into location since it is taken')
+                raise ValueError("Cannot place item into location since it is taken")
 
         # self.stash_map.add(item, children_items)
         item.slotId = move_location.container
@@ -535,17 +550,14 @@ class GridInventory(MutableInventory):
 
         self.add_item(item, child_items)
 
-    def __place_ammo_into_magazine(
-            self,
-            ammo: Item,
-            move_location: CartridgesMoveLocation
-    ) -> Optional[Item]:
+    def __place_ammo_into_magazine(self, ammo: Item, move_location: CartridgesMoveLocation) -> Optional[Item]:
         magazine = self.get_item(move_location.id)
         ammo_inside_mag = list(self.iter_item_children(magazine))
 
         self.add_item(item=ammo, child_items=[])
 
         if ammo_inside_mag:
+
             def ammo_stack_position(item: Item) -> int:
                 if isinstance(item.location, int):
                     return item.location
@@ -566,30 +578,25 @@ class GridInventory(MutableInventory):
             ammo.location = ItemAmmoStackPosition(0)
 
         ammo.parent_id = magazine.id
-        ammo.slotId = 'cartridges'
+        ammo.slotId = "cartridges"
 
         return ammo
 
     def __place_ammo_into_weapon(
-            self,
-            ammo: Item,
-            move_location: PatronInWeaponMoveLocation,
+        self,
+        ammo: Item,
+        move_location: PatronInWeaponMoveLocation,
     ) -> Item:
         weapon = self.get_item(move_location.id)
 
-        ammo.slotId = 'patron_in_weapon'
+        ammo.slotId = "patron_in_weapon"
         ammo.location = None
         ammo.parent_id = weapon.id
 
         self.add_item(ammo, child_items=[])
         return ammo
 
-    def split_item(
-            self,
-            item: Item,
-            split_location: AnyMoveLocation,
-            count: int
-    ) -> Optional[Item]:
+    def split_item(self, item: Item, split_location: AnyMoveLocation, count: int) -> Optional[Item]:
         """
         Splits count from item and returns new item
         :return: New item
@@ -613,7 +620,7 @@ class GridInventory(MutableInventory):
             ammo = item
 
             magazine_template = item_templates_repository.get_template(magazine)
-            assert magazine_template.props.Cartridges is not None
+            assert isinstance(magazine_template.props, MagazineProp)
 
             magazine_capacity: int = magazine_template.props.Cartridges[0].max_count
             bullet_stacks_inside_mag = list(self.iter_item_children(magazine))
@@ -640,14 +647,15 @@ class GridInventory(MutableInventory):
             return self.__place_ammo_into_weapon(ammo=ammo, move_location=split_location)
         # TODO: I'm not checking for ModMoveLocation there since i don't know if it might cause any problems
 
-        raise ValueError(f'Unknown split location: {split_location}')
+        raise ValueError(f"Unknown split location: {split_location}")
 
     @staticmethod
     def simple_split_item(item: Item, count: int) -> Item:
 
         if item.upd.StackObjectsCount < count:
             raise ValueError(
-                f'Can not split {count} from item[{item.id}] since it only has {item.upd.StackObjectsCount} in stack')
+                f"Can not split {count} from item[{item.id}] since it only has {item.upd.StackObjectsCount} in stack"
+            )
 
         item_copy = item.copy(deep=True)
         item_copy.id = generate_item_id()
@@ -670,26 +678,23 @@ class PlayerInventoryStashMap(GridInventoryStashMap):
     inventory: PlayerInventory
 
     def _is_item_in_root(self, item: Item) -> bool:
-        return item.parent_id in {
-            self.inventory.root_id,
-            self.inventory.equipment_id
-        }
+        return item.parent_id in {self.inventory.root_id, self.inventory.equipment_id}
 
 
 class PlayerInventory(GridInventory):
     inventory: InventoryModel
 
-    def __init__(self, profile: 'Profile'):
+    def __init__(self, profile: "Profile"):
         super().__init__()
         profile_id = profile.profile_id
-        self._path = root_dir.joinpath('resources', 'profiles', profile_id, 'pmc_inventory.json')
+        self._path = root_dir.joinpath("resources", "profiles", profile_id, "pmc_inventory.json")
 
     @property
     def grid_size(self) -> Tuple[int, int]:
         stash_item = self.get_item(self.root_id)
         stash_template = item_templates_repository.get_template(stash_item)
+        assert isinstance(stash_template.props, CompoundProp)
         stash_grids = stash_template.props.Grids
-        assert stash_grids is not None
         grids_props = stash_grids[0].props
         return grids_props.width, grids_props.height
 
@@ -713,7 +718,7 @@ class PlayerInventory(GridInventory):
         """
         Reads inventory file from disk
         """
-        self.inventory = InventoryModel(**ujson.load(self._path.open('r', encoding='utf8')))
+        self.inventory = InventoryModel(**ujson.load(self._path.open("r", encoding="utf8")))
         for item in self.items:
             item.__inventory__ = self
 
@@ -725,8 +730,8 @@ class PlayerInventory(GridInventory):
 
 def merge_extra_size(first: ItemExtraSize, second: ItemExtraSize) -> ItemExtraSize:
     extra_size = copy.deepcopy(first)
-    extra_size['left'] = max(first['left'], second['left'])
-    extra_size['right'] = max(first['right'], second['right'])
-    extra_size['up'] = max(first['up'], second['up'])
-    extra_size['down'] = max(first['down'], second['down'])
+    extra_size["left"] = max(first["left"], second["left"])
+    extra_size["right"] = max(first["right"], second["right"])
+    extra_size["up"] = max(first["up"], second["up"])
+    extra_size["down"] = max(first["down"], second["down"])
     return extra_size

@@ -25,21 +25,21 @@ from tarkov.trader.routes import trader_router
 class TarkovGZipMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         response: StreamingResponse = typing.cast(StreamingResponse, await call_next(request))
-        response_body: bytes = b''
+        response_body: bytes = b""
         async for chunk in response.body_iterator:
             response_body += chunk
 
         # Compression should apply only to json responses
-        if 'application/json' in response.headers['Content-Type']:
+        if "application/json" in response.headers["Content-Type"]:
             response_body = zlib.compress(response_body, zlib.Z_DEFAULT_COMPRESSION)
-            response.headers['Content-Length'] = f'{len(response_body)}'
-            response.headers['Content-Encoding'] = 'deflate'
+            response.headers["Content-Length"] = f"{len(response_body)}"
+            response.headers["Content-Encoding"] = "deflate"
 
         return Response(
             content=response_body,
             status_code=response.status_code,
             headers=dict(response.headers),
-            media_type=response.media_type
+            media_type=response.media_type,
         )
 
 
@@ -60,4 +60,8 @@ app.include_router(flea_market_router)
 app.include_router(match_router)
 app.include_router(launcher_router)
 
-app.mount('/files', StaticFiles(directory=str(root_dir.joinpath('resources', 'static'))), name='static')
+app.mount(
+    "/files",
+    StaticFiles(directory=str(root_dir.joinpath("resources", "static"))),
+    name="static",
+)

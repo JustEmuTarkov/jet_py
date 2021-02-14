@@ -8,7 +8,9 @@ from pydantic import parse_obj_as
 from server import db_dir
 from tarkov.exceptions import NotFoundError
 from .helpers import generate_item_id, regenerate_items_ids
-from .models import Item, ItemTemplate, ItemUpdMedKit, NodeTemplate, TemplateId
+from .models import Item, ItemTemplate, ItemUpdMedKit, NodeTemplate
+from .types import TemplateId
+from .prop_models import MedsProp
 
 AnyTemplate = Union[ItemTemplate, NodeTemplate]
 
@@ -18,15 +20,15 @@ class ItemTemplatesRepository:
         self._item_templates: Dict[TemplateId, AnyTemplate] = self.__read_item_templates()
         self._item_categories: dict = self.__read_item_categories()
 
-        self.globals = ujson.load(db_dir.joinpath('base', 'globals.json').open(encoding='utf8'))
+        self.globals = ujson.load(db_dir.joinpath("base", "globals.json").open(encoding="utf8"))
 
     @staticmethod
     def __read_item_templates() -> Dict[TemplateId, AnyTemplate]:
         item_templates: List[AnyTemplate] = []
 
         # Read every file from db/items
-        for item_file_path in db_dir.joinpath('items').glob('*'):
-            file_data = ujson.load(item_file_path.open('r', encoding='utf8'))
+        for item_file_path in db_dir.joinpath("items").glob("*"):
+            file_data = ujson.load(item_file_path.open("r", encoding="utf8"))
             items: List[AnyTemplate] = pydantic.parse_obj_as(List[AnyTemplate], file_data)
             item_templates.extend(items)
 
@@ -34,8 +36,8 @@ class ItemTemplatesRepository:
 
     @staticmethod
     def __read_item_categories():
-        items = ujson.load(db_dir.joinpath('templates', 'items.json').open('r', encoding='utf8'))
-        items = {item['Id']: item for item in items}
+        items = ujson.load(db_dir.joinpath("templates", "items.json").open("r", encoding="utf8"))
+        items = {item["Id"]: item for item in items}
         return items
 
     @property
@@ -50,7 +52,7 @@ class ItemTemplatesRepository:
 
         if isinstance(item_template, NodeTemplate):
             raise NotFoundError(
-                f'Can not found ItemTemplate with id {item_template.id}, however NodeTemplate was found.'
+                f"Can not found ItemTemplate with id {item_template.id}, however NodeTemplate was found."
             )
 
         return item_template
@@ -64,7 +66,7 @@ class ItemTemplatesRepository:
         try:
             item_template = self._item_templates[template_id]
         except KeyError as error:
-            raise NotFoundError(f'Can not found any template with id {template_id}') from error
+            raise NotFoundError(f"Can not found any template with id {template_id}") from error
 
         return item_template
 
@@ -91,16 +93,16 @@ class ItemTemplatesRepository:
         return [tpl for tpl in self.iter_template_children(template_id) if isinstance(tpl, ItemTemplate)]
 
     def get_category(self, item: Item):
-        return self._item_categories[item.tpl]['ParentId']
+        return self._item_categories[item.tpl]["ParentId"]
 
     def get_preset(self, template_id: TemplateId) -> dict:
         """
         :param template_id:
         :return: Preset of an item from globals
         """
-        item_presets = self.globals['ItemPresets']
+        item_presets = self.globals["ItemPresets"]
         try:
-            items = copy.deepcopy(item_presets[template_id]['_items'])
+            items = copy.deepcopy(item_presets[template_id]["_items"])
             regenerate_items_ids(items)
             return items
         except KeyError as e:
@@ -124,7 +126,12 @@ class ItemTemplatesRepository:
             item.upd.StackObjectsCount = count
 
         #  Item is either medkit or a painkiller
-        if item_template.parent in ('5448f39d4bdc2d0a728b4568', '5448f3a14bdc2d27728b4569'):
+        if item_template.parent in (
+            "5448f39d4bdc2d0a728b4568",
+            "5448f3a14bdc2d27728b4569",
+        ):
+            assert isinstance(item_template.props, MedsProp)
+
             medkit_max_hp = item_template.props.MaxHpResource
             assert medkit_max_hp is not None
 
@@ -135,7 +142,7 @@ class ItemTemplatesRepository:
     @staticmethod
     def create_item(template_id: TemplateId, count: int = 1) -> List[Item]:
         if count == 0:
-            raise ValueError('Cannot create 0 items')
+            raise ValueError("Cannot create 0 items")
 
         #  Try to return a preset if it exists
         try:

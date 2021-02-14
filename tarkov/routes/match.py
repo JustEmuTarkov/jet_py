@@ -9,24 +9,26 @@ from server.utils import make_router
 from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
 from tarkov.profile import Profile
 
-match_router = make_router(tags=['Match'])
+match_router = make_router(tags=["Match"])
 
 
-@match_router.post('/client/match/group/status')
+@match_router.post("/client/match/group/status")
 def group_status() -> TarkovSuccessResponse[dict]:
-    return TarkovSuccessResponse(data={
-        'players': [],
-        'invite': [],
-        'group': [],
-    })
+    return TarkovSuccessResponse(
+        data={
+            "players": [],
+            "invite": [],
+            "group": [],
+        }
+    )
 
 
-@match_router.post('/client/match/group/exit_from_menu')
+@match_router.post("/client/match/group/exit_from_menu")
 def exit_from_menu() -> TarkovSuccessResponse[Literal[None]]:
     return TarkovSuccessResponse(data=None)
 
 
-@match_router.post('/client/match/available')
+@match_router.post("/client/match/available")
 def available() -> TarkovSuccessResponse[Literal[True]]:
     return TarkovSuccessResponse(data=True)
 
@@ -45,38 +47,38 @@ def available() -> TarkovSuccessResponse[Literal[True]]:
 #     ],
 #     'keyId': ''
 # }
-@match_router.post('/client/match/join')
+@match_router.post("/client/match/join")
 async def join(
-        request: Request,
-        profile_id: Optional[str] = Cookie(alias='PHPSESSID', default=None),  # type: ignore
+    request: Request,
+    profile_id: Optional[str] = Cookie(alias="PHPSESSID", default=None),  # type: ignore
 ) -> Union[TarkovSuccessResponse[list], TarkovErrorResponse]:
     if profile_id is None:
         return TarkovErrorResponse.profile_id_is_none()
 
     request_data: dict = await request.json()
     with Profile(profile_id) as profile:
-        return TarkovSuccessResponse(data=[
-            {
-                'profileid': profile.pmc_profile.id,
-                'status': 'busy',
-                'sid': '',
-                'ip': '127.0.0.1',
-                'port': 9909,
-                'version': 'live',
-                'location``': request_data['location'],
-                'gamemode': 'deathmatch',
-                'shortid': 'TEST',
-            }
-        ])
+        return TarkovSuccessResponse(
+            data=[
+                {
+                    "profileid": profile.pmc_profile.id,
+                    "status": "busy",
+                    "sid": "",
+                    "ip": "127.0.0.1",
+                    "port": 9909,
+                    "version": "live",
+                    "location``": request_data["location"],
+                    "gamemode": "deathmatch",
+                    "shortid": "TEST",
+                }
+            ]
+        )
 
 
-@match_router.post('/client/match/exit')
+@match_router.post("/client/match/exit")
 def exit_() -> TarkovSuccessResponse[Literal[None]]:
     return TarkovSuccessResponse(data=None)
 
 
-@match_router.post('/client/getMetricsConfig')
+@match_router.post("/client/getMetricsConfig")
 def get_metrics_config() -> TarkovSuccessResponse[dict]:
-    return TarkovSuccessResponse(
-        data=ujson.load(db_dir.joinpath('base', 'matchMetrics.json').open(encoding='utf8'))
-    )
+    return TarkovSuccessResponse(data=ujson.load(db_dir.joinpath("base", "matchMetrics.json").open(encoding="utf8")))

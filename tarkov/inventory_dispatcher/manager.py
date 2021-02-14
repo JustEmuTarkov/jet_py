@@ -12,9 +12,7 @@ from . import dispatchers
 
 class DispatcherResponseItems(Base):
     class Config:
-        fields = {
-            'del_': 'del'
-        }
+        fields = {"del_": "del"}
 
     new: List[Item] = Field(default_factory=list)
     change: List[Item] = Field(default_factory=list)
@@ -36,7 +34,7 @@ class DispatcherManager:
 
     response: DispatcherResponse
 
-    dispatchers: Iterable['dispatchers.Dispatcher']
+    dispatchers: Iterable["dispatchers.Dispatcher"]
 
     def __init__(self, session_id: str):
         self.profile: Profile = Profile(session_id)
@@ -64,11 +62,11 @@ class DispatcherManager:
                 for dispatcher in self.dispatchers:
                     try:
                         dispatcher.dispatch(action)
-                        logger.debug(f'Action was dispatched in {dispatcher.__class__.__name__}')
+                        logger.debug(f"Action was dispatched in {dispatcher.__class__.__name__}")
                         break
                     except NotImplementedError:
                         pass
                 else:
-                    raise NotImplementedError(f'Action {action} not implemented in any of the dispatchers')
+                    raise NotImplementedError(f"Action {action} not implemented in any of the dispatchers")
 
         return self.response

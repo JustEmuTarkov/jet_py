@@ -18,18 +18,15 @@ class Notifier:
 
     def add_message_notification(self, profile_id: str, message: MailDialogueMessage) -> None:
         notification = {
-            'type': "new_message",
-            'eventId': message.id,
-            'data': {
-                "dialogId": message.uid,
-                "message": message.dict()
-            }
+            "type": "new_message",
+            "eventId": message.id,
+            "data": {"dialogId": message.uid, "message": message.dict()},
         }
         self.notifications[profile_id].append(notification)
 
     @staticmethod
     def get_empty_notification() -> dict:
-        return {'type': 'ping', 'eventId': 'ping'}
+        return {"type": "ping", "eventId": "ping"}
 
 
 notifier_instance = Notifier()

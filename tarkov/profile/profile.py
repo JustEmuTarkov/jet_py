@@ -9,7 +9,8 @@ from server import root_dir
 from server.utils import atomic_write
 from tarkov import inventory as inventory_, quests
 from tarkov.hideout import Hideout
-from tarkov.inventory.models import Item, TemplateId
+from tarkov.inventory.models import Item
+from ..inventory.types import TemplateId
 from tarkov.notifier import Mail
 from tarkov.trader import TraderType
 from .models import ItemInsurance, ProfileModel
@@ -56,34 +57,31 @@ class Profile:
     def __init__(self, profile_id: str):
         self.profile_id = profile_id
 
-        self.profile_dir = root_dir.joinpath('resources', 'profiles', profile_id)
+        self.profile_dir = root_dir.joinpath("resources", "profiles", profile_id)
 
-        self.pmc_profile_path = self.profile_dir.joinpath('pmc_profile.json')
+        self.pmc_profile_path = self.profile_dir.joinpath("pmc_profile.json")
 
-        self.quests_path = self.profile_dir.joinpath('pmc_quests.json')
+        self.quests_path = self.profile_dir.joinpath("pmc_quests.json")
 
     @staticmethod
     def exists(profile_id: str):
-        return root_dir.joinpath('resources', 'profiles', profile_id).exists() and profile_id
+        return root_dir.joinpath("resources", "profiles", profile_id).exists() and profile_id
 
     def get_profile(self) -> dict:
         profile_data = {}
-        for file in self.profile_dir.glob('pmc_*.json'):
-            profile_data[file.stem] = ujson.load(file.open('r', encoding='utf8'))
+        for file in self.profile_dir.glob("pmc_*.json"):
+            profile_data[file.stem] = ujson.load(file.open("r", encoding="utf8"))
 
         profile_base = self.pmc_profile.copy()
         profile_base.Hideout = self.hideout.data
         # profile_base['Inventory'] = self.inventory.inventory.dict()
-        profile_base.Quests = profile_data['pmc_quests']
-        profile_base.Stats = profile_data['pmc_stats']
+        profile_base.Quests = profile_data["pmc_quests"]
+        profile_base.Stats = profile_data["pmc_stats"]
 
         return profile_base.dict(exclude_none=True)
 
     def add_insurance(self, item: Item, trader: TraderType):
-        self.pmc_profile.InsuredItems.append(ItemInsurance(
-            item_id=item.id,
-            trader_id=trader.value
-        ))
+        self.pmc_profile.InsuredItems.append(ItemInsurance(item_id=item.id, trader_id=trader.value))
 
         #  Todo remove insurance from items that aren't present in inventory after raid
 
@@ -100,7 +98,7 @@ class Profile:
         self.inventory = tarkov.inventory.PlayerInventory(profile=self)
         self.inventory.read()
 
-        self.quests_data: List[dict] = ujson.load(self.quests_path.open('r', encoding='utf8'))
+        self.quests_data: List[dict] = ujson.load(self.quests_path.open("r", encoding="utf8"))
         self.quests = quests.Quests(profile=self)
 
         self.hideout = Hideout(profile=self)

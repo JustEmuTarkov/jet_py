@@ -3,13 +3,19 @@ from typing import Dict, List, TYPE_CHECKING, Tuple
 
 from pydantic import StrictInt
 
+import tarkov.inventory.types
 from tarkov import inventory
 from tarkov.inventory import PlayerInventory, item_templates_repository
 from tarkov.inventory.models import Item
 from tarkov.notifier.models import MailDialogueMessage, MailMessageItems
 from tarkov.trader import TraderInventory, TraderType
-from .models import (QuestMessageType, QuestRewardAssortUnlock, QuestRewardExperience, QuestRewardItem,
-                     QuestRewardTraderStanding, )
+from .models import (
+    QuestMessageType,
+    QuestRewardAssortUnlock,
+    QuestRewardExperience,
+    QuestRewardItem,
+    QuestRewardTraderStanding,
+)
 from .repositories import quests_repository
 from tarkov.profile.models import BackendCounter
 
@@ -19,16 +25,19 @@ if TYPE_CHECKING:
 
 
 class Quests:
-    profile: 'Profile'
+    profile: "Profile"
     data: List[dict]
 
-    def __init__(self, profile: 'Profile', ):
-        self.profile: 'Profile' = profile
+    def __init__(
+        self,
+        profile: "Profile",
+    ):
+        self.profile: "Profile" = profile
         self.data = self.profile.quests_data
 
     def get_quest(self, quest_id: str):
         try:
-            return next(quest for quest in self.data if quest['qid'] == quest_id)
+            return next(quest for quest in self.data if quest["qid"] == quest_id)
         except StopIteration as e:
             raise KeyError from e
 
@@ -36,26 +45,26 @@ class Quests:
         # TODO: Create quest if it does not exist
         try:
             quest = self.get_quest(quest_id)
-            if quest['status'] in ('Started', 'Success'):
-                raise ValueError('Quest is already accepted')
+            if quest["status"] in ("Started", "Success"):
+                raise ValueError("Quest is already accepted")
         except KeyError:
             pass
 
         quest = self.get_quest(quest_id)
-        quest['status'] = 'Started'
-        quest['startTime'] = int(time.time())
+        quest["status"] = "Started"
+        quest["startTime"] = int(time.time())
 
-    def handover_items(self, quest_id: str, condition_id: str, items: Dict[inventory.models.ItemId, int]) \
-            -> Tuple[List[inventory.models.Item], List[inventory.models.Item]]:
+    def handover_items(
+        self,
+        quest_id: str,
+        condition_id: str,
+        items: Dict[tarkov.inventory.types.ItemId, int],
+    ) -> Tuple[List[inventory.models.Item], List[inventory.models.Item]]:
 
         try:
             condition = self.profile.pmc_profile.BackendCounters[condition_id]
         except KeyError:
-            condition = BackendCounter(
-                id=condition_id,
-                qid=quest_id,
-                value=0
-            )
+            condition = BackendCounter(id=condition_id, qid=quest_id, value=0)
             self.profile.pmc_profile.BackendCounters[condition_id] = condition
 
         removed_items = []
@@ -116,12 +125,12 @@ class Quests:
                 raise ValueError
 
             else:
-                raise ValueError(f'Unknown reward: {reward.__class__.__name__} {reward}')
+                raise ValueError(f"Unknown reward: {reward.__class__.__name__} {reward}")
 
         message = MailDialogueMessage(
             uid=quest_template.traderId,
             type=StrictInt(QuestMessageType.questSuccess.value),
-            templateId='5ab0f32686f7745dd409f56b',  # TODO: Right now this is a placeholder
+            templateId="5ab0f32686f7745dd409f56b",  # TODO: Right now this is a placeholder
             systemData={},
             items=MailMessageItems.from_items(reward_items),
             hasRewards=True,

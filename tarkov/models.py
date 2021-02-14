@@ -23,14 +23,19 @@ class Base(pydantic.BaseModel):
             **kwargs,
         )
 
-    def json(self, *args, indent=4, **kwargs, ) -> str:  # pylint: disable=useless-super-delegation
+    def json(
+        self,
+        *args,
+        indent=4,
+        **kwargs,
+    ) -> str:  # pylint: disable=useless-super-delegation
         return super().json(*args, indent=indent, **kwargs)
 
     def atomic_write(self, path: Path, **dump_kwargs):
         atomic_write(path=path, str_=self.json(**dump_kwargs))
 
 
-ResponseType = TypeVar('ResponseType')
+ResponseType = TypeVar("ResponseType")
 
 
 class TarkovSuccessResponse(GenericModel, Generic[ResponseType]):
@@ -45,7 +50,5 @@ class TarkovErrorResponse(GenericModel, Generic[ResponseType]):
     data: Any = None
 
     @staticmethod
-    def profile_id_is_none() -> 'TarkovErrorResponse':
-        return TarkovErrorResponse(
-            errmsg="Profile id is None"
-        )
+    def profile_id_is_none() -> "TarkovErrorResponse":
+        return TarkovErrorResponse(errmsg="Profile id is None")

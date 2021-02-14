@@ -2,50 +2,66 @@ import typing
 from typing import Callable, Dict, Optional, TYPE_CHECKING
 
 import tarkov.inventory
+import tarkov.inventory.types
 from tarkov.hideout.models import HideoutAreaType
-from tarkov.inventory import (MutableInventory, PlayerInventory, generate_item_id,
-                              item_templates_repository, )
+from tarkov.inventory import (
+    MutableInventory,
+    PlayerInventory,
+    generate_item_id,
+    item_templates_repository,
+)
 from tarkov.inventory.implementations import SimpleInventory
-from tarkov.inventory.models import TemplateId
+from ..inventory.types import TemplateId
 from tarkov.trader import TraderInventory, TraderType
 from tarkov.profile import Profile
-from .models import ActionModel, ActionType, HideoutActions, InventoryActions, Owner, QuestActions, TradingActions
+from .models import (
+    ActionModel,
+    ActionType,
+    HideoutActions,
+    InventoryActions,
+    Owner,
+    QuestActions,
+    TradingActions,
+)
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
-    from tarkov.inventory_dispatcher.manager import DispatcherManager, DispatcherResponse
+    from tarkov.inventory_dispatcher.manager import (
+        DispatcherManager,
+        DispatcherResponse,
+    )
 
 
 class Dispatcher:
     dispatch_map: Dict[ActionType, Callable]
     inventory: PlayerInventory
     profile: Profile
-    response: 'DispatcherResponse'
+    response: "DispatcherResponse"
 
-    def __init__(self, manager: 'DispatcherManager'):
+    def __init__(self, manager: "DispatcherManager"):
         self.manager = manager
         self.inventory = manager.inventory
         self.profile = manager.profile
         self.response = manager.response
 
     def dispatch(self, action: dict):
-        action_type: ActionType = ActionType(action['Action'])
+        action_type: ActionType = ActionType(action["Action"])
 
         try:
             method = self.dispatch_map[action_type]
         except KeyError as error:
             raise NotImplementedError(
-                f'Action with type {action_type} not implemented in dispatcher {self.__class__}'
+                f"Action with type {action_type} not implemented in dispatcher {self.__class__}"
             ) from error
 
         types = typing.get_type_hints(method)
-        model_type = types['action'] if issubclass(types['action'], ActionModel) else dict
+        model_type = types["action"] if issubclass(types["action"], ActionModel) else dict
         # noinspection PyArgumentList
         method(model_type(**action))  # type: ignore
 
 
 class InventoryDispatcher(Dispatcher):
-    def __init__(self, manager: 'DispatcherManager'):
+    def __init__(self, manager: "DispatcherManager"):
         super().__init__(manager)
         self.dispatch_map = {
             ActionType.Move: self._move,
@@ -56,7 +72,6 @@ class InventoryDispatcher(Dispatcher):
             ActionType.Fold: self._fold,
             ActionType.Remove: self._remove,
             ActionType.ReadEncyclopedia: self._read_encyclopedia,
-
             ActionType.Insure: self._insure,
             ActionType.ApplyInventoryChanges: self._apply_inventory_changes,
         }
@@ -65,11 +80,11 @@ class InventoryDispatcher(Dispatcher):
         if owner is None:
             return self.inventory
 
-        if owner.type == 'Mail':
+        if owner.type == "Mail":
             message = self.profile.notifier.get_message(owner.id)
             return SimpleInventory(message.items.data)
 
-        raise ValueError(f'Cannot find inventory for owner: {owner}')
+        raise ValueError(f"Cannot find inventory for owner: {owner}")
 
     def _move(self, action: InventoryActions.Move):
         donor_inventory = self.get_owner_inventory(action.fromOwner)
@@ -85,11 +100,7 @@ class InventoryDispatcher(Dispatcher):
         donor_inventory = self.get_owner_inventory(action.fromOwner)
         item = donor_inventory.get_item(action.item)
 
-        new_item = self.inventory.split_item(
-            item=item,
-            split_location=action.container,
-            count=action.count
-        )
+        new_item = self.inventory.split_item(item=item, split_location=action.container, count=action.count)
 
         if new_item:
             self.response.items.new.append(new_item)
@@ -102,15 +113,15 @@ class InventoryDispatcher(Dispatcher):
             self.profile.encyclopedia.examine(item)
             return
 
-        if action.fromOwner.type == 'Trader':
+        if action.fromOwner.type == "Trader":
             trader_id = action.fromOwner.id
 
             trader_inventory = TraderInventory(TraderType(trader_id), self.profile)
             item = trader_inventory.get_item(item_id)
             self.profile.encyclopedia.examine(item)
 
-        elif action.fromOwner.type in ('HideoutUpgrade', 'HideoutProduction'):
-            item_tpl_id = tarkov.inventory.models.TemplateId(action.item)
+        elif action.fromOwner.type in ("HideoutUpgrade", "HideoutProduction"):
+            item_tpl_id = tarkov.inventory.types.TemplateId(action.item)
             self.profile.encyclopedia.examine(item_tpl_id)
 
     def _merge(self, action: InventoryActions.Merge):
@@ -169,7 +180,7 @@ class InventoryDispatcher(Dispatcher):
             profile=self.profile,
         )
 
-        rubles_tpl_id = tarkov.inventory.models.TemplateId('5449016a4bdc2d6f028b456f')
+        rubles_tpl_id = tarkov.inventory.types.TemplateId("5449016a4bdc2d6f028b456f")
         total_price = 0
         for item_id in action.items:
             item = self.profile.inventory.get_item(item_id)
@@ -183,7 +194,7 @@ class InventoryDispatcher(Dispatcher):
 
 
 class HideoutDispatcher(Dispatcher):
-    def __init__(self, manager: 'DispatcherManager'):
+    def __init__(self, manager: "DispatcherManager"):
         super().__init__(manager)
         self.dispatch_map = {
             ActionType.HideoutUpgrade: self._hideout_upgrade_start,
@@ -203,8 +214,8 @@ class HideoutDispatcher(Dispatcher):
 
         items_required = action.items
         for item_required in items_required:
-            count = item_required['count']
-            item_id = item_required['id']
+            count = item_required["count"]
+            item_id = item_required["id"]
 
             item = self.profile.inventory.get_item(item_id)
             item.upd.StackObjectsCount -= count
@@ -224,7 +235,7 @@ class HideoutDispatcher(Dispatcher):
         area_type = HideoutAreaType(action.areaType)
 
         for slot_id, item_data in action.items.items():
-            count, item_id = item_data['count'], item_data['id']
+            count, item_id = item_data["count"], item_data["id"]
             item = self.profile.inventory.get_item(item_id)
 
             if self.profile.inventory.can_split(item):
@@ -243,8 +254,8 @@ class HideoutDispatcher(Dispatcher):
         inventory = self.profile.inventory
 
         for item_info in items_info:
-            item_id = item_info['id']
-            count = item_info['count']
+            item_id = item_info["id"]
+            count = item_info["count"]
 
             item = inventory.get_item(item_id=item_id)
 
@@ -278,22 +289,22 @@ class HideoutDispatcher(Dispatcher):
 
 
 class TradingDispatcher(Dispatcher):
-    def __init__(self, manager: 'DispatcherManager'):
+    def __init__(self, manager: "DispatcherManager"):
         super().__init__(manager)
         self.dispatch_map = {
             ActionType.TradingConfirm: self._trading_confirm,
         }
 
     def _trading_confirm(self, action: TradingActions.Trading):
-        if action.type == 'buy_from_trader':
+        if action.type == "buy_from_trader":
             self.__buy_from_trader(TradingActions.BuyFromTrader(**action.dict()))
             return
 
-        if action.type == 'sell_to_trader':
+        if action.type == "sell_to_trader":
             self.__sell_to_trader(TradingActions.SellToTrader(**action.dict()))
             return
 
-        raise NotImplementedError(f'Trading action {action} not implemented')
+        raise NotImplementedError(f"Trading action {action} not implemented")
 
     def __buy_from_trader(self, action: TradingActions.BuyFromTrader):
         trader_inventory = TraderInventory(TraderType(action.tid), self.profile)
@@ -331,7 +342,8 @@ class TradingDispatcher(Dispatcher):
         self.inventory.remove_items(items)
 
         rubles_tpl = item_templates_repository.get_template(
-            tarkov.inventory.models.TemplateId('5449016a4bdc2d6f028b456f'))
+            tarkov.inventory.types.TemplateId("5449016a4bdc2d6f028b456f")
+        )
         money_max_stack_size = rubles_tpl.props.StackMaxSize
 
         while price_sum:
@@ -340,9 +352,9 @@ class TradingDispatcher(Dispatcher):
 
             money_stack = tarkov.inventory.models.Item(
                 id=generate_item_id(),
-                tpl=TemplateId('5449016a4bdc2d6f028b456f'),
+                tpl=TemplateId("5449016a4bdc2d6f028b456f"),
                 parent_id=self.inventory.root_id,
-                slotId='hideout',
+                slotId="hideout",
             )
             money_stack.upd.StackObjectsCount = stack_size
 
@@ -351,7 +363,7 @@ class TradingDispatcher(Dispatcher):
 
 
 class QuestDispatcher(Dispatcher):
-    def __init__(self, manager: 'DispatcherManager') -> None:
+    def __init__(self, manager: "DispatcherManager") -> None:
         super().__init__(manager)
         self.dispatch_map = {
             ActionType.QuestAccept: self._quest_accept,
