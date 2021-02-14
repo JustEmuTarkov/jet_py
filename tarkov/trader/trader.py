@@ -9,9 +9,21 @@ import pydantic
 import ujson
 
 from server import db_dir
-from tarkov.inventory import ImmutableInventory, item_templates_repository, regenerate_items_ids
-from tarkov.inventory.models import Item, ItemUpd, TemplateId
-from tarkov.trader.models import BarterScheme, BarterSchemeEntry, BoughtItems, TraderBase, TraderStanding, TraderType
+from tarkov.inventory import (
+    ImmutableInventory,
+    item_templates_repository,
+    regenerate_items_ids,
+)
+from tarkov.inventory.models import Item, ItemUpd
+from tarkov.inventory.types import TemplateId
+from tarkov.trader.models import (
+    BarterScheme,
+    BarterSchemeEntry,
+    BoughtItems,
+    TraderBase,
+    TraderStanding,
+    TraderType,
+)
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
@@ -36,17 +48,23 @@ class TraderInventory(ImmutableInventory):
         self.trader = trader
         self.profile = profile
 
-        trader_path = db_dir.joinpath('traders', self.trader.value)
+        trader_path = db_dir.joinpath("traders", self.trader.value)
 
         self.assort_items = pydantic.parse_obj_as(
             List[Item],
-            ujson.load(trader_path.joinpath('items.json').open('r', encoding='utf8'))
+            ujson.load(trader_path.joinpath("items.json").open("r", encoding="utf8")),
         )
-        self.base = TraderBase.parse_file(trader_path.joinpath('base.json'))
+        self.base = TraderBase.parse_file(trader_path.joinpath("base.json"))
 
-        self._barter_scheme = BarterScheme.parse_file(trader_path.joinpath('barter_scheme.json'))
-        self.loyal_level_items = ujson.load(trader_path.joinpath('loyal_level_items.json').open('r', encoding='utf8'))
-        self._quest_assort = ujson.load(trader_path.joinpath('questassort.json').open('r', encoding='utf8'))
+        self._barter_scheme = BarterScheme.parse_file(
+            trader_path.joinpath("barter_scheme.json")
+        )
+        self.loyal_level_items = ujson.load(
+            trader_path.joinpath("loyal_level_items.json").open("r", encoding="utf8")
+        )
+        self._quest_assort = ujson.load(
+            trader_path.joinpath("questassort.json").open("r", encoding="utf8")
+        )
 
     @property
     def items(self):
@@ -56,7 +74,9 @@ class TraderInventory(ImmutableInventory):
     def assort(self) -> List[Item]:
         if self.trader == TraderType.Fence:
             current_time = time.time()
-            expired = current_time > TraderInventory.__fence_assort_created_at + FENCE_ASSORT_LIFETIME
+            expired = current_time > (
+                TraderInventory.__fence_assort_created_at + FENCE_ASSORT_LIFETIME
+            )
 
             if not TraderInventory.__fence_assort or expired:
                 TraderInventory.__fence_assort = self._generate_fence_assort()
@@ -78,17 +98,19 @@ class TraderInventory(ImmutableInventory):
         for item in self.items:
             item_price = self.get_item_price(item)
 
-            barter_scheme[item.id] = [[
-                BarterSchemeEntry(
-                    count=item_price,
-                    item_required=TemplateId("5449016a4bdc2d6f028b456f")
-                )
-            ]]
+            barter_scheme[item.id] = [
+                [
+                    BarterSchemeEntry(
+                        count=item_price,
+                        item_required=TemplateId("5449016a4bdc2d6f028b456f"),
+                    )
+                ]
+            ]
 
         return barter_scheme
 
     def _generate_fence_assort(self) -> List[Item]:
-        root_items = [item for item in self.items if item.slotId == 'hideout']
+        root_items = [item for item in self.items if item.slotId == "hideout"]
         assort = random.sample(root_items, k=min(len(root_items), 500))
 
         child_items: List[Item] = []
@@ -101,14 +123,13 @@ class TraderInventory(ImmutableInventory):
         return assort
 
     def _trader_assort(self) -> List[Item]:
-
         def filter_quest_assort(item: Item) -> bool:
-            if item.id not in self._quest_assort['success']:
+            if item.id not in self._quest_assort["success"]:
                 return True
 
-            quest_id = self._quest_assort['success'][item.id]
+            quest_id = self._quest_assort["success"][item.id]
             quest = self.profile.quests.get_quest(quest_id)
-            return quest['status'] == 'Success'  # TODO: Extract into enum
+            return quest["status"] == "Success"  # TODO: Extract into enum
 
         def filter_loyal_level(item: Item) -> bool:
             if item.id not in self.loyal_level_items:
@@ -118,11 +139,15 @@ class TraderInventory(ImmutableInventory):
             return self.standing.current_level >= required_standing
 
         def filter_in_root(item: Item) -> bool:
-            return item.slotId == 'hideout'
+            return item.slotId == "hideout"
 
         items = filter(filter_in_root, self.items)  # Filter root items
-        items = filter(filter_quest_assort, items)  # Filter items that require quest completion
-        items = filter(filter_loyal_level, items)  # Filter items that require loyalty level
+        items = filter(
+            filter_quest_assort, items
+        )  # Filter items that require quest completion
+        items = filter(
+            filter_loyal_level, items
+        )  # Filter items that require loyalty level
 
         def assort_inner(items_list: Iterable[Item]) -> Iterable[Item]:
             """Return item and it's children from trader inventory"""
@@ -153,7 +178,7 @@ class TraderInventory(ImmutableInventory):
         :returns Price of item and it's children
         """
         if not self.can_sell(item):
-            raise ValueError('Item is not sellable')
+            raise ValueError("Item is not sellable")
 
         tpl = item_templates_repository.get_template(item)
         price = tpl.props.CreditsPrice
@@ -164,7 +189,7 @@ class TraderInventory(ImmutableInventory):
             if self.can_sell(child):
                 price += child_price
             else:
-                price += child_price * 0.85
+                price += int(child_price * 0.85)
 
         return int(price)
 
@@ -181,7 +206,8 @@ class TraderInventory(ImmutableInventory):
             item: Item = base_item.copy(deep=True)
             item.upd.StackObjectsCount = 1
             children_items: List[Item] = [
-                child.copy(deep=True) for child in self.iter_item_children_recursively(base_item)
+                child.copy(deep=True)
+                for child in self.iter_item_children_recursively(base_item)
             ]
 
             all_items = children_items + [item]
@@ -190,7 +216,9 @@ class TraderInventory(ImmutableInventory):
                 item.upd.UnlimitedCount = False
 
             item.upd = ItemUpd(StackObjectsCount=stack_size)
-            bought_items_list.append(BoughtItems(item=item, children_items=children_items))
+            bought_items_list.append(
+                BoughtItems(item=item, children_items=children_items)
+            )
 
         return bought_items_list
 
@@ -214,24 +242,28 @@ class TraderInventory(ImmutableInventory):
     def standing(self) -> TraderStanding:
         if self.trader.value not in self.profile.pmc_profile.TraderStandings:
             standing_copy: TraderStanding = self.base.loyalty.copy(deep=True)
-            self.profile.pmc_profile.TraderStandings[self.trader.value] = TraderStanding.parse_obj(standing_copy)
+            self.profile.pmc_profile.TraderStandings[
+                self.trader.value
+            ] = TraderStanding.parse_obj(standing_copy)
 
         return self.profile.pmc_profile.TraderStandings[self.trader.value]
 
 
 def get_trader_bases() -> List[dict]:
-    traders_path = db_dir.joinpath('traders')
+    traders_path = db_dir.joinpath("traders")
 
-    paths = set(traders_path.rglob('*/base.json')) - set(traders_path.rglob('ragfair/base.json'))
+    paths = set(traders_path.rglob("*/base.json")) - set(
+        traders_path.rglob("ragfair/base.json")
+    )
 
-    traders_data = [ujson.load(file.open('r', encoding='utf8')) for file in paths]
-    traders_data = sorted(traders_data, key=lambda trader: trader['_id'])
+    traders_data = [ujson.load(file.open("r", encoding="utf8")) for file in paths]
+    traders_data = sorted(traders_data, key=lambda trader: trader["_id"])
 
     return traders_data
 
 
 def get_trader_base(trader_id: str) -> dict:
-    base_path = db_dir.joinpath('traders', trader_id, 'base.json')
+    base_path = db_dir.joinpath("traders", trader_id, "base.json")
     if not base_path.exists():
-        raise ValueError(f'Path {base_path} does not exists')
-    return ujson.load(base_path.open('r', encoding='utf8'))
+        raise ValueError(f"Path {base_path} does not exists")
+    return ujson.load(base_path.open("r", encoding="utf8"))

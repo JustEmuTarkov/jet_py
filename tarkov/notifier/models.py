@@ -21,7 +21,7 @@ class MailMessageItems(Base):
             if not item.parent_id:
                 item.parent_id = stash_id
             if not item.slotId:
-                item.slotId = 'main'
+                item.slotId = "main"
 
         regenerate_items_ids(items)
 
@@ -34,7 +34,7 @@ class MailMessageItems(Base):
 class MailDialogueMessage(Base):
     class Config:
         fields = {
-            'id': '_id',
+            "id": "_id",
         }
 
     id: str = Field(default_factory=generate_item_id)  # Message id
@@ -44,19 +44,25 @@ class MailDialogueMessage(Base):
     templateId: str  # Locale template id
     hasRewards: StrictBool = False
     rewardCollected: StrictBool = False
-    items: MailMessageItems = Field(default_factory=MailMessageItems)  # Empty if it has no items
-    maxStorageTime: int = StrictInt(datetime.timedelta(days=3).total_seconds())  # Storage time in seconds
+    items: MailMessageItems = Field(
+        default_factory=MailMessageItems
+    )  # Empty if it has no items
+    maxStorageTime: int = StrictInt(
+        datetime.timedelta(days=3).total_seconds()
+    )  # Storage time in seconds
     systemData: dict = Field(default_factory=dict)
 
 
 class MailDialogue(Base):
     class Config:
         fields = {
-            'id': '_id',
+            "id": "_id",
         }
 
     id: str  # Trader id
-    messages: List[MailDialogueMessage] = Field(default_factory=list)  # List of messages in this dialogue
+    messages: List[MailDialogueMessage] = Field(
+        default_factory=list
+    )  # List of messages in this dialogue
     pinned: StrictBool = False
     new: int = 0
     attachmentsNew: int = 0
@@ -82,7 +88,7 @@ class MailMessagePreview(Base):
     uid: str
 
     @staticmethod
-    def from_dialogue(dialogue: MailDialogue) -> 'MailMessagePreview':
+    def from_dialogue(dialogue: MailDialogue) -> "MailMessagePreview":
         last_message = dialogue.messages[-1]
         return MailMessagePreview(
             dt=last_message.dt,
@@ -95,7 +101,7 @@ class MailMessagePreview(Base):
 class MailDialoguePreview(Base):
     class Config:
         fields = {
-            'id': '_id',
+            "id": "_id",
         }
 
     id: str
@@ -106,7 +112,7 @@ class MailDialoguePreview(Base):
     type: int = 2
 
     @staticmethod
-    def from_dialogue(dialogue: MailDialogue) -> 'MailDialoguePreview':
+    def from_dialogue(dialogue: MailDialogue) -> "MailDialoguePreview":
         return MailDialoguePreview(
             id=dialogue.id,
             message=MailMessagePreview.from_dialogue(dialogue),
@@ -120,7 +126,7 @@ class DialoguePreviewList(Base):
     __root__: List[MailDialoguePreview]
 
     @staticmethod
-    def from_dialogues(dialogue_list: MailDialogues) -> 'DialoguePreviewList':
+    def from_dialogues(dialogue_list: MailDialogues) -> "DialoguePreviewList":
         dialogues = [d for d in dialogue_list.__root__.values() if d.messages]
         return DialoguePreviewList(
             __root__=[MailDialoguePreview.from_dialogue(d) for d in dialogues]

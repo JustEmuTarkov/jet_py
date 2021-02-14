@@ -5,7 +5,8 @@ from typing import List, Literal, Optional
 from pydantic import Extra, StrictBool, StrictInt
 
 from tarkov import models
-from tarkov.inventory.models import AnyMoveLocation, Item, ItemId, TemplateId
+from tarkov.inventory.models import AnyMoveLocation, Item
+from tarkov.inventory.types import ItemId, TemplateId
 
 
 class ActionType(enum.Enum):
@@ -71,12 +72,12 @@ class ActionModel(models.Base):
 
 class InventoryExamineActionOwnerModel(models.Base):
     id: ItemId
-    type: Optional[Literal['Trader', 'HideoutUpgrade', 'HideoutProduction']] = None
+    type: Optional[Literal["Trader", "HideoutUpgrade", "HideoutProduction"]] = None
 
 
 class Owner(models.Base):
     id: str
-    type: Literal['Mail']
+    type: Literal["Mail"]
 
 
 class InventoryActions(SimpleNamespace):
@@ -101,7 +102,7 @@ class InventoryActions(SimpleNamespace):
 
     class Merge(ActionModel):
         class Config:
-            fields = {'with_': 'with'}
+            fields = {"with_": "with"}
 
         item: ItemId
         with_: ItemId
@@ -171,7 +172,7 @@ class TradingActions(SimpleNamespace):
         class Config:
             extra = Extra.allow
 
-        type: Literal['buy_from_trader', 'sell_to_trader']
+        type: Literal["buy_from_trader", "sell_to_trader"]
 
     class BuyFromTrader(Trading):
         class Config:

@@ -23,18 +23,18 @@ class QuestReward(models.Base):
 
 
 class QuestRewardTraderStanding(QuestReward):
-    type: Literal['TraderStanding']
+    type: Literal["TraderStanding"]
     value: str
     target: str
 
 
 class QuestRewardExperience(QuestReward):
     value: str
-    type: Literal['Experience']
+    type: Literal["Experience"]
 
 
 class QuestRewardItem(QuestReward):
-    type: Literal['Item']
+    type: Literal["Item"]
     value: str
     target: str
     items: List[Item]
@@ -42,7 +42,7 @@ class QuestRewardItem(QuestReward):
 
 
 class QuestRewardAssortUnlock(QuestReward):
-    type: Literal['AssortmentUnlock']
+    type: Literal["AssortmentUnlock"]
     target: str
     traderId: str
     loyaltyLevel: int
@@ -50,13 +50,13 @@ class QuestRewardAssortUnlock(QuestReward):
 
 
 class QuestRewardSkill(QuestReward):
-    type: Literal['Skill']
+    type: Literal["Skill"]
     target: str
     value: str
 
 
 class QuestRewardTraderUnlock(QuestReward):
-    type: Literal['TraderUnlock']
+    type: Literal["TraderUnlock"]
     target: str
 
 
@@ -78,9 +78,7 @@ class QuestRewards(models.Base):
 
 class QuestTemplate(models.Base):
     class Config:
-        fields = {
-            'id': '_id'
-        }
+        fields = {"id": "_id"}
         allow_mutation = False
 
     id: str

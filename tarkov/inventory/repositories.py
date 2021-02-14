@@ -1,5 +1,5 @@
 import copy
-from typing import Dict, Iterable, List, Union
+from typing import Dict, Iterable, List, Tuple, Union
 
 import pydantic
 import ujson
@@ -8,39 +8,68 @@ from pydantic import parse_obj_as
 from server import db_dir
 from tarkov.exceptions import NotFoundError
 from .helpers import generate_item_id, regenerate_items_ids
-from .models import Item, ItemTemplate, ItemUpdMedKit, NodeTemplate, TemplateId
+from .models import Item, ItemTemplate, ItemUpdMedKit, NodeTemplate
+from .prop_models import MedsProps
+from .types import TemplateId
 
 AnyTemplate = Union[ItemTemplate, NodeTemplate]
 
 
 class ItemTemplatesRepository:
     def __init__(self):
-        self._item_templates: Dict[TemplateId, AnyTemplate] = self.__read_item_templates()
+        items, nodes = self.__read_templates()
+        self._item_templates: Dict[TemplateId, ItemTemplate] = items
+        self._node_templates: Dict[TemplateId, NodeTemplate] = nodes
         self._item_categories: dict = self.__read_item_categories()
-
-        self.globals = ujson.load(db_dir.joinpath('base', 'globals.json').open(encoding='utf8'))
+        self.globals = ujson.load(
+            db_dir.joinpath("base", "globals.json").open(encoding="utf8")
+        )
 
     @staticmethod
-    def __read_item_templates() -> Dict[TemplateId, AnyTemplate]:
-        item_templates: List[AnyTemplate] = []
+    def __read_templates() -> Tuple[
+        Dict[TemplateId, ItemTemplate],
+        Dict[TemplateId, NodeTemplate],
+    ]:
+        item_templates: List[ItemTemplate] = []
+        node_templates: List[NodeTemplate] = []
 
         # Read every file from db/items
-        for item_file_path in db_dir.joinpath('items').glob('*'):
-            file_data = ujson.load(item_file_path.open('r', encoding='utf8'))
-            items: List[AnyTemplate] = pydantic.parse_obj_as(List[AnyTemplate], file_data)
-            item_templates.extend(items)
-
-        return {tpl.id: tpl for tpl in item_templates}
+        for item_file_path in db_dir.joinpath("items").glob("*"):
+            file_data: List[dict] = ujson.load(
+                item_file_path.open("r", encoding="utf8")
+            )
+            item_templates.extend(
+                pydantic.parse_obj_as(
+                    List[ItemTemplate],
+                    (item for item in file_data if item["_type"] == "Item"),
+                )
+            )
+            node_templates.extend(
+                pydantic.parse_obj_as(
+                    List[NodeTemplate],
+                    (item for item in file_data if item["_type"] == "Node"),
+                )
+            )
+        return (
+            {tpl.id: tpl for tpl in item_templates},
+            {tpl.id: tpl for tpl in node_templates},
+        )
 
     @staticmethod
     def __read_item_categories():
-        items = ujson.load(db_dir.joinpath('templates', 'items.json').open('r', encoding='utf8'))
-        items = {item['Id']: item for item in items}
+        items = ujson.load(
+            db_dir.joinpath("templates", "items.json").open("r", encoding="utf8")
+        )
+        items = {item["Id"]: item for item in items}
         return items
 
     @property
     def templates(self):
         return self._item_templates
+
+    @property
+    def client_items_view(self) -> Dict[TemplateId, AnyTemplate]:
+        return {**self._item_templates, **self._node_templates}
 
     def get_template(self, item: Union[Item, TemplateId]) -> ItemTemplate:
         """
@@ -50,12 +79,14 @@ class ItemTemplatesRepository:
 
         if isinstance(item_template, NodeTemplate):
             raise NotFoundError(
-                f'Can not found ItemTemplate with id {item_template.id}, however NodeTemplate was found.'
+                f"Can not found ItemTemplate with id {item_template.id}, however NodeTemplate was found."
             )
 
         return item_template
 
-    def get_any_template(self, item: Union[Item, TemplateId]) -> Union[NodeTemplate, ItemTemplate]:
+    def get_any_template(
+        self, item: Union[Item, TemplateId]
+    ) -> Union[NodeTemplate, ItemTemplate]:
         if isinstance(item, Item):
             template_id = item.tpl
         else:
@@ -64,12 +95,18 @@ class ItemTemplatesRepository:
         try:
             item_template = self._item_templates[template_id]
         except KeyError as error:
-            raise NotFoundError(f'Can not found any template with id {template_id}') from error
+            raise NotFoundError(
+                f"Can not found any template with id {template_id}"
+            ) from error
 
         return item_template
 
-    def iter_template_children(self, template_id: TemplateId) -> Iterable[Union[NodeTemplate, ItemTemplate]]:
-        templates: List[Union[NodeTemplate, ItemTemplate]] = [self.get_any_template(template_id)]
+    def iter_template_children(
+        self, template_id: TemplateId
+    ) -> Iterable[Union[NodeTemplate, ItemTemplate]]:
+        templates: List[Union[NodeTemplate, ItemTemplate]] = [
+            self.get_any_template(template_id)
+        ]
         while templates:
             template = templates.pop()
             yield template
@@ -88,19 +125,23 @@ class ItemTemplatesRepository:
         template = self.get_any_template(template_id)
         if isinstance(template, ItemTemplate):
             return [template]
-        return [tpl for tpl in self.iter_template_children(template_id) if isinstance(tpl, ItemTemplate)]
+        return [
+            tpl
+            for tpl in self.iter_template_children(template_id)
+            if isinstance(tpl, ItemTemplate)
+        ]
 
     def get_category(self, item: Item):
-        return self._item_categories[item.tpl]['ParentId']
+        return self._item_categories[item.tpl]["ParentId"]
 
     def get_preset(self, template_id: TemplateId) -> dict:
         """
         :param template_id:
         :return: Preset of an item from globals
         """
-        item_presets = self.globals['ItemPresets']
+        item_presets = self.globals["ItemPresets"]
         try:
-            items = copy.deepcopy(item_presets[template_id]['_items'])
+            items = copy.deepcopy(item_presets[template_id]["_items"])
             regenerate_items_ids(items)
             return items
         except KeyError as e:
@@ -124,7 +165,12 @@ class ItemTemplatesRepository:
             item.upd.StackObjectsCount = count
 
         #  Item is either medkit or a painkiller
-        if item_template.parent in ('5448f39d4bdc2d0a728b4568', '5448f3a14bdc2d27728b4569'):
+        if item_template.parent in (
+            "5448f39d4bdc2d0a728b4568",
+            "5448f3a14bdc2d27728b4569",
+        ):
+            assert isinstance(item_template.props, MedsProps)
+
             medkit_max_hp = item_template.props.MaxHpResource
             assert medkit_max_hp is not None
 
@@ -135,7 +181,7 @@ class ItemTemplatesRepository:
     @staticmethod
     def create_item(template_id: TemplateId, count: int = 1) -> List[Item]:
         if count == 0:
-            raise ValueError('Cannot create 0 items')
+            raise ValueError("Cannot create 0 items")
 
         #  Try to return a preset if it exists
         try:
@@ -158,7 +204,9 @@ class ItemTemplatesRepository:
             items.append(ItemTemplatesRepository.__create_item(item_template, count))
 
         if stack_size % count:
-            items.append(ItemTemplatesRepository.__create_item(item_template, stack_size % count))
+            items.append(
+                ItemTemplatesRepository.__create_item(item_template, stack_size % count)
+            )
 
         return items
 

@@ -3,7 +3,8 @@ from typing import Any, Dict, List, Optional
 from pydantic import Extra, Field, StrictBool, StrictInt, root_validator
 
 from server import root_dir
-from tarkov.inventory.models import InventoryModel, TemplateId
+from tarkov.inventory.models import InventoryModel
+from tarkov.inventory.types import TemplateId
 from tarkov.models import Base
 from tarkov.trader.models import ItemInsurance, TraderStanding
 
@@ -79,9 +80,11 @@ class BackendCounter(Base):
 class ProfileModel(Base):
     class Config:
         extra = Extra.allow
-        exclude = {'Inventory', }
+        exclude = {
+            "Inventory",
+        }
 
-    id: str = Field(alias='_id')
+    id: str = Field(alias="_id")
     aid: str
     savage: str
     Info: ProfileInfo
@@ -93,7 +96,9 @@ class ProfileModel(Base):
 
     Encyclopedia: Dict[TemplateId, StrictBool] = Field(default_factory=dict)
     ConditionCounters: _ConditionCounters = Field(default_factory=_ConditionCounters)
-    BackendCounters: Dict[str, BackendCounter] = Field(default_factory=dict)  # Dict key is the same as counter id
+    BackendCounters: Dict[str, BackendCounter] = Field(
+        default_factory=dict
+    )  # Dict key is the same as counter id
     InsuredItems: List[ItemInsurance] = Field(default_factory=list)
     Hideout: dict
     Bonuses: list
@@ -104,13 +109,15 @@ class ProfileModel(Base):
 
     @root_validator(pre=True)
     def collect_files(cls, values):  # pylint: disable=no-self-argument,no-self-use
-        if 'Inventory' not in values or not values['Inventory']:
-            inventory_path = root_dir.joinpath('resources', 'profiles', values.get('aid'), 'pmc_inventory.json')
-            values['Inventory'] = InventoryModel.parse_file(inventory_path)
+        if "Inventory" not in values or not values["Inventory"]:
+            inventory_path = root_dir.joinpath(
+                "resources", "profiles", values.get("aid"), "pmc_inventory.json"
+            )
+            values["Inventory"] = InventoryModel.parse_file(inventory_path)
         return values
 
     def json(self, *args, **kwargs) -> str:
-        if kwargs.get('exclude', None) is None:
-            kwargs['exclude'] = self.Config.exclude
+        if kwargs.get("exclude", None) is None:
+            kwargs["exclude"] = self.Config.exclude
 
         return super().json(*args, **kwargs)

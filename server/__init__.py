@@ -10,26 +10,30 @@ import flask.cli
 import werkzeug.serving
 from flask import Flask
 
-if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
     root_dir = Path(sys.executable).parent.absolute()
 else:
     root_dir = Path(__file__).parent.parent.absolute()
 
-db_dir = root_dir.joinpath('resources', 'db')
+db_dir = root_dir.joinpath("resources", "db")
 start_time = datetime.datetime.now()
 
-app = Flask(__name__, static_folder=str(root_dir.joinpath('resources', 'static')), static_url_path='/files')
+app = Flask(
+    __name__,
+    static_folder=str(root_dir.joinpath("resources", "static")),
+    static_url_path="/files",
+)
 
 
 class LogFormatter(logging.Formatter):
     def format(self, record: LogRecord) -> str:
-        return f'[{self.formatTime(record)}][{record.levelname}] {record.msg}'
+        return f"[{self.formatTime(record)}][{record.levelname}] {record.msg}"
 
     def formatTime(self, record: LogRecord, datefmt: Optional[str] = None) -> str:
-        return super().formatTime(record, datefmt='%H:%M:%S')
+        return super().formatTime(record, datefmt="%H:%M:%S")
 
 
-logger = logging.Logger('main')
+logger = logging.Logger("main")
 
 console_handler = StreamHandler()
 console_handler.formatter = LogFormatter()
@@ -45,7 +49,7 @@ flask.cli.show_server_banner = show_server_banner
 
 
 def custom_startup_log(*args: str):
-    if not args[1].startswith(' * Running on'):
+    if not args[1].startswith(" * Running on"):
         return
     logger.info(args[1] % args[2:])
 
@@ -61,6 +65,6 @@ def after(response):
     remote_addr = request.remote_addr
     url = request.url
     method = request.method
-    logger.info(msg=f'[{remote_addr}] {url} {method} {response.status_code}')
+    logger.info(msg=f"[{remote_addr}] {url} {method} {response.status_code}")
 
     return response

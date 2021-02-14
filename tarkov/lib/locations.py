@@ -9,9 +9,15 @@ from pydantic import parse_obj_as
 
 from server import db_dir
 from tarkov.exceptions import NoSpaceError
-from tarkov.inventory import GridInventory, GridInventoryStashMap, item_templates_repository
+from tarkov.inventory import (
+    GridInventory,
+    GridInventoryStashMap,
+    item_templates_repository,
+)
 from tarkov.inventory.helpers import generate_item_id, regenerate_item_ids_dict
-from tarkov.inventory.models import AnyItemLocation, Item, ItemId, ItemTemplate, TemplateId
+from tarkov.inventory.models import Item, ItemTemplate
+from tarkov.inventory.prop_models import CompoundProps, LootContainerProps
+from tarkov.inventory.types import ItemId, TemplateId
 from tarkov.models import Base
 
 
@@ -45,7 +51,7 @@ class ContainerInventory(GridInventory):
     @property
     def grid_size(self) -> Tuple[int, int]:
         # Let's assume we have only one grid
-        assert self.template.props.Grids is not None
+        assert isinstance(self.template.props, CompoundProps)
         grid_props = self.template.props.Grids[0].props
         return grid_props.width, grid_props.height
 
@@ -53,17 +59,21 @@ class ContainerInventory(GridInventory):
     def items(self) -> List[Item]:
         return self.container.Items
 
-    def place_item(self, item: Item, *, child_items: List[Item] = None, location: AnyItemLocation = None):
-        super().place_item(item, child_items=child_items, location=location)
-        item.slotId = 'main'
+    def place_item(
+        self,
+        item: Item,
+        **kwargs,
+    ):
+        super().place_item(item, **kwargs)
+        item.slotId = "main"
 
 
 class LocationGenerator:
     def __init__(self, location: str):
-        location_file_path = db_dir.joinpath('locations', f'{location}.json')
-        self.__location: dict = ujson.load(location_file_path.open(encoding='utf8'))
-        self.__base: dict = self.__location['base']
-        self.__loot: dict = self.__location['loot']
+        location_file_path = db_dir.joinpath("locations", f"{location}.json")
+        self.__location: dict = ujson.load(location_file_path.open(encoding="utf8"))
+        self.__base: dict = self.__location["base"]
+        self.__loot: dict = self.__location["loot"]
 
         # Cache to store pairs of categories and it's items
         # for example - Medkits category and all it's medkits
@@ -74,29 +84,32 @@ class LocationGenerator:
         return self.__base
 
     def __generate_location_loot(self):
-        for container in self.__loot['static']:
+        for container in self.__loot["static"]:
             self.__populate_container(container)
-            self.__base['Loot'].append(container)
+            self.__base["Loot"].append(container)
 
         dynamic_loot_locations: DefaultDict[str, list] = collections.defaultdict(list)
 
-        for dynamic_loot in self.__loot['dynamic']:
-            dynamic_loot = dynamic_loot['data'][0]
-            position = dynamic_loot['Position']
-            position = ';'.join(str(position[key]) for key in 'xyz')
+        for dynamic_loot in self.__loot["dynamic"]:
+            dynamic_loot = dynamic_loot["data"][0]
+            position = dynamic_loot["Position"]
+            position = ";".join(str(position[key]) for key in "xyz")
 
-            regenerate_item_ids_dict(dynamic_loot['Items'])
-            dynamic_loot['Id'] = dynamic_loot['Items'][0]['_id']
-            dynamic_loot['Root'] = dynamic_loot['Items'][0]['_id']
+            regenerate_item_ids_dict(dynamic_loot["Items"])
+            dynamic_loot["Id"] = dynamic_loot["Items"][0]["_id"]
+            dynamic_loot["Root"] = dynamic_loot["Items"][0]["_id"]
 
             dynamic_loot_locations[position].append(dynamic_loot)
 
-        self.__base['Loot'].extend(random.choice(loot) for loot in dynamic_loot_locations.values())
+        self.__base["Loot"].extend(
+            random.choice(loot) for loot in dynamic_loot_locations.values()
+        )
 
     def __get_category_items(self, template_id: TemplateId) -> List[ItemTemplate]:
         if template_id not in self.__category_cache:
             self.__category_cache[template_id] = list(
-                tpl for tpl in item_templates_repository.iter_template_children(template_id)
+                tpl
+                for tpl in item_templates_repository.iter_template_children(template_id)
                 if isinstance(tpl, ItemTemplate)
             )
 
@@ -107,11 +120,15 @@ class LocationGenerator:
         Populates given container with items
         Mutates the container argument
         """
-        container_id = container['Root']
-        container_template = item_templates_repository.get_template(container['Items'][0]['_tpl'])
+        container_id = container["Root"]
+        container_template = item_templates_repository.get_template(
+            container["Items"][0]["_tpl"]
+        )
 
-        assert container_template.props.SpawnFilter is not None
-        container_filter_templates: List[TemplateId] = container_template.props.SpawnFilter
+        assert isinstance(container_template.props, LootContainerProps)
+        container_filter_templates: List[
+            TemplateId
+        ] = container_template.props.SpawnFilter
 
         mean, deviation = 2.5, 2.5
         amount_of_items_in_container = max(round(random.gauss(mean, deviation)), 0)
@@ -129,13 +146,15 @@ class LocationGenerator:
 
         for _ in range(amount_of_items_in_container):
             for _ in range(10):
-                random_template = random.choices(item_templates, item_template_weights, k=1)[0]
+                random_template = random.choices(
+                    item_templates, item_template_weights, k=1
+                )[0]
 
                 item = Item(
                     id=generate_item_id(),
                     tpl=random_template.id,
                     parent_id=container_id,
-                    slotId='main',
+                    slotId="main",
                 )
                 try:
                     container_inventory.place_item(item)
@@ -143,15 +162,15 @@ class LocationGenerator:
                 except NoSpaceError:
                     pass
 
-        container['Items'] = container_inventory.container.dict()['Items']
+        container["Items"] = container_inventory.container.dict()["Items"]
 
     @staticmethod
     def __template_weight(template: ItemTemplate) -> Union[int, float]:
         rarity_coefficients = {
-            'Common': 1,
-            'Rare': 1,
-            'Superrare': 1,
-            'Not_exist': 0,
+            "Common": 1,
+            "Rare": 1,
+            "Superrare": 1,
+            "Not_exist": 0,
         }
         template_rarity = template.props.Rarity
         spawn_chance_coefficient = rarity_coefficients[template_rarity]

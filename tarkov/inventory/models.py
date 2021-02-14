@@ -4,159 +4,28 @@ import datetime
 import enum
 from typing import Any, List, Literal, NewType, Optional, TYPE_CHECKING, Union, cast
 
-from pydantic import Extra, Field, PrivateAttr, StrictBool, StrictInt, root_validator
+from pydantic import (
+    Extra,
+    Field,
+    PrivateAttr,
+    StrictBool,
+    ValidationError,
+    root_validator,
+)
 
 import tarkov.inventory
+from tarkov.inventory.prop_models import (
+    AnyProp,
+    BaseItemProps,
+    MedsProps,
+    props_models_map,
+)
+from tarkov.inventory.types import ItemId, TemplateId
 from tarkov.models import Base
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
     from tarkov.inventory import MutableInventory
-
-ItemId = NewType('ItemId', str)
-TemplateId = NewType('TemplateId', str)
-
-
-class ItemTemplateProps(Base):
-    class Config:
-        extra = Extra.allow
-        allow_mutation = False
-
-    Name: str
-    ShortName: str
-    Description: str
-    Weight: float
-    Width: StrictInt
-    Height: StrictInt
-    StackMaxSize: StrictInt
-    Rarity: Literal['Not_exist', 'Common', 'Rare', 'Superrare']
-    SpawnChance: float
-    CreditsPrice: float
-    ItemSound: str
-    StackObjectsCount: StrictInt
-    NotShownInSlot: StrictBool
-    ExaminedByDefault: StrictBool
-    ExamineTime: float
-
-    IsUndiscardable: StrictBool
-    IsUnsaleable: StrictBool
-    IsUnbuyable: StrictBool
-    IsUngivable: StrictBool
-    IsLockedafterEquip: StrictBool
-    QuestItem: StrictBool
-
-    LootExperience: StrictInt
-    ExamineExperience: StrictInt
-    HideEntrails: StrictBool
-    RepairCost: float
-    RepairSpeed: float
-    ExtraSizeLeft: StrictInt
-    ExtraSizeRight: StrictInt
-    ExtraSizeUp: StrictInt
-    ExtraSizeDown: StrictInt
-    ExtraSizeForceAdd: StrictBool
-
-    MergesWithChildren: StrictBool
-    CanSellOnRagfair: StrictBool
-    CanRequireOnRagfair: StrictBool
-    BannedFromRagfair: StrictBool
-    ConflictingItems: List[str]
-    FixedPrice: StrictBool
-    Unlootable: StrictBool
-    UnlootableFromSlot: str
-
-    # UnlootableFromSide: []
-
-    ChangePriceCoef: float
-    # AllowSpawnOnLocations": [],
-    # "SendToClient": false,
-    # "AnimationVariantsNumber": 0,
-    # "DiscardingBlock": false,
-
-    StackMinRandom: Optional[StrictInt] = None
-    StackMaxRandom: Optional[StrictInt] = None
-
-    medUseTime: Optional[StrictInt]
-    medEffectType: Optional[str]
-    MaxHpResource: Optional[StrictInt]
-    hpResourceRate: Optional[StrictInt]
-
-    Foldable: StrictBool = False
-
-    Grids: Optional[List[ItemGrid]] = None
-    SpawnFilter: Optional[List[TemplateId]] = None
-    Cartridges: Optional[List[Cartridges]] = None
-    # "ammoType": "bullet",
-    # "Damage": 67,
-    # "ammoAccr": 0,
-    # "ammoRec": 0,
-    # "ammoDist": 0,
-    # "buckshotBullets": 0,
-    # "PenetrationPower": 1,
-    # "PenetrationPowerDiviation": 0,
-    # "ammoHear": 0,
-    # "ammoSfx": "standart",
-    # "MisfireChance": 0.01,
-    # "MinFragmentsCount": 1,
-    # "MaxFragmentsCount": 2,
-    # "ammoShiftChance": 0,
-    # "casingName": "",
-    # "casingEjectPower": 1,
-    # "casingMass": 10,
-    # "casingSounds": "pistol_small",
-    # "ProjectileCount": 1,
-    # "InitialSpeed": 250,
-    # "PenetrationChance": 0.01,
-    # "RicochetChance": 0.05,
-    # "FragmentationChance": 0.6,
-    # "BallisticCoeficient": 1,
-    # "Deterioration": 1,
-    # "SpeedRetardation": 0.00007,
-    # "Tracer": false,
-    # "TracerColor": "red",
-    # "TracerDistance": 0,
-    # "ArmorDamage": 2,
-    # "Caliber": "Caliber9x18PM",
-    # "StaminaBurnPerDamage": 0.7,
-    # "ShowBullet": false,
-    # "HasGrenaderComponent": false,
-    # "FuzeArmTimeSec": 0,
-    # "ExplosionStrength": 0,
-    # "MinExplosionDistance": 0,
-    # "MaxExplosionDistance": 0,
-    # "FragmentsCount": 0,
-    # "FragmentType": "5996f6d686f77467977ba6cc",
-    # "ShowHitEffectOnExplode": false,
-    # "ExplosionType": "",
-    # "AmmoLifeTimeSec": 5,
-    # "Contusion": {
-    #     "x": 0,
-    #     "y": 0,
-    #     "z": 0
-    # },
-    # "ArmorDistanceDistanceDamage": {
-    #     "x": 0,
-    #     "y": 0,
-    #     "z": 0
-    # },
-    # "Blindness": {
-    #     "x": 0,
-    #     "y": 0,
-    #     "z": 0
-    # },
-    # "IsLightAndSoundShot": false,
-    # "LightAndSoundShotAngle": 0,
-    # "LightAndSoundShotSelfContusionTime": 0,
-    # "LightAndSoundShotSelfContusionStrength": 0
-    # "Prefab": {
-    #     "path": "assets/content/items/ammo/patrons/patron_9x18pm
-    #             "rcid": ""
-    # },
-    # "UsePrefab": {
-    #     "path": "",
-    #     "rcid": ""
-    # },
-    # "BackgroundColor": "yellow",
 
 
 class NodeTemplateBase(Base):
@@ -165,12 +34,12 @@ class NodeTemplateBase(Base):
 
         allow_mutation = False
         fields = {
-            'id': '_id',
-            'name': '_name',
-            'parent': '_parent',
-            'type': '_type',
-            'props': '_props',
-            'proto': '_proto'
+            "id": "_id",
+            "name": "_name",
+            "parent": "_parent",
+            "type": "_type",
+            "props": "_props",
+            "proto": "_proto",
         }
 
     id: TemplateId
@@ -180,65 +49,34 @@ class NodeTemplateBase(Base):
 
 
 class NodeTemplate(NodeTemplateBase):
-    type: Literal['Node']
-
-
-class FilterProp(Base):
-    Filter: List[str] = Field(default_factory=list)
-    ExcludedFilter: Optional[List[str]]
-
-
-class CartridgesProps(Base):
-    filters: List[FilterProp]
-
-
-class Cartridges(Base):
-    class Config:
-        allow_mutation = False
-        fields = {
-            'name': '_name',
-            'id': '_id',
-            'parent': '_parent',
-            'max_count': '_max_count',
-            'props': '_props',
-            'proto': '_proto'
-        }
-
-    name: Literal['cartridges']
-    id: TemplateId
-    parent: TemplateId
-    max_count: StrictInt
-    props: CartridgesProps
-    proto: str
-
-
-class GridProps(Base):
-    class Config:
-        allow_mutation = False
-        fields = {
-            'width': 'cellsH',
-            'height': 'cellsV'
-        }
-
-    filters: List[FilterProp]
-    width: StrictInt
-    height: StrictInt
-    minCount: StrictInt
-    maxCount: StrictInt
-    maxWeight: StrictInt
-
-
-class ItemGrid(NodeTemplate):
-    type: Optional[str] = None  # type: ignore
-    props: GridProps
-
-
-ItemTemplateProps.update_forward_refs()
+    type: Literal["Node"]
 
 
 class ItemTemplate(NodeTemplateBase):
-    type: Literal['Item']
-    props: ItemTemplateProps
+    type: Literal["Item"]
+    props: AnyProp
+
+    @root_validator(pre=True)
+    def assign_prop(cls, values: dict):  # pylint: disable=no-self-argument, no-self-use
+        if values["_type"] != "Item":
+            return values
+        if isinstance(values["_props"], BaseItemProps):
+            return values
+
+        props = values["_props"]
+        try:
+            model = props_models_map[values["_parent"]]
+        except KeyError as e:
+            raise KeyError(
+                f"Props class for node with id {values['_parent']} was not found"
+            ) from e
+        try:
+            values["_props"] = model.parse_obj(props)
+        except ValidationError as e:
+            print(values["_id"])
+            print(e)
+            raise
+        return values
 
 
 class ItemUpdDogtag(Base):
@@ -274,7 +112,9 @@ class ItemUpdLockable(Base):
 
 
 class ItemUpdRepairable(Base):
-    MaxDurability: Optional[int] = None  # TODO: Some items in bot inventories don't have MaxDurability
+    MaxDurability: Optional[
+        int
+    ] = None  # TODO: Some items in bot inventories don't have MaxDurability
     Durability: int
 
 
@@ -322,14 +162,14 @@ class ItemUpd(Base):
     UnlimitedCount: StrictBool = False
 
 
-ItemAmmoStackPosition = NewType('ItemAmmoStackPosition', int)
+ItemAmmoStackPosition = NewType("ItemAmmoStackPosition", int)
 
-ItemOrientation = Literal['Horizontal', 'Vertical']
+ItemOrientation = Literal["Horizontal", "Vertical"]
 
 
 class ItemOrientationEnum(enum.Enum):
-    Horizontal = 'Horizontal'
-    Vertical = 'Vertical'
+    Horizontal = "Horizontal"
+    Vertical = "Vertical"
 
 
 class ItemInventoryLocation(Base):
@@ -346,49 +186,60 @@ class Item(Base):
     class Config:
         extra = Extra.forbid
 
-    __inventory__: Optional['MutableInventory'] = PrivateAttr(default=None)  # Link to the inventory
+    __inventory__: Optional["MutableInventory"] = PrivateAttr(
+        default=None
+    )  # Link to the inventory
 
-    id: ItemId = Field(alias='_id')
-    tpl: TemplateId = Field(alias='_tpl')
+    id: ItemId = Field(alias="_id")
+    tpl: TemplateId = Field(alias="_tpl")
     slotId: Optional[str] = None
-    parent_id: Optional[ItemId] = Field(alias='parentId', default=None)
+    parent_id: Optional[ItemId] = Field(alias="parentId", default=None)
     location: Optional[AnyItemLocation] = None
     upd: ItemUpd = Field(default_factory=ItemUpd)
 
-    def get_inventory(self) -> 'MutableInventory':
+    def get_inventory(self) -> "MutableInventory":
         if self.__inventory__ is None:
-            raise ValueError('Item does not have inventory')
+            raise ValueError("Item does not have inventory")
         return self.__inventory__
 
     @root_validator(pre=False, skip_on_failure=True)
-    def validate_medkit_hp(cls, values: dict):  # pylint: disable=no-self-argument,no-self-use
-        if 'id' not in values:
+    def validate_medkit_hp(
+        cls, values: dict
+    ):  # pylint: disable=no-self-argument,no-self-use
+        if "id" not in values:
             return values
 
-        item_tpl_id: TemplateId = cast(TemplateId, values.get('tpl'))
-        item_template = tarkov.inventory.item_templates_repository.get_template(item_tpl_id)
-        if item_template.parent == '5448f39d4bdc2d0a728b4568':
-            upd: ItemUpd = cast(ItemUpd, values.get('upd'))
+        item_tpl_id: TemplateId = cast(TemplateId, values.get("tpl"))
+        item_template = tarkov.inventory.item_templates_repository.get_template(
+            item_tpl_id
+        )
+        if item_template.parent == "5448f39d4bdc2d0a728b4568":  # Medkit Id
+            assert isinstance(item_template.props, MedsProps)
+            upd: ItemUpd = cast(ItemUpd, values.get("upd"))
             if not isinstance(item_template.props.MaxHpResource, int):
                 raise ResourceWarning(
-                    f'''Item template that inherits directly form MedKit does not have MaxHpResource property
+                    f"""Item template that inherits directly form MedKit does not have MaxHpResource property
                     template id: {item_template.id}
-                    ''')
-            upd.MedKit = upd.MedKit if upd.MedKit else ItemUpdMedKit(HpResource=item_template.props.MaxHpResource)
+                    """
+                )
+            upd.MedKit = (
+                upd.MedKit
+                if upd.MedKit
+                else ItemUpdMedKit(HpResource=item_template.props.MaxHpResource)
+            )
 
         return values
 
     @root_validator(pre=False, skip_on_failure=True)
-    def validate_upd_none(cls, values: dict):  # pylint: disable=no-self-argument,no-self-use
-        if 'upd' in values and values['upd'] is None:
-            values['upd'] = ItemUpd()
+    def validate_upd_none(
+        cls, values: dict
+    ):  # pylint: disable=no-self-argument,no-self-use
+        if "upd" in values and values["upd"] is None:
+            values["upd"] = ItemUpd()
 
         return values
 
-    def copy(
-            self: Item,
-            **kwargs
-    ) -> Item:
+    def copy(self: Item, **kwargs) -> Item:
         item_inventory = self.__inventory__
         # Avoid copying inventory
         self.__inventory__ = None
@@ -419,12 +270,12 @@ class InventoryMoveLocation(Base):
 
 class CartridgesMoveLocation(Base):
     id: ItemId  # Magazine id
-    container: Literal['cartridges']
+    container: Literal["cartridges"]
 
 
 class PatronInWeaponMoveLocation(Base):
     id: ItemId
-    container: Literal['patron_in_weapon']
+    container: Literal["patron_in_weapon"]
 
 
 class ModMoveLocation(Base):
@@ -451,4 +302,9 @@ class ModMoveLocation(Base):
     # ]
 
 
-AnyMoveLocation = Union[InventoryMoveLocation, CartridgesMoveLocation, PatronInWeaponMoveLocation, ModMoveLocation]
+AnyMoveLocation = Union[
+    InventoryMoveLocation,
+    CartridgesMoveLocation,
+    PatronInWeaponMoveLocation,
+    ModMoveLocation,
+]

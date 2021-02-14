@@ -2,8 +2,13 @@ import datetime
 from typing import Dict, List, TYPE_CHECKING
 
 from server.utils import atomic_write
-from tarkov.notifier.models import (DialoguePreviewList, MailDialogue, MailDialogueMessage, MailDialoguePreview,
-                                    MailDialogues, )
+from tarkov.notifier.models import (
+    DialoguePreviewList,
+    MailDialogue,
+    MailDialogueMessage,
+    MailDialoguePreview,
+    MailDialogues,
+)
 from tarkov.notifier.notifier import notifier_instance
 
 if TYPE_CHECKING:
@@ -12,12 +17,12 @@ if TYPE_CHECKING:
 
 
 class Mail:
-    profile: 'Profile'
+    profile: "Profile"
     dialogues: MailDialogues
 
-    def __init__(self, profile: 'Profile'):
+    def __init__(self, profile: "Profile"):
         self.profile = profile
-        self.path = self.profile.profile_dir.joinpath('dialogue.json')
+        self.path = self.profile.profile_dir.joinpath("dialogue.json")
 
     def get_dialogue(self, trader_id: str) -> MailDialogue:
         """Returns trader dialogue by trader id"""
@@ -34,8 +39,7 @@ class Mail:
         category.messages.insert(0, message)
 
         notifier_instance.add_message_notification(
-            profile_id=self.profile.profile_id,
-            message=message
+            profile_id=self.profile.profile_id, message=message
         )
 
     def get_message(self, message_id: str) -> MailDialogueMessage:
@@ -44,7 +48,7 @@ class Mail:
             for message in dialogue.messages:
                 if message.id == message_id:
                     return message
-        raise IndexError(f'DialogueMessage with id {message_id} was not found.')
+        raise IndexError(f"DialogueMessage with id {message_id} was not found.")
 
     def view_dialogue_preview_list(self) -> List[Dict]:
         dialogues_previews = DialoguePreviewList.from_dialogues(self.dialogues).__root__
@@ -57,7 +61,7 @@ class Mail:
     def view_dialog(self, dialogue_id: str, time_: float) -> dict:
         if time_:
             # Since we're returning all the messages at once we don't have to return anything if time was specified
-            return {'messages': []}
+            return {"messages": []}
 
         dialogue = self.get_dialogue(dialogue_id)
 
@@ -69,18 +73,24 @@ class Mail:
         #     if has_uncollected_rewards and not expired:
         #         attachments_count += 1
 
-        return {'messages': [msg.dict() for msg in dialogue.messages]}
+        return {"messages": [msg.dict() for msg in dialogue.messages]}
 
     def all_attachments_view(self, dialogue_id) -> dict:
         dialogue = self.get_dialogue(dialogue_id)
 
-        messages = [msg.dict(exclude_none=True) for msg in dialogue.messages if not self.__is_message_expired(msg)]
-        return {'messages': messages}
+        messages = [
+            msg.dict(exclude_none=True)
+            for msg in dialogue.messages
+            if not self.__is_message_expired(msg)
+        ]
+        return {"messages": messages}
 
     @staticmethod
     def __is_message_expired(message: MailDialogueMessage) -> bool:
         datetime_now = datetime.datetime.now()
-        message_expires_at = datetime.datetime.fromtimestamp(message.dt + message.maxStorageTime)
+        message_expires_at = datetime.datetime.fromtimestamp(
+            message.dt + message.maxStorageTime
+        )
         return datetime_now > message_expires_at
 
     def read(self):
@@ -91,6 +101,8 @@ class Mail:
 
     def write(self):
         atomic_write(
-            self.dialogues.json(by_alias=True, exclude_unset=False, exclude_none=True, indent=4),
-            self.path
+            self.dialogues.json(
+                by_alias=True, exclude_unset=False, exclude_none=True, indent=4
+            ),
+            self.path,
         )

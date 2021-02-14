@@ -8,8 +8,8 @@ from server import logger, root_dir
 
 
 class PackageMeta:
-    name: str = ''
-    version: str = ''
+    name: str = ""
+    version: str = ""
     dependencies: Union[Set[str], List[str]] = []
 
 
@@ -23,7 +23,7 @@ class PackageBase:
         pass
 
     def __str__(self):
-        return f'{self.Meta.name} - {self.Meta.version}'
+        return f"{self.Meta.name} - {self.Meta.version}"
 
 
 class UnresolvedPackageError(Exception):
@@ -41,8 +41,8 @@ class CycleDependencyError(Exception):
         self.dependencies = dependencies
 
     def __str__(self):
-        dependencies = ', '.join(dep.Meta.name for dep in self.dependencies)
-        return f'{self.package.Meta.name}: [{dependencies}]'
+        dependencies = ", ".join(dep.Meta.name for dep in self.dependencies)
+        return f"{self.package.Meta.name}: [{dependencies}]"
 
 
 PackageType = Type[PackageBase]
@@ -67,15 +67,18 @@ class PackageTopologicalSorter:
             for pkg in self.packages
         }
 
-        logger.debug(f'Dependency graph: {dependency_graph}')
-        pkg_with_no_deps = [pkg for pkg, pkg_deps in dependency_graph.items() if not pkg_deps]
-        logger.debug(f'pkg_with_no_deps: {pkg_with_no_deps}')
+        logger.debug(f"Dependency graph: {dependency_graph}")
+        pkg_with_no_deps = [
+            pkg for pkg, pkg_deps in dependency_graph.items() if not pkg_deps
+        ]
+        logger.debug(f"pkg_with_no_deps: {pkg_with_no_deps}")
         if not pkg_with_no_deps and dependency_graph:
             raise NoBasePackageError
 
         dependency_graph = {
             pkg: [d for d in deps if d not in pkg_with_no_deps]
-            for pkg, deps in dependency_graph.items() if pkg not in pkg_with_no_deps
+            for pkg, deps in dependency_graph.items()
+            if pkg not in pkg_with_no_deps
         }
 
         while pkg_with_no_deps:
@@ -115,13 +118,13 @@ class PackageManager:
         """
         Imports top-level packages in self.packages_dir directory
         """
-        for module_path in (d for d in self.packages_dir.glob('*') if d.is_dir()):
-            module_name = '.'.join(module_path.relative_to(root_dir).parts)
+        for module_path in (d for d in self.packages_dir.glob("*") if d.is_dir()):
+            module_name = ".".join(module_path.relative_to(root_dir).parts)
 
             module = importlib.import_module(module_name)
-            if hasattr(module, 'Package'):
-                package: Type[PackageBase] = getattr(module, 'Package')
-                logger.debug(f'Package import: {package.Meta.name}')
+            if hasattr(module, "Package"):
+                package: Type[PackageBase] = getattr(module, "Package")
+                logger.debug(f"Package import: {package.Meta.name}")
                 self.register(package)
 
     def __load_packages(self):
@@ -131,7 +134,7 @@ class PackageManager:
         order = self.__get_load_order()
         for package in order:
             package_instance = package()
-            logger.debug(f'Package load: {str(package_instance)}')
+            logger.debug(f"Package load: {str(package_instance)}")
             package_instance.on_load()
 
     def __get_load_order(self) -> Iterable[Type[PackageBase]]:
