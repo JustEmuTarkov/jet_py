@@ -24,7 +24,7 @@ jobs:
         run: |
           python -m pip install --upgrade black
 
-      - name Check with black
+      - name: Check with black
         run: |
           python -m black ./ --check
 
@@ -33,7 +33,7 @@ jobs:
     needs: Black
     strategy:
       matrix:
-        toxenv: ['mypy', 'pytest', 'pylint', 'flake8']
+        toxenv: [ 'mypy', 'pytest', 'pylint', 'flake8' ]
 
     steps:
       - uses: actions/checkout@v2
