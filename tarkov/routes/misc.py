@@ -9,8 +9,8 @@ from starlette.requests import Request
 from server import db_dir, start_time
 from server.utils import get_request_url_root, make_router
 from tarkov.inventory import item_templates_repository
-from tarkov.inventory.types import TemplateId
 from tarkov.inventory.repositories import AnyTemplate
+from tarkov.inventory.types import TemplateId
 from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
 
 misc_router = make_router(tags=["Misc/Bootstrap"])
@@ -43,8 +43,8 @@ def client_game_version_validate() -> TarkovSuccessResponse[Type[None]]:
 
 @misc_router.post("/client/game/config")
 def client_game_config(
-    request: Request,
-    profile_id: Optional[str] = Cookie(alias="PHPSESSID", default=None),  # type: ignore
+        request: Request,
+        profile_id: Optional[str] = Cookie(alias="PHPSESSID", default=None),  # type: ignore
 ) -> Union[TarkovSuccessResponse[dict], TarkovErrorResponse]:
     url_root = get_request_url_root(request)
 
@@ -75,7 +75,7 @@ def client_game_config(
 
 @misc_router.post("/client/game/keepalive")
 def client_game_keepalive(
-    profile_id: Optional[str] = Cookie(alias="PHPSESSID", default=None),  # type: ignore
+        profile_id: Optional[str] = Cookie(alias="PHPSESSID", default=None),  # type: ignore
 ) -> Union[TarkovSuccessResponse[dict], TarkovErrorResponse]:
     if not profile_id:
         return TarkovErrorResponse(err=True, errmsg="No Session", data=None)
@@ -85,12 +85,10 @@ def client_game_keepalive(
 
 @misc_router.post(
     "/client/items",
-    response_model=TarkovSuccessResponse[Dict[TemplateId, Union[AnyTemplate]]],
-    response_model_exclude_unset=True,
-    response_model_exclude_none=True,
+    # response_model=TarkovSuccessResponse[Dict[TemplateId, AnyTemplate]]
 )
 def client_items() -> TarkovSuccessResponse[Dict[TemplateId, Union[AnyTemplate]]]:
-    return TarkovSuccessResponse(data=item_templates_repository.templates)
+    return TarkovSuccessResponse(data=item_templates_repository.client_items_view)
 
 
 @misc_router.post("/client/customization")

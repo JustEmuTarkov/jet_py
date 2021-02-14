@@ -1,5 +1,5 @@
 import copy
-from typing import Dict, Iterable, List, Union
+from typing import Dict, Iterable, List, Tuple, Union
 
 import pydantic
 import ujson
@@ -17,30 +17,43 @@ AnyTemplate = Union[ItemTemplate, NodeTemplate]
 
 class ItemTemplatesRepository:
     def __init__(self):
-        self._item_templates: Dict[
-            TemplateId, AnyTemplate
-        ] = self.__read_item_templates()
+        items, nodes = self.__read_templates()
+        self._item_templates: Dict[TemplateId, ItemTemplate] = items
+        self._node_templates: Dict[TemplateId, NodeTemplate] = nodes
         self._item_categories: dict = self.__read_item_categories()
         self.globals = ujson.load(
             db_dir.joinpath("base", "globals.json").open(encoding="utf8")
         )
 
     @staticmethod
-    def __read_item_templates() -> Dict[TemplateId, ItemTemplate]:
-
-        item_templates: List[AnyTemplate] = []
+    def __read_templates() -> Tuple[
+        Dict[TemplateId, ItemTemplate],
+        Dict[TemplateId, NodeTemplate],
+    ]:
+        item_templates: List[ItemTemplate] = []
+        node_templates: List[NodeTemplate] = []
 
         # Read every file from db/items
         for item_file_path in db_dir.joinpath("items").glob("*"):
             file_data: List[dict] = ujson.load(
                 item_file_path.open("r", encoding="utf8")
             )
-            items: List[ItemTemplate] = pydantic.parse_obj_as(
-                List[ItemTemplate],
-                (item for item in file_data if item["_type"] == "Item"),
+            item_templates.extend(
+                pydantic.parse_obj_as(
+                    List[ItemTemplate],
+                    (item for item in file_data if item["_type"] == "Item"),
+                )
             )
-            item_templates.extend(items)
-        return {tpl.id: tpl for tpl in item_templates}
+            node_templates.extend(
+                pydantic.parse_obj_as(
+                    List[NodeTemplate],
+                    (item for item in file_data if item["_type"] == "Node"),
+                )
+            )
+        return (
+            {tpl.id: tpl for tpl in item_templates},
+            {tpl.id: tpl for tpl in node_templates},
+        )
 
     @staticmethod
     def __read_item_categories():
@@ -53,6 +66,10 @@ class ItemTemplatesRepository:
     @property
     def templates(self):
         return self._item_templates
+
+    @property
+    def client_items_view(self) -> Dict[TemplateId, AnyTemplate]:
+        return {**self._item_templates, **self._node_templates}
 
     def get_template(self, item: Union[Item, TemplateId]) -> ItemTemplate:
         """

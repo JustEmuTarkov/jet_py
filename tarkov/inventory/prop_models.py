@@ -404,7 +404,7 @@ class TacticalComboProps(FunctionalModProps):
 
 class FlashlightProps(FunctionalModProps):
     __template_id__: str = "55818b084bdc2d5b648b4571"
-    ModesCount: StrictInt = 0
+    ModesCount: StrictInt = Field(default=0)
 
 
 class ForegripProps(FunctionalModProps):
