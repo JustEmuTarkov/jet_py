@@ -85,7 +85,7 @@ class ItemTemplatesRepository:
         return item_template
 
     def get_any_template(
-            self, item: Union[Item, TemplateId]
+        self, item: Union[Item, TemplateId]
     ) -> Union[NodeTemplate, ItemTemplate]:
         if isinstance(item, Item):
             template_id = item.tpl
@@ -102,7 +102,7 @@ class ItemTemplatesRepository:
         return item_template
 
     def iter_template_children(
-            self, template_id: TemplateId
+        self, template_id: TemplateId
     ) -> Iterable[Union[NodeTemplate, ItemTemplate]]:
         templates: List[Union[NodeTemplate, ItemTemplate]] = [
             self.get_any_template(template_id)
@@ -166,8 +166,8 @@ class ItemTemplatesRepository:
 
         #  Item is either medkit or a painkiller
         if item_template.parent in (
-                "5448f39d4bdc2d0a728b4568",
-                "5448f3a14bdc2d27728b4569",
+            "5448f39d4bdc2d0a728b4568",
+            "5448f3a14bdc2d27728b4569",
         ):
             assert isinstance(item_template.props, MedsProps)
 

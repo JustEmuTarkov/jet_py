@@ -74,9 +74,8 @@ class TraderInventory(ImmutableInventory):
     def assort(self) -> List[Item]:
         if self.trader == TraderType.Fence:
             current_time = time.time()
-            expired = (
-                current_time
-                > TraderInventory.__fence_assort_created_at + FENCE_ASSORT_LIFETIME
+            expired = current_time > (
+                TraderInventory.__fence_assort_created_at + FENCE_ASSORT_LIFETIME
             )
 
             if not TraderInventory.__fence_assort or expired:

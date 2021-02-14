@@ -14,7 +14,12 @@ from pydantic import (
 )
 
 import tarkov.inventory
-from tarkov.inventory.prop_models import AnyProp, BaseItemProps, MedsProps, props_models_map
+from tarkov.inventory.prop_models import (
+    AnyProp,
+    BaseItemProps,
+    MedsProps,
+    props_models_map,
+)
 from tarkov.inventory.types import ItemId, TemplateId
 from tarkov.models import Base
 
@@ -52,10 +57,10 @@ class ItemTemplate(NodeTemplateBase):
     props: AnyProp
 
     @root_validator(pre=True)
-    def assign_prop(cls, values: dict):
-        if values['_type'] != 'Item':
+    def assign_prop(cls, values: dict):  # pylint: disable=no-self-argument, no-self-use
+        if values["_type"] != "Item":
             return values
-        if isinstance(values['_props'], BaseItemProps):
+        if isinstance(values["_props"], BaseItemProps):
             return values
 
         props = values["_props"]
@@ -199,7 +204,7 @@ class Item(Base):
 
     @root_validator(pre=False, skip_on_failure=True)
     def validate_medkit_hp(
-            cls, values: dict
+        cls, values: dict
     ):  # pylint: disable=no-self-argument,no-self-use
         if "id" not in values:
             return values
@@ -227,7 +232,7 @@ class Item(Base):
 
     @root_validator(pre=False, skip_on_failure=True)
     def validate_upd_none(
-            cls, values: dict
+        cls, values: dict
     ):  # pylint: disable=no-self-argument,no-self-use
         if "upd" in values and values["upd"] is None:
             values["upd"] = ItemUpd()

@@ -27,9 +27,9 @@ from .models import (
     ModMoveLocation,
     PatronInWeaponMoveLocation,
 )
-from .types import ItemId, TemplateId
-from .prop_models import CompoundProps, MagazineProps, WeaponProps
+from .prop_models import CompoundProps, MagazineProps, StockProps, WeaponProps
 from .repositories import item_templates_repository
+from .types import ItemId, TemplateId
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
@@ -90,31 +90,35 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
             child_template = item_templates_repository.get_template(child)
 
             child_props = child_template.props
-            child_extra_size: ItemExtraSize = {
-                "left": child_props.ExtraSizeLeft,
-                "right": child_props.ExtraSizeRight,
-                "up": child_props.ExtraSizeUp,
-                "down": child_props.ExtraSizeDown,
-            }
             if child_props.ExtraSizeForceAdd:
-                extra_size["left"] += child_extra_size["left"]
-                extra_size["right"] += child_extra_size["right"]
-                extra_size["up"] += child_extra_size["up"]
-                extra_size["down"] += child_extra_size["down"]
-            else:
-                extra_size = merge_extra_size(extra_size, child_extra_size)
+                extra_size["left"] += child_props.ExtraSizeLeft
+                extra_size["right"] += child_props.ExtraSizeRight
+                extra_size["up"] += child_props.ExtraSizeUp
+                extra_size["down"] += child_props.ExtraSizeDown
 
         width: int = template.props.Width + extra_size["left"] + extra_size["right"]
         height: int = template.props.Height + extra_size["up"] + extra_size["down"]
 
-        folded = any(
-            isinstance(child.upd.Foldable, ItemUpdFoldable)
-            and child.upd.Foldable.Folded is True
-            for child in itertools.chain([item], children_items)
-        )
+        if not isinstance(template.props, WeaponProps):
+            return width, height
+
+        folded: bool = False
+        if template.props.Foldable and template.props.FoldedSlot == "":
+            # Item is foldable
+            folded = item.upd.Foldable is not None and item.upd.Foldable.Folded
+
+        elif template.props.FoldedSlot == "":
+            # Item is not foldable and we have to find stock
+            for child in children_items:
+                tpl = item_templates_repository.get_template(child)
+                foldable = isinstance(tpl.props, StockProps) and tpl.props.Foldable
+                if not foldable:
+                    continue
+
+                folded = child.upd.Foldable is not None and child.upd.Foldable.Folded
 
         if folded:
-            width -= 1
+            width -= template.props.SizeReduceRight
         return width, height
 
     def iter_item_children(self, item: Item) -> Iterable[Item]:
@@ -437,12 +441,7 @@ class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
         """
         item_template = item_templates_repository.get_template(item)
 
-        assert isinstance(item_template.props, WeaponProps)
-        foldable = item_template.props.Foldable
-
-        if not foldable:
-            raise ValueError("Item is not foldable")
-
+        assert isinstance(item_template.props, (WeaponProps, StockProps))
         item.upd.Foldable = ItemUpdFoldable(Folded=folded)
 
     def take_item(

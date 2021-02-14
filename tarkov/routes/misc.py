@@ -43,8 +43,8 @@ def client_game_version_validate() -> TarkovSuccessResponse[Type[None]]:
 
 @misc_router.post("/client/game/config")
 def client_game_config(
-        request: Request,
-        profile_id: Optional[str] = Cookie(alias="PHPSESSID", default=None),  # type: ignore
+    request: Request,
+    profile_id: Optional[str] = Cookie(alias="PHPSESSID", default=None),  # type: ignore
 ) -> Union[TarkovSuccessResponse[dict], TarkovErrorResponse]:
     url_root = get_request_url_root(request)
 
@@ -75,7 +75,7 @@ def client_game_config(
 
 @misc_router.post("/client/game/keepalive")
 def client_game_keepalive(
-        profile_id: Optional[str] = Cookie(alias="PHPSESSID", default=None),  # type: ignore
+    profile_id: Optional[str] = Cookie(alias="PHPSESSID", default=None),  # type: ignore
 ) -> Union[TarkovSuccessResponse[dict], TarkovErrorResponse]:
     if not profile_id:
         return TarkovErrorResponse(err=True, errmsg="No Session", data=None)
@@ -86,6 +86,7 @@ def client_game_keepalive(
 @misc_router.post(
     "/client/items",
     # response_model=TarkovSuccessResponse[Dict[TemplateId, AnyTemplate]]
+    # Disable response_model since validating Templates via pydantic is really expensive
 )
 def client_items() -> TarkovSuccessResponse[Dict[TemplateId, Union[AnyTemplate]]]:
     return TarkovSuccessResponse(data=item_templates_repository.client_items_view)
