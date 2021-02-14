@@ -11,7 +11,7 @@ from server import root_dir
 from tarkov.launcher.routes import launcher_router
 from tarkov.notifier.routes import notifier_router
 from tarkov.profile.routes import profile_router
-from tarkov.routes.flea_market import flea_market_router
+from tarkov.fleamarket.routes import flea_market_router
 from tarkov.routes.friend import friend_router
 from tarkov.routes.hideout import hideout_router
 from tarkov.routes.insurance import insurance_router
