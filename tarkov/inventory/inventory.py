@@ -67,17 +67,10 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
             raise NotFoundError from error
 
     @staticmethod
-    def get_item_size(item: Item, child_items: List[Item] = None) -> Tuple[int, int]:
-        """
-        Return size of the item according to it's attachments, etc.
-
-        :return: Tuple[width, height]
-        """
-        child_items = child_items or []
-
+    def __get_item_size_without_folding(
+        item: Item, child_items: List[Item]
+    ) -> Tuple[int, int]:
         item_template = item_templates_repository.get_template(item)
-        if not isinstance(item_template.props, WeaponProps):
-            return item_template.props.Width, item_template.props.Height
 
         size_left: int = 0
         size_right: int = 0
@@ -106,6 +99,26 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
 
         width += size_left + size_right
         height += size_up + size_down
+
+        return width, height
+
+    @staticmethod
+    def get_item_size(  # noqa: C901 - Guess there's nothing i can do about this function complexity
+        item: Item, child_items: List[Item] = None
+    ) -> Tuple[int, int]:
+        """
+        Return size of the item according to it's attachments, etc.
+
+        :return: Tuple[width, height]
+        """
+        item_template = item_templates_repository.get_template(item)
+        if not isinstance(item_template.props, WeaponProps):
+            return item_template.props.Width, item_template.props.Height
+
+        child_items = child_items or []
+        width, height = ImmutableInventory.__get_item_size_without_folding(
+            item, child_items
+        )
 
         if item_template.props.Foldable and item_template.props.FoldedSlot == "":
             if item.upd.folded():
