@@ -27,7 +27,7 @@ from .models import (
     ModMoveLocation,
     PatronInWeaponMoveLocation,
 )
-from .prop_models import CompoundProps, MagazineProps, StockProps, WeaponProps
+from .prop_models import CompoundProps, MagazineProps, ModProps, StockProps, WeaponProps
 from .repositories import item_templates_repository
 from .types import ItemId, TemplateId
 
@@ -71,6 +71,8 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
         item: Item, child_items: List[Item]
     ) -> Tuple[int, int]:
         item_template = item_templates_repository.get_template(item)
+        if not isinstance(item_template.props, (WeaponProps, ModProps)):
+            return item_template.props.Width, item_template.props.Height
 
         size_left: int = 0
         size_right: int = 0
@@ -112,10 +114,13 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
         :return: Tuple[width, height]
         """
         item_template = item_templates_repository.get_template(item)
-        if not isinstance(item_template.props, WeaponProps):
-            return item_template.props.Width, item_template.props.Height
-
         child_items = child_items or []
+        width, height = ImmutableInventory.__get_item_size_without_folding(
+            item, child_items
+        )
+        if not isinstance(item_template.props, WeaponProps):
+            return width, height
+
         width, height = ImmutableInventory.__get_item_size_without_folding(
             item, child_items
         )

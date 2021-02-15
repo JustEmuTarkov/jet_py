@@ -1,0 +1,85 @@
+{
+    "equipment": "5df7b9abef12bf7a252437a1",
+    "stash": "5df7b9abef12bf7a2524385f",
+    "questRaidItems": "5df7b9abef12bf7a25243860",
+    "questStashItems": "5df7b9abef12bf7a25243861",
+    "fastPanel": {},
+    "items": [
+        {
+            "id": "5df7b9abef12bf7a2524385f",
+            "tpl": "5811ce772459770e9e5f9532",
+            "upd": {}
+        },
+        {
+            "id": "5df7b9abef12bf7a25243860",
+            "tpl": "5963866286f7747bf429b572",
+            "upd": {}
+        },
+        {
+            "id": "5df7b9abef12bf7a25243861",
+            "tpl": "5963866b86f7747bfa1c4462",
+            "upd": {}
+        },
+        {
+            "id": "5df7b9abef12bf7a252437a1",
+            "tpl": "55d7217a4bdc2d86028b456d",
+            "upd": {}
+        },
+        {
+            "id": "6d814da8a5cf6c55522703a7",
+            "tpl": "557ffd194bdc2d28148b457f",
+            "slotId": "Pockets",
+            "parent_id": "5df7b9abef12bf7a252437a1",
+            "upd": {}
+        },
+        {
+            "id": "5df7b9abef12bf7a252437ea",
+            "tpl": "5449016a4bdc2d6f028b456f",
+            "slotId": "hideout",
+            "parent_id": "5df7b9abef12bf7a2524385f",
+            "location": {
+                "x": 9,
+                "y": 0,
+                "r": "Horizontal",
+                "isSearched": true
+            },
+            "upd": {
+                "StackObjectsCount": 964155341
+            }
+        },
+        {
+            "id": "test_weapon",
+            "tpl": "55d3632e4bdc2d972f8b4569",
+            "slotId": "hideout",
+            "parent_id": "5df7b9abef12bf7a2524385f",
+            "location": {
+                "x": 0,
+                "y": 0,
+                "r": "Horizontal",
+                "isSearched": true
+            },
+            "upd": {}
+        },
+        {
+            "id": "ed774a49a778ab4231beb7db",
+            "tpl": "56eabcd4d2720b66698b4574",
+            "slotId": "mod_gas_block",
+            "parent_id": "test_weapon",
+            "upd": {}
+        },
+        {
+            "id": "377342ce96f71516c1f76af1",
+            "tpl": "5ea172e498dacb342978818e",
+            "slotId": "mod_muzzle",
+            "parent_id": "test_weapon",
+            "upd": {}
+        },
+        {
+            "id": "8b9540b19fd7a736b590f9fb",
+            "tpl": "5ea17bbc09aa976f2e7a51cd",
+            "slotId": "mod_muzzle",
+            "parent_id": "377342ce96f71516c1f76af1",
+            "upd": {}
+        }
+    ]
+}
