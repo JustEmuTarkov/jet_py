@@ -5,7 +5,6 @@ import pytest
 from tarkov.exceptions import NoSpaceError
 from tarkov.inventory import (
     GridInventoryStashMap,
-    PlayerInventory,
     item_templates_repository,
 )
 from tarkov.inventory.models import Item, ItemInventoryLocation, ItemOrientationEnum

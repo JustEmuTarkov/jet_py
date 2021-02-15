@@ -1,5 +1,5 @@
 import enum
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from pydantic import Field, StrictBool, StrictInt
 
@@ -83,6 +83,6 @@ class Offer(Base):
 
 class FleaMarketResponse(Base):
     offers: List[Offer] = Field(default_factory=list)
-    categories: dict
+    categories: Dict[CategoryId, int]
     offersCount: int
     selectedCategory: str
