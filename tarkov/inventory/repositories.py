@@ -165,12 +165,7 @@ class ItemTemplatesRepository:
             item.upd.StackObjectsCount = count
 
         #  Item is either medkit or a painkiller
-        if item_template.parent in (
-            "5448f39d4bdc2d0a728b4568",
-            "5448f3a14bdc2d27728b4569",
-        ):
-            assert isinstance(item_template.props, MedsProps)
-
+        if isinstance(item_template.props, MedsProps):
             medkit_max_hp = item_template.props.MaxHpResource
             assert medkit_max_hp is not None
 

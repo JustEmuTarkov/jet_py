@@ -1,0 +1,82 @@
+{
+    "equipment": "5df7b9abef12bf7a252437a1",
+    "stash": "5df7b9abef12bf7a2524385f",
+    "questRaidItems": "5df7b9abef12bf7a25243860",
+    "questStashItems": "5df7b9abef12bf7a25243861",
+    "fastPanel": {},
+    "items": [
+        {
+            "id": "5df7b9abef12bf7a2524385f",
+            "tpl": "5811ce772459770e9e5f9532",
+            "upd": {}
+        },
+        {
+            "id": "5df7b9abef12bf7a25243860",
+            "tpl": "5963866286f7747bf429b572",
+            "upd": {}
+        },
+        {
+            "id": "5df7b9abef12bf7a25243861",
+            "tpl": "5963866b86f7747bfa1c4462",
+            "upd": {}
+        },
+        {
+            "id": "5df7b9abef12bf7a252437a1",
+            "tpl": "55d7217a4bdc2d86028b456d",
+            "upd": {}
+        },
+        {
+            "id": "6d814da8a5cf6c55522703a7",
+            "tpl": "557ffd194bdc2d28148b457f",
+            "slotId": "Pockets",
+            "parent_id": "5df7b9abef12bf7a252437a1",
+            "upd": {}
+        },
+        {
+            "id": "test_weapon",
+            "tpl": "57d14d2524597714373db789",
+            "slotId": "hideout",
+            "parent_id": "5df7b9abef12bf7a2524385f",
+            "location": {
+                "x": 0,
+                "y": 0,
+                "r": "Horizontal",
+                "isSearched": true
+            },
+            "upd": {
+                "Foldable": {
+                    "Folded": false
+                }
+            }
+        },
+        {
+            "id": "0c7d41d0992a0f0c49d904d8",
+            "tpl": "57d1519e24597714373db79d",
+            "slotId": "mod_magazine",
+            "parent_id": "test_weapon",
+            "upd": {}
+        },
+        {
+            "id": "40414ea2b61407b1b394795a",
+            "tpl": "57d152ec245977144076ccdf",
+            "slotId": "mod_pistol_grip",
+            "parent_id": "test_weapon",
+            "upd": {}
+        },
+        {
+            "id": "5df7b9abef12bf7a252437ea",
+            "tpl": "5449016a4bdc2d6f028b456f",
+            "slotId": "hideout",
+            "parent_id": "5df7b9abef12bf7a2524385f",
+            "location": {
+                "x": 9,
+                "y": 7,
+                "r": "Horizontal",
+                "isSearched": true
+            },
+            "upd": {
+                "StackObjectsCount": 967469885
+            }
+        }
+    ]
+}

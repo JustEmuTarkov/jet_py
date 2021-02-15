@@ -7,9 +7,12 @@ from typing import List
 
 import pytest  # type: ignore
 
+from server import root_dir
 from tarkov.inventory import PlayerInventory, item_templates_repository
 from tarkov.inventory.models import Item, ItemTemplate
 from tarkov.profile import Profile
+
+TEST_RESOURCES_PATH = root_dir.joinpath("tarkov", "tests", "resources")
 
 
 @pytest.fixture()
@@ -31,9 +34,8 @@ def inventory(player_profile: Profile) -> PlayerInventory:
 @pytest.fixture()
 def make_inventory(player_profile: Profile):
     def _make_inventory(inventory_path: str):
-        file_path = Path(f"tarkov/tests/inventory/{inventory_path}").absolute()
         inventory = PlayerInventory(player_profile)
-        with patch.object(inventory, "_path", file_path):
+        with patch.object(inventory, "_path", inventory_path):
             inventory.read()
         return inventory
 

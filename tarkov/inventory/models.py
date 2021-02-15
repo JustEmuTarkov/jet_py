@@ -161,6 +161,9 @@ class ItemUpd(Base):
     Dogtag: Optional[ItemUpdDogtag] = None
     UnlimitedCount: StrictBool = False
 
+    def folded(self):
+        return self.Foldable and self.Foldable.Folded
+
 
 ItemAmmoStackPosition = NewType("ItemAmmoStackPosition", int)
 

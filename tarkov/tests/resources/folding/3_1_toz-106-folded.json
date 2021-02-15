@@ -1,0 +1,73 @@
+{
+    "equipment": "5df7b9abef12bf7a252437a1",
+    "stash": "5df7b9abef12bf7a2524385f",
+    "questRaidItems": "5df7b9abef12bf7a25243860",
+    "questStashItems": "5df7b9abef12bf7a25243861",
+    "fastPanel": {},
+    "items": [
+        {
+            "id": "5df7b9abef12bf7a2524385f",
+            "tpl": "5811ce772459770e9e5f9532",
+            "upd": {}
+        },
+        {
+            "id": "5df7b9abef12bf7a25243860",
+            "tpl": "5963866286f7747bf429b572",
+            "upd": {}
+        },
+        {
+            "id": "5df7b9abef12bf7a25243861",
+            "tpl": "5963866b86f7747bfa1c4462",
+            "upd": {}
+        },
+        {
+            "id": "5df7b9abef12bf7a252437a1",
+            "tpl": "55d7217a4bdc2d86028b456d",
+            "upd": {}
+        },
+        {
+            "id": "6d814da8a5cf6c55522703a7",
+            "tpl": "557ffd194bdc2d28148b457f",
+            "slotId": "Pockets",
+            "parent_id": "5df7b9abef12bf7a252437a1",
+            "upd": {}
+        },
+        {
+            "id": "test_weapon",
+            "tpl": "5a38e6bac4a2826c6e06d79b",
+            "slotId": "hideout",
+            "parent_id": "5df7b9abef12bf7a2524385f",
+            "location": {
+                "x": 0,
+                "y": 0,
+                "r": "Horizontal"
+            },
+            "upd": {}
+        },
+        {
+            "id": "c79448e8b9fc6fe08d4d097a",
+            "tpl": "5a38ef1fc4a282000b1521f6",
+            "slotId": "mod_stock",
+            "parent_id": "test_weapon",
+            "upd": {
+                "Foldable": {
+                    "Folded": true
+                }
+            }
+        },
+        {
+            "id": "e8ed4d52904516ac093130d3",
+            "tpl": "5a38eecdc4a282329a73b512",
+            "slotId": "mod_pistol_grip",
+            "parent_id": "c79448e8b9fc6fe08d4d097a",
+            "upd": {}
+        },
+        {
+            "id": "802c4ee2bc09baae56429c98",
+            "tpl": "5a38ee51c4a282000c5a955c",
+            "slotId": "mod_magazine",
+            "parent_id": "test_weapon",
+            "upd": {}
+        }
+    ]
+}

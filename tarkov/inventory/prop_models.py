@@ -103,8 +103,8 @@ class BaseItemProps(BaseModel):
     Description: str
     Weight: float
     BackgroundColor: Color
-    Width: StrictInt
-    Height: StrictInt
+    Width: int
+    Height: int
     StackMaxSize: StrictInt
     Rarity: str
     SpawnChance: Union[StrictInt, StrictFloat]
@@ -127,10 +127,10 @@ class BaseItemProps(BaseModel):
     HideEntrails: StrictBool
     RepairCost: StrictInt
     RepairSpeed: StrictInt
-    ExtraSizeLeft: StrictInt
-    ExtraSizeRight: StrictInt
-    ExtraSizeUp: StrictInt
-    ExtraSizeDown: StrictInt
+    ExtraSizeLeft: int
+    ExtraSizeRight: int
+    ExtraSizeUp: int
+    ExtraSizeDown: int
     ExtraSizeForceAdd: StrictBool
     MergesWithChildren: StrictBool
     CanSellOnRagfair: StrictBool
@@ -352,7 +352,7 @@ class StockProps(GearModProps):
     IsShoulderContact: StrictBool
     Foldable: StrictBool
     Retractable: StrictBool
-    SizeReduceRight: StrictInt
+    SizeReduceRight: int
 
 
 class ChargeProps(GearModProps):
@@ -599,7 +599,7 @@ class WeaponProps(CompoundProps):
     RotationCenter: Vector
     RotationCenterNoStock: Vector
     MergesWithChildren: StrictBool
-    SizeReduceRight: StrictInt
+    SizeReduceRight: int
     FoldedSlot: str
     CompactHandling: StrictBool
     SightingRange: StrictInt
