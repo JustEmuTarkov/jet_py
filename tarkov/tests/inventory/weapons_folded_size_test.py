@@ -3,7 +3,7 @@ import pytest
 from tarkov.inventory import PlayerInventory
 from tarkov.tests.inventory.conftest import TEST_RESOURCES_PATH
 
-test_inventories = TEST_RESOURCES_PATH.joinpath("folding").glob("*.json")
+test_inventories = TEST_RESOURCES_PATH.joinpath("folding").rglob("*.json")
 
 
 @pytest.mark.parametrize(
