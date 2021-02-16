@@ -26,8 +26,8 @@ profile_router = make_router(tags=["Profile"])
     response_model_exclude_unset=False,
 )
 async def client_game_profile_item_move(
-        request: ZLibRequest,
-        profile: Profile = Depends(with_profile),  # type:
+    request: ZLibRequest,
+    profile: Profile = Depends(with_profile),  # type: ignore
 ) -> Union[TarkovSuccessResponse[DispatcherResponse], TarkovErrorResponse]:
     data = await request.json()
 
@@ -38,7 +38,7 @@ async def client_game_profile_item_move(
 
 @profile_router.post("/client/game/profile/list")
 def client_game_profile_list(
-        profile: Profile = Depends(with_profile),  # type: ignore
+    profile: Profile = Depends(with_profile),  # type: ignore
 ) -> Union[TarkovSuccessResponse[List[dict]], TarkovErrorResponse]:
     pmc_profile = profile.get_profile()
     profile_dir = root_dir.joinpath("resources", "profiles", profile.profile_id)
@@ -68,7 +68,7 @@ def client_game_profile_list_select(request: Request) -> TarkovSuccessResponse[d
 
 @profile_router.post("/client/profile/status")
 def client_profile_status(
-        profile: Profile = Depends(with_profile),  # type: ignore
+    profile: Profile = Depends(with_profile),  # type: ignore
 ) -> Union[TarkovSuccessResponse[List[dict]], TarkovErrorResponse]:
     response = []
     for profile_type in ("scav", "pmc"):

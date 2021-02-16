@@ -9,11 +9,11 @@ from tarkov.inventory import (
     PlayerInventory,
     generate_item_id,
     item_templates_repository,
+    regenerate_items_ids,
 )
 from tarkov.inventory.implementations import SimpleInventory
-from ..inventory.types import TemplateId
-from tarkov.trader import TraderInventory, TraderType
 from tarkov.profile import Profile
+from tarkov.trader import TraderInventory, TraderType
 from .models import (
     ActionModel,
     ActionType,
@@ -21,8 +21,12 @@ from .models import (
     InventoryActions,
     Owner,
     QuestActions,
+    RagfairActions,
     TradingActions,
 )
+from ..fleamarket.fleamarket import flea_market_instance
+from ..fleamarket.models import OfferId
+from ..inventory.types import TemplateId
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
@@ -127,6 +131,12 @@ class InventoryDispatcher(Dispatcher):
         elif action.fromOwner.type in ("HideoutUpgrade", "HideoutProduction"):
             item_tpl_id = tarkov.inventory.types.TemplateId(action.item)
             self.profile.encyclopedia.examine(item_tpl_id)
+
+        elif action.fromOwner.type == "RagFair":
+            offer = flea_market_instance.get_offer(OfferId(action.fromOwner.id))
+            item = offer.root_item
+            assert action.item == item.id
+            self.profile.encyclopedia.examine(item)
 
     def _merge(self, action: InventoryActions.Merge):
         donor_inventory = self.get_owner_inventory(action.fromOwner)
@@ -407,3 +417,32 @@ class QuestDispatcher(Dispatcher):
 
     def _quest_complete(self, action: QuestActions.Complete) -> None:
         self.profile.quests.complete_quest(action.qid)
+
+
+class FleaMarketDispatcher(Dispatcher):
+    def __init__(self, manager: "DispatcherManager") -> None:
+        super().__init__(manager)
+        self.dispatch_map = {ActionType.RagFairBuyOffer: self._flea_market_buy}
+
+    def _flea_market_buy(self, action: RagfairActions.Buy) -> None:
+        for offer_to_buy in action.offers:
+            offer = flea_market_instance.get_offer(offer_to_buy.offer_id)
+            items = offer.items
+            root_item = offer.root_item
+            offer.items.remove(root_item)
+            regenerate_items_ids(items)
+            flea_market_instance.buy_offer(offer)
+            self.inventory.place_item(item=root_item, child_items=items)
+
+            self.response.items.new.append(root_item)
+            self.response.items.new.extend(items)
+
+            # Take required items from inventory
+            for req in offer_to_buy.requirements:
+                item = self.inventory.get_item(req.id)
+                if req.count == item.upd.StackObjectsCount:
+                    self.inventory.remove_item(item)
+                    self.response.items.del_.append(item)
+                else:
+                    item.upd.StackObjectsCount -= req.count
+                    self.response.items.change.append(item)

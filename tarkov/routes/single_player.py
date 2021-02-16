@@ -2,12 +2,10 @@ from typing import Any, List
 
 import ujson
 from fastapi import Request
-from fastapi.params import Depends
 from pydantic import BaseModel, parse_obj_as
 
 from server import db_dir, logger
 from server.utils import make_router
-from tarkov.dependencies import with_profile
 from tarkov.inventory.helpers import regenerate_items_ids
 from tarkov.inventory.models import Item
 from tarkov.lib import locations

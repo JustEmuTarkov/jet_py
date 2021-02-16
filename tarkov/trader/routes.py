@@ -1,6 +1,5 @@
 from typing import Dict, List, Optional, Union
 
-from fastapi import HTTPException
 from fastapi.params import Cookie, Depends
 
 from server.utils import make_router

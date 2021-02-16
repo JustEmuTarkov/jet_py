@@ -1,11 +1,8 @@
-from pathlib import Path
 from typing import Any, Generic, Optional, TypeVar
 
 import pydantic
 from pydantic import Extra
 from pydantic.generics import GenericModel
-
-from server.utils import atomic_write
 
 
 class Base(pydantic.BaseModel):
@@ -31,9 +28,6 @@ class Base(pydantic.BaseModel):
     ) -> str:
         # pylint: disable=useless-super-delegation
         return super().json(*args, indent=indent, **kwargs)
-
-    def atomic_write(self, path: Path, **dump_kwargs):
-        atomic_write(path=path, str_=self.json(**dump_kwargs))
 
 
 ResponseType = TypeVar("ResponseType")

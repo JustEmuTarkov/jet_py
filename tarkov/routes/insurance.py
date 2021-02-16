@@ -1,6 +1,6 @@
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Union
 
-from fastapi.params import Cookie, Depends
+from fastapi.params import Depends
 from pydantic import BaseModel
 
 from server.utils import make_router

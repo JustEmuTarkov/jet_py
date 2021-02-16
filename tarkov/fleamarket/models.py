@@ -1,9 +1,9 @@
 import enum
-from typing import Dict, List, Optional
+from typing import Dict, List, NewType, Optional, Union
 
-from pydantic import Field, StrictBool, StrictInt
+from pydantic import BaseModel, Field, StrictBool, StrictInt
 
-from tarkov._repositories.categories import CategoryId
+from tarkov.repositories.categories import CategoryId
 from tarkov.inventory.models import Item
 from tarkov.inventory.types import ItemId, TemplateId
 from tarkov.models import Base
@@ -17,13 +17,13 @@ class SortType(enum.Enum):
     ExpiresIn = 6
 
 
-class FleaMarketRequest(Base):
+class FleaMarketRequest(BaseModel):
     buildCount: StrictInt
     buildItems: dict  # Don't know the type yet
     conditionFrom: StrictInt
     conditionTo: StrictInt
     currency: StrictInt
-    handbookId: CategoryId
+    handbookId: Union[TemplateId, CategoryId]
     limit: StrictInt
     linkedSearchId: str
     neededSearchId: str
@@ -38,14 +38,14 @@ class FleaMarketRequest(Base):
     reload: StrictInt
     removeBartering: StrictBool
     sortDirection: StrictInt
-    sortType: StrictInt
+    sortType: SortType
     tm: StrictInt
     updateOfferCount: StrictBool
 
 
 class FleaUser(Base):
     id: str
-    memberType: StrictInt
+    memberType: int
     nickname: str
     rating: float
     isRatingGrowing: bool = True
@@ -60,8 +60,14 @@ class OfferRequirement(Base):
     side: Optional[str]
 
 
-class Offer(Base):
-    id: str = Field(alias="_id")
+OfferId = NewType("OfferId", str)
+
+
+class Offer(BaseModel):
+    class Config:
+        allow_population_by_field_name = True
+
+    id: OfferId = Field(alias="_id")
     intId: int
     user: FleaUser
     root: ItemId
@@ -83,6 +89,6 @@ class Offer(Base):
 
 class FleaMarketResponse(Base):
     offers: List[Offer] = Field(default_factory=list)
-    categories: Dict[CategoryId, int]
+    categories: Dict[Union[CategoryId, TemplateId], int]
     offersCount: int
     selectedCategory: str

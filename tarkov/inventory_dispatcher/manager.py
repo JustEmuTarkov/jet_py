@@ -47,6 +47,7 @@ class DispatcherManager:
             dispatchers.HideoutDispatcher(self),
             dispatchers.TradingDispatcher(self),
             dispatchers.QuestDispatcher(self),
+            dispatchers.FleaMarketDispatcher(self),
         )
 
     def dispatch(self, request_data: dict) -> DispatcherResponse:
@@ -59,6 +60,7 @@ class DispatcherManager:
             actions: List[dict] = request_data  # type: ignore
 
             for action in actions:
+                logger.debug(action)
                 for dispatcher in self.dispatchers:
                     try:
                         dispatcher.dispatch(action)

@@ -1,9 +1,9 @@
-from typing import Literal, Optional, Union
+from typing import Literal, Union
 
 import ujson
-from fastapi.params import Cookie, Depends
-
 from fastapi import Request
+from fastapi.params import Depends
+
 from server import db_dir
 from server.utils import make_router
 from tarkov.dependencies import with_profile
