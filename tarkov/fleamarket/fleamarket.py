@@ -26,6 +26,7 @@ from tarkov.inventory import generate_item_id, item_templates_repository
 from tarkov.inventory.models import ItemTemplate
 from tarkov.inventory.prop_models import AmmoProps
 from tarkov.inventory.types import TemplateId
+from tarkov import config
 
 
 class OfferGenerator:
@@ -51,8 +52,8 @@ class OfferGenerator:
         prices = list(self.item_prices.values())
         median_price = statistics.median(prices)
         prices_sorted = sorted(prices)
-        self.percentile_high: int = prices_sorted[int(len(prices) * 0.985)]
-        self.percentile_low: int = prices_sorted[int(len(prices) * 0.25)]
+        self.percentile_high: int = prices_sorted[int(len(prices) * config.flea_market.percentile_high)]
+        self.percentile_low: int = prices_sorted[int(len(prices) * config.flea_market.percentile_low)]
         self.item_templates_weights = [
             self._get_item_template_weight(tpl, median_price)
             for tpl in self.item_templates
@@ -175,12 +176,13 @@ class FleaMarketView:
 
 
 class FleaMarket:
-    def __init__(self, offers_amount: int):
+    def __init__(self):
+        self.offers_amount: int = config.flea_market.offers_amount
+
         self.updated_at = datetime.fromtimestamp(0)
 
         self.generator: OfferGenerator = OfferGenerator(self)
         self._view: FleaMarketView = FleaMarketView(self)
-        self.offers_amount: int = offers_amount
         self.offers: Dict[OfferId, Offer] = {}
 
     def get_offer(self, offer_id: OfferId) -> Offer:
@@ -224,6 +226,4 @@ class FleaMarket:
         return self._view
 
 
-flea_market_instance = FleaMarket(
-    offers_amount=7_500,
-)
+flea_market_instance = FleaMarket()
