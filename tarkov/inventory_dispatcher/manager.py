@@ -36,8 +36,8 @@ class DispatcherManager:
 
     dispatchers: Iterable["dispatchers.Dispatcher"]
 
-    def __init__(self, session_id: str):
-        self.profile: Profile = Profile(session_id)
+    def __init__(self, profile: Profile):
+        self.profile: Profile = profile
 
         self.response: DispatcherResponse = DispatcherResponse()
 

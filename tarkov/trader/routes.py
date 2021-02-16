@@ -1,9 +1,10 @@
 from typing import Dict, List, Optional, Union
 
 from fastapi import HTTPException
-from fastapi.params import Cookie
+from fastapi.params import Cookie, Depends
 
 from server.utils import make_router
+from tarkov.dependencies import with_profile
 from tarkov.inventory.models import Item
 from tarkov.inventory.types import ItemId
 from tarkov.models import Base, TarkovErrorResponse, TarkovSuccessResponse
@@ -53,30 +54,20 @@ def customization(trader_id: str):  # pylint: disable=unused-argument
 )
 def get_user_assort_price(
     trader_id: str,
-    profile_id: Optional[str] = Cookie("", alias="PHPSESSID"),  # type: ignore
+    profile: Profile = Depends(with_profile),  # type: ignore
 ) -> Union[TarkovSuccessResponse[Dict[ItemId, List[List[dict]]]], TarkovErrorResponse]:
-    if profile_id is None:
-        return TarkovErrorResponse(errmsg="Profile id is None", data=None)
+    trader_inventory = TraderInventory(TraderType(trader_id), profile=profile)
+    items = {}
 
-    if not Profile.exists(profile_id):
-        raise HTTPException(
-            status_code=404, detail=fr"Profile with id {profile_id} was not found"
-        )
+    for item in profile.inventory.items:
+        if not trader_inventory.can_sell(item):
+            continue
 
-    with Profile(profile_id) as player_profile:
-        trader_inventory = TraderInventory(
-            TraderType(trader_id), profile=player_profile
-        )
-        items = {}
-        for item in player_profile.inventory.items:
-            if not trader_inventory.can_sell(item):
-                continue
+        price = trader_inventory.get_sell_price(item)
+        items[item.id] = [[{"_tpl": "5449016a4bdc2d6f028b456f", "count": price}]]
 
-            price = trader_inventory.get_sell_price(item)
-            items[item.id] = [[{"_tpl": "5449016a4bdc2d6f028b456f", "count": price}]]
-
-        # TODO: Calculate price for items to sell in specified trader
-        # output is { "item._id": [[{ "_tpl": "", "count": 0 }]] }
+    # TODO: Calculate price for items to sell in specified trader
+    # output is { "item._id": [[{ "_tpl": "", "count": 0 }]] }
     return TarkovSuccessResponse(data=items)
 
 
@@ -98,19 +89,15 @@ class TraderAssortResponse(Base):
 )
 def get_trader_assort(
     trader_id: str,
-    profile_id: Optional[str] = Cookie(None, alias="PHPSESSID"),  # type: ignore
+    profile: Profile = Depends(with_profile),  # type: ignore
 ) -> Union[TarkovSuccessResponse[TraderAssortResponse], TarkovErrorResponse]:
-    if profile_id is None:
-        return TarkovErrorResponse.profile_id_is_none()
-
-    with Profile(profile_id) as profile:
-        trader_inventory = TraderInventory(TraderType(trader_id), profile=profile)
-        assort_response = TraderAssortResponse(
-            barter_scheme=trader_inventory.barter_scheme.__root__,
-            items=trader_inventory.assort,
-            loyal_level_items=trader_inventory.loyal_level_items,
-        )
-        return TarkovSuccessResponse(data=assort_response)
+    trader_inventory = TraderInventory(TraderType(trader_id), profile=profile)
+    assort_response = TraderAssortResponse(
+        barter_scheme=trader_inventory.barter_scheme.__root__,
+        items=trader_inventory.assort,
+        loyal_level_items=trader_inventory.loyal_level_items,
+    )
+    return TarkovSuccessResponse(data=assort_response)
 
 
 @trader_router.post("/client/trading/api/getTrader/{trader_id}")

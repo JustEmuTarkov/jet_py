@@ -3,19 +3,18 @@
     "stash": "5df7b9abef12bf7a2524385f",
     "questRaidItems": "5df7b9abef12bf7a25243860",
     "questStashItems": "5df7b9abef12bf7a25243861",
-    "fastPanel": {
-
-    },
+    "fastPanel": {},
     "items": [
         {
-            "_id": "5df7b9abef12bf7a2524385f",
-            "_tpl": "5811ce772459770e9e5f9532"
+            "id": "5df7b9abef12bf7a2524385f",
+            "tpl": "5811ce772459770e9e5f9532",
+            "upd": {}
         },
         {
-            "_id": "5df7b9abef12bf7a252437ea",
-            "_tpl": "5449016a4bdc2d6f028b456f",
-            "parentId": "5df7b9abef12bf7a2524385f",
+            "id": "5df7b9abef12bf7a252437ea",
+            "tpl": "5449016a4bdc2d6f028b456f",
             "slotId": "hideout",
+            "parent_id": "5df7b9abef12bf7a2524385f",
             "location": {
                 "x": 9,
                 "y": 0,
@@ -23,14 +22,14 @@
                 "isSearched": true
             },
             "upd": {
-                "StackObjectsCount": 971509336
+                "StackObjectsCount": 970502603
             }
         },
         {
-            "_id": "I9241448291794864774nqXn",
-            "_tpl": "5696686a4bdc2da3298b456a",
-            "parentId": "5df7b9abef12bf7a2524385f",
+            "id": "I9241448291794864774nqXn",
+            "tpl": "5696686a4bdc2da3298b456a",
             "slotId": "hideout",
+            "parent_id": "5df7b9abef12bf7a2524385f",
             "location": {
                 "x": 9,
                 "y": 2,
@@ -42,34 +41,39 @@
             }
         },
         {
-            "_id": "5df7b9abef12bf7a252437a1",
-            "_tpl": "55d7217a4bdc2d86028b456d"
+            "id": "5df7b9abef12bf7a252437a1",
+            "tpl": "55d7217a4bdc2d86028b456d",
+            "upd": {}
         },
         {
-            "_id": "5df7b9abef12bf7a25243860",
-            "_tpl": "5963866286f7747bf429b572"
+            "id": "5df7b9abef12bf7a25243860",
+            "tpl": "5963866286f7747bf429b572",
+            "upd": {}
         },
         {
-            "_id": "5df7b9abef12bf7a25243861",
-            "_tpl": "5963866b86f7747bfa1c4462"
+            "id": "5df7b9abef12bf7a25243861",
+            "tpl": "5963866b86f7747bfa1c4462",
+            "upd": {}
         },
         {
-            "_id": "I1021193973902008757GchV",
-            "_tpl": "5857a8b324597729ab0a0e7d",
-            "parentId": "5df7b9abef12bf7a252437a1",
-            "slotId": "SecuredContainer"
+            "id": "I1021193973902008757GchV",
+            "tpl": "5857a8b324597729ab0a0e7d",
+            "slotId": "SecuredContainer",
+            "parent_id": "5df7b9abef12bf7a252437a1",
+            "upd": {}
         },
         {
-            "_id": "I10211939786801944064Ylf",
-            "_tpl": "557ffd194bdc2d28148b457f",
-            "parentId": "5df7b9abef12bf7a252437a1",
-            "slotId": "Pockets"
+            "id": "I10211939786801944064Ylf",
+            "tpl": "557ffd194bdc2d28148b457f",
+            "slotId": "Pockets",
+            "parent_id": "5df7b9abef12bf7a252437a1",
+            "upd": {}
         },
         {
-            "_id": "6dQY5lMua7ROQegRnDGDuhbF",
-            "_tpl": "5696686a4bdc2da3298b456a",
-            "parentId": "5df7b9abef12bf7a2524385f",
+            "id": "6dQY5lMua7ROQegRnDGDuhbF",
+            "tpl": "5696686a4bdc2da3298b456a",
             "slotId": "hideout",
+            "parent_id": "5df7b9abef12bf7a2524385f",
             "location": {
                 "x": 9,
                 "y": 1,

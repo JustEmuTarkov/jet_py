@@ -110,8 +110,8 @@ class TraderInventory(ImmutableInventory):
         return barter_scheme
 
     def _generate_fence_assort(self) -> List[Item]:
-        root_items = [item for item in self.items if item.slotId == "hideout"]
-        assort = random.sample(root_items, k=min(len(root_items), 500))
+        root_items = set(item for item in self.items if item.slotId == "hideout")
+        assort = random.sample(root_items, k=min(len(root_items), 200))
 
         child_items: List[Item] = []
 
