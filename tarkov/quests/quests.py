@@ -140,7 +140,7 @@ class Quests:
 
         message = MailDialogueMessage(
             uid=quest_template.traderId,
-            type=StrictInt(MailMessageType.questSuccess.value),
+            type=StrictInt(MailMessageType.QuestSuccess.value),
             templateId="5ab0f32686f7745dd409f56b",  # TODO: Right now this is a placeholder
             systemData={},
             items=MailMessageItems.from_items(reward_items),

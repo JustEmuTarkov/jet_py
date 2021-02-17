@@ -1,14 +1,13 @@
 from __future__ import annotations
 
+import collections
 from datetime import datetime
 from typing import DefaultDict, Dict, List, Optional, TYPE_CHECKING
 
-import collections
-from pydantic import BaseModel, Field
+from pydantic import Field
 
-from server import logger
-from .models import MailDialogueMessage
 from tarkov.models import Base
+from .models import MailDialogueMessage
 
 if TYPE_CHECKING:
     from tarkov.profile import Profile
@@ -41,7 +40,7 @@ class ProfileNotifier:
 
     def __add_profile_notifications(self, profile: Profile):
         now = datetime.now()
-        for trader_id, dialogue in profile.notifier.dialogues.__root__.items():
+        for dialogue in profile.notifier.dialogues.__root__.values():
             for msg in dialogue.messages:
                 if datetime.fromtimestamp(msg.dt) < now:
                     # Message already should be sent

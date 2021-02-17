@@ -229,6 +229,8 @@ class FleaMarket:
     def get_offer_tax(
         template: ItemTemplate, requirements_cost: int, quantity: int
     ) -> int:
+        # pylint: disable=invalid-name
+        # Formula is taken from tarkov wiki
         # TODO: Players that have intel level 3 have their tax reduced by 30%
         tax_constant = 0.05
         base_price = template.props.CreditsPrice

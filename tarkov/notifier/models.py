@@ -135,10 +135,10 @@ class DialoguePreviewList(Base):
 
 
 class MailMessageType(enum.Enum):
-    questStart = 10
-    questFail = 11
-    questSuccess = 12
+    QuestStart = 10
+    QuestFail = 11
+    QuestSuccess = 12
 
-    npcTrader = 2
+    NpcTrader = 2
 
-    insuranceReturn = 8
+    InsuranceReturn = 8

@@ -200,7 +200,9 @@ class ItemTemplatesRepository:
         while amount_to_create > 0:
             stack_size = min(stack_max_size, amount_to_create)
             amount_to_create -= stack_size
-            items.append(ItemTemplatesRepository.__create_item(item_template, stack_size))
+            items.append(
+                ItemTemplatesRepository.__create_item(item_template, stack_size)
+            )
 
         return items
 

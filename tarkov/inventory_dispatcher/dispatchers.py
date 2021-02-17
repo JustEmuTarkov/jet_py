@@ -29,8 +29,11 @@ from .models import (
     RagfairActions,
     TradingActions,
 )
-from ..inventory.models import Item
-from ..notifier.models import MailDialogueMessage, MailMessageItems, MailMessageType
+from tarkov.notifier.models import (
+    MailDialogueMessage,
+    MailMessageItems,
+    MailMessageType,
+)
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
@@ -482,7 +485,7 @@ class FleaMarketDispatcher(Dispatcher):
             dt=int(sent_at.timestamp()),
             hasRewards=True,
             uid=TraderType.Ragman.value,
-            type=MailMessageType.npcTrader.value,
+            type=MailMessageType.NpcTrader.value,
             templateId="5bdac0b686f7743e1665e09e",
             items=MailMessageItems.from_items(roubles),
         )
