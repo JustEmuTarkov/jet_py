@@ -95,8 +95,10 @@ class OfferGenerator:
             template_id=TemplateId("5449016a4bdc2d6f028b456f"),
             count=item_price,
         )
+        now = datetime.now()
+        expiration_time = random.gauss(timedelta(hours=6).total_seconds(), timedelta(hours=6).total_seconds())
+        expires_at = now + timedelta(seconds=abs(expiration_time))
 
-        offer_expires_at = datetime.now() - timedelta(days=120) + timedelta(hours=1)
         return Offer(
             id=OfferId(generate_item_id()),
             intId=random.randint(0, 999_999),
@@ -109,7 +111,7 @@ class OfferGenerator:
             summaryCost=item_price,
             sellInOnePiece=True,
             startTime=0,
-            endTime=int(offer_expires_at.timestamp()),
+            endTime=int(expires_at.timestamp()),
         )
 
     @staticmethod
@@ -195,7 +197,17 @@ class FleaMarket:
         del self.offers[offer.id]
         self.offers.update(self.generator.generate_offers(1))
 
+    def __clear_expired_offers(self):
+        now = datetime.now()
+        now_timestamp = now.timestamp()
+        expired_offers_keys = [key for key, offer in self.offers.items() if now_timestamp > offer.endTime]
+
+        for key in expired_offers_keys:
+            del self.offers[key]
+
     def __update_offers(self):
+        self.__clear_expired_offers()
+
         now = datetime.now()
         time_elapsed = now - self.updated_at
         self.updated_at = now
