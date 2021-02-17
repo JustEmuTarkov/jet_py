@@ -4,28 +4,11 @@ import collections
 from datetime import datetime
 from typing import DefaultDict, Dict, List, Optional, TYPE_CHECKING
 
-from pydantic import Field
-
-from tarkov.models import Base
-from .models import MailDialogueMessage
+from tarkov.mail.models import MailDialogueMessage
+from .models import MessageNotification, MessageNotificationData
 
 if TYPE_CHECKING:
     from tarkov.profile import Profile
-
-
-class MessageNotificationData(Base):
-    """Model bound to MessageNotification"""
-
-    dialogue_id: str = Field(alias="dialogId")
-    message: MailDialogueMessage
-
-
-class MessageNotification(Base):
-    """Notification for a mail message"""
-
-    type: str = "new_message"
-    event_id: str = Field(alias="eventId")
-    data: MessageNotificationData
 
 
 class ProfileNotifier:

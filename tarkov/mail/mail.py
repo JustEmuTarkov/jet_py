@@ -2,7 +2,7 @@ import datetime
 from typing import Dict, List, TYPE_CHECKING
 
 from server.utils import atomic_write
-from tarkov.notifier.models import (
+from tarkov.mail.models import (
     DialoguePreviewList,
     MailDialogue,
     MailDialogueMessage,

@@ -7,7 +7,7 @@ import tarkov.inventory.types
 from tarkov import inventory
 from tarkov.inventory import PlayerInventory, item_templates_repository
 from tarkov.inventory.models import Item
-from tarkov.notifier.models import (
+from tarkov.mail.models import (
     MailDialogueMessage,
     MailMessageItems,
     MailMessageType,

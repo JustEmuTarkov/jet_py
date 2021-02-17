@@ -29,7 +29,7 @@ from .models import (
     RagfairActions,
     TradingActions,
 )
-from tarkov.notifier.models import (
+from tarkov.mail.models import (
     MailDialogueMessage,
     MailMessageItems,
     MailMessageType,
@@ -485,7 +485,7 @@ class FleaMarketDispatcher(Dispatcher):
             dt=int(sent_at.timestamp()),
             hasRewards=True,
             uid=TraderType.Ragman.value,
-            type=MailMessageType.NpcTrader.value,
+            type=MailMessageType.NpcTraderMessage.value,
             templateId="5bdac0b686f7743e1665e09e",
             items=MailMessageItems.from_items(roubles),
         )

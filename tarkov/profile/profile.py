@@ -10,8 +10,8 @@ from server.utils import atomic_write
 from tarkov import inventory as inventory_, quests
 from tarkov.hideout import Hideout
 from tarkov.inventory.models import Item
-from ..inventory.types import TemplateId
-from tarkov.notifier import Mail
+from tarkov.inventory.types import TemplateId
+from tarkov.mail import Mail
 from tarkov.trader import TraderType
 from .models import ItemInsurance, ProfileModel
 
