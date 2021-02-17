@@ -27,6 +27,15 @@ class DispatcherResponse(Base):
     builds: list = Field(default_factory=list)
     currentSalesSums: Dict[str, int] = Field(default_factory=dict)
 
+    def append_error(self, title: str, message: str):
+        self.badRequest.append(
+            {
+                "index": len(self.badRequest),
+                "err": title,
+                "errmsg": message,
+            }
+        )
+
 
 class DispatcherManager:
     profile: Profile

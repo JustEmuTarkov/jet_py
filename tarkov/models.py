@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Generic, Optional, TypeVar
+from typing import Any, ClassVar, Generic, Optional, Type, TypeVar
 
 import pydantic
 import yaml
@@ -25,17 +25,20 @@ class Base(pydantic.BaseModel):
         )
 
     def json(
-            self,
-            *args,
-            indent=4,
-            **kwargs,
+        self,
+        *args,
+        indent=4,
+        **kwargs,
     ) -> str:
         # pylint: disable=useless-super-delegation
         return super().json(*args, indent=indent, **kwargs)
 
 
+ConfigType = TypeVar("ConfigType", bound="BaseConfig")
+
+
 class BaseConfig(pydantic.BaseModel):
-    __config_path__: str
+    __config_path__: ClassVar[Path]
 
     class Config:
         extra = Extra.forbid
@@ -44,7 +47,7 @@ class BaseConfig(pydantic.BaseModel):
         allow_mutation = False
 
     @classmethod
-    def load(cls, path: Path = None, auto_create=True) -> BaseConfig:
+    def load(cls: Type[ConfigType], path: Path = None, auto_create=True) -> ConfigType:
         path = path or cls.__config_path__
         if not path.exists():
             if auto_create:
@@ -52,11 +55,11 @@ class BaseConfig(pydantic.BaseModel):
                     config = cls()
                     if not path.parent.exists():
                         path.parent.mkdir(parents=True, exist_ok=True)
-                    yaml.safe_dump(config.dict(), path.open(mode='w', encoding='utf8'))
+                    yaml.safe_dump(config.dict(), path.open(mode="w", encoding="utf8"))
                 except ValidationError as error:
                     raise ValueError(f"Config on {path} does not exists.") from error
 
-        with path.open(encoding='utf8') as file:
+        with path.open(encoding="utf8") as file:
             config = yaml.safe_load(file)
 
         return cls.parse_obj(config)

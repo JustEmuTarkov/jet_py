@@ -109,7 +109,7 @@ def client_customization() -> TarkovSuccessResponse[dict]:
 def client_globals() -> TarkovSuccessResponse[dict]:
     globals_path = db_dir.joinpath("base", "globals.json")
     globals_base = ujson.load(globals_path.open(encoding="utf8"))
-    globals_base['time'] = int(datetime.datetime.now().timestamp())
+    globals_base["time"] = int(datetime.datetime.now().timestamp())
     return TarkovSuccessResponse(data=globals_base)
 
 

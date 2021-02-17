@@ -24,9 +24,10 @@ from .models import (
     RagfairActions,
     TradingActions,
 )
-from ..fleamarket.fleamarket import flea_market_instance
-from ..fleamarket.models import OfferId
-from ..inventory.types import TemplateId
+from tarkov.exceptions import NotFoundError
+from tarkov.fleamarket.fleamarket import flea_market_instance
+from tarkov.fleamarket.models import OfferId
+from tarkov.inventory.types import TemplateId
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
@@ -133,7 +134,14 @@ class InventoryDispatcher(Dispatcher):
             self.profile.encyclopedia.examine(item_tpl_id)
 
         elif action.fromOwner.type == "RagFair":
-            offer = flea_market_instance.get_offer(OfferId(action.fromOwner.id))
+            try:
+                offer = flea_market_instance.get_offer(OfferId(action.fromOwner.id))
+            except NotFoundError:
+                self.response.append_error(
+                    title="Item examination error", message="Offer can not be found"
+                )
+                return
+
             item = offer.root_item
             assert action.item == item.id
             self.profile.encyclopedia.examine(item)
@@ -426,7 +434,14 @@ class FleaMarketDispatcher(Dispatcher):
 
     def _flea_market_buy(self, action: RagfairActions.Buy) -> None:
         for offer_to_buy in action.offers:
-            offer = flea_market_instance.get_offer(offer_to_buy.offer_id)
+            try:
+                offer = flea_market_instance.get_offer(offer_to_buy.offer_id)
+            except NotFoundError:
+                self.response.append_error(
+                    title="Flea Market Error",
+                    message="Item is already bought",
+                )
+                return
             items = offer.items
             root_item = offer.root_item
             offer.items.remove(root_item)
