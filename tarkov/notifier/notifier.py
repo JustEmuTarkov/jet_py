@@ -1,30 +1,116 @@
-import collections
-from typing import DefaultDict, Dict, List
+from __future__ import annotations
 
+from datetime import datetime
+from typing import DefaultDict, Dict, List, Optional, TYPE_CHECKING
+
+import collections
+from pydantic import BaseModel, Field
+
+from server import logger
 from .models import MailDialogueMessage
+from tarkov.models import Base
+
+if TYPE_CHECKING:
+    from tarkov.profile import Profile
+
+
+class MessageNotificationData(Base):
+    """Model bound to MessageNotification"""
+
+    dialogue_id: str = Field(alias="dialogId")
+    message: MailDialogueMessage
+
+
+class MessageNotification(Base):
+    """Notification for a mail message"""
+
+    type: str = "new_message"
+    event_id: str = Field(alias="eventId")
+    data: MessageNotificationData
+
+
+class ProfileNotifier:
+    """Notifier for a profile"""
+
+    def __init__(self, profile: Optional[Profile]):
+        self.unsent_notifications: List[MessageNotification] = []
+
+        if profile is None:
+            return
+        self.__add_profile_notifications(profile)
+
+    def __add_profile_notifications(self, profile: Profile):
+        now = datetime.now()
+        for trader_id, dialogue in profile.notifier.dialogues.__root__.items():
+            for msg in dialogue.messages:
+                if datetime.fromtimestamp(msg.dt) < now:
+                    # Message already should be sent
+                    continue
+
+                notification = MessageNotification(
+                    event_id=msg.id,
+                    data=MessageNotificationData(dialogue_id=msg.uid, message=msg),
+                )
+                self.unsent_notifications.append(notification)
+
+    @staticmethod
+    def ready_to_send(notification: MessageNotification, now: datetime):
+        print(now, datetime.fromtimestamp(notification.data.message.dt))
+        return now > datetime.fromtimestamp(notification.data.message.dt)
+
+    @property
+    def has_new_notifications(self) -> bool:
+        now = datetime.now()
+        return bool(
+            [
+                notification
+                for notification in self.unsent_notifications
+                if self.ready_to_send(notification, now)
+            ]
+        )
+
+    def notifications_ready_to_send_view(self) -> List[dict]:
+        now = datetime.now()
+        messages_ready_to_send = [
+            notification.dict(exclude_none=True)
+            for notification in self.unsent_notifications
+            if self.ready_to_send(notification, now)
+        ]
+        self.unsent_notifications = [
+            notification
+            for notification in self.unsent_notifications
+            if not self.ready_to_send(notification, now)
+        ]
+
+        return messages_ready_to_send
+
+    def add_mail_notification(self, notification: MessageNotification):
+        self.unsent_notifications.append(notification)
 
 
 class Notifier:
+    """Notifier that contains multiple Profile Notifiers"""
+
     def __init__(self):
-        self.notifications: DefaultDict[str, List[dict]] = collections.defaultdict(list)
+        self.notifications: DefaultDict[str, ProfileNotifier] = collections.defaultdict(
+            lambda: ProfileNotifier(None)
+        )
 
     def has_notifications(self, profile_id: str) -> bool:
-        return bool(self.notifications[profile_id])
+        return self.notifications[profile_id].has_new_notifications
 
-    def get_notifications(self, profile_id) -> List[Dict]:
-        notifications = self.notifications[profile_id]
-        self.notifications[profile_id] = []
-        return notifications
+    def get_notifications_view(self, profile_id) -> List[Dict]:
+        profile_notifier = self.notifications[profile_id]
+        return profile_notifier.notifications_ready_to_send_view()
 
     def add_message_notification(
         self, profile_id: str, message: MailDialogueMessage
     ) -> None:
-        notification = {
-            "type": "new_message",
-            "eventId": message.id,
-            "data": {"dialogId": message.uid, "message": message.dict()},
-        }
-        self.notifications[profile_id].append(notification)
+        notification = MessageNotification(
+            event_id=message.id,
+            data=MessageNotificationData(dialogue_id=message.uid, message=message),
+        )
+        self.notifications[profile_id].add_mail_notification(notification)
 
     @staticmethod
     def get_empty_notification() -> dict:

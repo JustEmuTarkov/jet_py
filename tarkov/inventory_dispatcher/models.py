@@ -228,7 +228,21 @@ class RagfairBuyOffer(Base):
     requirements: List[RequiredItem] = Field(alias="items")
 
 
+class RagfairOfferRequirement(Base):
+    template_id: TemplateId = Field(alias="_tpl")
+    count: int
+    level: int
+    side: int
+    onlyFunctional: bool
+
+
 class RagfairActions(SimpleNamespace):
     class Buy(ActionModel):
         Action: ActionType
         offers: List[RagfairBuyOffer]
+
+    class Add(ActionModel):
+        Action: ActionType
+        sellInOnePiece: bool
+        items: List[ItemId]
+        requirements: List[RagfairOfferRequirement]

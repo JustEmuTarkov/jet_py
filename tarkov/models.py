@@ -17,10 +17,9 @@ class Base(pydantic.BaseModel):
         validate_all = True
         allow_population_by_field_name = True
 
-    def dict(self, by_alias=True, exclude_unset=True, **kwargs) -> dict:
+    def dict(self, by_alias=True, **kwargs) -> dict:
         return super().dict(
             by_alias=by_alias,
-            exclude_unset=exclude_unset,
             **kwargs,
         )
 

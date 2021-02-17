@@ -11,7 +11,13 @@ from typing import Dict, List, Union
 import pydantic
 
 from server import db_dir
+from tarkov import config
 from tarkov.exceptions import NotFoundError
+from tarkov.inventory import generate_item_id, item_templates_repository
+from tarkov.inventory.models import ItemTemplate
+from tarkov.inventory.prop_models import AmmoProps
+from tarkov.inventory.types import TemplateId
+from tarkov.repositories.categories import CategoryId, category_repository
 from .models import (
     FleaMarketRequest,
     FleaMarketResponse,
@@ -21,12 +27,6 @@ from .models import (
     OfferRequirement,
     SortType,
 )
-from tarkov.repositories.categories import CategoryId, category_repository
-from tarkov.inventory import generate_item_id, item_templates_repository
-from tarkov.inventory.models import ItemTemplate
-from tarkov.inventory.prop_models import AmmoProps
-from tarkov.inventory.types import TemplateId
-from tarkov import config
 
 
 class OfferGenerator:
@@ -202,6 +202,50 @@ class FleaMarket:
     def buy_offer(self, offer: Offer) -> None:
         del self.offers[offer.id]
         self.offers.update(self.generator.generate_offers(1))
+
+    def item_price(self, template_id: TemplateId) -> dict:
+        offers = [
+            offer
+            for offer in self.offers.values()
+            if offer.root_item.tpl == template_id
+        ]
+        if not offers:
+            return {
+                "min": 0,
+                "max": 0,
+                "avg": 0,
+            }
+        offers_costs = [offer.itemsCost for offer in offers]
+        mean_price = statistics.mean(offers_costs)
+        max_price = max(offers_costs)
+        min_price = min(offers_costs)
+        return {
+            "avg": mean_price,
+            "min": min_price,
+            "max": max_price,
+        }
+
+    @staticmethod
+    def get_offer_tax(
+        template: ItemTemplate, requirements_cost: int, quantity: int
+    ) -> int:
+        # TODO: Players that have intel level 3 have their tax reduced by 30%
+        tax_constant = 0.05
+        base_price = template.props.CreditsPrice
+
+        p0 = math.log10(base_price / requirements_cost)
+        if requirements_cost < base_price:
+            p0 = p0 ** 1.08
+
+        pr = math.log10(requirements_cost / base_price)
+        if requirements_cost >= base_price:
+            pr = pr ** 1.08
+
+        tax = round(
+            base_price * tax_constant * 4 ** p0 * quantity
+            + requirements_cost * tax_constant * 4 ** pr * quantity
+        )
+        return tax
 
     def __clear_expired_offers(self):
         now = datetime.now()

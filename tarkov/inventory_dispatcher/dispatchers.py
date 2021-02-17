@@ -1,8 +1,12 @@
 import typing
+from datetime import datetime, timedelta
 from typing import Callable, Dict, Optional, TYPE_CHECKING
 
 import tarkov.inventory
 import tarkov.inventory.types
+from tarkov.exceptions import NotFoundError
+from tarkov.fleamarket.fleamarket import flea_market_instance
+from tarkov.fleamarket.models import OfferId
 from tarkov.hideout.models import HideoutAreaType
 from tarkov.inventory import (
     MutableInventory,
@@ -12,6 +16,7 @@ from tarkov.inventory import (
     regenerate_items_ids,
 )
 from tarkov.inventory.implementations import SimpleInventory
+from tarkov.inventory.types import TemplateId
 from tarkov.profile import Profile
 from tarkov.trader import TraderInventory, TraderType
 from .models import (
@@ -24,10 +29,8 @@ from .models import (
     RagfairActions,
     TradingActions,
 )
-from tarkov.exceptions import NotFoundError
-from tarkov.fleamarket.fleamarket import flea_market_instance
-from tarkov.fleamarket.models import OfferId
-from tarkov.inventory.types import TemplateId
+from ..inventory.models import Item
+from ..notifier.models import MailDialogueMessage, MailMessageItems, MailMessageType
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
@@ -430,9 +433,12 @@ class QuestDispatcher(Dispatcher):
 class FleaMarketDispatcher(Dispatcher):
     def __init__(self, manager: "DispatcherManager") -> None:
         super().__init__(manager)
-        self.dispatch_map = {ActionType.RagFairBuyOffer: self._flea_market_buy}
+        self.dispatch_map = {
+            ActionType.RagFairBuyOffer: self._buy_offer,
+            ActionType.RagFairAddOffer: self._add_offer,
+        }
 
-    def _flea_market_buy(self, action: RagfairActions.Buy) -> None:
+    def _buy_offer(self, action: RagfairActions.Buy) -> None:
         for offer_to_buy in action.offers:
             try:
                 offer = flea_market_instance.get_offer(offer_to_buy.offer_id)
@@ -461,3 +467,23 @@ class FleaMarketDispatcher(Dispatcher):
                 else:
                     item.upd.StackObjectsCount -= req.count
                     self.response.items.change.append(item)
+
+    def _add_offer(self, action: RagfairActions.Add):
+        # Todo: Add taxation
+        items = [self.inventory.get_item(item_id) for item_id in action.items]
+        self.inventory.remove_items(items)
+        self.response.items.del_.extend(items)
+
+        sent_at = datetime.now() + timedelta(seconds=10)
+        roubles = item_templates_repository.create_item(
+            TemplateId("5449016a4bdc2d6f028b456f"), 100_000
+        )
+        message = MailDialogueMessage(
+            dt=int(sent_at.timestamp()),
+            hasRewards=True,
+            uid=TraderType.Ragman.value,
+            type=MailMessageType.npcTrader.value,
+            templateId="5bdac0b686f7743e1665e09e",
+            items=MailMessageItems.from_items(roubles),
+        )
+        self.profile.notifier.add_message(message)

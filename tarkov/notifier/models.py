@@ -1,4 +1,5 @@
 import datetime
+import enum
 import time
 from typing import Dict, List
 
@@ -39,7 +40,7 @@ class MailDialogueMessage(Base):
 
     id: str = Field(default_factory=generate_item_id)  # Message id
     uid: str  # Trader id (Same as MailDialogue id)
-    type: StrictInt
+    type: int
     dt: float = Field(default_factory=time.time)  # Send datetime
     templateId: str  # Locale template id
     hasRewards: StrictBool = False
@@ -83,7 +84,7 @@ class MailDialogues(Base):
 
 class MailMessagePreview(Base):
     dt: float
-    type: StrictInt
+    type: int
     templateId: str
     uid: str
 
@@ -131,3 +132,13 @@ class DialoguePreviewList(Base):
         return DialoguePreviewList(
             __root__=[MailDialoguePreview.from_dialogue(d) for d in dialogues]
         )
+
+
+class MailMessageType(enum.Enum):
+    questStart = 10
+    questFail = 11
+    questSuccess = 12
+
+    npcTrader = 2
+
+    insuranceReturn = 8

@@ -8,8 +8,8 @@ from pydantic import parse_obj_as
 from server import db_dir
 from tarkov.exceptions import NotFoundError
 from .helpers import generate_item_id, regenerate_items_ids
-from .models import Item, ItemTemplate, ItemUpdMedKit, NodeTemplate
-from .prop_models import MedsProps
+from .models import Item, ItemTemplate, ItemUpdMedKit, ItemUpdResource, NodeTemplate
+from .prop_models import FuelProps, MedsProps
 from .types import TemplateId
 
 AnyTemplate = Union[ItemTemplate, NodeTemplate]
@@ -156,10 +156,15 @@ class ItemTemplatesRepository:
         :param count: Amount of items in stack
         :return: new Item
         """
-        item = Item(
-            id=generate_item_id(),
-            tpl=item_template.id,
-        )
+
+        try:
+            item_dict: dict = item_templates_repository.get_preset(item_template.id)
+            item = parse_obj_as(Item, item_dict)
+        except NotFoundError:
+            item = Item(
+                id=generate_item_id(),
+                tpl=item_template.id,
+            )
 
         if count > 1:
             item.upd.StackObjectsCount = count
@@ -171,19 +176,15 @@ class ItemTemplatesRepository:
 
             item.upd.MedKit = ItemUpdMedKit(HpResource=medkit_max_hp)
 
+        if isinstance(item_template.props, FuelProps):
+            item.upd.Resource = ItemUpdResource(Value=item_template.props.MaxResource)
+
         return item
 
     @staticmethod
     def create_item(template_id: TemplateId, count: int = 1) -> List[Item]:
         if count == 0:
             raise ValueError("Cannot create 0 items")
-
-        #  Try to return a preset if it exists
-        try:
-            item: dict = item_templates_repository.get_preset(template_id)
-            return [parse_obj_as(Item, item)]
-        except NotFoundError:
-            pass
 
         item_template = item_templates_repository.get_template(template_id)
 
@@ -192,16 +193,14 @@ class ItemTemplatesRepository:
             return [ItemTemplatesRepository.__create_item(item_template)]
 
         items: List[Item] = []
-        stack_size = item_template.props.StackMaxSize
+        stack_max_size = item_template.props.StackMaxSize
 
         #  Create multiple stacks of items (Say 80 rounds of 5.45 ammo it will create two stacks (60 and 20))
-        for _ in range(count, stack_size, count):
-            items.append(ItemTemplatesRepository.__create_item(item_template, count))
-
-        if stack_size % count:
-            items.append(
-                ItemTemplatesRepository.__create_item(item_template, stack_size % count)
-            )
+        amount_to_create = count
+        while amount_to_create > 0:
+            stack_size = min(stack_max_size, amount_to_create)
+            amount_to_create -= stack_size
+            items.append(ItemTemplatesRepository.__create_item(item_template, stack_size))
 
         return items
 

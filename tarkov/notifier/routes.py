@@ -3,35 +3,47 @@ from typing import Dict, List, Optional, Union
 
 import orjson
 from fastapi.params import Cookie, Param
+from fastapi.responses import ORJSONResponse
 from starlette.requests import Request
 from starlette.responses import PlainTextResponse
 
 import tarkov.profile
+from server import logger
 from server.utils import get_request_url_root, make_router
 from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
-from tarkov.notifier.notifier import notifier_instance
+from tarkov.notifier import notifier_instance
 from tarkov.notifier.requests import GetAllAttachmentsRequest, MailDialogViewRequest
 
 notifier_router = make_router(tags=["Notifier"])
 
 
-@notifier_router.get(
-    "/notifierServer/get/{profile_id}", response_class=PlainTextResponse
-)
-async def notifierserver_get(profile_id: str) -> bytes:
+@notifier_router.get("/notifierServer/get/{profile_id}", response_class=ORJSONResponse)
+async def notifierserver_get(
+    profile_id: str,
+):
     for _ in range(15):  # Poll for 15 seconds
         if notifier_instance.has_notifications(profile_id):
-            notifications = notifier_instance.get_notifications(profile_id)
+            notifications = notifier_instance.get_notifications_view(profile_id)
+            logger.debug(f"New notifications for profile {profile_id}")
+            logger.debug(notifications)
             response = "\n".join(
                 [
                     orjson.dumps(notification).decode("utf8")
                     for notification in notifications
                 ]
             )
-            return response.encode("utf8")
-
+            logger.debug(f"Notifier response: {response}")
+            return PlainTextResponse(
+                content=response.encode("utf8"),
+                media_type="application/json",
+            )
+        logger.debug(f"Polling for {profile_id}")
         await asyncio.sleep(1)
-    return orjson.dumps(notifier_instance.get_empty_notification())
+
+    return PlainTextResponse(
+        content=orjson.dumps({"type": "ping", "eventId": "ping"}),
+        media_type="application/json",
+    )
 
 
 @notifier_router.post("/client/mail/dialog/list")

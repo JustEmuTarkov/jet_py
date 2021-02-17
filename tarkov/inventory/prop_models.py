@@ -105,7 +105,7 @@ class BaseItemProps(BaseModel):
     BackgroundColor: Color
     Width: int
     Height: int
-    StackMaxSize: StrictInt
+    StackMaxSize: int
     Rarity: str
     SpawnChance: Union[StrictInt, StrictFloat]
     CreditsPrice: int

@@ -7,10 +7,13 @@ import tarkov.inventory.types
 from tarkov import inventory
 from tarkov.inventory import PlayerInventory, item_templates_repository
 from tarkov.inventory.models import Item
-from tarkov.notifier.models import MailDialogueMessage, MailMessageItems
+from tarkov.notifier.models import (
+    MailDialogueMessage,
+    MailMessageItems,
+    MailMessageType,
+)
 from tarkov.trader import TraderInventory, TraderType
 from .models import (
-    QuestMessageType,
     QuestRewardAssortUnlock,
     QuestRewardExperience,
     QuestRewardItem,
@@ -137,7 +140,7 @@ class Quests:
 
         message = MailDialogueMessage(
             uid=quest_template.traderId,
-            type=StrictInt(QuestMessageType.questSuccess.value),
+            type=StrictInt(MailMessageType.questSuccess.value),
             templateId="5ab0f32686f7745dd409f56b",  # TODO: Right now this is a placeholder
             systemData={},
             items=MailMessageItems.from_items(reward_items),
