@@ -122,8 +122,8 @@ class Hideout:
             production = cast(HideoutProduction, production)
 
             generator_idle_time = time_elapsed - generator_work_time
-            if generator_idle_time < 0:
-                raise AssertionError("generator_didnt_work_for < 0")
+            assert generator_idle_time > 0
+            assert generator_work_time > 0
 
             # TODO: Move 0.15 into settings
             production["Progress"] += generator_work_time + generator_idle_time * 0.15
