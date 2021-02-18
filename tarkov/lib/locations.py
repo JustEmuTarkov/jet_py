@@ -142,19 +142,14 @@ class LocationGenerator:
             for _ in range(10):
                 random_template = random.choices(item_templates, item_template_weights, k=1)[0]
 
-                item = Item(
-                    id=generate_item_id(),
-                    tpl=random_template.id,
-                    parent_id=container_id,
-                    slot_id="main",
-                )
+                item, children = item_templates_repository.create_item(random_template)
                 try:
-                    container_inventory.place_item(item)
+                    container_inventory.place_item(item, child_items=children)
                     break
                 except NoSpaceError:
                     pass
 
-        container["Items"] = container_inventory.container.dict()["Items"]
+        container["Items"] = container_inventory.container.dict(exclude_none=True)["Items"]
 
     @staticmethod
     def __template_weight(template: ItemTemplate) -> Union[int, float]:

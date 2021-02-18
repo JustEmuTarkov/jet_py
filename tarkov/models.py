@@ -26,11 +26,12 @@ class Base(pydantic.BaseModel):
     def json(
         self,
         *args: list,
+        by_alias: bool = True,
         indent: int = 4,
         **kwargs: Any,
     ) -> str:
         # pylint: disable=useless-super-delegation
-        return super().json(*args, indent=indent, **kwargs)
+        return super().json(*args, by_alias=by_alias, indent=indent, **kwargs)
 
 
 ConfigType = TypeVar("ConfigType", bound="BaseConfig")

@@ -60,7 +60,7 @@ class BotGenerator:
         bot_inventory = BotInventory(ujson.load(random_inventory_path.open(encoding="utf8")))
         bot_inventory.regenerate_ids()
 
-        bot["Inventory"] = bot_inventory.data.dict()
+        bot["Inventory"] = bot_inventory.data.dict(exclude_none=True)
 
         self.__generate_health(bot, role)
 

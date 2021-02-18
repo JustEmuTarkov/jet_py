@@ -84,12 +84,13 @@ class ItemTemplatesRepository:
         else:
             template_id = item
 
-        try:
-            item_template = self._item_templates[template_id]
-        except KeyError as error:
-            raise NotFoundError(f"Can not found any template with id {template_id}") from error
+        if template_id in self._item_templates:
+            return self._item_templates[template_id]
 
-        return item_template
+        if template_id in self._node_templates:
+            return self._node_templates[template_id]
+
+        raise NotFoundError(f"Can not found any template with id {template_id}")
 
     def iter_template_children(self, template_id: TemplateId) -> Iterable[Union[NodeTemplate, ItemTemplate]]:
         templates: List[Union[NodeTemplate, ItemTemplate]] = [self.get_any_template(template_id)]
