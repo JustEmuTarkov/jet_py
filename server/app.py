@@ -10,6 +10,7 @@ from starlette.responses import Response, StreamingResponse
 from server import root_dir
 from tarkov.launcher.routes import launcher_router
 from tarkov.mail.routes import mail_router
+from tarkov.notifier.router import notifier_router
 from tarkov.profile.routes import profile_router
 from tarkov.fleamarket.routes import flea_market_router
 from tarkov.routes.friend import friend_router
@@ -50,6 +51,7 @@ class TarkovGZipMiddleware(BaseHTTPMiddleware):
 app = FastAPI()
 
 app.include_router(mail_router)
+app.include_router(notifier_router)
 
 app.include_router(trader_router)
 app.include_router(profile_router)
