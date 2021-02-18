@@ -42,7 +42,7 @@ def make_inventory(player_profile: Profile) -> Callable:
 
 @pytest.fixture()
 def random_items() -> List[Item]:
-    random_templates = random.choices(
+    random_templates = random.sample(
         [tpl for tpl in item_templates_repository._item_templates.values() if isinstance(tpl, ItemTemplate)],
         k=100,
     )

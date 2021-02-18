@@ -1,6 +1,6 @@
 import typing
 from datetime import datetime, timedelta
-from typing import Callable, Dict, List, Optional, TYPE_CHECKING
+from typing import Callable, Dict, List, Optional, TYPE_CHECKING, Tuple
 
 import tarkov.inventory
 import tarkov.inventory.types
@@ -181,14 +181,15 @@ class InventoryDispatcher(Dispatcher):
 
     def _apply_inventory_changes(self, action: InventoryActions.ApplyInventoryChanges) -> None:
         if action.changedItems is not None:
+            changed_items: List[Tuple[Item, List[Item]]] = []
             for changed_item in action.changedItems:
                 item = self.inventory.get_item(changed_item.id)
-
                 child_items = list(self.inventory.iter_item_children_recursively(item))
                 self.inventory.remove_item(item, remove_children=True)
-                self.inventory.add_item(changed_item, child_items)
+                changed_items.append((item, child_items))
 
-                self.response.items.change.append(changed_item)
+            for item, child_items in changed_items:
+                self.inventory.add_item(item=item, child_items=child_items)
 
         if action.deletedItems is not None:
             for deleted_item in action.deletedItems:

@@ -36,7 +36,7 @@ def client_notifier_channel_create(
 async def notifierserver_get(
     profile_id: str,
 ) -> PlainTextResponse:
-    for _ in range(15):  # Poll for 15 seconds
+    for _ in range(90):
         if notifier_instance.has_notifications(profile_id):
             notifications = notifier_instance.get_notifications_view(profile_id)
             logger.debug(f"New notifications for profile {profile_id}")
@@ -44,10 +44,9 @@ async def notifierserver_get(
             response = "\n".join([orjson.dumps(notification).decode("utf8") for notification in notifications])
             logger.debug(f"Notifier response: {response}")
             return PlainTextResponse(
-                content=response.encode("utf8"),
+                content=response,
                 media_type="application/json",
             )
-        logger.debug(f"Polling for {profile_id}")
         await asyncio.sleep(1)
 
     return PlainTextResponse(

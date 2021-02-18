@@ -1,11 +1,14 @@
 from typing import Dict, List, Optional, Union
 
-from fastapi.params import Cookie, Param
+from fastapi.params import Body, Cookie, Depends, Param
+from starlette.requests import Request
 
 import tarkov.profile
 from server.utils import make_router
+from tarkov.dependencies import with_profile
 from tarkov.mail.requests import GetAllAttachmentsRequest, MailDialogViewRequest
 from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
+from tarkov.profile import Profile
 
 mail_router = make_router(tags=["Notifier"])
 
@@ -22,19 +25,12 @@ def mail_dialog_list(
 
 
 @mail_router.post("/client/mail/dialog/info")
-def mail_dialog_info(
-    dialogue_id: str = Param(alias="dialogId", default=None),  # type: ignore
-    profile_id: Optional[str] = Cookie(alias="PHPSESSID", default=None),  # type: ignore
+async def mail_dialog_info(
+    dialogue_id: str = Body(..., alias="dialogId", embed=True),  # type: ignore
+    profile: Profile = Depends(with_profile),  # type: ignore
 ) -> Union[TarkovSuccessResponse[dict], TarkovErrorResponse]:
-    if not dialogue_id:
-        return TarkovErrorResponse(errmsg="No dialogue_id was provided")
-
-    if not profile_id:
-        return TarkovErrorResponse.profile_id_is_none()
-
-    with tarkov.profile.Profile(profile_id) as profile:
-        dialogue_preview = profile.notifier.view_dialog_preview(dialogue_id=dialogue_id)
-        return TarkovSuccessResponse(data=dialogue_preview)
+    dialogue_preview = profile.notifier.view_dialog_preview(dialogue_id=dialogue_id)
+    return TarkovSuccessResponse(data=dialogue_preview)
 
 
 @mail_router.post("/client/mail/dialog/view")

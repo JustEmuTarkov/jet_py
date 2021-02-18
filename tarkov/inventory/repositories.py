@@ -10,7 +10,8 @@ from .helpers import generate_item_id, regenerate_items_ids
 from .models import Item, ItemTemplate, ItemUpdMedKit, ItemUpdResource, NodeTemplate
 from .prop_models import FuelProps, MedsProps
 from .types import ItemId, TemplateId
-from ..repositories.categories import CategoryId
+from tarkov.globals_ import globals_repository
+from tarkov.repositories.categories import CategoryId
 
 AnyTemplate = Union[ItemTemplate, NodeTemplate]
 
@@ -141,7 +142,7 @@ class ItemTemplatesRepository:
     @staticmethod
     def create_item(item_template: ItemTemplate, count: int = 1) -> Tuple[Item, List[Item]]:
         try:
-            return item_templates_repository.get_preset(item_template.id)
+            return globals_repository.item_preset(item_template).get_items()
         except NotFoundError:
             pass
 

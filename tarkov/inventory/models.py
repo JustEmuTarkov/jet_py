@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import datetime
 import enum
-from typing import Any, List, Literal, NewType, Optional, TYPE_CHECKING, Union, cast
+from typing import Any, List, Literal, NewType, Optional, TYPE_CHECKING, Union
 
 from pydantic import (
     Extra,
@@ -13,11 +13,9 @@ from pydantic import (
     root_validator,
 )
 
-import tarkov.inventory
 from tarkov.inventory.prop_models import (
     AnyProp,
     BaseItemProps,
-    MedsProps,
     props_models_map,
 )
 from tarkov.inventory.types import ItemId, TemplateId
@@ -199,34 +197,34 @@ class Item(Base):
             raise ValueError("Item does not have inventory")
         return self.__inventory__
 
-    @root_validator(pre=False, skip_on_failure=True)
-    def validate_medkit_hp(cls, values: dict) -> dict:  # pylint: disable=no-self-argument,no-self-use
-        if "id" not in values:
-            return values
-
-        item_tpl_id: TemplateId = cast(TemplateId, values.get("tpl"))
-        item_template = tarkov.inventory.item_templates_repository.get_template(item_tpl_id)
-        if item_template.parent == "5448f39d4bdc2d0a728b4568":  # Medkit Id
-            assert isinstance(item_template.props, MedsProps)
-            upd: ItemUpd = cast(ItemUpd, values.get("upd"))
-            if not isinstance(item_template.props.MaxHpResource, int):
-                raise ResourceWarning(
-                    f"""Item template that inherits directly form MedKit does not have MaxHpResource property
-                    template id: {item_template.id}
-                    """
-                )
-            upd.MedKit = (
-                upd.MedKit if upd.MedKit else ItemUpdMedKit(HpResource=item_template.props.MaxHpResource)
-            )
-
-        return values
-
-    @root_validator(pre=False, skip_on_failure=True)
-    def validate_upd_none(cls, values: dict) -> dict:  # pylint: disable=no-self-argument,no-self-use
-        if "upd" in values and values["upd"] is None:
-            values["upd"] = ItemUpd()
-
-        return values
+    # @root_validator(pre=False, skip_on_failure=True)
+    # def validate_medkit_hp(cls, values: dict) -> dict:  # pylint: disable=no-self-argument,no-self-use
+    #     if "id" not in values:
+    #         return values
+    #
+    #     item_tpl_id: TemplateId = cast(TemplateId, values.get("tpl"))
+    #     item_template = tarkov.inventory.item_templates_repository.get_template(item_tpl_id)
+    #     if item_template.parent == "5448f39d4bdc2d0a728b4568":  # Medkit Id
+    #         assert isinstance(item_template.props, MedsProps)
+    #         upd: ItemUpd = cast(ItemUpd, values.get("upd"))
+    #         if not isinstance(item_template.props.MaxHpResource, int):
+    #             raise ResourceWarning(
+    #                 f"""Item template that inherits directly form MedKit does not have MaxHpResource property
+    #                 template id: {item_template.id}
+    #                 """
+    #             )
+    #         upd.MedKit = (
+    #             upd.MedKit if upd.MedKit else ItemUpdMedKit(HpResource=item_template.props.MaxHpResource)
+    #         )
+    #
+    #     return values
+    #
+    # @root_validator(pre=False, skip_on_failure=True)
+    # def validate_upd_none(cls, values: dict) -> dict:  # pylint: disable=no-self-argument,no-self-use
+    #     if "upd" in values and values["upd"] is None:
+    #         values["upd"] = ItemUpd()
+    #
+    #     return values
 
     def copy(self: Item, **kwargs: Any) -> Item:
         item_inventory = self.__inventory__

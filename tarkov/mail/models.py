@@ -74,6 +74,9 @@ class MailDialogues(Base):
     def __setitem__(self, trader_id: str, dialogue: MailDialogue) -> None:
         self.__root__[trader_id] = dialogue
 
+    def __contains__(self, trader_id: str) -> bool:
+        return trader_id in self.__root__
+
     def items(self) -> ItemsView[str, MailDialogue]:
         return self.__root__.items()
 

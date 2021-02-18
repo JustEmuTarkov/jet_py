@@ -14,7 +14,7 @@ from tarkov.inventory import (
     GridInventoryStashMap,
     item_templates_repository,
 )
-from tarkov.inventory.helpers import generate_item_id, regenerate_item_ids_dict
+from tarkov.inventory.helpers import regenerate_item_ids_dict
 from tarkov.inventory.models import Item, ItemTemplate
 from tarkov.inventory.prop_models import CompoundProps, LootContainerProps
 from tarkov.inventory.types import ItemId, TemplateId
@@ -118,7 +118,7 @@ class LocationGenerator:
         Populates given container with items
         Mutates the container argument
         """
-        container_id = container["Root"]
+        # container_id = container["Root"]
         container_template = item_templates_repository.get_template(container["Items"][0]["_tpl"])
 
         assert isinstance(container_template.props, LootContainerProps)
