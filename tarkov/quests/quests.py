@@ -38,13 +38,13 @@ class Quests:
         self.profile: "Profile" = profile
         self.data = self.profile.quests_data
 
-    def get_quest(self, quest_id: str):
+    def get_quest(self, quest_id: str) -> dict:
         try:
             return next(quest for quest in self.data if quest["qid"] == quest_id)
         except StopIteration as e:
             raise KeyError from e
 
-    def accept_quest(self, quest_id: str):
+    def accept_quest(self, quest_id: str) -> None:
         # TODO: Create quest if it does not exist
         try:
             quest = self.get_quest(quest_id)
@@ -98,7 +98,7 @@ class Quests:
 
         return [], []
 
-    def complete_quest(self, quest_id: str):
+    def complete_quest(self, quest_id: str) -> None:
         quest_template = quests_repository.get_quest_template(quest_id)
 
         reward_items: List[Item] = []

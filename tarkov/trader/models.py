@@ -1,5 +1,13 @@
 from enum import Enum
-from typing import Any, Dict, List, Literal, NamedTuple, Optional
+from typing import (
+    Any,
+    Dict,
+    List,
+    Literal,
+    NamedTuple,
+    Optional,
+    ValuesView,
+)
 
 from pydantic import Field, StrictBool
 
@@ -110,11 +118,11 @@ class BarterSchemeEntry(Base):
 class BarterScheme(Base):
     __root__: Dict[ItemId, List[List[BarterSchemeEntry]]] = Field(default_factory=dict)
 
-    def __getitem__(self, item_id: ItemId):
+    def __getitem__(self, item_id: ItemId) -> List[List[BarterSchemeEntry]]:
         return self.__root__[item_id]
 
-    def __setitem__(self, key: ItemId, value: List[List[BarterSchemeEntry]]):
+    def __setitem__(self, key: ItemId, value: List[List[BarterSchemeEntry]]) -> None:
         self.__root__[key] = value
 
-    def values(self):
+    def values(self) -> ValuesView[List[List[BarterSchemeEntry]]]:
         return self.__root__.values()

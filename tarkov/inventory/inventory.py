@@ -386,7 +386,7 @@ class GridInventoryStashMap:
 
         raise NoSpaceError("Cannot place item into inventory")
 
-    def debug_print(self):
+    def debug_print(self) -> None:
         stash_map = self._construct_map()
         lines = []
         for y in range(self.height):
@@ -397,7 +397,7 @@ class GridInventoryStashMap:
 
 
 class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
-    def remove_item(self, item: Item, remove_children=True) -> None:
+    def remove_item(self, item: Item, remove_children: bool = True) -> None:
         """
         Removes item from inventory
         """
@@ -408,7 +408,7 @@ class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
         for child in self.iter_item_children_recursively(item):
             self.items.remove(child)
 
-    def remove_items(self, items: Iterable[Item], remove_children=True):
+    def remove_items(self, items: Iterable[Item], remove_children: bool = True) -> None:
         for item in items:
             try:
                 self.remove_item(item, remove_children=remove_children)
@@ -417,7 +417,7 @@ class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
                     f"Item with id {item.id} is not present in {self.__class__.__name__}"
                 ) from e
 
-    def add_item(self, item: Item, child_items: List[Item]):
+    def add_item(self, item: Item, child_items: List[Item]) -> None:
         """
         Adds item into inventory
         """
@@ -470,7 +470,7 @@ class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
             item.get_inventory().remove_item(item)
 
     @staticmethod
-    def fold(item: Item, folded: bool):
+    def fold(item: Item, folded: bool) -> None:
         """
         Folds item
         """
@@ -512,7 +512,7 @@ class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
         return affected_items, deleted_items
 
     @staticmethod
-    def can_split(item: Item):
+    def can_split(item: Item) -> bool:
         return item.upd.StackObjectsCount > 1
 
 
@@ -532,11 +532,11 @@ class GridInventory(MutableInventory):
         """
         raise NotImplementedError
 
-    def remove_item(self, item: Item, remove_children=True):
+    def remove_item(self, item: Item, remove_children: bool = True) -> None:
         self.stash_map.remove(item, list(self.iter_item_children_recursively(item)))
         super().remove_item(item, remove_children=remove_children)
 
-    def add_item(self, item: Item, child_items: List[Item]):
+    def add_item(self, item: Item, child_items: List[Item]) -> None:
         self.stash_map.add(item, child_items)
         super().add_item(item=item, child_items=child_items)
 
@@ -546,7 +546,7 @@ class GridInventory(MutableInventory):
         *,
         child_items: List[Item] = None,
         location: AnyItemLocation = None,
-    ):
+    ) -> None:
         if child_items is None:
             child_items = []
         #  This is kinda tricky but item given to StashMap should have
@@ -570,7 +570,7 @@ class GridInventory(MutableInventory):
         self,
         item: Item,
         move_location: AnyMoveLocation,
-    ):
+    ) -> None:
         """
         Moves item to location
         """
@@ -788,18 +788,18 @@ class PlayerInventory(GridInventory):
         return self.inventory.items
 
     @property
-    def root_id(self):
+    def root_id(self) -> ItemId:
         return self.inventory.stash
 
     @property
-    def stash_id(self):
+    def stash_id(self) -> ItemId:
         return self.root_id
 
     @property
     def equipment_id(self) -> str:
         return self.inventory.equipment
 
-    def read(self):
+    def read(self) -> None:
         """
         Reads inventory file from disk
         """
@@ -811,7 +811,7 @@ class PlayerInventory(GridInventory):
 
         self.stash_map = PlayerInventoryStashMap(inventory=self)
 
-    def write(self):
+    def write(self) -> None:
         atomic_write(
             self.inventory.json(exclude_none=True, exclude_defaults=True), self._path
         )

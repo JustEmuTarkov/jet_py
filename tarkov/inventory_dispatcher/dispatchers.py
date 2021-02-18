@@ -55,7 +55,7 @@ class Dispatcher:
         self.profile = manager.profile
         self.response = manager.response
 
-    def dispatch(self, action: dict):
+    def dispatch(self, action: dict) -> None:
         action_type: ActionType = ActionType(action["Action"])
 
         try:
@@ -99,7 +99,7 @@ class InventoryDispatcher(Dispatcher):
 
         raise ValueError(f"Cannot find inventory for owner: {owner}")
 
-    def _move(self, action: InventoryActions.Move):
+    def _move(self, action: InventoryActions.Move) -> None:
         donor_inventory = self.get_owner_inventory(action.fromOwner)
         item = donor_inventory.get_item(action.item)
 
@@ -109,7 +109,7 @@ class InventoryDispatcher(Dispatcher):
         )
         self.response.items.new.append(item)
 
-    def _split(self, action: InventoryActions.Split):
+    def _split(self, action: InventoryActions.Split) -> None:
         donor_inventory = self.get_owner_inventory(action.fromOwner)
         item = donor_inventory.get_item(action.item)
 
@@ -120,7 +120,7 @@ class InventoryDispatcher(Dispatcher):
         if new_item:
             self.response.items.new.append(new_item)
 
-    def _examine(self, action: InventoryActions.Examine):
+    def _examine(self, action: InventoryActions.Examine) -> None:
         item_id = action.item
 
         if action.fromOwner is None:
@@ -152,7 +152,7 @@ class InventoryDispatcher(Dispatcher):
             assert action.item == item.id
             self.profile.encyclopedia.examine(item)
 
-    def _merge(self, action: InventoryActions.Merge):
+    def _merge(self, action: InventoryActions.Merge) -> None:
         donor_inventory = self.get_owner_inventory(action.fromOwner)
         item = donor_inventory.get_item(item_id=action.item)
         with_ = self.inventory.get_item(action.with_)
@@ -162,7 +162,7 @@ class InventoryDispatcher(Dispatcher):
         self.response.items.del_.append(item)
         self.response.items.change.append(with_)
 
-    def _transfer(self, action: InventoryActions.Transfer):
+    def _transfer(self, action: InventoryActions.Transfer) -> None:
         donor_inventory = self.get_owner_inventory(action.fromOwner)
         item = donor_inventory.get_item(item_id=action.item)
         with_ = self.inventory.get_item(action.with_)
@@ -170,21 +170,23 @@ class InventoryDispatcher(Dispatcher):
         self.inventory.transfer(item=item, with_=with_, count=action.count)
         self.response.items.change.extend((item, with_))
 
-    def _fold(self, action: InventoryActions.Fold):
+    def _fold(self, action: InventoryActions.Fold) -> None:
         item = self.inventory.get_item(action.item)
         self.inventory.fold(item, action.value)
 
-    def _remove(self, action: InventoryActions.Remove):
+    def _remove(self, action: InventoryActions.Remove) -> None:
         item = self.inventory.get_item(action.item)
         self.inventory.remove_item(item)
 
         self.response.items.del_.append(item)
 
-    def _read_encyclopedia(self, action: InventoryActions.ReadEncyclopedia):
+    def _read_encyclopedia(self, action: InventoryActions.ReadEncyclopedia) -> None:
         for template_id in action.ids:
             self.profile.encyclopedia.read(template_id)
 
-    def _apply_inventory_changes(self, action: InventoryActions.ApplyInventoryChanges):
+    def _apply_inventory_changes(
+        self, action: InventoryActions.ApplyInventoryChanges
+    ) -> None:
         if action.changedItems is not None:
             for changed_item in action.changedItems:
                 item = self.inventory.get_item(changed_item.id)
@@ -201,7 +203,7 @@ class InventoryDispatcher(Dispatcher):
                 self.profile.inventory.remove_item(item)
                 self.response.items.del_.append(item)
 
-    def _insure(self, action: InventoryActions.Insure):
+    def _insure(self, action: InventoryActions.Insure) -> None:
         trader = TraderType(action.tid)
         trader_inventory = TraderInventory(
             trader=trader,
@@ -236,7 +238,7 @@ class HideoutDispatcher(Dispatcher):
             ActionType.HideoutTakeItemsFromAreaSlots: self._hideout_take_items_from_area_slots,
         }
 
-    def _hideout_upgrade_start(self, action: HideoutActions.Upgrade):
+    def _hideout_upgrade_start(self, action: HideoutActions.Upgrade) -> None:
         hideout = self.profile.hideout
 
         area_type = HideoutAreaType(action.areaType)
@@ -255,7 +257,7 @@ class HideoutDispatcher(Dispatcher):
             else:
                 self.response.items.change.append(item)
 
-    def _hideout_upgrade_finish(self, action: HideoutActions.UpgradeComplete):
+    def _hideout_upgrade_finish(self, action: HideoutActions.UpgradeComplete) -> None:
         hideout = self.profile.hideout
 
         area_type = HideoutAreaType(action.areaType)
@@ -263,7 +265,7 @@ class HideoutDispatcher(Dispatcher):
 
     def _hideout_put_items_in_area_slots(
         self, action: HideoutActions.PutItemsInAreaSlots
-    ):
+    ) -> None:
         area_type = HideoutAreaType(action.areaType)
 
         for slot_id, item_data in action.items.items():
@@ -283,13 +285,13 @@ class HideoutDispatcher(Dispatcher):
                     area_type, int(slot_id), item
                 )
 
-    def _hideout_toggle_area(self, action: HideoutActions.ToggleArea):
+    def _hideout_toggle_area(self, action: HideoutActions.ToggleArea) -> None:
         area_type = HideoutAreaType(action.areaType)
         self.profile.hideout.toggle_area(area_type, action.enabled)
 
     def _hideout_single_production_start(
         self, action: HideoutActions.SingleProductionStart
-    ):
+    ) -> None:
         items_info = action.items
         inventory = self.profile.inventory
 
@@ -314,7 +316,7 @@ class HideoutDispatcher(Dispatcher):
 
         self.profile.hideout.start_single_production(recipe_id=action.recipeId)
 
-    def _hideout_take_production(self, action: HideoutActions.TakeProduction):
+    def _hideout_take_production(self, action: HideoutActions.TakeProduction) -> None:
         items = self.profile.hideout.take_production(action.recipeId)
         self.response.items.new.extend(items)
         for item in items:
@@ -322,7 +324,7 @@ class HideoutDispatcher(Dispatcher):
 
     def _hideout_take_items_from_area_slots(
         self, action: HideoutActions.TakeItemsFromAreaSlots
-    ):
+    ) -> None:
         hideout = self.profile.hideout
         area_type = HideoutAreaType(action.areaType)
         for slot_id in action.slots:
@@ -341,7 +343,7 @@ class TradingDispatcher(Dispatcher):
             ActionType.TradingConfirm: self._trading_confirm,
         }
 
-    def _trading_confirm(self, action: TradingActions.Trading):
+    def _trading_confirm(self, action: TradingActions.Trading) -> None:
         if action.type == "buy_from_trader":
             self.__buy_from_trader(TradingActions.BuyFromTrader(**action.dict()))
             return
@@ -352,7 +354,7 @@ class TradingDispatcher(Dispatcher):
 
         raise NotImplementedError(f"Trading action {action} not implemented")
 
-    def __buy_from_trader(self, action: TradingActions.BuyFromTrader):
+    def __buy_from_trader(self, action: TradingActions.BuyFromTrader) -> None:
         trader_inventory = TraderInventory(TraderType(action.tid), self.profile)
 
         bought_items_list = trader_inventory.buy_item(action.item_id, action.count)
@@ -376,7 +378,7 @@ class TradingDispatcher(Dispatcher):
             else:
                 self.response.items.change.append(item)
 
-    def __sell_to_trader(self, action: TradingActions.SellToTrader):
+    def __sell_to_trader(self, action: TradingActions.SellToTrader) -> None:
         trader_id = action.tid
         items_to_sell = action.items
         trader_inventory = TraderInventory(TraderType(trader_id), self.profile)
@@ -471,7 +473,7 @@ class FleaMarketDispatcher(Dispatcher):
                     item.upd.StackObjectsCount -= req.count
                     self.response.items.change.append(item)
 
-    def _add_offer(self, action: RagfairActions.Add):
+    def _add_offer(self, action: RagfairActions.Add) -> None:
         # Todo: Add taxation
         items = [self.inventory.get_item(item_id) for item_id in action.items]
         self.inventory.remove_items(items)

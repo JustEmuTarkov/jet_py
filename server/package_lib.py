@@ -16,13 +16,13 @@ class PackageMeta:
 class PackageBase:
     Meta: PackageMeta
 
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
-    def on_load(self):
+    def on_load(self) -> None:
         pass
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.Meta.name} - {self.Meta.version}"
 
 
@@ -40,7 +40,7 @@ class CycleDependencyError(Exception):
         self.package = package
         self.dependencies = dependencies
 
-    def __str__(self):
+    def __str__(self) -> str:
         dependencies = ", ".join(dep.Meta.name for dep in self.dependencies)
         return f"{self.package.Meta.name}: [{dependencies}]"
 
@@ -59,7 +59,7 @@ class PackageTopologicalSorter:
         except StopIteration as error:
             raise UnresolvedPackageError(name) from error
 
-    def get_load_order(self):
+    def get_load_order(self) -> PackageTypeList:
         in_order: PackageTypeList = []
 
         dependency_graph: Dict[PackageType, PackageTypeList] = {
@@ -107,14 +107,14 @@ class PackageManager:
         self.packages_dir = packages_path
         self.packages: List[Type[PackageBase]] = []
 
-    def register(self, package: Type[PackageBase]):
+    def register(self, package: Type[PackageBase]) -> None:
         self.packages.append(package)
 
-    def load_packages(self):
+    def load_packages(self) -> None:
         self.__import_packages()
         self.__load_packages()
 
-    def __import_packages(self):
+    def __import_packages(self) -> None:
         """
         Imports top-level packages in self.packages_dir directory
         """
@@ -127,7 +127,7 @@ class PackageManager:
                 logger.debug(f"Package import: {package.Meta.name}")
                 self.register(package)
 
-    def __load_packages(self):
+    def __load_packages(self) -> None:
         """
         Executes packages on_load method
         """

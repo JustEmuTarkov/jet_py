@@ -3,7 +3,7 @@ import unittest
 import unittest.mock
 from unittest.mock import patch
 from pathlib import Path
-from typing import List
+from typing import Callable, List
 
 import pytest  # type: ignore
 
@@ -32,8 +32,8 @@ def inventory(player_profile: Profile) -> PlayerInventory:
 
 
 @pytest.fixture()
-def make_inventory(player_profile: Profile):
-    def _make_inventory(inventory_path: str):
+def make_inventory(player_profile: Profile) -> Callable:
+    def _make_inventory(inventory_path: str) -> PlayerInventory:
         inventory = PlayerInventory(player_profile)
         with patch.object(inventory, "_path", inventory_path):
             inventory.read()

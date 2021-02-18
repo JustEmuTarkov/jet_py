@@ -11,12 +11,13 @@ from .helpers import generate_item_id, regenerate_items_ids
 from .models import Item, ItemTemplate, ItemUpdMedKit, ItemUpdResource, NodeTemplate
 from .prop_models import FuelProps, MedsProps
 from .types import TemplateId
+from ..repositories.categories import CategoryId
 
 AnyTemplate = Union[ItemTemplate, NodeTemplate]
 
 
 class ItemTemplatesRepository:
-    def __init__(self):
+    def __init__(self) -> None:
         items, nodes = self.__read_templates()
         self._item_templates: Dict[TemplateId, ItemTemplate] = items
         self._node_templates: Dict[TemplateId, NodeTemplate] = nodes
@@ -56,7 +57,7 @@ class ItemTemplatesRepository:
         )
 
     @staticmethod
-    def __read_item_categories():
+    def __read_item_categories() -> dict:
         items = ujson.load(
             db_dir.joinpath("templates", "items.json").open("r", encoding="utf8")
         )
@@ -64,7 +65,7 @@ class ItemTemplatesRepository:
         return items
 
     @property
-    def templates(self):
+    def templates(self) -> Dict[TemplateId, ItemTemplate]:
         return self._item_templates
 
     @property
@@ -131,7 +132,7 @@ class ItemTemplatesRepository:
             if isinstance(tpl, ItemTemplate)
         ]
 
-    def get_category(self, item: Item):
+    def get_category(self, item: Item) -> CategoryId:
         return self._item_categories[item.tpl]["ParentId"]
 
     def get_preset(self, template_id: TemplateId) -> dict:
@@ -172,7 +173,6 @@ class ItemTemplatesRepository:
         #  Item is either medkit or a painkiller
         if isinstance(item_template.props, MedsProps):
             medkit_max_hp = item_template.props.MaxHpResource
-            assert medkit_max_hp is not None
 
             item.upd.MedKit = ItemUpdMedKit(HpResource=medkit_max_hp)
 

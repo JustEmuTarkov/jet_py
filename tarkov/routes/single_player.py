@@ -80,7 +80,7 @@ async def generate_bots(request: Request) -> TarkovSuccessResponse[List[dict]]:
 
 
 @singleplayer_router.get("/mode/offline")
-def mode_offline():
+def mode_offline() -> dict:
     # TODO: Put that into Server config file
     return {
         "OfflineLootPatch": True,

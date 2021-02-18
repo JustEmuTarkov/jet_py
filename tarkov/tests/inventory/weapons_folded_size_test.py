@@ -10,7 +10,7 @@ test_inventories = TEST_RESOURCES_PATH.joinpath("folding").rglob("*.json")
     "inventory_path",
     test_inventories,
 )
-def test_folding_calculation(make_inventory, inventory_path):
+def test_folding_calculation(make_inventory, inventory_path):  # type: ignore
     inventory: PlayerInventory = make_inventory(inventory_path)
     weapon = inventory.get_item("test_weapon")
     weapon_mods = list(inventory.iter_item_children_recursively(weapon))

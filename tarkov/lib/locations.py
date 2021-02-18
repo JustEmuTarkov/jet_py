@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import collections
 import random
-from typing import DefaultDict, Dict, List, Tuple, Union
+from typing import Any, DefaultDict, Dict, List, Tuple, Union
 
 import ujson
 from pydantic import parse_obj_as
@@ -62,8 +62,8 @@ class ContainerInventory(GridInventory):
     def place_item(
         self,
         item: Item,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         super().place_item(item, **kwargs)
         item.slotId = "main"
 
@@ -83,7 +83,7 @@ class LocationGenerator:
         self.__generate_location_loot()
         return self.__base
 
-    def __generate_location_loot(self):
+    def __generate_location_loot(self) -> None:
         for container in self.__loot["static"]:
             self.__populate_container(container)
             self.__base["Loot"].append(container)
@@ -115,7 +115,7 @@ class LocationGenerator:
 
         return self.__category_cache[template_id]
 
-    def __populate_container(self, container: dict):
+    def __populate_container(self, container: dict) -> None:
         """
         Populates given container with items
         Mutates the container argument

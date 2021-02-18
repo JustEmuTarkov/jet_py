@@ -32,7 +32,9 @@ def customization_storage(
 
 
 @trader_router.post("/client/trading/customization/{trader_id}")
-def customization(trader_id: str):  # pylint: disable=unused-argument
+def customization(
+    trader_id: str,  # pylint: disable=unused-argument
+) -> TarkovSuccessResponse:
     # suits_path = db_dir.joinpath('assort', trader_id, 'suits.json')
     # if not suits_path.exists():
     #     return TarkovError(600, "This Trader Doesn't have any suits for sale")

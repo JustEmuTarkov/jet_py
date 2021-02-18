@@ -5,13 +5,13 @@ from pathlib import Path
 from OpenSSL import crypto  # type: ignore
 
 
-def is_ssl_certificate_expired():
+def is_ssl_certificate_expired() -> bool:
     with Path("certificates/cert.crt").open("rb") as file:
         cert = crypto.load_certificate(crypto.FILETYPE_PEM, file.read())
         return cert.has_expired()
 
 
-def generate_ssl_certificate():
+def generate_ssl_certificate() -> None:
     pkey = crypto.PKey()
     pkey.generate_key(crypto.TYPE_RSA, 2048)
     x509 = crypto.X509()

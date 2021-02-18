@@ -21,7 +21,7 @@ class ProfileNotifier:
             return
         self.__add_profile_notifications(profile)
 
-    def __add_profile_notifications(self, profile: Profile):
+    def __add_profile_notifications(self, profile: Profile) -> None:
         now = datetime.now()
         for dialogue in profile.notifier.dialogues.__root__.values():
             for msg in dialogue.messages:
@@ -36,7 +36,7 @@ class ProfileNotifier:
                 self.unsent_notifications.append(notification)
 
     @staticmethod
-    def ready_to_send(notification: MessageNotification, now: datetime):
+    def ready_to_send(notification: MessageNotification, now: datetime) -> bool:
         print(now, datetime.fromtimestamp(notification.data.message.dt))
         return now > datetime.fromtimestamp(notification.data.message.dt)
 
@@ -66,14 +66,14 @@ class ProfileNotifier:
 
         return messages_ready_to_send
 
-    def add_mail_notification(self, notification: MessageNotification):
+    def add_mail_notification(self, notification: MessageNotification) -> None:
         self.unsent_notifications.append(notification)
 
 
 class Notifier:
     """Notifier that contains multiple Profile Notifiers"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.notifications: DefaultDict[str, ProfileNotifier] = collections.defaultdict(
             lambda: ProfileNotifier(None)
         )
@@ -81,7 +81,7 @@ class Notifier:
     def has_notifications(self, profile_id: str) -> bool:
         return self.notifications[profile_id].has_new_notifications
 
-    def get_notifications_view(self, profile_id) -> List[Dict]:
+    def get_notifications_view(self, profile_id: str) -> List[Dict]:
         profile_notifier = self.notifications[profile_id]
         return profile_notifier.notifications_ready_to_send_view()
 

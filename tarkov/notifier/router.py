@@ -4,7 +4,6 @@ from typing import Optional
 import orjson
 from fastapi import Request
 from fastapi.params import Cookie
-from fastapi.responses import ORJSONResponse
 from starlette.responses import PlainTextResponse
 
 from server import logger
@@ -33,10 +32,10 @@ def client_notifier_channel_create(
     return TarkovSuccessResponse(data=response)
 
 
-@notifier_router.get("/notifierServer/get/{profile_id}", response_class=ORJSONResponse)
+@notifier_router.get("/notifierServer/get/{profile_id}")
 async def notifierserver_get(
     profile_id: str,
-):
+) -> PlainTextResponse:
     for _ in range(15):  # Poll for 15 seconds
         if notifier_instance.has_notifications(profile_id):
             notifications = notifier_instance.get_notifications_view(profile_id)

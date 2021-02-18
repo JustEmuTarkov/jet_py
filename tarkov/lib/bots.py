@@ -47,7 +47,7 @@ class BotInventory(MutableInventory):
 
 
 class BotGenerator:
-    def __init__(self):
+    def __init__(self) -> None:
         self.__bot_base = ujson.load(
             db_dir.joinpath("base", "botBase.json").open(encoding="utf8")
         )
@@ -79,8 +79,8 @@ class BotGenerator:
         return bot
 
     @staticmethod
-    def __generate_health(bot, role):
-        health_base = {
+    def __generate_health(bot: dict, role: str) -> None:
+        health_base: dict = {
             "Hydration": {"Current": 100, "Maximum": 100},
             "Energy": {"Current": 100, "Maximum": 100},
             "BodyParts": {
@@ -95,7 +95,7 @@ class BotGenerator:
             "UpdateTime": 0,
         }
 
-        bot_health = ujson.load(
+        bot_health: dict = ujson.load(
             db_dir.joinpath("bots", role)
             .joinpath("health", "default.json")
             .open(encoding="utf8")

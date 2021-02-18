@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import datetime
 import enum
 import time
-from typing import Dict, List
+from typing import Dict, ItemsView, List
 
 from pydantic import Field, StrictBool, StrictInt
 
@@ -15,7 +17,7 @@ class MailMessageItems(Base):
     data: List[Item] = Field(default_factory=list)  # List of items in message
 
     @staticmethod
-    def from_items(items: List[Item]):
+    def from_items(items: List[Item]) -> MailMessageItems:
         stash_id = generate_item_id()
 
         for item in items:
@@ -78,7 +80,7 @@ class MailDialogues(Base):
     def __setitem__(self, trader_id: str, dialogue: MailDialogue) -> None:
         self.__root__[trader_id] = dialogue
 
-    def items(self):
+    def items(self) -> ItemsView[str, MailDialogue]:
         return self.__root__.items()
 
 

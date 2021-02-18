@@ -71,7 +71,7 @@ class OfferGenerator:
         item_price = self.item_prices[template.id]
         if isinstance(template.props, AmmoProps):
             item_price *= template.props.StackMaxSize  # So we don't have so much ammo
-        chance_modifier = 1
+        chance_modifier: float = 1
 
         if item_price < self.percentile_low:
             chance_modifier = item_price / self.percentile_low
@@ -80,7 +80,7 @@ class OfferGenerator:
 
         return math.log(self.item_prices[template.id], median_price) * chance_modifier
 
-    def generate_offers(self, amount) -> Dict[OfferId, Offer]:
+    def generate_offers(self, amount: int) -> Dict[OfferId, Offer]:
         offers = {}
         templates = random.choices(
             self.item_templates, weights=self.item_templates_weights, k=amount
@@ -146,7 +146,8 @@ class FleaMarketView:
             offer
             for offer in self.flea_market.offers.values()
             if category_repository.has_parent_category(
-                category_repository.get_category(offer.root_item), request.handbookId
+                category_repository.get_category(offer.root_item.tpl),
+                request.handbookId,
             )
             or offer.root_item.tpl == request.handbookId
         ]
@@ -169,7 +170,7 @@ class FleaMarketView:
     ) -> List[Offer]:
         """Sorts offers in place"""
 
-        def sort_by_title(offer):
+        def sort_by_title(offer: Offer) -> str:
             item_tpl = item_templates_repository.get_template(offer.root_item)
             return item_tpl.name  # Swap to localization later
 
@@ -184,7 +185,7 @@ class FleaMarketView:
 
 
 class FleaMarket:
-    def __init__(self):
+    def __init__(self) -> None:
         self.offers_amount: int = config.flea_market.offers_amount
 
         self.updated_at = datetime.fromtimestamp(0)
@@ -249,7 +250,7 @@ class FleaMarket:
         )
         return tax
 
-    def __clear_expired_offers(self):
+    def __clear_expired_offers(self) -> None:
         now = datetime.now()
         now_timestamp = now.timestamp()
         expired_offers_keys = [
@@ -259,7 +260,7 @@ class FleaMarket:
         for key in expired_offers_keys:
             del self.offers[key]
 
-    def __update_offers(self):
+    def __update_offers(self) -> None:
         self.__clear_expired_offers()
 
         now = datetime.now()

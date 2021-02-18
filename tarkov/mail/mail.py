@@ -33,7 +33,7 @@ class Mail:
             self.dialogues[trader_id] = dialogue
             return dialogue
 
-    def add_message(self, message: MailDialogueMessage):
+    def add_message(self, message: MailDialogueMessage) -> None:
         """Adds message to mail and creates notification in notifier"""
         category: MailDialogue = self.get_dialogue(message.uid)
         category.messages.insert(0, message)
@@ -75,7 +75,7 @@ class Mail:
 
         return {"messages": [msg.dict() for msg in dialogue.messages]}
 
-    def all_attachments_view(self, dialogue_id) -> dict:
+    def all_attachments_view(self, dialogue_id: str) -> dict:
         dialogue = self.get_dialogue(dialogue_id)
 
         messages = [
@@ -93,13 +93,13 @@ class Mail:
         )
         return datetime_now > message_expires_at
 
-    def read(self):
+    def read(self) -> None:
         try:
             self.dialogues = MailDialogues.parse_file(self.path)
         except FileNotFoundError:
             self.dialogues = MailDialogues()
 
-    def write(self):
+    def write(self) -> None:
         atomic_write(
             self.dialogues.json(
                 by_alias=True, exclude_unset=False, exclude_none=True, indent=4

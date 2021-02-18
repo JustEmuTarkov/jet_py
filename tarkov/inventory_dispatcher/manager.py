@@ -27,7 +27,7 @@ class DispatcherResponse(Base):
     builds: list = Field(default_factory=list)
     currentSalesSums: Dict[str, int] = Field(default_factory=dict)
 
-    def append_error(self, title: str, message: str):
+    def append_error(self, title: str, message: str) -> None:
         self.badRequest.append(
             {
                 "index": len(self.badRequest),
@@ -50,7 +50,7 @@ class DispatcherManager:
 
         self.response: DispatcherResponse = DispatcherResponse()
 
-    def __make_dispatchers(self):
+    def __make_dispatchers(self) -> None:
         self.dispatchers = (
             dispatchers.InventoryDispatcher(self),
             dispatchers.HideoutDispatcher(self),

@@ -57,7 +57,9 @@ class ItemTemplate(NodeTemplateBase):
     props: AnyProp
 
     @root_validator(pre=True)
-    def assign_prop(cls, values: dict):  # pylint: disable=no-self-argument, no-self-use
+    def assign_prop(  # pylint: disable=no-self-argument, no-self-use
+        cls, values: dict
+    ) -> dict:
         if values["_type"] != "Item":
             return values
         if isinstance(values["_props"], BaseItemProps):
@@ -161,8 +163,8 @@ class ItemUpd(Base):
     Dogtag: Optional[ItemUpdDogtag] = None
     UnlimitedCount: StrictBool = False
 
-    def folded(self):
-        return self.Foldable and self.Foldable.Folded
+    def folded(self) -> bool:
+        return self.Foldable is not None and self.Foldable.Folded
 
 
 ItemAmmoStackPosition = NewType("ItemAmmoStackPosition", int)
@@ -206,9 +208,9 @@ class Item(Base):
         return self.__inventory__
 
     @root_validator(pre=False, skip_on_failure=True)
-    def validate_medkit_hp(
+    def validate_medkit_hp(  # pylint: disable=no-self-argument,no-self-use
         cls, values: dict
-    ):  # pylint: disable=no-self-argument,no-self-use
+    ) -> dict:
         if "id" not in values:
             return values
 
@@ -234,15 +236,15 @@ class Item(Base):
         return values
 
     @root_validator(pre=False, skip_on_failure=True)
-    def validate_upd_none(
+    def validate_upd_none(  # pylint: disable=no-self-argument,no-self-use
         cls, values: dict
-    ):  # pylint: disable=no-self-argument,no-self-use
+    ) -> dict:
         if "upd" in values and values["upd"] is None:
             values["upd"] = ItemUpd()
 
         return values
 
-    def copy(self: Item, **kwargs) -> Item:
+    def copy(self: Item, **kwargs: Any) -> Item:
         item_inventory = self.__inventory__
         # Avoid copying inventory
         self.__inventory__ = None
@@ -252,7 +254,7 @@ class Item(Base):
 
         return item_copy
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.id)
 
 

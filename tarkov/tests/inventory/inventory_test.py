@@ -5,13 +5,14 @@ import pytest
 from tarkov.exceptions import NoSpaceError
 from tarkov.inventory import (
     GridInventoryStashMap,
+    PlayerInventory,
     item_templates_repository,
 )
 from tarkov.inventory.models import Item, ItemInventoryLocation, ItemOrientationEnum
 from tarkov.inventory.types import TemplateId
 
 
-def test_adds_items(inventory, random_items: List[Item]):
+def test_adds_items(inventory: PlayerInventory, random_items: List[Item]) -> None:
     for item in random_items:
         inventory.add_item(item, [])
 
@@ -24,8 +25,8 @@ def test_adds_items(inventory, random_items: List[Item]):
     [(-1, 0), (0, -1), (0, 67), (8, 0), (40, 0), (-2, -12), (9, 0), (10, 0)],
 )
 def test_should_not_be_able_to_place_items_out_of_bounds(
-    inventory, test_coords: Tuple[int, int]
-):
+    inventory: PlayerInventory, test_coords: Tuple[int, int]
+) -> None:
     magbox = item_templates_repository.create_item(
         TemplateId("5c127c4486f7745625356c13")
     )[0]
@@ -39,7 +40,7 @@ def test_should_not_be_able_to_place_items_out_of_bounds(
         )
 
 
-def test_finds_locations(inventory):
+def test_finds_locations(inventory) -> None:  # type: ignore
     # Should be able to completely fill EOD stash with PSUs
     width, height = inventory.grid_size
     for i in range((width * height) // (2 * 2)):

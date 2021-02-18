@@ -17,7 +17,7 @@ class Base(pydantic.BaseModel):
         validate_all = True
         allow_population_by_field_name = True
 
-    def dict(self, by_alias=True, **kwargs) -> dict:
+    def dict(self, by_alias: bool = True, **kwargs: Any) -> dict:
         return super().dict(
             by_alias=by_alias,
             **kwargs,
@@ -25,9 +25,9 @@ class Base(pydantic.BaseModel):
 
     def json(
         self,
-        *args,
-        indent=4,
-        **kwargs,
+        *args: list,
+        indent: int = 4,
+        **kwargs: Any,
     ) -> str:
         # pylint: disable=useless-super-delegation
         return super().json(*args, indent=indent, **kwargs)
@@ -46,7 +46,9 @@ class BaseConfig(pydantic.BaseModel):
         allow_mutation = False
 
     @classmethod
-    def load(cls: Type[ConfigType], path: Path = None, auto_create=True) -> ConfigType:
+    def load(
+        cls: Type[ConfigType], path: Path = None, auto_create: bool = True
+    ) -> ConfigType:
         path = path or cls.__config_path__
         if not path.exists():
             if auto_create:

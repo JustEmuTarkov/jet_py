@@ -67,7 +67,7 @@ class TraderInventory(ImmutableInventory):
         )
 
     @property
-    def items(self):
+    def items(self) -> List[Item]:
         return self.assort_items
 
     @property
@@ -235,7 +235,7 @@ class TraderInventory(ImmutableInventory):
 
         return int(price)
 
-    def _increase_sales_sum(self, amount: int):
+    def _increase_sales_sum(self, amount: int) -> None:
         raise NotImplementedError
 
     @property

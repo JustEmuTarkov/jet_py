@@ -35,7 +35,7 @@ class Hideout:
         self.profile: "Profile" = profile
 
     @staticmethod
-    def get_recipe(recipe_id):
+    def get_recipe(recipe_id: str) -> dict:
         recipe_path = db_dir.joinpath("hideout", "production", f"{recipe_id}.json")
         return ujson.load(recipe_path.open("r", encoding="utf8"))
 
@@ -46,14 +46,14 @@ class Hideout:
         except StopIteration as e:
             raise ValueError(f"Hideout are with type {area_type} does not exist") from e
 
-    def area_upgrade_start(self, area_type: HideoutAreaType):
+    def area_upgrade_start(self, area_type: HideoutAreaType) -> None:
         area = self.get_area(area_type)
         area[
             "completeTime"
         ] = 0  # Todo: grab construction time from db/hideout/areas and current time
         area["constructing"] = True
 
-    def area_upgrade_finish(self, area_type: HideoutAreaType):
+    def area_upgrade_finish(self, area_type: HideoutAreaType) -> None:
         area = self.get_area(area_type)
         area["constructing"] = False
         area["completeTime"] = 0
@@ -61,7 +61,7 @@ class Hideout:
 
     def put_items_in_area_slots(
         self, area_type: HideoutAreaType, slot_id: int, item: inventory.models.Item
-    ):
+    ) -> None:
         area = self.get_area(area_type)
 
         item.location = None
@@ -84,7 +84,7 @@ class Hideout:
         slot["item"] = None
         return parse_obj_as(Item, item)
 
-    def start_single_production(self, recipe_id: str, timestamp: int = None):
+    def start_single_production(self, recipe_id: str, timestamp: int = None) -> None:
         if not timestamp:
             timestamp = int(time.time())
 
@@ -113,17 +113,19 @@ class Hideout:
         del self.data["Production"][recipe_id]
         return items
 
-    def toggle_area(self, area_type: HideoutAreaType, enabled: bool):
+    def toggle_area(self, area_type: HideoutAreaType, enabled: bool) -> None:
         area = self.get_area(area_type)
         area["active"] = enabled
 
-    def __update_production_time(self, time_elapsed: int, generator_work_time: int):
+    def __update_production_time(
+        self, time_elapsed: int, generator_work_time: int
+    ) -> None:
         for production in self.data["Production"].values():
             production = cast(HideoutProduction, production)
 
             generator_idle_time = time_elapsed - generator_work_time
-            assert generator_idle_time > 0
-            assert generator_work_time > 0
+            assert generator_idle_time >= 0
+            assert generator_work_time >= 0
 
             # TODO: Move 0.15 into settings
             production["Progress"] += generator_work_time + generator_idle_time * 0.15
@@ -163,7 +165,7 @@ class Hideout:
 
         return int(fuel_consumed / self.__FUEL_BURN_RATE)
 
-    def read(self):
+    def read(self) -> None:
         self.data: dict = ujson.load(self.path.open("r", encoding="utf8"))
 
         if not self.meta_path.exists():
@@ -183,6 +185,6 @@ class Hideout:
 
         self.metadata["updated_at"] = self.current_time
 
-    def write(self):
+    def write(self) -> None:
         atomic_write(ujson.dumps(self.data, indent=4), self.path)
         atomic_write(ujson.dumps(self.metadata, indent=4), self.meta_path)
