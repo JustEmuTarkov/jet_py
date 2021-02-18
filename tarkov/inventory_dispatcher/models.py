@@ -168,7 +168,7 @@ class HideoutActions(SimpleNamespace):
 class TradingSchemeItemModel(models.Base):
     id: ItemId
     count: StrictInt
-    # scheme_id: Optional[StrictInt]
+    scheme_id: Optional[int]
 
 
 class TradingActions(SimpleNamespace):
