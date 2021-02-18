@@ -117,18 +117,17 @@ class Hideout:
         area = self.get_area(area_type)
         area["active"] = enabled
 
-    def __update_production_time(self, time_elapsed: int, generator_worked: int):
+    def __update_production_time(self, time_elapsed: int, generator_work_time: int):
         for production in self.data["Production"].values():
             production = cast(HideoutProduction, production)
 
-            generator_didnt_work_for = time_elapsed - generator_worked
-            if generator_didnt_work_for < 0:
+            generator_idle_time = time_elapsed - generator_work_time
+            if generator_idle_time < 0:
                 raise AssertionError("generator_didnt_work_for < 0")
 
-            production["Progress"] += (
-                generator_worked + time_elapsed * self.__GENERATOR_SPEED_WITHOUT_FUEL
-            )
-            # production['SkipTime'] += skip_time
+            # TODO: Move 0.15 into settings
+            production["Progress"] += generator_work_time + generator_idle_time * 0.15
+            # production['SkipTime'] +=
 
     def __update_fuel(self) -> int:
         """
