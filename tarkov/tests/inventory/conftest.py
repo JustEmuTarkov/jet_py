@@ -54,8 +54,9 @@ def random_items() -> List[Item]:
     )
 
     items: List[Item] = [
-        item
+        item_templates_repository.create_item(
+            item_templates_repository.get_template(tpl.id)
+        )[0]
         for tpl in random_templates
-        for item in item_templates_repository.create_item(tpl.id)
     ]
     return items

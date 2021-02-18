@@ -91,10 +91,10 @@ class OfferGenerator:
         return offers
 
     def _generate_offer(self, item_template: ItemTemplate) -> Offer:
-        items = item_templates_repository.create_item(item_template.id)
+        root_item, child_items = item_templates_repository.create_item(item_template)
         item_price = self.item_prices[item_template.id]
         item_price = int(random.gauss(item_price * 1.1, item_price * 0.1))
-        assert len(items) == 1
+
         requirement = OfferRequirement(
             template_id=TemplateId("5449016a4bdc2d6f028b456f"),
             count=item_price,
@@ -109,8 +109,8 @@ class OfferGenerator:
             id=OfferId(generate_item_id()),
             intId=random.randint(0, 999_999),
             user=self._make_random_user(),
-            root=items[0].id,
-            items=items,
+            root=root_item.id,
+            items=[root_item, *child_items],
             itemsCost=item_price,
             requirements=[requirement],
             requirementsCost=item_price,

@@ -10,7 +10,7 @@ from tarkov.exceptions import NotFoundError
 from .helpers import generate_item_id, regenerate_items_ids
 from .models import Item, ItemTemplate, ItemUpdMedKit, ItemUpdResource, NodeTemplate
 from .prop_models import FuelProps, MedsProps
-from .types import TemplateId
+from .types import ItemId, TemplateId
 from ..repositories.categories import CategoryId
 
 AnyTemplate = Union[ItemTemplate, NodeTemplate]
@@ -135,37 +135,46 @@ class ItemTemplatesRepository:
     def get_category(self, item: Item) -> CategoryId:
         return self._item_categories[item.tpl]["ParentId"]
 
-    def get_preset(self, template_id: TemplateId) -> dict:
+    def get_preset(self, template_id: TemplateId) -> Tuple[Item, List[Item]]:
         """
         :param template_id:
         :return: Preset of an item from globals
         """
         item_presets = self.globals["ItemPresets"]
         try:
-            items = copy.deepcopy(item_presets[template_id]["_items"])
-            regenerate_items_ids(items)
-            return items
+            preset = copy.deepcopy(item_presets[template_id])
         except KeyError as e:
             raise NotFoundError() from e
+        root_item_id: ItemId = preset["_parent"]
+        # All the items in preset
+        items: List[Item] = pydantic.parse_obj_as(List[Item], preset["_items"])
+        # Let's grab root item (parent) And remove it from items list
+        root_item = next(i for i in items if i.id == root_item_id)
+        items.remove(root_item)
+
+        # Regenerate item ids
+        regenerate_items_ids([root_item, *items])
+        return root_item, items
 
     @staticmethod
-    def __create_item(item_template: ItemTemplate, count: int = 1) -> Item:
-        """
-        Creates new item stack with size of :count:
-
-        :param item_template: Item template to create item from
-        :param count: Amount of items in stack
-        :return: new Item
-        """
-
+    def create_item(
+        item_template: ItemTemplate, count: int = 1
+    ) -> Tuple[Item, List[Item]]:
         try:
-            item_dict: dict = item_templates_repository.get_preset(item_template.id)
-            item = parse_obj_as(Item, item_dict)
+            return item_templates_repository.get_preset(item_template.id)
         except NotFoundError:
-            item = Item(
-                id=generate_item_id(),
-                tpl=item_template.id,
+            pass
+
+        if count > item_template.props.StackMaxSize:
+            raise ValueError(
+                f"Trying to create item with template id {item_template} with stack size "
+                f"of {count} but maximum stack size is {item_template.props.StackMaxSize}"
             )
+
+        item = Item(
+            id=generate_item_id(),
+            tpl=item_template.id,
+        )
 
         if count > 1:
             item.upd.StackObjectsCount = count
@@ -179,10 +188,16 @@ class ItemTemplatesRepository:
         if isinstance(item_template.props, FuelProps):
             item.upd.Resource = ItemUpdResource(Value=item_template.props.MaxResource)
 
-        return item
+        item.parent_id = None
+        return item, []
 
     @staticmethod
-    def create_item(template_id: TemplateId, count: int = 1) -> List[Item]:
+    def create_items(
+        template_id: TemplateId, count: int = 1
+    ) -> List[Tuple[Item, List[Item]]]:
+        """
+        Returns list of Tuple[Root Item, [Child items]
+        """
         if count == 0:
             raise ValueError("Cannot create 0 items")
 
@@ -190,9 +205,9 @@ class ItemTemplatesRepository:
 
         #  If we need only one item them we will just return it
         if count == 1:
-            return [ItemTemplatesRepository.__create_item(item_template)]
+            return [ItemTemplatesRepository.create_item(item_template)]
 
-        items: List[Item] = []
+        items: List[Tuple[Item, List[Item]]] = []
         stack_max_size = item_template.props.StackMaxSize
 
         #  Create multiple stacks of items (Say 80 rounds of 5.45 ammo it will create two stacks (60 and 20))
@@ -200,9 +215,12 @@ class ItemTemplatesRepository:
         while amount_to_create > 0:
             stack_size = min(stack_max_size, amount_to_create)
             amount_to_create -= stack_size
-            items.append(
-                ItemTemplatesRepository.__create_item(item_template, stack_size)
+            root, children = ItemTemplatesRepository.create_item(
+                item_template, stack_size
             )
+            root.slotId = None
+
+            items.append((root, children))
 
         return items
 

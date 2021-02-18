@@ -1,6 +1,6 @@
 import typing
 from datetime import datetime, timedelta
-from typing import Callable, Dict, Optional, TYPE_CHECKING
+from typing import Callable, Dict, List, Optional, TYPE_CHECKING
 
 import tarkov.inventory
 import tarkov.inventory.types
@@ -34,6 +34,7 @@ from tarkov.mail.models import (
     MailMessageItems,
     MailMessageType,
 )
+from ..inventory.models import Item
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
@@ -480,15 +481,25 @@ class FleaMarketDispatcher(Dispatcher):
         self.response.items.del_.extend(items)
 
         sent_at = datetime.now() + timedelta(seconds=10)
-        roubles = item_templates_repository.create_item(
-            TemplateId("5449016a4bdc2d6f028b456f"), 100_000
-        )
+        required_items: List[Item] = []
+        for requirement in action.requirements:
+            # TODO: This will probably cause issues with nested items, create_item function have to be changed
+            required_items_list = item_templates_repository.create_items(
+                requirement.template_id, requirement.count
+            )
+            for item, children in required_items_list:
+                required_items.extend([item, *children])
+
+        # roubles = item_templates_repository.create_items(
+        #     TemplateId("5449016a4bdc2d6f028b456f"), 100_000
+        # )
+        # roubles_stacks = [stack[0] for stack in roubles]
         message = MailDialogueMessage(
             dt=int(sent_at.timestamp()),
             hasRewards=True,
             uid=TraderType.Ragman.value,
-            type=MailMessageType.NpcTraderMessage.value,
+            type=MailMessageType.FleamarketMessage.value,
             templateId="5bdac0b686f7743e1665e09e",
-            items=MailMessageItems.from_items(roubles),
+            items=MailMessageItems.from_items(required_items),
         )
         self.profile.notifier.add_message(message)

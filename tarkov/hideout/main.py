@@ -105,13 +105,18 @@ class Hideout:
         product_tpl = recipe["endProduct"]
         count = recipe["count"]
 
-        items = item_templates_repository.create_item(product_tpl, count)
+        items = item_templates_repository.create_items(product_tpl, count)
+        items_list: List[Item] = []
+        for item, child_items in items:
+            items_list.append(item)
+            items_list.extend(child_items)
 
-        for item in items:
             item.upd.SpawnedInSession = True
+            for child in child_items:
+                child.upd.SpawnedInSession = True
 
         del self.data["Production"][recipe_id]
-        return items
+        return items_list
 
     def toggle_area(self, area_type: HideoutAreaType, enabled: bool) -> None:
         area = self.get_area(area_type)

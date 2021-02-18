@@ -43,13 +43,13 @@ class MailDialogueMessage(Base):
     id: str = Field(default_factory=generate_item_id)  # Message id
     uid: str  # Trader id (Same as MailDialogue id)
     type: int
-    dt: float = Field(default_factory=time.time)  # Send datetime
+    dt: float = Field(default_factory=time.time)  # Timestamp when message was sent
     templateId: str  # Locale template id
     hasRewards: StrictBool = False
     rewardCollected: StrictBool = False
     items: MailMessageItems = Field(
         default_factory=MailMessageItems
-    )  # Empty if it has no items
+    )   # Items bound to message
     maxStorageTime: int = StrictInt(
         datetime.timedelta(days=3).total_seconds()
     )  # Storage time in seconds
