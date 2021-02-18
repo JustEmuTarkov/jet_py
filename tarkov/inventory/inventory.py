@@ -118,7 +118,7 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
             stock_template = item_templates_repository.get_template(stock)
             if not isinstance(stock_template.props, StockProps):
                 continue
-            if item_template.props.FoldedSlot == stock.slotId:
+            if item_template.props.FoldedSlot == stock.slot_id:
                 item_or_stock_folded = stock.upd.folded() or item.upd.folded()
                 item_or_item_foldable = stock_template.props.Foldable or item_template.props.Foldable
                 if item_or_item_foldable and item_or_stock_folded:
@@ -509,7 +509,7 @@ class GridInventory(MutableInventory):
         #  This is kinda tricky but item given to StashMap should have
         #  slotId and parent_id otherwise it won't be considered as being in inventory
         item.location = location
-        item.slotId = "hideout"
+        item.slot_id = "hideout"
         item.parent_id = self.root_id
 
         if location is None:
@@ -562,7 +562,7 @@ class GridInventory(MutableInventory):
                 raise ValueError("Cannot place item into location since it is taken")
 
         # self.stash_map.add(item, children_items)
-        item.slotId = move_location.container
+        item.slot_id = move_location.container
         item.parent_id = move_location.id
         if isinstance(move_location, ModMoveLocation):
             item.location = None
@@ -599,7 +599,7 @@ class GridInventory(MutableInventory):
             ammo.location = ItemAmmoStackPosition(0)
 
         ammo.parent_id = magazine.id
-        ammo.slotId = "cartridges"
+        ammo.slot_id = "cartridges"
 
         return ammo
 
@@ -610,7 +610,7 @@ class GridInventory(MutableInventory):
     ) -> Item:
         weapon = self.get_item(move_location.id)
 
-        ammo.slotId = "patron_in_weapon"
+        ammo.slot_id = "patron_in_weapon"
         ammo.location = None
         ammo.parent_id = weapon.id
 
@@ -631,7 +631,7 @@ class GridInventory(MutableInventory):
 
             new_item.location = split_location.location
             new_item.parent_id = split_location.id
-            new_item.slotId = split_location.container
+            new_item.slot_id = split_location.container
 
             self.add_item(new_item, child_items=[])
             return new_item

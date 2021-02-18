@@ -104,7 +104,7 @@ class TraderInventory(ImmutableInventory):
         return barter_scheme
 
     def _generate_fence_assort(self) -> List[Item]:
-        root_items = set(item for item in self.items if item.slotId == "hideout")
+        root_items = set(item for item in self.items if item.slot_id == "hideout")
         assort = random.sample(root_items, k=min(len(root_items), 200))
 
         child_items: List[Item] = []
@@ -133,7 +133,7 @@ class TraderInventory(ImmutableInventory):
             return self.standing.current_level >= required_standing
 
         def filter_in_root(item: Item) -> bool:
-            return item.slotId == "hideout"
+            return item.slot_id == "hideout"
 
         items = filter(filter_in_root, self.items)  # Filter root items
         items = filter(filter_quest_assort, items)  # Filter items that require quest completion

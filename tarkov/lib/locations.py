@@ -65,7 +65,7 @@ class ContainerInventory(GridInventory):
         **kwargs: Any,
     ) -> None:
         super().place_item(item, **kwargs)
-        item.slotId = "main"
+        item.slot_id = "main"
 
 
 class LocationGenerator:
@@ -146,7 +146,7 @@ class LocationGenerator:
                     id=generate_item_id(),
                     tpl=random_template.id,
                     parent_id=container_id,
-                    slotId="main",
+                    slot_id="main",
                 )
                 try:
                     container_inventory.place_item(item)

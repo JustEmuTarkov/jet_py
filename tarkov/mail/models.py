@@ -23,8 +23,8 @@ class MailMessageItems(Base):
         for item in items:
             if not item.parent_id:
                 item.parent_id = stash_id
-            if not item.slotId:
-                item.slotId = "main"
+            if not item.slot_id:
+                item.slot_id = "main"
 
         regenerate_items_ids(items)
 

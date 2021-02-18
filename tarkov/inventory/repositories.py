@@ -193,7 +193,7 @@ class ItemTemplatesRepository:
             stack_size = min(stack_max_size, amount_to_create)
             amount_to_create -= stack_size
             root, children = ItemTemplatesRepository.create_item(item_template, stack_size)
-            root.slotId = None
+            root.slot_id = None
 
             items.append((root, children))
 

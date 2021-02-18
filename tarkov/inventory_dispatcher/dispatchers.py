@@ -377,7 +377,7 @@ class TradingDispatcher(Dispatcher):
                 id=generate_item_id(),
                 tpl=TemplateId("5449016a4bdc2d6f028b456f"),
                 parent_id=self.inventory.root_id,
-                slotId="hideout",
+                slot_id="hideout",
             )
             money_stack.upd.StackObjectsCount = stack_size
 

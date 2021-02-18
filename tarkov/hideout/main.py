@@ -64,7 +64,7 @@ class Hideout:
 
         item.location = None
         item.parent_id = None
-        item.slotId = None
+        item.slot_id = None
 
         area_slots = area["slots"]
         diff = slot_id + 1 - len(area_slots)
