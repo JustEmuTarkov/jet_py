@@ -143,9 +143,7 @@ class BaseItemProps(BaseModel):
     UnlootableFromSide: List[str]
     ChangePriceCoef: float
     AllowSpawnOnLocations: List[
-        Literal[
-            "laboratory", "Shoreline", "Interchange", "RezervBase", "bigmap", "Woods"
-        ]
+        Literal["laboratory", "Shoreline", "Interchange", "RezervBase", "bigmap", "Woods"]
     ]
     SendToClient: StrictBool
     AnimationVariantsNumber: StrictInt
@@ -975,6 +973,4 @@ AnyProp = Union[
     VisorsProps,
 ]
 
-props_models_map: Dict[str, AnyProp] = {
-    model.__template_id__: model for model in typing.get_args(AnyProp)
-}
+props_models_map: Dict[str, AnyProp] = {model.__template_id__: model for model in typing.get_args(AnyProp)}

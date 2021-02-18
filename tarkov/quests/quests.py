@@ -109,14 +109,8 @@ class Quests:
                     stack_size: int = item_template.props.StackMaxSize
 
                     while reward_item.upd.StackObjectsCount > 0:
-                        amount_to_split = min(
-                            reward_item.upd.StackObjectsCount, stack_size
-                        )
-                        reward_items.append(
-                            PlayerInventory.simple_split_item(
-                                reward_item, amount_to_split
-                            )
-                        )
+                        amount_to_split = min(reward_item.upd.StackObjectsCount, stack_size)
+                        reward_items.append(PlayerInventory.simple_split_item(reward_item, amount_to_split))
 
             elif isinstance(reward, QuestRewardExperience):
                 exp_amount: str = reward.value
@@ -134,9 +128,7 @@ class Quests:
                 raise ValueError
 
             else:
-                raise ValueError(
-                    f"Unknown reward: {reward.__class__.__name__} {reward}"
-                )
+                raise ValueError(f"Unknown reward: {reward.__class__.__name__} {reward}")
 
         message = MailDialogueMessage(
             uid=quest_template.traderId,

@@ -63,14 +63,11 @@ class PackageTopologicalSorter:
         in_order: PackageTypeList = []
 
         dependency_graph: Dict[PackageType, PackageTypeList] = {
-            pkg: [self.__get_package_with_name(name) for name in pkg.Meta.dependencies]
-            for pkg in self.packages
+            pkg: [self.__get_package_with_name(name) for name in pkg.Meta.dependencies] for pkg in self.packages
         }
 
         logger.debug(f"Dependency graph: {dependency_graph}")
-        pkg_with_no_deps = [
-            pkg for pkg, pkg_deps in dependency_graph.items() if not pkg_deps
-        ]
+        pkg_with_no_deps = [pkg for pkg, pkg_deps in dependency_graph.items() if not pkg_deps]
         logger.debug(f"pkg_with_no_deps: {pkg_with_no_deps}")
         if not pkg_with_no_deps and dependency_graph:
             raise NoBasePackageError

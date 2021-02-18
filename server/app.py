@@ -24,12 +24,8 @@ from tarkov.trader.routes import trader_router
 
 
 class TarkovGZipMiddleware(BaseHTTPMiddleware):
-    async def dispatch(
-        self, request: Request, call_next: RequestResponseEndpoint
-    ) -> Response:
-        response: StreamingResponse = typing.cast(
-            StreamingResponse, await call_next(request)
-        )
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
+        response: StreamingResponse = typing.cast(StreamingResponse, await call_next(request))
         response_body: bytes = b""
         async for chunk in response.body_iterator:
             response_body += chunk

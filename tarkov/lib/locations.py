@@ -101,9 +101,7 @@ class LocationGenerator:
 
             dynamic_loot_locations[position].append(dynamic_loot)
 
-        self.__base["Loot"].extend(
-            random.choice(loot) for loot in dynamic_loot_locations.values()
-        )
+        self.__base["Loot"].extend(random.choice(loot) for loot in dynamic_loot_locations.values())
 
     def __get_category_items(self, template_id: TemplateId) -> List[ItemTemplate]:
         if template_id not in self.__category_cache:
@@ -121,14 +119,10 @@ class LocationGenerator:
         Mutates the container argument
         """
         container_id = container["Root"]
-        container_template = item_templates_repository.get_template(
-            container["Items"][0]["_tpl"]
-        )
+        container_template = item_templates_repository.get_template(container["Items"][0]["_tpl"])
 
         assert isinstance(container_template.props, LootContainerProps)
-        container_filter_templates: List[
-            TemplateId
-        ] = container_template.props.SpawnFilter
+        container_filter_templates: List[TemplateId] = container_template.props.SpawnFilter
 
         mean, deviation = 2.5, 2.5
         amount_of_items_in_container = max(round(random.gauss(mean, deviation)), 0)
@@ -146,9 +140,7 @@ class LocationGenerator:
 
         for _ in range(amount_of_items_in_container):
             for _ in range(10):
-                random_template = random.choices(
-                    item_templates, item_template_weights, k=1
-                )[0]
+                random_template = random.choices(item_templates, item_template_weights, k=1)[0]
 
                 item = Item(
                     id=generate_item_id(),

@@ -3,7 +3,6 @@ from typing import Dict, Iterable, List, Tuple, Union
 
 import pydantic
 import ujson
-from pydantic import parse_obj_as
 
 from server import db_dir
 from tarkov.exceptions import NotFoundError
@@ -22,9 +21,7 @@ class ItemTemplatesRepository:
         self._item_templates: Dict[TemplateId, ItemTemplate] = items
         self._node_templates: Dict[TemplateId, NodeTemplate] = nodes
         self._item_categories: dict = self.__read_item_categories()
-        self.globals = ujson.load(
-            db_dir.joinpath("base", "globals.json").open(encoding="utf8")
-        )
+        self.globals = ujson.load(db_dir.joinpath("base", "globals.json").open(encoding="utf8"))
 
     @staticmethod
     def __read_templates() -> Tuple[
@@ -36,9 +33,7 @@ class ItemTemplatesRepository:
 
         # Read every file from db/items
         for item_file_path in db_dir.joinpath("items").glob("*"):
-            file_data: List[dict] = ujson.load(
-                item_file_path.open("r", encoding="utf8")
-            )
+            file_data: List[dict] = ujson.load(item_file_path.open("r", encoding="utf8"))
             item_templates.extend(
                 pydantic.parse_obj_as(
                     List[ItemTemplate],
@@ -58,9 +53,7 @@ class ItemTemplatesRepository:
 
     @staticmethod
     def __read_item_categories() -> dict:
-        items = ujson.load(
-            db_dir.joinpath("templates", "items.json").open("r", encoding="utf8")
-        )
+        items = ujson.load(db_dir.joinpath("templates", "items.json").open("r", encoding="utf8"))
         items = {item["Id"]: item for item in items}
         return items
 
@@ -85,9 +78,7 @@ class ItemTemplatesRepository:
 
         return item_template
 
-    def get_any_template(
-        self, item: Union[Item, TemplateId]
-    ) -> Union[NodeTemplate, ItemTemplate]:
+    def get_any_template(self, item: Union[Item, TemplateId]) -> Union[NodeTemplate, ItemTemplate]:
         if isinstance(item, Item):
             template_id = item.tpl
         else:
@@ -96,18 +87,12 @@ class ItemTemplatesRepository:
         try:
             item_template = self._item_templates[template_id]
         except KeyError as error:
-            raise NotFoundError(
-                f"Can not found any template with id {template_id}"
-            ) from error
+            raise NotFoundError(f"Can not found any template with id {template_id}") from error
 
         return item_template
 
-    def iter_template_children(
-        self, template_id: TemplateId
-    ) -> Iterable[Union[NodeTemplate, ItemTemplate]]:
-        templates: List[Union[NodeTemplate, ItemTemplate]] = [
-            self.get_any_template(template_id)
-        ]
+    def iter_template_children(self, template_id: TemplateId) -> Iterable[Union[NodeTemplate, ItemTemplate]]:
+        templates: List[Union[NodeTemplate, ItemTemplate]] = [self.get_any_template(template_id)]
         while templates:
             template = templates.pop()
             yield template
@@ -126,11 +111,7 @@ class ItemTemplatesRepository:
         template = self.get_any_template(template_id)
         if isinstance(template, ItemTemplate):
             return [template]
-        return [
-            tpl
-            for tpl in self.iter_template_children(template_id)
-            if isinstance(tpl, ItemTemplate)
-        ]
+        return [tpl for tpl in self.iter_template_children(template_id) if isinstance(tpl, ItemTemplate)]
 
     def get_category(self, item: Item) -> CategoryId:
         return self._item_categories[item.tpl]["ParentId"]
@@ -157,9 +138,7 @@ class ItemTemplatesRepository:
         return root_item, items
 
     @staticmethod
-    def create_item(
-        item_template: ItemTemplate, count: int = 1
-    ) -> Tuple[Item, List[Item]]:
+    def create_item(item_template: ItemTemplate, count: int = 1) -> Tuple[Item, List[Item]]:
         try:
             return item_templates_repository.get_preset(item_template.id)
         except NotFoundError:
@@ -192,9 +171,7 @@ class ItemTemplatesRepository:
         return item, []
 
     @staticmethod
-    def create_items(
-        template_id: TemplateId, count: int = 1
-    ) -> List[Tuple[Item, List[Item]]]:
+    def create_items(template_id: TemplateId, count: int = 1) -> List[Tuple[Item, List[Item]]]:
         """
         Returns list of Tuple[Root Item, [Child items]
         """
@@ -215,9 +192,7 @@ class ItemTemplatesRepository:
         while amount_to_create > 0:
             stack_size = min(stack_max_size, amount_to_create)
             amount_to_create -= stack_size
-            root, children = ItemTemplatesRepository.create_item(
-                item_template, stack_size
-            )
+            root, children = ItemTemplatesRepository.create_item(item_template, stack_size)
             root.slotId = None
 
             items.append((root, children))

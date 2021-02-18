@@ -46,9 +46,7 @@ class BaseConfig(pydantic.BaseModel):
         allow_mutation = False
 
     @classmethod
-    def load(
-        cls: Type[ConfigType], path: Path = None, auto_create: bool = True
-    ) -> ConfigType:
+    def load(cls: Type[ConfigType], path: Path = None, auto_create: bool = True) -> ConfigType:
         path = path or cls.__config_path__
         if not path.exists():
             if auto_create:

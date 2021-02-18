@@ -34,9 +34,7 @@ def test_should_not_be_able_to_place_items_out_of_bounds(
     with pytest.raises(GridInventoryStashMap.OutOfBoundsError):
         inventory.place_item(
             item=magbox,
-            location=ItemInventoryLocation(
-                x=x, y=y, r=ItemOrientationEnum.Horizontal.value
-            ),
+            location=ItemInventoryLocation(x=x, y=y, r=ItemOrientationEnum.Horizontal.value),
         )
 
 
@@ -44,13 +42,9 @@ def test_finds_locations(inventory) -> None:  # type: ignore
     # Should be able to completely fill EOD stash with PSUs
     width, height = inventory.grid_size
     for i in range((width * height) // (2 * 2)):
-        psu = item_templates_repository.create_items(
-            TemplateId("57347c2e24597744902c94a1")
-        )[0]
+        psu = item_templates_repository.create_items(TemplateId("57347c2e24597744902c94a1"))[0]
         inventory.place_item(psu)
 
     with pytest.raises(NoSpaceError):
-        psu = item_templates_repository.create_items(
-            TemplateId("57347c2e24597744902c94a1")
-        )[0]
+        psu = item_templates_repository.create_items(TemplateId("57347c2e24597744902c94a1"))[0]
         inventory.place_item(psu)

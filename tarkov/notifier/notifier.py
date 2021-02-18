@@ -85,9 +85,7 @@ class Notifier:
         profile_notifier = self.notifications[profile_id]
         return profile_notifier.notifications_ready_to_send_view()
 
-    def add_message_notification(
-        self, profile_id: str, message: MailDialogueMessage
-    ) -> None:
+    def add_message_notification(self, profile_id: str, message: MailDialogueMessage) -> None:
         notification = MessageNotification(
             event_id=message.id,
             data=MessageNotificationData(dialogue_id=message.uid, message=message),

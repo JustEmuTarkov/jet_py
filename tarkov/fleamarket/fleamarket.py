@@ -38,34 +38,21 @@ class OfferGenerator:
             for tpl in item_templates_repository.templates.values()
             if tpl.id in category_repository.item_categories and tpl.props.CreditsPrice
         }
-        item_prices = pydantic.parse_file_as(
-            Dict[TemplateId, int], db_dir.joinpath("flea_prices.json")
-        )
-        self.item_prices.update(
-            {tpl: price for tpl, price in item_prices.items() if price > 0}
-        )
+        item_prices = pydantic.parse_file_as(Dict[TemplateId, int], db_dir.joinpath("flea_prices.json"))
+        self.item_prices.update({tpl: price for tpl, price in item_prices.items() if price > 0})
         self.item_templates = [
-            tpl
-            for tpl in item_templates_repository.templates.values()
-            if tpl.id in self.item_prices
+            tpl for tpl in item_templates_repository.templates.values() if tpl.id in self.item_prices
         ]
         prices = list(self.item_prices.values())
         median_price = statistics.median(prices)
         prices_sorted = sorted(prices)
-        self.percentile_high: int = prices_sorted[
-            int(len(prices) * config.flea_market.percentile_high)
-        ]
-        self.percentile_low: int = prices_sorted[
-            int(len(prices) * config.flea_market.percentile_low)
-        ]
+        self.percentile_high: int = prices_sorted[int(len(prices) * config.flea_market.percentile_high)]
+        self.percentile_low: int = prices_sorted[int(len(prices) * config.flea_market.percentile_low)]
         self.item_templates_weights = [
-            self._get_item_template_weight(tpl, median_price)
-            for tpl in self.item_templates
+            self._get_item_template_weight(tpl, median_price) for tpl in self.item_templates
         ]
 
-    def _get_item_template_weight(
-        self, template: ItemTemplate, median_price: float
-    ) -> float:
+    def _get_item_template_weight(self, template: ItemTemplate, median_price: float) -> float:
         if not template.props.CanSellOnRagfair:
             return 0
         item_price = self.item_prices[template.id]
@@ -82,9 +69,7 @@ class OfferGenerator:
 
     def generate_offers(self, amount: int) -> Dict[OfferId, Offer]:
         offers = {}
-        templates = random.choices(
-            self.item_templates, weights=self.item_templates_weights, k=amount
-        )
+        templates = random.choices(self.item_templates, weights=self.item_templates_weights, k=amount)
         for template in templates:
             offer = self._generate_offer(template)
             offers[offer.id] = offer
@@ -100,9 +85,7 @@ class OfferGenerator:
             count=item_price,
         )
         now = datetime.now()
-        expiration_time = random.gauss(
-            timedelta(hours=6).total_seconds(), timedelta(hours=6).total_seconds()
-        )
+        expiration_time = random.gauss(timedelta(hours=6).total_seconds(), timedelta(hours=6).total_seconds())
         expires_at = now + timedelta(seconds=abs(expiration_time))
 
         return Offer(
@@ -137,9 +120,7 @@ class FleaMarketView:
         self.flea_market = flea_market
 
     def get_response(self, request: FleaMarketRequest) -> FleaMarketResponse:
-        templates_counter: Dict[
-            Union[TemplateId, CategoryId], int
-        ] = collections.Counter(
+        templates_counter: Dict[Union[TemplateId, CategoryId], int] = collections.Counter(
             offer.root_item.tpl for offer in self.flea_market.offers.values()
         )
         offers = [
@@ -152,9 +133,7 @@ class FleaMarketView:
             or offer.root_item.tpl == request.handbookId
         ]
         page_size = request.limit
-        offers = self._sorted_offers(
-            offers, request.sortType, reverse=request.sortDirection == 1
-        )
+        offers = self._sorted_offers(offers, request.sortType, reverse=request.sortDirection == 1)
         offers_view = offers[request.page * page_size : (request.page + 1) * page_size]
 
         return FleaMarketResponse(
@@ -165,9 +144,7 @@ class FleaMarketView:
         )
 
     @staticmethod
-    def _sorted_offers(
-        offers: List[Offer], sort_type: SortType, reverse: bool = False
-    ) -> List[Offer]:
+    def _sorted_offers(offers: List[Offer], sort_type: SortType, reverse: bool = False) -> List[Offer]:
         """Sorts offers in place"""
 
         def sort_by_title(offer: Offer) -> str:
@@ -205,11 +182,7 @@ class FleaMarket:
         self.offers.update(self.generator.generate_offers(1))
 
     def item_price(self, template_id: TemplateId) -> dict:
-        offers = [
-            offer
-            for offer in self.offers.values()
-            if offer.root_item.tpl == template_id
-        ]
+        offers = [offer for offer in self.offers.values() if offer.root_item.tpl == template_id]
         if not offers:
             return {
                 "min": 0,
@@ -227,9 +200,7 @@ class FleaMarket:
         }
 
     @staticmethod
-    def get_offer_tax(
-        template: ItemTemplate, requirements_cost: int, quantity: int
-    ) -> int:
+    def get_offer_tax(template: ItemTemplate, requirements_cost: int, quantity: int) -> int:
         # pylint: disable=invalid-name
         # Formula is taken from tarkov wiki
         # TODO: Players that have intel level 3 have their tax reduced by 30%
@@ -253,9 +224,7 @@ class FleaMarket:
     def __clear_expired_offers(self) -> None:
         now = datetime.now()
         now_timestamp = now.timestamp()
-        expired_offers_keys = [
-            key for key, offer in self.offers.items() if now_timestamp > offer.endTime
-        ]
+        expired_offers_keys = [key for key, offer in self.offers.items() if now_timestamp > offer.endTime]
 
         for key in expired_offers_keys:
             del self.offers[key]
@@ -274,9 +243,7 @@ class FleaMarket:
         if new_offers_amount < offers_to_full:
             new_offers_amount = offers_to_full
         try:
-            keys_to_delete = random.sample(
-                list(self.offers.keys()), k=new_offers_amount
-            )
+            keys_to_delete = random.sample(list(self.offers.keys()), k=new_offers_amount)
         except ValueError:
             keys_to_delete = []
 

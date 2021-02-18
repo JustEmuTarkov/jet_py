@@ -47,9 +47,7 @@ async def mail_dialog_view(
 
     with tarkov.profile.Profile(profile_id) as profile:
         return TarkovSuccessResponse(
-            data=profile.notifier.view_dialog(
-                dialogue_id=request.dialogue_id, time_=request.time
-            )
+            data=profile.notifier.view_dialog(dialogue_id=request.dialogue_id, time_=request.time)
         )
 
 

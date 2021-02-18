@@ -109,17 +109,13 @@ class ProfileModel(Base):
     WishList: list
 
     @root_validator(pre=True)
-    def collect_files(  # pylint: disable=no-self-argument,no-self-use
-        cls, values: dict
-    ) -> dict:
+    def collect_files(cls, values: dict) -> dict:  # pylint: disable=no-self-argument,no-self-use
         profile_id = values.get("aid", None)
         if not profile_id:
             raise ValidationError("Profile has no aid property")
 
         if "Inventory" not in values or not values["Inventory"]:
-            inventory_path = root_dir.joinpath(
-                "resources", "profiles", profile_id, "pmc_inventory.json"
-            )
+            inventory_path = root_dir.joinpath("resources", "profiles", profile_id, "pmc_inventory.json")
             values["Inventory"] = InventoryModel.parse_file(inventory_path)
         return values
 

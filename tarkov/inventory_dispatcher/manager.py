@@ -73,15 +73,11 @@ class DispatcherManager:
                 for dispatcher in self.dispatchers:
                     try:
                         dispatcher.dispatch(action)
-                        logger.debug(
-                            f"Action was dispatched in {dispatcher.__class__.__name__}"
-                        )
+                        logger.debug(f"Action was dispatched in {dispatcher.__class__.__name__}")
                         break
                     except NotImplementedError:
                         pass
                 else:
-                    raise NotImplementedError(
-                        f"Action {action} not implemented in any of the dispatchers"
-                    )
+                    raise NotImplementedError(f"Action {action} not implemented in any of the dispatchers")
 
         return self.response

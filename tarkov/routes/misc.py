@@ -31,9 +31,7 @@ def client_locations() -> TarkovSuccessResponse[dict]:
 
 @misc_router.post("/client/game/start")
 def client_game_start() -> TarkovSuccessResponse[Type[None]]:
-    return TarkovSuccessResponse(
-        data=None
-    )  # TODO Add account data, check if character exists
+    return TarkovSuccessResponse(data=None)  # TODO Add account data, check if character exists
 
 
 @misc_router.post("/client/game/version/validate")
@@ -96,9 +94,7 @@ def client_items() -> TarkovSuccessResponse[Dict[TemplateId, Union[AnyTemplate]]
 def client_customization() -> TarkovSuccessResponse[dict]:
     customization = {}
     for customization_file_path in (db_dir / "customization").glob("*"):
-        customization_data = ujson.load(
-            customization_file_path.open("r", encoding="utf8")
-        )
+        customization_data = ujson.load(customization_file_path.open("r", encoding="utf8"))
         customization_id = customization_data["_id"]
         customization[customization_id] = customization_data
 
@@ -117,9 +113,7 @@ def client_globals() -> TarkovSuccessResponse[dict]:
 def client_weather() -> TarkovSuccessResponse[dict]:
     weather_dir = db_dir.joinpath("weather")
     weather_files = list(weather_dir.glob("*"))
-    weather_data: dict = ujson.load(
-        random.choice(weather_files).open("r", encoding="utf8")
-    )
+    weather_data: dict = ujson.load(random.choice(weather_files).open("r", encoding="utf8"))
 
     current_datetime = datetime.datetime.now()
     delta = current_datetime - start_time
@@ -154,17 +148,13 @@ def client_handbook_builds_my_list() -> TarkovSuccessResponse:
 
 @misc_router.post("/client/quest/list")
 def client_quest_list() -> TarkovSuccessResponse[list]:
-    all_quests: list = ujson.load(
-        db_dir.joinpath("quests", "all.json").open("r", encoding="utf8")
-    )
+    all_quests: list = ujson.load(db_dir.joinpath("quests", "all.json").open("r", encoding="utf8"))
     return TarkovSuccessResponse(data=all_quests)
 
 
 @misc_router.post("/client/server/list")
 def client_server_list(request: Request) -> TarkovSuccessResponse[list]:
-    return TarkovSuccessResponse(
-        data=[{"ip": get_request_url_root(request), "port": 5000}]
-    )
+    return TarkovSuccessResponse(data=[{"ip": get_request_url_root(request), "port": 5000}])
 
 
 @misc_router.post("/client/checkVersion")

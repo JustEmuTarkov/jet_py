@@ -67,9 +67,7 @@ class Dispatcher:
             ) from error
 
         types = typing.get_type_hints(method)
-        model_type = (
-            types["action"] if issubclass(types["action"], ActionModel) else dict
-        )
+        model_type = types["action"] if issubclass(types["action"], ActionModel) else dict
         # noinspection PyArgumentList
         method(model_type(**action))  # type: ignore
 
@@ -114,9 +112,7 @@ class InventoryDispatcher(Dispatcher):
         donor_inventory = self.get_owner_inventory(action.fromOwner)
         item = donor_inventory.get_item(action.item)
 
-        new_item = self.inventory.split_item(
-            item=item, split_location=action.container, count=action.count
-        )
+        new_item = self.inventory.split_item(item=item, split_location=action.container, count=action.count)
 
         if new_item:
             self.response.items.new.append(new_item)
@@ -144,9 +140,7 @@ class InventoryDispatcher(Dispatcher):
             try:
                 offer = flea_market_instance.get_offer(OfferId(action.fromOwner.id))
             except NotFoundError:
-                self.response.append_error(
-                    title="Item examination error", message="Offer can not be found"
-                )
+                self.response.append_error(title="Item examination error", message="Offer can not be found")
                 return
 
             item = offer.root_item
@@ -185,9 +179,7 @@ class InventoryDispatcher(Dispatcher):
         for template_id in action.ids:
             self.profile.encyclopedia.read(template_id)
 
-    def _apply_inventory_changes(
-        self, action: InventoryActions.ApplyInventoryChanges
-    ) -> None:
+    def _apply_inventory_changes(self, action: InventoryActions.ApplyInventoryChanges) -> None:
         if action.changedItems is not None:
             for changed_item in action.changedItems:
                 item = self.inventory.get_item(changed_item.id)
@@ -218,9 +210,7 @@ class InventoryDispatcher(Dispatcher):
             total_price += trader_inventory.calculate_insurance_price(item)
             self.profile.add_insurance(item, trader)
 
-        affected_items, deleted_items = self.profile.inventory.take_item(
-            rubles_tpl_id, total_price
-        )
+        affected_items, deleted_items = self.profile.inventory.take_item(rubles_tpl_id, total_price)
 
         self.response.items.change.extend(affected_items)
         self.response.items.del_.extend(deleted_items)
@@ -264,9 +254,7 @@ class HideoutDispatcher(Dispatcher):
         area_type = HideoutAreaType(action.areaType)
         hideout.area_upgrade_finish(area_type)
 
-    def _hideout_put_items_in_area_slots(
-        self, action: HideoutActions.PutItemsInAreaSlots
-    ) -> None:
+    def _hideout_put_items_in_area_slots(self, action: HideoutActions.PutItemsInAreaSlots) -> None:
         area_type = HideoutAreaType(action.areaType)
 
         for slot_id, item_data in action.items.items():
@@ -274,25 +262,17 @@ class HideoutDispatcher(Dispatcher):
             item = self.profile.inventory.get_item(item_id)
 
             if self.profile.inventory.can_split(item):
-                splitted_item = self.profile.inventory.simple_split_item(
-                    item=item, count=count
-                )
-                self.profile.hideout.put_items_in_area_slots(
-                    area_type, int(slot_id), splitted_item
-                )
+                splitted_item = self.profile.inventory.simple_split_item(item=item, count=count)
+                self.profile.hideout.put_items_in_area_slots(area_type, int(slot_id), splitted_item)
             else:
                 self.profile.inventory.remove_item(item)
-                self.profile.hideout.put_items_in_area_slots(
-                    area_type, int(slot_id), item
-                )
+                self.profile.hideout.put_items_in_area_slots(area_type, int(slot_id), item)
 
     def _hideout_toggle_area(self, action: HideoutActions.ToggleArea) -> None:
         area_type = HideoutAreaType(action.areaType)
         self.profile.hideout.toggle_area(area_type, action.enabled)
 
-    def _hideout_single_production_start(
-        self, action: HideoutActions.SingleProductionStart
-    ) -> None:
+    def _hideout_single_production_start(self, action: HideoutActions.SingleProductionStart) -> None:
         items_info = action.items
         inventory = self.profile.inventory
 
@@ -307,9 +287,7 @@ class HideoutDispatcher(Dispatcher):
                 self.response.items.del_.append(item)
                 continue
 
-            inventory.simple_split_item(
-                item=item, count=count
-            )  # Simply throw away splitted item
+            inventory.simple_split_item(item=item, count=count)  # Simply throw away splitted item
             if not item.upd.StackObjectsCount:
                 self.response.items.del_.append(item)
             else:
@@ -323,15 +301,11 @@ class HideoutDispatcher(Dispatcher):
         for item in items:
             self.inventory.place_item(item)
 
-    def _hideout_take_items_from_area_slots(
-        self, action: HideoutActions.TakeItemsFromAreaSlots
-    ) -> None:
+    def _hideout_take_items_from_area_slots(self, action: HideoutActions.TakeItemsFromAreaSlots) -> None:
         hideout = self.profile.hideout
         area_type = HideoutAreaType(action.areaType)
         for slot_id in action.slots:
-            item = hideout.take_item_from_area_slot(
-                area_type=area_type, slot_id=slot_id
-            )
+            item = hideout.take_item_from_area_slot(area_type=area_type, slot_id=slot_id)
 
             self.inventory.place_item(item)
             self.response.items.new.append(item)
@@ -425,9 +399,7 @@ class QuestDispatcher(Dispatcher):
 
     def _quest_handover(self, action: QuestActions.Handover) -> None:
         items_dict = {item.id: item.count for item in action.items}
-        removed, changed = self.profile.quests.handover_items(
-            action.qid, action.conditionId, items_dict
-        )
+        removed, changed = self.profile.quests.handover_items(action.qid, action.conditionId, items_dict)
 
         self.response.items.change.extend(changed)
         self.response.items.del_.extend(removed)

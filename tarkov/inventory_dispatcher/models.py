@@ -76,9 +76,7 @@ class ActionModel(models.Base):
 
 class InventoryExamineActionOwnerModel(models.Base):
     id: ItemId
-    type: Optional[
-        Literal["Trader", "HideoutUpgrade", "HideoutProduction", "RagFair"]
-    ] = None
+    type: Optional[Literal["Trader", "HideoutUpgrade", "HideoutProduction", "RagFair"]] = None
 
 
 class Owner(models.Base):
