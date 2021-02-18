@@ -54,7 +54,7 @@ class Mail:
 
     def view_dialog_preview(self, dialogue_id: str) -> dict:
         dialogue = self.get_dialogue(dialogue_id)
-        return MailDialoguePreview.from_dialogue(dialogue).dict()
+        return MailDialoguePreview.from_dialogue(dialogue).dict(exclude_none=True)
 
     def view_dialog(self, dialogue_id: str, time_: float) -> dict:
         if time_:
