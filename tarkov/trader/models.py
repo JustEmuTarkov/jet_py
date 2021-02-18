@@ -14,6 +14,7 @@ from pydantic import Field, StrictBool
 from tarkov.inventory.models import Item
 from tarkov.inventory.types import ItemId, TemplateId
 from tarkov.models import Base
+from tarkov.repositories.categories import CategoryId
 
 
 class TraderType(Enum):
@@ -103,7 +104,7 @@ class TraderBase(Base):
     repair: TraderRepair
     insurance: TraderInsurance
     loyalty: TraderStanding
-    sell_category: List[TemplateId]
+    sell_category: List[CategoryId]
 
 
 class BarterSchemeEntry(Base):
