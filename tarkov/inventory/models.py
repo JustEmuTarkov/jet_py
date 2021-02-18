@@ -189,7 +189,7 @@ class Item(Base):
 
     id: ItemId = Field(alias="_id")
     tpl: TemplateId = Field(alias="_tpl")
-    slot_id: Optional[str] = Field(alias='slotId')
+    slot_id: Optional[str] = Field(alias="slotId")
     parent_id: Optional[ItemId] = Field(alias="parentId", default=None)
     location: Optional[AnyItemLocation] = None
     upd: ItemUpd = Field(default_factory=ItemUpd)
