@@ -1,5 +1,5 @@
 import enum
-from typing import Dict, List, NewType, Optional, Union
+from typing import Dict, List, NewType, Optional, Tuple, Union
 
 from pydantic import BaseModel, Field, StrictBool, StrictInt
 
@@ -85,6 +85,11 @@ class Offer(BaseModel):
     @property
     def root_item(self) -> Item:
         return next(item for item in self.items if item.id == self.root)
+
+    def get_items(self) -> Tuple[Item, List[Item]]:
+        root = self.root_item.copy()
+        children = [i for i in self.items if i.id != root.id]
+        return root, children
 
 
 class FleaMarketResponse(Base):

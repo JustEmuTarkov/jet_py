@@ -17,6 +17,11 @@ from tarkov.inventory import (
 )
 from tarkov.inventory.implementations import SimpleInventory
 from tarkov.inventory.types import TemplateId
+from tarkov.mail.models import (
+    MailDialogueMessage,
+    MailMessageItems,
+    MailMessageType,
+)
 from tarkov.profile import Profile
 from tarkov.trader import TraderInventory, TraderType
 from .models import (
@@ -28,11 +33,6 @@ from .models import (
     QuestActions,
     RagfairActions,
     TradingActions,
-)
-from tarkov.mail.models import (
-    MailDialogueMessage,
-    MailMessageItems,
-    MailMessageType,
 )
 from ..inventory.models import Item
 
@@ -427,15 +427,23 @@ class FleaMarketDispatcher(Dispatcher):
                     message="Item is already bought",
                 )
                 return
-            items = offer.items
-            root_item = offer.root_item
-            offer.items.remove(root_item)
-            regenerate_items_ids(items)
-            flea_market_instance.buy_offer(offer)
-            self.inventory.place_item(item=root_item, child_items=items)
+            if not offer.sellInOnePiece:
+                bough_stack = self.inventory.simple_split_item(offer.root_item, count=offer_to_buy.count)
+                bough_items: List[Item] = self.inventory.split_into_stacks(bough_stack)
+                for item in bough_items:
+                    self.inventory.place_item(item)
+                self.response.items.new.extend(bough_items)
 
-            self.response.items.new.append(root_item)
-            self.response.items.new.extend(items)
+                if not offer.root_item.upd.StackObjectsCount:
+                    # I Guess flea market itself can delete offers like these
+                    flea_market_instance.remove_offer(offer)
+            else:
+                bough_item, child_items = offer.get_items()
+                flea_market_instance.remove_offer(offer)
+
+                self.inventory.place_item(item=bough_item, child_items=child_items)
+                self.response.items.new.append(bough_item)
+                self.response.items.new.extend(child_items)
 
             # Take required items from inventory
             for req in offer_to_buy.requirements:

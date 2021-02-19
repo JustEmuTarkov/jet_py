@@ -696,6 +696,22 @@ class GridInventory(MutableInventory):
 
         return item_copy
 
+    @staticmethod
+    def split_into_stacks(item: Item) -> List[Item]:
+        item_template = item_templates_repository.get_template(item)
+        count = item.upd.StackObjectsCount
+
+        items = []
+        while count > 0:
+            item_copy = item.copy(deep=True)
+            item_copy.id = generate_item_id()
+            items.append(item_copy)
+            item_copy.upd.StackObjectsCount = min(item_template.props.StackMaxSize, count)
+            item_copy.location = None
+            count -= item_copy.upd.StackObjectsCount
+
+        return items
+
 
 class PlayerInventoryStashMap(GridInventoryStashMap):
     inventory: PlayerInventory

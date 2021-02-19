@@ -14,7 +14,7 @@ from server import db_dir, logger
 from tarkov import config
 from tarkov.exceptions import NotFoundError
 from tarkov.inventory import generate_item_id, item_templates_repository
-from tarkov.inventory.models import ItemTemplate
+from tarkov.inventory.models import Item, ItemTemplate
 from tarkov.inventory.prop_models import AmmoProps
 from tarkov.inventory.types import TemplateId
 from tarkov.repositories.categories import CategoryId, category_repository
@@ -27,6 +27,7 @@ from .models import (
     OfferRequirement,
     SortType,
 )
+from tarkov.globals_ import globals_repository
 
 
 class OfferGenerator:
@@ -101,13 +102,38 @@ class OfferGenerator:
         """
         Generates single offer
         """
-        root_item, child_items = item_templates_repository.create_item(item_template)
-        item_price = self.item_prices[item_template.id]
-        item_price = int(random.gauss(item_price * 1.1, item_price * 0.1))
+        offer_items: List[Item]
+        offer_price: int
+        root_item: Item
+        sell_in_one_piece = False
+
+        if globals_repository.has_preset(item_template):
+            preset = globals_repository.item_preset(item_template)
+            root_item, children = preset.get_items()
+            offer_items = [root_item, *children]
+            sell_in_one_piece = True
+
+        elif isinstance(item_template.props, AmmoProps):
+            ammo_count = int(
+                random.gauss(
+                    item_template.props.StackMaxSize * 0.75,
+                    item_template.props.StackMaxSize * 1.25,
+                )
+            )
+            ammo_count = max(1, abs(ammo_count))
+            root_item, _ = item_templates_repository.create_item(item_template, 1)
+            offer_items = [root_item]
+            root_item.upd.StackObjectsCount = ammo_count
+        else:
+            root_item, child_items = item_templates_repository.create_item(item_template)
+            offer_items = [root_item, *child_items]
+
+        offer_price = sum(self.item_prices[i.tpl] for i in offer_items)
+        offer_price = int(random.gauss(offer_price * 1.1, offer_price * 0.1))
 
         requirement = OfferRequirement(
             template_id=TemplateId("5449016a4bdc2d6f028b456f"),
-            count=item_price,
+            count=offer_price,
         )
         now = datetime.now()
         expiration_time = random.gauss(timedelta(hours=6).total_seconds(), timedelta(hours=6).total_seconds())
@@ -118,12 +144,12 @@ class OfferGenerator:
             intId=random.randint(0, 999_999),
             user=self._make_random_user(),
             root=root_item.id,
-            items=[root_item, *child_items],
-            itemsCost=item_price,
+            items=offer_items,
+            itemsCost=offer_price,
             requirements=[requirement],
-            requirementsCost=item_price,
-            summaryCost=item_price,
-            sellInOnePiece=True,
+            requirementsCost=offer_price,
+            summaryCost=offer_price,
+            sellInOnePiece=sell_in_one_piece,
             startTime=0,
             endTime=int(expires_at.timestamp()),
         )
@@ -211,7 +237,7 @@ class FleaMarket:
         except KeyError as error:
             raise NotFoundError from error
 
-    def buy_offer(self, offer: Offer) -> None:
+    def remove_offer(self, offer: Offer) -> None:
         """
         Simply deletes offer
         """
