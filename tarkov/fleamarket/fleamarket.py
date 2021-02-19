@@ -10,7 +10,7 @@ from typing import Dict, List, Union
 
 import pydantic
 
-from server import db_dir
+from server import db_dir, logger
 from tarkov import config
 from tarkov.exceptions import NotFoundError
 from tarkov.inventory import generate_item_id, item_templates_repository
@@ -299,7 +299,7 @@ class FleaMarket:
             del self.offers[key]
 
         new_offers = self.generator.generate_offers(new_offers_amount)
-        print(f"Generated {len(new_offers)} items!")
+        logger.debug(f"Generated {len(new_offers)} items!")
         self.offers.update(new_offers)
 
     @property

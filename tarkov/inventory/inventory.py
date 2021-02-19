@@ -302,7 +302,7 @@ class GridInventoryStashMap:
 
         for other_footprint in self.footprints.values():
             if item_footprint.overlaps(other_footprint):
-                print(item_footprint, other_footprint, sep="\n")
+                logger.debug(item_footprint, other_footprint, sep="\n")
                 return False
         return True
 

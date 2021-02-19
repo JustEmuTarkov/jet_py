@@ -13,6 +13,7 @@ from pydantic import (
     root_validator,
 )
 
+from server import logger
 from tarkov.inventory.prop_models import (
     AnyProp,
     BaseItemProps,
@@ -69,8 +70,8 @@ class ItemTemplate(NodeTemplateBase):
         try:
             values["_props"] = model.parse_obj(props)
         except ValidationError as e:
-            print(values["_id"])
-            print(e)
+            logger.debug(values["_id"])
+            logger.debug(e)
             raise
         return values
 

@@ -37,7 +37,6 @@ class ProfileNotifier:
 
     @staticmethod
     def ready_to_send(notification: MessageNotification, now: datetime) -> bool:
-        print(now, datetime.fromtimestamp(notification.data.message.dt))
         return now > datetime.fromtimestamp(notification.data.message.dt)
 
     @property
