@@ -30,29 +30,48 @@ from .models import (
 
 
 class OfferGenerator:
+    flea_market: FleaMarket
+
+    item_prices: Dict[TemplateId, int]
+    item_templates: List[ItemTemplate]
+    item_templates_weights: List[float]
+
+    percentile_high: int
+    percentile_low: int
+
     def __init__(self, flea_market: FleaMarket):
         self.flea_market = flea_market
 
+        # Creates dictionary with item prices from templates and updates it with prices from flea_prices.json
         self.item_prices = {
             tpl.id: tpl.props.CreditsPrice
             for tpl in item_templates_repository.templates.values()
             if tpl.id in category_repository.item_categories and tpl.props.CreditsPrice
         }
-        item_prices = pydantic.parse_file_as(Dict[TemplateId, int], db_dir.joinpath("flea_prices.json"))
+        item_prices: Dict[TemplateId, int] = pydantic.parse_file_as(
+            Dict[TemplateId, int], db_dir.joinpath("flea_prices.json")
+        )
         self.item_prices.update({tpl: price for tpl, price in item_prices.items() if price > 0})
+
+        # All the item templates that we have prices for
         self.item_templates = [
             tpl for tpl in item_templates_repository.templates.values() if tpl.id in self.item_prices
         ]
         prices = list(self.item_prices.values())
         median_price = statistics.median(prices)
         prices_sorted = sorted(prices)
+        # Calculates low/high percentile, they're used to weight too cheap/expensive items
         self.percentile_high: int = prices_sorted[int(len(prices) * config.flea_market.percentile_high)]
         self.percentile_low: int = prices_sorted[int(len(prices) * config.flea_market.percentile_low)]
+
         self.item_templates_weights = [
             self._get_item_template_weight(tpl, median_price) for tpl in self.item_templates
         ]
 
     def _get_item_template_weight(self, template: ItemTemplate, median_price: float) -> float:
+        """
+        Calculates item spawn chance on flea market
+        """
         if not template.props.CanSellOnRagfair:
             return 0
         item_price = self.item_prices[template.id]
@@ -68,6 +87,9 @@ class OfferGenerator:
         return math.log(self.item_prices[template.id], median_price) * chance_modifier
 
     def generate_offers(self, amount: int) -> Dict[OfferId, Offer]:
+        """
+        Generates multiple offers
+        """
         offers = {}
         templates = random.choices(self.item_templates, weights=self.item_templates_weights, k=amount)
         for template in templates:
@@ -76,6 +98,9 @@ class OfferGenerator:
         return offers
 
     def _generate_offer(self, item_template: ItemTemplate) -> Offer:
+        """
+        Generates single offer
+        """
         root_item, child_items = item_templates_repository.create_item(item_template)
         item_price = self.item_prices[item_template.id]
         item_price = int(random.gauss(item_price * 1.1, item_price * 0.1))
@@ -162,26 +187,40 @@ class FleaMarketView:
 
 
 class FleaMarket:
+    offers_amount: int
+    updated_at: datetime
+    generator: OfferGenerator
+    _view: FleaMarketView
+    offers: Dict[OfferId, Offer]
+
     def __init__(self) -> None:
-        self.offers_amount: int = config.flea_market.offers_amount
+        self.offers_amount = config.flea_market.offers_amount
 
         self.updated_at = datetime.fromtimestamp(0)
 
-        self.generator: OfferGenerator = OfferGenerator(self)
-        self._view: FleaMarketView = FleaMarketView(self)
-        self.offers: Dict[OfferId, Offer] = {}
+        self.generator = OfferGenerator(self)
+        self._view = FleaMarketView(self)
+        self.offers = {}
 
     def get_offer(self, offer_id: OfferId) -> Offer:
+        """
+        Returns specific offer by it's id
+        """
         try:
             return self.offers[offer_id]
         except KeyError as error:
             raise NotFoundError from error
 
     def buy_offer(self, offer: Offer) -> None:
+        """
+        Simply deletes offer
+        """
         del self.offers[offer.id]
-        self.offers.update(self.generator.generate_offers(1))
 
     def item_price(self, template_id: TemplateId) -> dict:
+        """
+        Calculates min, max and average price of item on flea. Used by client when selling items.
+        """
         offers = [offer for offer in self.offers.values() if offer.root_item.tpl == template_id]
         if not offers:
             return {
@@ -201,6 +240,9 @@ class FleaMarket:
 
     @staticmethod
     def get_offer_tax(template: ItemTemplate, requirements_cost: int, quantity: int) -> int:
+        """
+        Returns tax for selling specific item
+        """
         # pylint: disable=invalid-name
         # Formula is taken from tarkov wiki
         # TODO: Players that have intel level 3 have their tax reduced by 30%
@@ -222,6 +264,9 @@ class FleaMarket:
         return tax
 
     def __clear_expired_offers(self) -> None:
+        """
+        Deletes offers that are expired
+        """
         now = datetime.now()
         now_timestamp = now.timestamp()
         expired_offers_keys = [key for key, offer in self.offers.items() if now_timestamp > offer.endTime]
@@ -230,6 +275,9 @@ class FleaMarket:
             del self.offers[key]
 
     def __update_offers(self) -> None:
+        """
+        Clears expired offers and generates new ones until we have desired amount
+        """
         self.__clear_expired_offers()
 
         now = datetime.now()

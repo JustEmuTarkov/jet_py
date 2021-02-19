@@ -41,6 +41,7 @@ class MailDialogueMessage(Base):
     """
     Represents single message in MailDialogue
     """
+
     id: str = Field(alias="_id", default_factory=generate_item_id)  # Message id
     uid: str  # Trader id (Same as MailDialogue id)
     type: int
@@ -57,6 +58,7 @@ class MailDialogue(Base):
     """
     Dialogues with specific trader e.g. Ragman, Prapor.
     """
+
     id: str = Field(alias="_id")  # Trader id
     messages: List[MailDialogueMessage] = Field(default_factory=list)  # List of messages in this dialogue
     pinned: StrictBool = False
@@ -68,6 +70,7 @@ class MailDialogues(Base):
     """
     Dictionary with all the dialogues with trader id's as keys
     """
+
     __root__: Dict[str, MailDialogue] = Field(default_factory=dict)
 
     def __getitem__(self, trader_id: str) -> MailDialogue:
