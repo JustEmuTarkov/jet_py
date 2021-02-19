@@ -21,9 +21,6 @@ def generate_item_id() -> "ItemId":
 def regenerate_items_ids(items: List["Item"]) -> None:
     """
     Generates new ids for all items in list (mutates the list)
-
-    :param items: List[Item]
-    :return: None
     """
     items = [item for item in items if item.parent_id is not None]
 
