@@ -93,7 +93,7 @@ class InventoryDispatcher(Dispatcher):
             return self.inventory
 
         if owner.type == "Mail":
-            message = self.profile.notifier.get_message(owner.id)
+            message = self.profile.mail.get_message(owner.id)
             return SimpleInventory(message.items.data)
 
         raise ValueError(f"Cannot find inventory for owner: {owner}")
@@ -475,4 +475,4 @@ class FleaMarketDispatcher(Dispatcher):
             templateId="5bdac0b686f7743e1665e09e",
             items=MailMessageItems.from_items(required_items),
         )
-        self.profile.notifier.add_message(message)
+        self.profile.mail.add_message(message)

@@ -19,7 +19,7 @@ def mail_dialog_list(
         return TarkovErrorResponse.profile_id_is_none()
 
     with tarkov.profile.Profile(profile_id) as profile:
-        return TarkovSuccessResponse(data=profile.notifier.view_dialogue_preview_list())
+        return TarkovSuccessResponse(data=profile.mail.view.view_dialogue_preview_list())
 
 
 @mail_router.post("/client/mail/dialog/info")
@@ -27,7 +27,7 @@ async def mail_dialog_info(
     dialogue_id: str = Body(..., alias="dialogId", embed=True),  # type: ignore
     profile: Profile = Depends(with_profile),  # type: ignore
 ) -> Union[TarkovSuccessResponse[dict], TarkovErrorResponse]:
-    dialogue_preview = profile.notifier.view_dialog_preview(dialogue_id=dialogue_id)
+    dialogue_preview = profile.mail.view.view_dialog_preview(dialogue_id=dialogue_id)
     return TarkovSuccessResponse(data=dialogue_preview)
 
 
@@ -41,7 +41,7 @@ async def mail_dialog_view(
 
     with tarkov.profile.Profile(profile_id) as profile:
         return TarkovSuccessResponse(
-            data=profile.notifier.view_dialog(dialogue_id=request.dialogue_id, time_=request.time)
+            data=profile.mail.view.view_dialog(dialogue_id=request.dialogue_id, time_=request.time)
         )
 
 
@@ -55,5 +55,5 @@ def mail_dialog_all_attachments(
 
     with tarkov.profile.Profile(profile_id) as profile:
         return TarkovSuccessResponse(
-            data=profile.notifier.all_attachments_view(dialogue_id=request.dialogue_id)
+            data=profile.mail.view.all_attachments_view(dialogue_id=request.dialogue_id)
         )

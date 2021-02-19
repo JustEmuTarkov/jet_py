@@ -23,7 +23,7 @@ class ProfileNotifier:
 
     def __add_profile_notifications(self, profile: Profile) -> None:
         now = datetime.now()
-        for dialogue in profile.notifier.dialogues.__root__.values():
+        for dialogue in profile.mail.dialogues.__root__.values():
             for msg in dialogue.messages:
                 if datetime.fromtimestamp(msg.dt) < now:
                     # Message already should be sent

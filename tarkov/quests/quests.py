@@ -138,4 +138,4 @@ class Quests:
             items=MailMessageItems.from_items(reward_items),
             hasRewards=True,
         )
-        self.profile.notifier.add_message(message)
+        self.profile.mail.add_message(message)

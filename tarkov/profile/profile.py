@@ -54,7 +54,7 @@ class Profile:
     inventory: inventory_.PlayerInventory
     encyclopedia: Encyclopedia
 
-    notifier: Mail
+    mail: Mail
 
     def __init__(self, profile_id: str):
         self.profile_id = profile_id
@@ -106,8 +106,8 @@ class Profile:
         self.hideout = Hideout(profile=self)
         self.hideout.read()
 
-        self.notifier = Mail(profile=self)
-        self.notifier.read()
+        self.mail = Mail(profile=self)
+        self.mail.read()
 
     def __write(self) -> None:
         atomic_write(self.pmc_profile.json(exclude_defaults=True), self.pmc_profile_path)
@@ -116,7 +116,7 @@ class Profile:
 
         atomic_write(ujson.dumps(self.quests_data, indent=4), self.quests_path)
 
-        self.notifier.write()
+        self.mail.write()
 
     def __enter__(self) -> Profile:
         self.__read()
