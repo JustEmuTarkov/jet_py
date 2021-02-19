@@ -53,12 +53,7 @@ class MailDialogueMessage(Base):
 
 
 class MailDialogue(Base):
-    class Config:
-        fields = {
-            "id": "_id",
-        }
-
-    id: str  # Trader id
+    id: str = Field(alias="_id")  # Trader id
     messages: List[MailDialogueMessage] = Field(default_factory=list)  # List of messages in this dialogue
     pinned: StrictBool = False
     new: int = 0
