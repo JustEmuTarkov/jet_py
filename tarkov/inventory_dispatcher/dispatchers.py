@@ -14,7 +14,6 @@ from tarkov.inventory import (
     PlayerInventory,
     generate_item_id,
     item_templates_repository,
-    regenerate_items_ids,
 )
 from tarkov.inventory.implementations import SimpleInventory
 from tarkov.inventory.types import TemplateId
