@@ -8,6 +8,7 @@ from tarkov.mail.models import MailDialogueMessage
 from .models import MessageNotification, MessageNotificationData
 
 if TYPE_CHECKING:
+    # pylint: disable=cyclic-import
     from tarkov.profile import Profile
 
 
