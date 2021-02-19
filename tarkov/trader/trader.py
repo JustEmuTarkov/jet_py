@@ -56,27 +56,21 @@ class TraderInventory(ImmutableInventory):
         )
         self.base = TraderBase.parse_file(trader_path.joinpath("base.json"))
 
-        self._barter_scheme = BarterScheme.parse_file(
-            trader_path.joinpath("barter_scheme.json")
-        )
+        self._barter_scheme = BarterScheme.parse_file(trader_path.joinpath("barter_scheme.json"))
         self.loyal_level_items = ujson.load(
             trader_path.joinpath("loyal_level_items.json").open("r", encoding="utf8")
         )
-        self._quest_assort = ujson.load(
-            trader_path.joinpath("questassort.json").open("r", encoding="utf8")
-        )
+        self._quest_assort = ujson.load(trader_path.joinpath("questassort.json").open("r", encoding="utf8"))
 
     @property
-    def items(self):
+    def items(self) -> List[Item]:
         return self.assort_items
 
     @property
     def assort(self) -> List[Item]:
         if self.trader == TraderType.Fence:
             current_time = time.time()
-            expired = current_time > (
-                TraderInventory.__fence_assort_created_at + FENCE_ASSORT_LIFETIME
-            )
+            expired = current_time > (TraderInventory.__fence_assort_created_at + FENCE_ASSORT_LIFETIME)
 
             if not TraderInventory.__fence_assort or expired:
                 TraderInventory.__fence_assort = self._generate_fence_assort()
@@ -110,8 +104,8 @@ class TraderInventory(ImmutableInventory):
         return barter_scheme
 
     def _generate_fence_assort(self) -> List[Item]:
-        root_items = [item for item in self.items if item.slotId == "hideout"]
-        assort = random.sample(root_items, k=min(len(root_items), 500))
+        root_items = set(item for item in self.items if item.slot_id == "hideout")
+        assort = random.sample(root_items, k=min(len(root_items), 200))
 
         child_items: List[Item] = []
 
@@ -139,15 +133,11 @@ class TraderInventory(ImmutableInventory):
             return self.standing.current_level >= required_standing
 
         def filter_in_root(item: Item) -> bool:
-            return item.slotId == "hideout"
+            return item.slot_id == "hideout"
 
         items = filter(filter_in_root, self.items)  # Filter root items
-        items = filter(
-            filter_quest_assort, items
-        )  # Filter items that require quest completion
-        items = filter(
-            filter_loyal_level, items
-        )  # Filter items that require loyalty level
+        items = filter(filter_quest_assort, items)  # Filter items that require quest completion
+        items = filter(filter_loyal_level, items)  # Filter items that require loyalty level
 
         def assort_inner(items_list: Iterable[Item]) -> Iterable[Item]:
             """Return item and it's children from trader inventory"""
@@ -206,8 +196,7 @@ class TraderInventory(ImmutableInventory):
             item: Item = base_item.copy(deep=True)
             item.upd.StackObjectsCount = 1
             children_items: List[Item] = [
-                child.copy(deep=True)
-                for child in self.iter_item_children_recursively(base_item)
+                child.copy(deep=True) for child in self.iter_item_children_recursively(base_item)
             ]
 
             all_items = children_items + [item]
@@ -216,9 +205,7 @@ class TraderInventory(ImmutableInventory):
                 item.upd.UnlimitedCount = False
 
             item.upd = ItemUpd(StackObjectsCount=stack_size)
-            bought_items_list.append(
-                BoughtItems(item=item, children_items=children_items)
-            )
+            bought_items_list.append(BoughtItems(item=item, children_items=children_items))
 
         return bought_items_list
 
@@ -235,16 +222,16 @@ class TraderInventory(ImmutableInventory):
 
         return int(price)
 
-    def _increase_sales_sum(self, amount: int):
+    def _increase_sales_sum(self, amount: int) -> None:
         raise NotImplementedError
 
     @property
     def standing(self) -> TraderStanding:
         if self.trader.value not in self.profile.pmc_profile.TraderStandings:
             standing_copy: TraderStanding = self.base.loyalty.copy(deep=True)
-            self.profile.pmc_profile.TraderStandings[
-                self.trader.value
-            ] = TraderStanding.parse_obj(standing_copy)
+            self.profile.pmc_profile.TraderStandings[self.trader.value] = TraderStanding.parse_obj(
+                standing_copy
+            )
 
         return self.profile.pmc_profile.TraderStandings[self.trader.value]
 
@@ -252,9 +239,7 @@ class TraderInventory(ImmutableInventory):
 def get_trader_bases() -> List[dict]:
     traders_path = db_dir.joinpath("traders")
 
-    paths = set(traders_path.rglob("*/base.json")) - set(
-        traders_path.rglob("ragfair/base.json")
-    )
+    paths = set(traders_path.rglob("*/base.json")) - set(traders_path.rglob("ragfair/base.json"))
 
     traders_data = [ujson.load(file.open("r", encoding="utf8")) for file in paths]
     traders_data = sorted(traders_data, key=lambda trader: trader["_id"])

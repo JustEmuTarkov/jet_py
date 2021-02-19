@@ -2,11 +2,13 @@ import enum
 from types import SimpleNamespace
 from typing import List, Literal, Optional
 
-from pydantic import Extra, StrictBool, StrictInt
+from pydantic import Extra, Field, StrictBool, StrictInt
 
 from tarkov import models
+from tarkov.fleamarket.models import OfferId
 from tarkov.inventory.models import AnyMoveLocation, Item
 from tarkov.inventory.types import ItemId, TemplateId
+from tarkov.models import Base
 
 
 class ActionType(enum.Enum):
@@ -43,7 +45,9 @@ class ActionType(enum.Enum):
     QuestComplete = "QuestComplete"
     QuestHandover = "QuestHandover"
 
+    RagFairBuyOffer = "RagFairBuyOffer"
     RagFairAddOffer = "RagFairAddOffer"
+
     Repair = "Repair"
     Fold = "Fold"
     Toggle = "Toggle"
@@ -52,7 +56,6 @@ class ActionType(enum.Enum):
     Examine = "Examine"
     ReadEncyclopedia = "ReadEncyclopedia"
     TradingConfirm = "TradingConfirm"
-    RagFairBuyOffer = "RagFairBuyOffer"
 
     SaveBuild = "SaveBuild"
     RemoveBuild = "RemoveBuild"
@@ -66,13 +69,14 @@ class ActionType(enum.Enum):
 class ActionModel(models.Base):
     class Config:
         extra = Extra.forbid
+        use_enum_values = True
 
     Action: ActionType
 
 
 class InventoryExamineActionOwnerModel(models.Base):
     id: ItemId
-    type: Optional[Literal["Trader", "HideoutUpgrade", "HideoutProduction"]] = None
+    type: Optional[Literal["Trader", "HideoutUpgrade", "HideoutProduction", "RagFair"]] = None
 
 
 class Owner(models.Base):
@@ -164,7 +168,7 @@ class HideoutActions(SimpleNamespace):
 class TradingSchemeItemModel(models.Base):
     id: ItemId
     count: StrictInt
-    # scheme_id: Optional[StrictInt]
+    scheme_id: Optional[int]
 
 
 class TradingActions(SimpleNamespace):
@@ -209,3 +213,34 @@ class QuestActions(SimpleNamespace):
     class Complete(ActionModel):
         qid: str
         removeExcessItems: StrictBool
+
+
+class RequiredItem(Base):
+    id: ItemId
+    count: int
+
+
+class RagfairBuyOffer(Base):
+    offer_id: OfferId = Field(alias="id")
+    count: int
+    requirements: List[RequiredItem] = Field(alias="items")
+
+
+class RagfairOfferRequirement(Base):
+    template_id: TemplateId = Field(alias="_tpl")
+    count: int
+    level: int
+    side: int
+    onlyFunctional: bool
+
+
+class RagfairActions(SimpleNamespace):
+    class Buy(ActionModel):
+        Action: ActionType
+        offers: List[RagfairBuyOffer]
+
+    class Add(ActionModel):
+        Action: ActionType
+        sellInOnePiece: bool
+        items: List[ItemId]
+        requirements: List[RagfairOfferRequirement]

@@ -1,0 +1,158 @@
+{
+    "equipment": "5df7b9abef12bf7a252437a1",
+    "stash": "5df7b9abef12bf7a2524385f",
+    "questRaidItems": "5df7b9abef12bf7a25243860",
+    "questStashItems": "5df7b9abef12bf7a25243861",
+    "fastPanel": {},
+    "items": [
+        {
+            "id": "5df7b9abef12bf7a2524385f",
+            "tpl": "5811ce772459770e9e5f9532",
+            "upd": {}
+        },
+        {
+            "id": "5df7b9abef12bf7a25243860",
+            "tpl": "5963866286f7747bf429b572",
+            "upd": {}
+        },
+        {
+            "id": "5df7b9abef12bf7a25243861",
+            "tpl": "5963866b86f7747bfa1c4462",
+            "upd": {}
+        },
+        {
+            "id": "5df7b9abef12bf7a252437a1",
+            "tpl": "55d7217a4bdc2d86028b456d",
+            "upd": {}
+        },
+        {
+            "id": "6d814da8a5cf6c55522703a7",
+            "tpl": "557ffd194bdc2d28148b457f",
+            "slotId": "Pockets",
+            "parent_id": "5df7b9abef12bf7a252437a1",
+            "upd": {}
+        },
+        {
+            "id": "5df7b9abef12bf7a252437ea",
+            "tpl": "5449016a4bdc2d6f028b456f",
+            "slotId": "hideout",
+            "parent_id": "5df7b9abef12bf7a2524385f",
+            "location": {
+                "x": 9,
+                "y": 0,
+                "r": "Horizontal",
+                "isSearched": true
+            },
+            "upd": {
+                "StackObjectsCount": 964139665
+            }
+        },
+        {
+            "id": "test_weapon",
+            "tpl": "59984ab886f7743e98271174",
+            "slotId": "hideout",
+            "parent_id": "5df7b9abef12bf7a2524385f",
+            "location": {
+                "x": 0,
+                "y": 0,
+                "r": "Horizontal"
+            },
+            "upd": {
+                "Foldable": {
+                    "Folded": false
+                }
+            }
+        },
+        {
+            "id": "f4e84f83a430b78621f0a78e",
+            "tpl": "59ccd11386f77428f24a488f",
+            "slotId": "mod_gas_block",
+            "parent_id": "test_weapon",
+            "upd": {}
+        },
+        {
+            "id": "fbae414b8c92cf7cce407b0a",
+            "tpl": "5648b4534bdc2d3d1c8b4580",
+            "slotId": "mod_handguard",
+            "parent_id": "f4e84f83a430b78621f0a78e",
+            "upd": {}
+        },
+        {
+            "id": "896848b3b2c38e02eb7eb01c",
+            "tpl": "560d657b4bdc2da74d8b4572",
+            "slotId": "mod_tactical_001",
+            "parent_id": "fbae414b8c92cf7cce407b0a",
+            "upd": {}
+        },
+        {
+            "id": "c0bc4746b76198d75e24173b",
+            "tpl": "591af28e86f77414a27a9e1d",
+            "slotId": "mod_foregrip",
+            "parent_id": "fbae414b8c92cf7cce407b0a",
+            "upd": {}
+        },
+        {
+            "id": "e5f04893b4406ebbf4deb95a",
+            "tpl": "599860e986f7743bb57573a6",
+            "slotId": "mod_sight_rear",
+            "parent_id": "test_weapon",
+            "upd": {}
+        },
+        {
+            "id": "1c604893bea8e4769b0c307f",
+            "tpl": "59985a6c86f77414ec448d17",
+            "slotId": "mod_reciever",
+            "parent_id": "test_weapon",
+            "upd": {}
+        },
+        {
+            "id": "07cf41bd98f9fbe3826c5134",
+            "tpl": "570fd6c2d2720bc6458b457f",
+            "slotId": "mod_scope",
+            "parent_id": "1c604893bea8e4769b0c307f",
+            "upd": {}
+        },
+        {
+            "id": "72f9416ba8a8f51f995ef72b",
+            "tpl": "59bfc5c886f7743bf6794e62",
+            "slotId": "mod_muzzle",
+            "parent_id": "test_weapon",
+            "upd": {}
+        },
+        {
+            "id": "e5a2489bbd2da234cab3db37",
+            "tpl": "599860ac86f77436b225ed1a",
+            "slotId": "mod_magazine",
+            "parent_id": "test_weapon",
+            "upd": {}
+        },
+        {
+            "id": "5e884c9ead18f84e347a6e6c",
+            "tpl": "5648ac824bdc2ded0b8b457d",
+            "slotId": "mod_charge",
+            "parent_id": "test_weapon",
+            "upd": {}
+        },
+        {
+            "id": "6d5a4764948adb430af5f00f",
+            "tpl": "5ac78eaf5acfc4001926317a",
+            "slotId": "mod_stock",
+            "parent_id": "test_weapon",
+            "upd": {}
+        },
+        {
+            "id": "f3dd4374ba68f0da9503b06e",
+            "tpl": "59ecc3dd86f7746dc827481c",
+            "slotId": "mod_stock",
+            "parent_id": "6d5a4764948adb430af5f00f",
+            "upd": {}
+        },
+        {
+            "id": "d5324514bbb8b74a4336d5e9",
+            "tpl": "5649ae4a4bdc2d1b2b8b4588",
+            "slotId": "mod_pistol_grip",
+            "parent_id": "test_weapon",
+            "upd": {}
+        }
+    ]
+}

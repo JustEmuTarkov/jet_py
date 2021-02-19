@@ -1,5 +1,4 @@
 if __name__ == "__main__":
-
     import uvicorn  # type: ignore
 
     from server.app import app
@@ -8,9 +7,9 @@ if __name__ == "__main__":
     try:
         if is_ssl_certificate_expired():
             generate_ssl_certificate()
-
     except FileNotFoundError:
         generate_ssl_certificate()
+
     uvicorn.run(
         app,
         port=443,

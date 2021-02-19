@@ -1,11 +1,12 @@
-from typing import Literal, Optional, Union
+from typing import Literal, Union
 
 import ujson
-from fastapi.params import Cookie
-
 from fastapi import Request
+from fastapi.params import Depends
+
 from server import db_dir
 from server.utils import make_router
+from tarkov.dependencies import with_profile
 from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
 from tarkov.profile import Profile
 
@@ -50,28 +51,24 @@ def available() -> TarkovSuccessResponse[Literal[True]]:
 @match_router.post("/client/match/join")
 async def join(
     request: Request,
-    profile_id: Optional[str] = Cookie(alias="PHPSESSID", default=None),  # type: ignore
+    profile: Profile = Depends(with_profile),  # type: ignore
 ) -> Union[TarkovSuccessResponse[list], TarkovErrorResponse]:
-    if profile_id is None:
-        return TarkovErrorResponse.profile_id_is_none()
-
     request_data: dict = await request.json()
-    with Profile(profile_id) as profile:
-        return TarkovSuccessResponse(
-            data=[
-                {
-                    "profileid": profile.pmc_profile.id,
-                    "status": "busy",
-                    "sid": "",
-                    "ip": "127.0.0.1",
-                    "port": 9909,
-                    "version": "live",
-                    "location``": request_data["location"],
-                    "gamemode": "deathmatch",
-                    "shortid": "TEST",
-                }
-            ]
-        )
+    return TarkovSuccessResponse(
+        data=[
+            {
+                "profileid": profile.pmc_profile.id,
+                "status": "busy",
+                "sid": "",
+                "ip": "127.0.0.1",
+                "port": 9909,
+                "version": "live",
+                "location``": request_data["location"],
+                "gamemode": "deathmatch",
+                "shortid": "TEST",
+            }
+        ]
+    )
 
 
 @match_router.post("/client/match/exit")
@@ -82,7 +79,5 @@ def exit_() -> TarkovSuccessResponse[Literal[None]]:
 @match_router.post("/client/getMetricsConfig")
 def get_metrics_config() -> TarkovSuccessResponse[dict]:
     return TarkovSuccessResponse(
-        data=ujson.load(
-            db_dir.joinpath("base", "matchMetrics.json").open(encoding="utf8")
-        )
+        data=ujson.load(db_dir.joinpath("base", "matchMetrics.json").open(encoding="utf8"))
     )

@@ -20,7 +20,7 @@ async def login() -> str:
 
 
 @launcher_router.post("/launcher/profile/get")
-async def get_profile():
+async def get_profile() -> dict:
     return {
         "id": "AID8131647517931710690RF",
         "nickname": "",

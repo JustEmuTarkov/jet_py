@@ -3,13 +3,16 @@ import unittest
 import unittest.mock
 from unittest.mock import patch
 from pathlib import Path
-from typing import List
+from typing import Callable, List
 
 import pytest  # type: ignore
 
+from server import root_dir
 from tarkov.inventory import PlayerInventory, item_templates_repository
 from tarkov.inventory.models import Item, ItemTemplate
 from tarkov.profile import Profile
+
+TEST_RESOURCES_PATH = root_dir.joinpath("tarkov", "tests", "resources")
 
 
 @pytest.fixture()
@@ -19,9 +22,7 @@ def player_profile() -> Profile:
 
 @pytest.fixture()
 def inventory(player_profile: Profile) -> PlayerInventory:
-    empty_inventory_path = Path(
-        "tarkov/tests/inventory/empty_inventory.json"
-    ).absolute()
+    empty_inventory_path = Path("tarkov/tests/inventory/empty_inventory.json").absolute()
     inventory = PlayerInventory(player_profile)
     with unittest.mock.patch("pathlib.Path.open", empty_inventory_path.open):
         inventory.read()
@@ -29,11 +30,10 @@ def inventory(player_profile: Profile) -> PlayerInventory:
 
 
 @pytest.fixture()
-def make_inventory(player_profile: Profile):
-    def _make_inventory(inventory_path: str):
-        file_path = Path(f"tarkov/tests/inventory/{inventory_path}").absolute()
+def make_inventory(player_profile: Profile) -> Callable:
+    def _make_inventory(inventory_path: str) -> PlayerInventory:
         inventory = PlayerInventory(player_profile)
-        with patch.object(inventory, "_path", file_path):
+        with patch.object(inventory, "_path", inventory_path):
             inventory.read()
         return inventory
 
@@ -42,18 +42,13 @@ def make_inventory(player_profile: Profile):
 
 @pytest.fixture()
 def random_items() -> List[Item]:
-    random_templates = random.choices(
-        [
-            tpl
-            for tpl in item_templates_repository._item_templates.values()
-            if isinstance(tpl, ItemTemplate)
-        ],
+    random_templates = random.sample(
+        [tpl for tpl in item_templates_repository._item_templates.values() if isinstance(tpl, ItemTemplate)],
         k=100,
     )
 
     items: List[Item] = [
-        item
+        item_templates_repository.create_item(item_templates_repository.get_template(tpl.id))[0]
         for tpl in random_templates
-        for item in item_templates_repository.create_item(tpl.id)
     ]
     return items

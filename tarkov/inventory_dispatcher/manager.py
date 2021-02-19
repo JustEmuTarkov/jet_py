@@ -11,12 +11,9 @@ from . import dispatchers
 
 
 class DispatcherResponseItems(Base):
-    class Config:
-        fields = {"del_": "del"}
-
     new: List[Item] = Field(default_factory=list)
     change: List[Item] = Field(default_factory=list)
-    del_: List[Item] = Field(default_factory=list)
+    del_: List[Item] = Field(default_factory=list, alias="del")
 
 
 class DispatcherResponse(Base):
@@ -27,6 +24,15 @@ class DispatcherResponse(Base):
     builds: list = Field(default_factory=list)
     currentSalesSums: Dict[str, int] = Field(default_factory=dict)
 
+    def append_error(self, title: str, message: str) -> None:
+        self.badRequest.append(
+            {
+                "index": len(self.badRequest),
+                "err": title,
+                "errmsg": message,
+            }
+        )
+
 
 class DispatcherManager:
     profile: Profile
@@ -36,17 +42,18 @@ class DispatcherManager:
 
     dispatchers: Iterable["dispatchers.Dispatcher"]
 
-    def __init__(self, session_id: str):
-        self.profile: Profile = Profile(session_id)
+    def __init__(self, profile: Profile):
+        self.profile: Profile = profile
 
         self.response: DispatcherResponse = DispatcherResponse()
 
-    def __make_dispatchers(self):
+    def __make_dispatchers(self) -> None:
         self.dispatchers = (
             dispatchers.InventoryDispatcher(self),
             dispatchers.HideoutDispatcher(self),
             dispatchers.TradingDispatcher(self),
             dispatchers.QuestDispatcher(self),
+            dispatchers.FleaMarketDispatcher(self),
         )
 
     def dispatch(self, request_data: dict) -> DispatcherResponse:
@@ -59,18 +66,15 @@ class DispatcherManager:
             actions: List[dict] = request_data  # type: ignore
 
             for action in actions:
+                logger.debug(action)
                 for dispatcher in self.dispatchers:
                     try:
                         dispatcher.dispatch(action)
-                        logger.debug(
-                            f"Action was dispatched in {dispatcher.__class__.__name__}"
-                        )
+                        logger.debug(f"Action was dispatched in {dispatcher.__class__.__name__}")
                         break
                     except NotImplementedError:
                         pass
                 else:
-                    raise NotImplementedError(
-                        f"Action {action} not implemented in any of the dispatchers"
-                    )
+                    raise NotImplementedError(f"Action {action} not implemented in any of the dispatchers")
 
         return self.response

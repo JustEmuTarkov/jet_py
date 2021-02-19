@@ -1,11 +1,12 @@
+from __future__ import annotations
+
 from pathlib import Path
-from typing import Any, Generic, Optional, TypeVar
+from typing import Any, ClassVar, Generic, Optional, Type, TypeVar
 
 import pydantic
-from pydantic import Extra
+import yaml
+from pydantic import Extra, ValidationError
 from pydantic.generics import GenericModel
-
-from server.utils import atomic_write
 
 
 class Base(pydantic.BaseModel):
@@ -16,24 +17,52 @@ class Base(pydantic.BaseModel):
         validate_all = True
         allow_population_by_field_name = True
 
-    def dict(self, by_alias=True, exclude_unset=True, **kwargs) -> dict:
+    def dict(self, by_alias: bool = True, **kwargs: Any) -> dict:
         return super().dict(
             by_alias=by_alias,
-            exclude_unset=exclude_unset,
             **kwargs,
         )
 
     def json(
         self,
-        *args,
-        indent=4,
-        **kwargs,
+        *args: list,
+        by_alias: bool = True,
+        indent: int = 4,
+        **kwargs: Any,
     ) -> str:
         # pylint: disable=useless-super-delegation
-        return super().json(*args, indent=indent, **kwargs)
+        return super().json(*args, by_alias=by_alias, indent=indent, **kwargs)
 
-    def atomic_write(self, path: Path, **dump_kwargs):
-        atomic_write(path=path, str_=self.json(**dump_kwargs))
+
+ConfigType = TypeVar("ConfigType", bound="BaseConfig")
+
+
+class BaseConfig(pydantic.BaseModel):
+    __config_path__: ClassVar[Path]
+
+    class Config:
+        extra = Extra.forbid
+        use_enum_values = True
+        validate_all = True
+        allow_mutation = False
+
+    @classmethod
+    def load(cls: Type[ConfigType], path: Path = None, auto_create: bool = True) -> ConfigType:
+        path = path or cls.__config_path__
+        if not path.exists():
+            if auto_create:
+                try:
+                    config = cls()
+                    if not path.parent.exists():
+                        path.parent.mkdir(parents=True, exist_ok=True)
+                    yaml.safe_dump(config.dict(), path.open(mode="w", encoding="utf8"))
+                except ValidationError as error:
+                    raise ValueError(f"Config on {path} does not exists.") from error
+
+        with path.open(encoding="utf8") as file:
+            config = yaml.safe_load(file)
+
+        return cls.parse_obj(config)
 
 
 ResponseType = TypeVar("ResponseType")

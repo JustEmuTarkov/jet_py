@@ -1,20 +1,9 @@
-import enum
 from typing import Any, List, Literal, Union
 
 from pydantic import StrictBool, StrictInt
 
 from tarkov import models
 from tarkov.inventory.models import Item
-
-
-class QuestMessageType(enum.Enum):
-    questStart = 10
-    questFail = 11
-    questSuccess = 12
-
-    npcTrader = 2
-
-    insuranceReturn = 8
 
 
 class QuestReward(models.Base):

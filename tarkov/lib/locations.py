@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import collections
 import random
-from typing import DefaultDict, Dict, List, Tuple, Union
+from typing import Any, DefaultDict, Dict, List, Tuple, Union
 
 import ujson
 from pydantic import parse_obj_as
@@ -14,7 +14,7 @@ from tarkov.inventory import (
     GridInventoryStashMap,
     item_templates_repository,
 )
-from tarkov.inventory.helpers import generate_item_id, regenerate_item_ids_dict
+from tarkov.inventory.helpers import regenerate_item_ids_dict
 from tarkov.inventory.models import Item, ItemTemplate
 from tarkov.inventory.prop_models import CompoundProps, LootContainerProps
 from tarkov.inventory.types import ItemId, TemplateId
@@ -62,10 +62,10 @@ class ContainerInventory(GridInventory):
     def place_item(
         self,
         item: Item,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         super().place_item(item, **kwargs)
-        item.slotId = "main"
+        item.slot_id = "main"
 
 
 class LocationGenerator:
@@ -83,7 +83,7 @@ class LocationGenerator:
         self.__generate_location_loot()
         return self.__base
 
-    def __generate_location_loot(self):
+    def __generate_location_loot(self) -> None:
         for container in self.__loot["static"]:
             self.__populate_container(container)
             self.__base["Loot"].append(container)
@@ -101,9 +101,7 @@ class LocationGenerator:
 
             dynamic_loot_locations[position].append(dynamic_loot)
 
-        self.__base["Loot"].extend(
-            random.choice(loot) for loot in dynamic_loot_locations.values()
-        )
+        self.__base["Loot"].extend(random.choice(loot) for loot in dynamic_loot_locations.values())
 
     def __get_category_items(self, template_id: TemplateId) -> List[ItemTemplate]:
         if template_id not in self.__category_cache:
@@ -115,20 +113,16 @@ class LocationGenerator:
 
         return self.__category_cache[template_id]
 
-    def __populate_container(self, container: dict):
+    def __populate_container(self, container: dict) -> None:
         """
         Populates given container with items
         Mutates the container argument
         """
-        container_id = container["Root"]
-        container_template = item_templates_repository.get_template(
-            container["Items"][0]["_tpl"]
-        )
+        # container_id = container["Root"]
+        container_template = item_templates_repository.get_template(container["Items"][0]["_tpl"])
 
         assert isinstance(container_template.props, LootContainerProps)
-        container_filter_templates: List[
-            TemplateId
-        ] = container_template.props.SpawnFilter
+        container_filter_templates: List[TemplateId] = container_template.props.SpawnFilter
 
         mean, deviation = 2.5, 2.5
         amount_of_items_in_container = max(round(random.gauss(mean, deviation)), 0)
@@ -146,23 +140,16 @@ class LocationGenerator:
 
         for _ in range(amount_of_items_in_container):
             for _ in range(10):
-                random_template = random.choices(
-                    item_templates, item_template_weights, k=1
-                )[0]
+                random_template = random.choices(item_templates, item_template_weights, k=1)[0]
 
-                item = Item(
-                    id=generate_item_id(),
-                    tpl=random_template.id,
-                    parent_id=container_id,
-                    slotId="main",
-                )
+                item, children = item_templates_repository.create_item(random_template)
                 try:
-                    container_inventory.place_item(item)
+                    container_inventory.place_item(item, child_items=children)
                     break
                 except NoSpaceError:
                     pass
 
-        container["Items"] = container_inventory.container.dict()["Items"]
+        container["Items"] = container_inventory.container.dict(exclude_none=True)["Items"]
 
     @staticmethod
     def __template_weight(template: ItemTemplate) -> Union[int, float]:

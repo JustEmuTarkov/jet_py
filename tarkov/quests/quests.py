@@ -7,10 +7,13 @@ import tarkov.inventory.types
 from tarkov import inventory
 from tarkov.inventory import PlayerInventory, item_templates_repository
 from tarkov.inventory.models import Item
-from tarkov.notifier.models import MailDialogueMessage, MailMessageItems
+from tarkov.mail.models import (
+    MailDialogueMessage,
+    MailMessageItems,
+    MailMessageType,
+)
 from tarkov.trader import TraderInventory, TraderType
 from .models import (
-    QuestMessageType,
     QuestRewardAssortUnlock,
     QuestRewardExperience,
     QuestRewardItem,
@@ -35,13 +38,13 @@ class Quests:
         self.profile: "Profile" = profile
         self.data = self.profile.quests_data
 
-    def get_quest(self, quest_id: str):
+    def get_quest(self, quest_id: str) -> dict:
         try:
             return next(quest for quest in self.data if quest["qid"] == quest_id)
         except StopIteration as e:
             raise KeyError from e
 
-    def accept_quest(self, quest_id: str):
+    def accept_quest(self, quest_id: str) -> None:
         # TODO: Create quest if it does not exist
         try:
             quest = self.get_quest(quest_id)
@@ -95,7 +98,7 @@ class Quests:
 
         return [], []
 
-    def complete_quest(self, quest_id: str):
+    def complete_quest(self, quest_id: str) -> None:
         quest_template = quests_repository.get_quest_template(quest_id)
 
         reward_items: List[Item] = []
@@ -106,14 +109,8 @@ class Quests:
                     stack_size: int = item_template.props.StackMaxSize
 
                     while reward_item.upd.StackObjectsCount > 0:
-                        amount_to_split = min(
-                            reward_item.upd.StackObjectsCount, stack_size
-                        )
-                        reward_items.append(
-                            PlayerInventory.simple_split_item(
-                                reward_item, amount_to_split
-                            )
-                        )
+                        amount_to_split = min(reward_item.upd.StackObjectsCount, stack_size)
+                        reward_items.append(PlayerInventory.simple_split_item(reward_item, amount_to_split))
 
             elif isinstance(reward, QuestRewardExperience):
                 exp_amount: str = reward.value
@@ -131,16 +128,14 @@ class Quests:
                 raise ValueError
 
             else:
-                raise ValueError(
-                    f"Unknown reward: {reward.__class__.__name__} {reward}"
-                )
+                raise ValueError(f"Unknown reward: {reward.__class__.__name__} {reward}")
 
         message = MailDialogueMessage(
             uid=quest_template.traderId,
-            type=StrictInt(QuestMessageType.questSuccess.value),
+            type=StrictInt(MailMessageType.QuestSuccess.value),
             templateId="5ab0f32686f7745dd409f56b",  # TODO: Right now this is a placeholder
             systemData={},
             items=MailMessageItems.from_items(reward_items),
             hasRewards=True,
         )
-        self.profile.notifier.add_message(message)
+        self.profile.mail.add_message(message)

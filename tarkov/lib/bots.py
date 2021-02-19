@@ -27,19 +27,13 @@ class BotInventory(MutableInventory):
     def regenerate_ids(self) -> None:
         regenerate_items_ids(self.items)
 
-        equipment_item = self.get_item_by_template(
-            TemplateId("55d7217a4bdc2d86028b456d")
-        )
+        equipment_item = self.get_item_by_template(TemplateId("55d7217a4bdc2d86028b456d"))
         self.data.equipment = equipment_item.id
 
-        quest_raid_items = self.get_item_by_template(
-            TemplateId("5963866286f7747bf429b572")
-        )
+        quest_raid_items = self.get_item_by_template(TemplateId("5963866286f7747bf429b572"))
         self.data.questRaidItems = quest_raid_items.id
 
-        quest_stash_items = self.get_item_by_template(
-            TemplateId("5963866b86f7747bfa1c4462")
-        )
+        quest_stash_items = self.get_item_by_template(TemplateId("5963866b86f7747bfa1c4462"))
         self.data.questStashItems = quest_stash_items.id
 
         stash = self.get_item_by_template(TemplateId("566abbc34bdc2d92178b4576"))
@@ -47,10 +41,8 @@ class BotInventory(MutableInventory):
 
 
 class BotGenerator:
-    def __init__(self):
-        self.__bot_base = ujson.load(
-            db_dir.joinpath("base", "botBase.json").open(encoding="utf8")
-        )
+    def __init__(self) -> None:
+        self.__bot_base = ujson.load(db_dir.joinpath("base", "botBase.json").open(encoding="utf8"))
 
     def generate_bot(self, role: str, difficulty: str) -> dict:
         bot = copy.deepcopy(self.__bot_base)
@@ -63,24 +55,20 @@ class BotGenerator:
 
         bot_path = db_dir.joinpath("bots", role)
 
-        random_inventory_path: Path = random.choice(
-            list(bot_path.joinpath("inventory").glob("*.json"))
-        )
+        random_inventory_path: Path = random.choice(list(bot_path.joinpath("inventory").glob("*.json")))
 
-        bot_inventory = BotInventory(
-            ujson.load(random_inventory_path.open(encoding="utf8"))
-        )
+        bot_inventory = BotInventory(ujson.load(random_inventory_path.open(encoding="utf8")))
         bot_inventory.regenerate_ids()
 
-        bot["Inventory"] = bot_inventory.data.dict()
+        bot["Inventory"] = bot_inventory.data.dict(exclude_none=True)
 
         self.__generate_health(bot, role)
 
         return bot
 
     @staticmethod
-    def __generate_health(bot, role):
-        health_base = {
+    def __generate_health(bot: dict, role: str) -> None:
+        health_base: dict = {
             "Hydration": {"Current": 100, "Maximum": 100},
             "Energy": {"Current": 100, "Maximum": 100},
             "BodyParts": {
@@ -95,10 +83,8 @@ class BotGenerator:
             "UpdateTime": 0,
         }
 
-        bot_health = ujson.load(
-            db_dir.joinpath("bots", role)
-            .joinpath("health", "default.json")
-            .open(encoding="utf8")
+        bot_health: dict = ujson.load(
+            db_dir.joinpath("bots", role).joinpath("health", "default.json").open(encoding="utf8")
         )
 
         # Set current and maximum energy and hydration

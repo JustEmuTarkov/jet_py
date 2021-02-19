@@ -103,9 +103,9 @@ class BaseItemProps(BaseModel):
     Description: str
     Weight: float
     BackgroundColor: Color
-    Width: StrictInt
-    Height: StrictInt
-    StackMaxSize: StrictInt
+    Width: int
+    Height: int
+    StackMaxSize: int
     Rarity: str
     SpawnChance: Union[StrictInt, StrictFloat]
     CreditsPrice: int
@@ -127,10 +127,10 @@ class BaseItemProps(BaseModel):
     HideEntrails: StrictBool
     RepairCost: StrictInt
     RepairSpeed: StrictInt
-    ExtraSizeLeft: StrictInt
-    ExtraSizeRight: StrictInt
-    ExtraSizeUp: StrictInt
-    ExtraSizeDown: StrictInt
+    ExtraSizeLeft: int
+    ExtraSizeRight: int
+    ExtraSizeUp: int
+    ExtraSizeDown: int
     ExtraSizeForceAdd: StrictBool
     MergesWithChildren: StrictBool
     CanSellOnRagfair: StrictBool
@@ -143,9 +143,7 @@ class BaseItemProps(BaseModel):
     UnlootableFromSide: List[str]
     ChangePriceCoef: float
     AllowSpawnOnLocations: List[
-        Literal[
-            "laboratory", "Shoreline", "Interchange", "RezervBase", "bigmap", "Woods"
-        ]
+        Literal["laboratory", "Shoreline", "Interchange", "RezervBase", "bigmap", "Woods"]
     ]
     SendToClient: StrictBool
     AnimationVariantsNumber: StrictInt
@@ -352,7 +350,7 @@ class StockProps(GearModProps):
     IsShoulderContact: StrictBool
     Foldable: StrictBool
     Retractable: StrictBool
-    SizeReduceRight: StrictInt
+    SizeReduceRight: int
 
 
 class ChargeProps(GearModProps):
@@ -599,7 +597,7 @@ class WeaponProps(CompoundProps):
     RotationCenter: Vector
     RotationCenterNoStock: Vector
     MergesWithChildren: StrictBool
-    SizeReduceRight: StrictInt
+    SizeReduceRight: int
     FoldedSlot: str
     CompactHandling: StrictBool
     SightingRange: StrictInt
@@ -975,6 +973,4 @@ AnyProp = Union[
     VisorsProps,
 ]
 
-props_models_map: Dict[str, AnyProp] = {
-    model.__template_id__: model for model in typing.get_args(AnyProp)
-}
+props_models_map: Dict[str, AnyProp] = {model.__template_id__: model for model in typing.get_args(AnyProp)}

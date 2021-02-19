@@ -1,11 +1,20 @@
 from enum import Enum
-from typing import Any, Dict, List, Literal, NamedTuple, Optional
+from typing import (
+    Any,
+    Dict,
+    List,
+    Literal,
+    NamedTuple,
+    Optional,
+    ValuesView,
+)
 
 from pydantic import Field, StrictBool
 
 from tarkov.inventory.models import Item
 from tarkov.inventory.types import ItemId, TemplateId
 from tarkov.models import Base
+from tarkov.repositories.categories import CategoryId
 
 
 class TraderType(Enum):
@@ -46,9 +55,7 @@ class TraderStanding(Base):
     current_standing: float = Field(alias="currentStanding")
     current_sales_sum: int = Field(alias="currentSalesSum")
     next_loyalty: Any = Field(alias="NextLoyalty", const=None)
-    loyalty_levels: Dict[Literal["0", "1", "2", "3"], TraderLoyaltyLevel] = Field(
-        alias="loyaltyLevels"
-    )
+    loyalty_levels: Dict[Literal["0", "1", "2", "3"], TraderLoyaltyLevel] = Field(alias="loyaltyLevels")
     display: Optional[StrictBool] = None
     current_loyalty: Optional[float] = Field(alias="CurrentLoyalty", default=None)
 
@@ -97,7 +104,7 @@ class TraderBase(Base):
     repair: TraderRepair
     insurance: TraderInsurance
     loyalty: TraderStanding
-    sell_category: List[TemplateId]
+    sell_category: List[CategoryId]
 
 
 class BarterSchemeEntry(Base):
@@ -110,11 +117,11 @@ class BarterSchemeEntry(Base):
 class BarterScheme(Base):
     __root__: Dict[ItemId, List[List[BarterSchemeEntry]]] = Field(default_factory=dict)
 
-    def __getitem__(self, item_id: ItemId):
+    def __getitem__(self, item_id: ItemId) -> List[List[BarterSchemeEntry]]:
         return self.__root__[item_id]
 
-    def __setitem__(self, key: ItemId, value: List[List[BarterSchemeEntry]]):
+    def __setitem__(self, key: ItemId, value: List[List[BarterSchemeEntry]]) -> None:
         self.__root__[key] = value
 
-    def values(self):
+    def values(self) -> ValuesView[List[List[BarterSchemeEntry]]]:
         return self.__root__.values()

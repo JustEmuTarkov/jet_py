@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional
 
 from pydantic import Extra, Field, StrictBool, StrictInt, root_validator
+from werkzeug.routing import ValidationError
 
 from server import root_dir
 from tarkov.inventory.models import InventoryModel
@@ -108,15 +109,17 @@ class ProfileModel(Base):
     WishList: list
 
     @root_validator(pre=True)
-    def collect_files(cls, values):  # pylint: disable=no-self-argument,no-self-use
+    def collect_files(cls, values: dict) -> dict:  # pylint: disable=no-self-argument,no-self-use
+        profile_id = values.get("aid", None)
+        if not profile_id:
+            raise ValidationError("Profile has no aid property")
+
         if "Inventory" not in values or not values["Inventory"]:
-            inventory_path = root_dir.joinpath(
-                "resources", "profiles", values.get("aid"), "pmc_inventory.json"
-            )
+            inventory_path = root_dir.joinpath("resources", "profiles", profile_id, "pmc_inventory.json")
             values["Inventory"] = InventoryModel.parse_file(inventory_path)
         return values
 
-    def json(self, *args, **kwargs) -> str:
+    def json(self, *args: Any, **kwargs: Any) -> str:
         if kwargs.get("exclude", None) is None:
             kwargs["exclude"] = self.Config.exclude
 
