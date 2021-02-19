@@ -1,8 +1,6 @@
 from typing import Dict, List, Optional, Union
 
-from fastapi.params import Body, Cookie, Depends, Param
-from starlette.requests import Request
-
+from fastapi.params import Body, Cookie, Depends
 import tarkov.profile
 from server.utils import make_router
 from tarkov.dependencies import with_profile
