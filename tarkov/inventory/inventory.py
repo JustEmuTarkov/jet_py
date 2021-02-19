@@ -490,6 +490,10 @@ class GridInventory(MutableInventory):
         raise NotImplementedError
 
     def remove_item(self, item: Item, remove_children: bool = True) -> None:
+        if item.parent_id == self.root_id:
+            item.location = None
+            item.parent_id = None
+            item.slot_id = None
         self.stash_map.remove(item, list(self.iter_item_children_recursively(item)))
         super().remove_item(item, remove_children=remove_children)
 

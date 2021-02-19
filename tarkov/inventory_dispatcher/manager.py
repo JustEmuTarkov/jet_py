@@ -11,12 +11,9 @@ from . import dispatchers
 
 
 class DispatcherResponseItems(Base):
-    class Config:
-        fields = {"del_": "del"}
-
     new: List[Item] = Field(default_factory=list)
     change: List[Item] = Field(default_factory=list)
-    del_: List[Item] = Field(default_factory=list)
+    del_: List[Item] = Field(default_factory=list, alias="del")
 
 
 class DispatcherResponse(Base):

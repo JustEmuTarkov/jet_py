@@ -4,6 +4,7 @@ from typing import Callable, Dict, List, Optional, TYPE_CHECKING, Tuple
 
 import tarkov.inventory
 import tarkov.inventory.types
+from server import logger
 from tarkov.exceptions import NotFoundError
 from tarkov.fleamarket.fleamarket import flea_market_instance
 from tarkov.fleamarket.models import OfferId
@@ -458,10 +459,9 @@ class FleaMarketDispatcher(Dispatcher):
     def _add_offer(self, action: RagfairActions.Add) -> None:
         # Todo: Add taxation
         items = [self.inventory.get_item(item_id) for item_id in action.items]
+        self.response.items.del_.extend(item.copy(deep=True) for item in items)
         self.inventory.remove_items(items)
-        self.response.items.del_.extend(items)
 
-        sent_at = datetime.now() + timedelta(seconds=10)
         required_items: List[Item] = []
         for requirement in action.requirements:
             # TODO: This will probably cause issues with nested items, create_item function have to be changed
@@ -471,16 +471,39 @@ class FleaMarketDispatcher(Dispatcher):
             for item, children in required_items_list:
                 required_items.extend([item, *children])
 
-        # roubles = item_templates_repository.create_items(
-        #     TemplateId("5449016a4bdc2d6f028b456f"), 100_000
-        # )
-        # roubles_stacks = [stack[0] for stack in roubles]
-        message = MailDialogueMessage(
-            dt=int(sent_at.timestamp()),
-            hasRewards=True,
-            uid=TraderType.Ragman.value,
-            type=MailMessageType.FleamarketMessage.value,
-            templateId="5bdac0b686f7743e1665e09e",
-            items=MailMessageItems.from_items(required_items),
-        )
-        self.profile.mail.add_message(message)
+        selling_price_rub = flea_market_instance.items_price(required_items)
+        selling_time: timedelta = flea_market_instance.selling_time(items, selling_price_rub)
+        logger.debug(f"Requirements cost in rubles: {selling_price_rub}")
+        logger.debug(f"Selling time: {selling_time}")
+
+        will_sell_in_24_h = selling_time < timedelta(days=1)
+        if will_sell_in_24_h:
+            # "5bdac0b686f7743e1665e09e": "Your {soldItem}  {itemCount} items was bought by {buyerNickname}",
+            sent_at = datetime.now() + selling_time
+            message = MailDialogueMessage(
+                dt=int(sent_at.timestamp()),
+                hasRewards=True,
+                uid=TraderType.Ragman.value,
+                type=MailMessageType.FleamarketMessage.value,
+                templateId="5bdac0b686f7743e1665e09e",
+                items=MailMessageItems.from_items(required_items),
+                systemData={
+                    "soldItem": items[0].tpl,
+                    "itemCount": str(items[0].upd.StackObjectsCount),
+                    "buyerNickname": "Nikita",
+                },
+            )
+            self.profile.mail.add_message(message)
+
+        else:
+            #  "5bdac06e86f774296f5a19c5": "The item was not sold",
+            sent_at = datetime.now() + timedelta(days=1)
+            message = MailDialogueMessage(
+                dt=int(sent_at.timestamp() + 5),
+                hasRewards=True,
+                uid=TraderType.Ragman.value,
+                type=MailMessageType.FleamarketMessage.value,
+                templateId="5bdac06e86f774296f5a19c5",
+                items=MailMessageItems.from_items(items),
+            )
+            self.profile.mail.add_message(message)

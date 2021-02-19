@@ -30,4 +30,4 @@ def client_items_prices() -> TarkovSuccessResponse:
 async def client_ragfair_item_market_price(
     template_id: TemplateId = Body(..., alias="templateId", embed=True),  # type: ignore
 ) -> TarkovSuccessResponse:
-    return TarkovSuccessResponse(data=flea_market_instance.item_price(template_id))
+    return TarkovSuccessResponse(data=flea_market_instance.item_price_view(template_id))

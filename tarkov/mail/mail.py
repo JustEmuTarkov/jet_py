@@ -46,8 +46,8 @@ class MailView:
         #
         #     if has_uncollected_rewards and not expired:
         #         attachments_count += 1
-
-        return {"messages": [msg.dict() for msg in dialogue.messages]}
+        now = datetime.datetime.now().timestamp()
+        return {"messages": [msg.dict() for msg in dialogue.messages if msg.dt < now]}
 
     def all_attachments_view(self, dialogue_id: str) -> dict:
         dialogue = self.mail.get_dialogue(dialogue_id)
