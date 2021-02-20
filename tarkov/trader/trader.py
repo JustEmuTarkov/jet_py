@@ -16,6 +16,7 @@ from tarkov.inventory import (
 )
 from tarkov.inventory.models import Item, ItemUpd
 from tarkov.inventory.types import TemplateId
+from tarkov.quests.models import QuestStatus
 from tarkov.trader.models import (
     BarterScheme,
     BarterSchemeEntry,
@@ -122,8 +123,11 @@ class TraderInventory(ImmutableInventory):
                 return True
 
             quest_id = self._quest_assort["success"][item.id]
-            quest = self.profile.quests.get_quest(quest_id)
-            return quest["status"] == "Success"  # TODO: Extract into enum
+            try:
+                quest = self.profile.quests.get_quest(quest_id)
+            except KeyError:
+                return False
+            return quest.status == QuestStatus.Started
 
         def filter_loyal_level(item: Item) -> bool:
             if item.id not in self.loyal_level_items:
