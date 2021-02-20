@@ -1,7 +1,7 @@
 import random
 import string
 from pathlib import Path
-from typing import Any, Union
+from typing import Any
 
 from fastapi import APIRouter
 from starlette.requests import Request
@@ -10,7 +10,7 @@ from server.requests import ZLibRoute
 from server.responses import ZLibORJSONResponse
 
 
-def atomic_write(str_: Union[str], path: Path, *, encoding: str = "utf8") -> None:
+def atomic_write(str_: str, path: Path, *, encoding: str = "utf8") -> None:
     random_str = "".join(random.choices([*string.ascii_lowercase, *string.digits], k=16))
     tmp_path = Path(str(path) + random_str)
 
