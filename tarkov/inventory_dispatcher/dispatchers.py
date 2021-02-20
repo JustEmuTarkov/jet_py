@@ -341,8 +341,8 @@ class TradingDispatcher(Dispatcher):
 
             self.inventory.place_item(item, child_items=children)
 
-            self.response.items.new.append(item)
-            self.response.items.new.extend(children)
+            self.response.items.new.append(item.copy(deep=True))
+            self.response.items.new.extend(c.copy(deep=True) for c in children)
 
         # Take required items from inventory
         for scheme_item in action.scheme_items:
