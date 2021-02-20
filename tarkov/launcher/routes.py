@@ -1,6 +1,13 @@
+import zlib
+
+from fastapi.params import Body
 from starlette.requests import Request
+from starlette.responses import PlainTextResponse
 
 from server.utils import get_request_url_root, make_router
+from tarkov.exceptions import NotFoundError
+from tarkov.launcher.accounts import account_service
+from tarkov.launcher.models import Account
 
 launcher_router = make_router(tags=["Launcher"])
 
@@ -15,24 +22,41 @@ async def connect(request: Request) -> dict:
 
 
 @launcher_router.post("/launcher/profile/login")
-async def login() -> str:
-    return "AID8131647517931710690RF"
+async def login(
+    email: str = Body(..., embed=True),  # type: ignore
+    password: str = Body(..., embed=True),  # type: ignore
+) -> PlainTextResponse:
+    try:
+        account_service.find(email=email, password=password)
+        return PlainTextResponse(content=zlib.compress("OK".encode("utf8")))
+    except NotFoundError:
+        return PlainTextResponse(content=zlib.compress("FAILED".encode("utf8")))
 
 
 @launcher_router.post("/launcher/profile/get")
-async def get_profile() -> dict:
-    return {
-        "id": "AID8131647517931710690RF",
-        "nickname": "",
-        "email": "",
-        "password": "",
-        "wipe": False,
-        "edition": "Edge Of Darkness",
-    }
+async def get_profile(
+    email: str = Body(..., embed=True),  # type: ignore
+    password: str = Body(..., embed=True),  # type: ignore
+) -> Account:
+    return account_service.find(email, password)
 
 
-# async def server_info():
-#     return {
-#         'ServerName': 'Jet Py',
-#         'Editions': ['Edge Of Darkness']
-#     }
+@launcher_router.post(
+    "/launcher/profile/register",
+    response_class=PlainTextResponse,
+)
+def register_account(
+    email: str = Body(..., embed=True),  # type: ignore
+    password: str = Body(..., embed=True),  # type: ignore
+    edition: str = Body(..., embed=True),  # type: ignore
+) -> PlainTextResponse:
+    try:
+        account_service.find(email=email, password=password)
+        return PlainTextResponse(content=zlib.compress("FAILED".encode("utf8")))
+    except NotFoundError:
+        account_service.create_account(
+            email=email,
+            password=password,
+            edition=edition,
+        )
+        return PlainTextResponse(content=zlib.compress("OK".encode("utf8")))
