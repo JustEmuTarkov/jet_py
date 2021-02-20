@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import List, Union
 
 import ujson
-from fastapi.params import Depends
+from fastapi.params import Body, Cookie, Depends
 from starlette.requests import Request
 
 from server import root_dir
@@ -12,9 +12,11 @@ from server.utils import get_request_url_root, make_router
 from tarkov.dependencies import with_profile
 from tarkov.inventory_dispatcher import DispatcherManager
 from tarkov.inventory_dispatcher.manager import DispatcherResponse
+from tarkov.launcher.accounts import account_service
 from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
 from tarkov.profile import Profile
 from tarkov.profile.models import ProfileModel
+from tarkov.profile.service import profile_service
 
 profile_router = make_router(tags=["Profile"])
 
@@ -38,19 +40,23 @@ async def client_game_profile_item_move(
 
 @profile_router.post("/client/game/profile/list")
 def client_game_profile_list(
-    profile: Profile = Depends(with_profile),  # type: ignore
+    profile_id: str = Cookie(..., alias="PHPSESSID"),  # type: ignore
 ) -> Union[TarkovSuccessResponse[List[dict]], TarkovErrorResponse]:
-    pmc_profile = profile.get_profile()
-    profile_dir = root_dir.joinpath("resources", "profiles", profile.profile_id)
-    scav_profile = ujson.load((profile_dir / "character_scav.json").open("r"))
-    return TarkovSuccessResponse(
-        data=[
-            ProfileModel.parse_obj(pmc_profile).dict(
-                exclude_unset=False, exclude_defaults=False, exclude_none=True
-            ),
-            scav_profile,
-        ]
-    )
+    try:
+        with Profile(profile_id) as profile:
+            pmc_profile = profile.get_profile()
+            profile_dir = root_dir.joinpath("resources", "profiles", profile.profile_id)
+            scav_profile = ujson.load((profile_dir / "character_scav.json").open("r"))
+            return TarkovSuccessResponse(
+                data=[
+                    ProfileModel.parse_obj(pmc_profile).dict(
+                        exclude_unset=False, exclude_defaults=False, exclude_none=True
+                    ),
+                    scav_profile,
+                ]
+            )
+    except Profile.ProfileDoesNotExistsError:
+        return TarkovSuccessResponse(data=[])
 
 
 @profile_router.post("/client/game/profile/select")
@@ -81,5 +87,36 @@ def client_profile_status(
                 "port": 0,
             }
         )
+    print(response)
 
     return TarkovSuccessResponse(data=response)
+
+
+@profile_router.post("/client/game/profile/nickname/reserved")
+def nickname_reserved(
+    profile_id: str = Cookie(..., alias="PHPSESSID"),  # type: ignore
+) -> TarkovSuccessResponse[str]:
+    account = account_service.get_account(profile_id)
+    return TarkovSuccessResponse(data=account.nickname)
+
+
+@profile_router.post("/client/game/profile/nickname/validate")
+def nickname_validate(
+    nickname: str = Body(..., embed=True),  # type: ignore
+) -> Union[TarkovSuccessResponse, TarkovErrorResponse]:
+    if len(nickname) < 3:
+        return TarkovErrorResponse(errmsg="Nickname is too short", err=256)
+
+    if account_service.is_nickname_taken(nickname):
+        return TarkovErrorResponse(errmsg="Nickname is taken", err=255)
+
+    return TarkovSuccessResponse(data={"status": "ok"})
+
+
+@profile_router.post("/client/game/profile/create")
+async def create_profile(
+    profile_id: str = Cookie(..., alias="PHPSESSID"),  # type: ignore
+    side: str = Body(..., embed=True),  # type: ignore
+    nickname: str = Body(..., embed=True),  # type: ignore
+) -> None:
+    profile_service.create_profile(nickname=nickname, side=side, profile_id=profile_id)

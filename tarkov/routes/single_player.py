@@ -1,3 +1,4 @@
+from pprint import pprint
 from typing import Any, List
 
 import ujson
@@ -6,7 +7,7 @@ from pydantic import BaseModel, parse_obj_as
 
 from server import db_dir, logger
 from server.utils import make_router
-from tarkov.inventory.helpers import regenerate_items_ids
+from tarkov.inventory.implementations import SimpleInventory
 from tarkov.inventory.models import Item
 from tarkov.lib import locations
 from tarkov.lib.bots import BotGenerator
@@ -124,7 +125,7 @@ async def singleplayer_raid_profile_save(request: Request) -> TarkovSuccessRespo
     # data struct {exit, isPlayerScav, profile, health}
     # update profile on this request
     body = await request.json()
-
+    pprint(body, indent=4)
     with Profile(profile_id=body["profile"]["aid"]) as profile:
         # profile.pmc_profile['Health']['BodyParts'] = data['health']['Health']
         # for body_part in profile.pmc_profile['HealtPh']['BodyParts']:
@@ -138,15 +139,16 @@ async def singleplayer_raid_profile_save(request: Request) -> TarkovSuccessRespo
         # profile.pmc_profile['Skills'] = profile_data['Skills']
 
         raid_inventory_items: List[Item] = parse_obj_as(List[Item], body["profile"]["Inventory"]["items"])
+        raid_inventory = SimpleInventory(items=raid_inventory_items)
         equipment = profile.inventory.get_item(profile.inventory.inventory.equipment)
 
         # Remove all equipment children
         profile.inventory.remove_item(equipment, remove_children=True)
         profile.inventory.add_item(equipment, child_items=[])
 
-        items = list(item for item in raid_inventory_items if item.slot_id is not None)
-        regenerate_items_ids(items)  # Regenerate item ids to be 100% safe
-        profile.inventory.add_items(items)
+        raid_equipment = raid_inventory.iter_item_children_recursively(raid_inventory.get_item(equipment.id))
+        # regenerate_items_ids(equipment_items)  # Regenerate item ids to be 100% safe
+        profile.inventory.add_items(raid_equipment)
 
     return TarkovSuccessResponse(data=None)
 

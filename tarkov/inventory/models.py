@@ -11,6 +11,7 @@ from pydantic import (
     StrictBool,
     ValidationError,
     root_validator,
+validator,
 )
 
 from server import logger
@@ -175,6 +176,14 @@ class ItemInventoryLocation(Base):
     y: int
     r: str = ItemOrientationEnum.Vertical.value
     isSearched: Optional[bool] = None
+
+    @validator("r", pre=True)
+    def validate_rotation(cls, value: Any):
+        if value == 1:
+            return ItemOrientationEnum.Vertical.value
+        if value == 0:
+            return ItemOrientationEnum.Horizontal.value
+        return value
 
 
 AnyItemLocation = Union[ItemInventoryLocation, ItemAmmoStackPosition]

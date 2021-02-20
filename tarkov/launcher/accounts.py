@@ -17,6 +17,12 @@ class AccountService:
 
         self.__read()
 
+    def is_nickname_taken(self, nickname: str) -> bool:
+        for account in self.accounts:
+            if account.nickname == nickname:
+                return True
+        return False
+
     def create_account(self, email: str, password: str, edition: str) -> Account:
         for account in self.accounts:
             if account.email == email:
@@ -32,6 +38,12 @@ class AccountService:
         self.accounts.append(account)
         self.__write()
         return account
+
+    def get_account(self, account_id: str) -> Account:
+        try:
+            return next(acc for acc in self.accounts if acc.id == account_id)
+        except StopIteration as error:
+            raise NotFoundError from error
 
     def find(self, email: str, password: str) -> Account:
         for account in self.accounts:

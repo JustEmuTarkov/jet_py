@@ -41,6 +41,9 @@ class Encyclopedia:
 
 
 class Profile:
+    class ProfileDoesNotExistsError(Exception):
+        pass
+
     # pylint: disable=too-many-instance-attributes
     # Disabling that in case of profile is reasonable
 
@@ -63,8 +66,6 @@ class Profile:
 
         self.pmc_profile_path = self.profile_dir.joinpath("pmc_profile.json")
 
-        self.quests_path = self.profile_dir.joinpath("pmc_quests.json")
-
     @staticmethod
     def exists(profile_id: str) -> bool:
         return root_dir.joinpath("resources", "profiles", profile_id).exists()
@@ -75,10 +76,6 @@ class Profile:
             profile_data[file.stem] = ujson.load(file.open("r", encoding="utf8"))
 
         profile_base = self.pmc_profile.copy()
-        profile_base.Hideout = self.hideout.data
-        # profile_base['Inventory'] = self.inventory.inventory.dict()
-        profile_base.Quests = profile_data["pmc_quests"]
-        profile_base.Stats = profile_data["pmc_stats"]
 
         return profile_base.dict(exclude_none=True)
 
@@ -91,16 +88,12 @@ class Profile:
         self.pmc_profile.Info.Experience += amount
 
     def __read(self) -> None:
+        if not self.profile_dir.exists():
+            raise Profile.ProfileDoesNotExistsError
         self.pmc_profile: ProfileModel = ProfileModel.parse_file(self.pmc_profile_path)
 
-        # self.pmc_profile: dict = ujson.load(self.pmc_profile_path.open('r', encoding='utf8'))
-
         self.encyclopedia = Encyclopedia(profile=self)
-
         self.inventory = tarkov.inventory.PlayerInventory(profile=self)
-        self.inventory.read()
-
-        self.quests_data: List[dict] = ujson.load(self.quests_path.open("r", encoding="utf8"))
         self.quests = quests.Quests(profile=self)
 
         self.hideout = Hideout(profile=self)
@@ -111,11 +104,7 @@ class Profile:
 
     def __write(self) -> None:
         atomic_write(self.pmc_profile.json(exclude_defaults=True), self.pmc_profile_path)
-        self.inventory.write()
         self.hideout.write()
-
-        atomic_write(ujson.dumps(self.quests_data, indent=4), self.quests_path)
-
         self.mail.write()
 
     def __enter__(self) -> Profile:

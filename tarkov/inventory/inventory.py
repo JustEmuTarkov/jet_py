@@ -298,11 +298,12 @@ class GridInventoryStashMap:
         """
         item_footprint = self._calculate_item_footprint(item, child_items, location)
         if item_footprint.is_out_of_bounds(inventory_width=self.width, inventory_height=self.height):
+            logger.debug(item_footprint)
             raise GridInventoryStashMap.OutOfBoundsError
 
         for other_footprint in self.footprints.values():
             if item_footprint.overlaps(other_footprint):
-                logger.debug(item_footprint, other_footprint, sep="\n")
+                logger.debug(item_footprint, other_footprint)
                 return False
         return True
 
@@ -729,8 +730,12 @@ class PlayerInventory(GridInventory):
 
     def __init__(self, profile: "Profile"):
         super().__init__()
-        profile_id = profile.profile_id
-        self._path = root_dir.joinpath("resources", "profiles", profile_id, "pmc_inventory.json")
+        self.profile: "Profile" = profile
+        self.inventory = profile.pmc_profile.Inventory
+
+        for item in self.items:
+            item.__inventory__ = self
+        self.stash_map = PlayerInventoryStashMap(inventory=self)
 
     @property
     def grid_size(self) -> Tuple[int, int]:
@@ -756,20 +761,6 @@ class PlayerInventory(GridInventory):
     @property
     def equipment_id(self) -> str:
         return self.inventory.equipment
-
-    def read(self) -> None:
-        """
-        Reads inventory file from disk
-        """
-        self.inventory = InventoryModel(**ujson.load(self._path.open("r", encoding="utf8")))
-        for item in self.items:
-            item.__inventory__ = self
-
-        self.stash_map = PlayerInventoryStashMap(inventory=self)
-
-    def write(self) -> None:
-        atomic_write(self.inventory.json(exclude_none=True, exclude_defaults=True), self._path)
-
 
 def merge_extra_size(first: ItemExtraSize, second: ItemExtraSize) -> ItemExtraSize:
     extra_size = copy.deepcopy(first)

@@ -29,10 +29,10 @@ class Hideout:
     current_time: int
 
     def __init__(self, profile: "Profile"):
-        self.path = profile.profile_dir.joinpath("pmc_hideout.json")
         self.meta_path = profile.profile_dir.joinpath("pmc_hideout.meta.json")
 
         self.profile: "Profile" = profile
+        self.data = profile.pmc_profile.Hideout
 
     @staticmethod
     def get_recipe(recipe_id: str) -> dict:
@@ -165,8 +165,6 @@ class Hideout:
         return int(fuel_consumed / self.__FUEL_BURN_RATE)
 
     def read(self) -> None:
-        self.data: dict = ujson.load(self.path.open("r", encoding="utf8"))
-
         if not self.meta_path.exists():
             self.metadata = {"updated_at": int(time.time())}
         else:
@@ -185,5 +183,4 @@ class Hideout:
         self.metadata["updated_at"] = self.current_time
 
     def write(self) -> None:
-        atomic_write(ujson.dumps(self.data, indent=4), self.path)
         atomic_write(ujson.dumps(self.metadata, indent=4), self.meta_path)
