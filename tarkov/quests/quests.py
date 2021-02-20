@@ -14,10 +14,12 @@ from tarkov.mail.models import (
 )
 from tarkov.trader import TraderInventory, TraderType
 from .models import (
+    Quest,
     QuestRewardAssortUnlock,
     QuestRewardExperience,
     QuestRewardItem,
     QuestRewardTraderStanding,
+    QuestStatus,
 )
 from .repositories import quests_repository
 from tarkov.profile.models import BackendCounter
@@ -29,18 +31,28 @@ if TYPE_CHECKING:
 
 class Quests:
     profile: "Profile"
-    data: List[dict]
+    quests: List[Quest]
 
     def __init__(
         self,
         profile: "Profile",
     ):
         self.profile: "Profile" = profile
-        self.data = self.profile.quests_data
+        self.quests = self.profile.pmc_profile.Quests
 
-    def get_quest(self, quest_id: str) -> dict:
+    def create_quest(self, quest_id: str) -> Quest:
+        quest_template = quests_repository.get_quest_template(quest_id)
+        quest = Quest(
+            quest_id=quest_template.id,
+            started_at=0,
+            status=QuestStatus.AvailableForStart,
+        )
+        self.quests.append(quest)
+        return quest
+
+    def get_quest(self, quest_id: str) -> Quest:
         try:
-            return next(quest for quest in self.data if quest["qid"] == quest_id)
+            return next(quest for quest in self.quests if quest.quest_id == quest_id)
         except StopIteration as e:
             raise KeyError from e
 
@@ -48,14 +60,14 @@ class Quests:
         # TODO: Create quest if it does not exist
         try:
             quest = self.get_quest(quest_id)
-            if quest["status"] in ("Started", "Success"):
-                raise ValueError("Quest is already accepted")
         except KeyError:
-            pass
+            quest = self.create_quest(quest_id)
 
-        quest = self.get_quest(quest_id)
-        quest["status"] = "Started"
-        quest["startTime"] = int(time.time())
+        if quest.status != QuestStatus.AvailableForStart:
+            raise ValueError("Quest is already accepted or locked")
+
+        quest.status = QuestStatus.Started
+        quest.started_at = int(time.time())
 
     def handover_items(
         self,
@@ -100,6 +112,8 @@ class Quests:
 
     def complete_quest(self, quest_id: str) -> None:
         quest_template = quests_repository.get_quest_template(quest_id)
+        quest = self.get_quest(quest_id)
+        quest.status = QuestStatus.Success
 
         reward_items: List[Item] = []
         for reward in quest_template.rewards.Success:
