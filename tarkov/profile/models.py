@@ -4,9 +4,11 @@ from pydantic import Extra, Field, StrictBool, StrictInt, root_validator
 from werkzeug.routing import ValidationError
 
 from server import root_dir
+from tarkov.fleamarket.models import Offer
 from tarkov.inventory.models import InventoryModel
 from tarkov.inventory.types import TemplateId
 from tarkov.models import Base
+from tarkov.quests.models import Quest
 from tarkov.trader.models import ItemInsurance, TraderStanding
 
 
@@ -78,6 +80,12 @@ class BackendCounter(Base):
     value: int
 
 
+class RagfairInfo(Base):
+    rating: float
+    isRatingGrowing: bool
+    offers: List[Offer]
+
+
 class ProfileModel(Base):
     class Config:
         extra = Extra.allow
@@ -105,8 +113,10 @@ class ProfileModel(Base):
     Bonuses: list
     Notes: dict
     TraderStandings: Dict[str, TraderStanding]
-    Quests: list
+    Quests: List[Quest]
     WishList: list
+    RagfairInfo: RagfairInfo
+    Health: dict
 
     @root_validator(pre=True)
     def collect_files(cls, values: dict) -> dict:  # pylint: disable=no-self-argument,no-self-use
