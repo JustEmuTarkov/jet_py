@@ -56,14 +56,12 @@ class DispatcherManager:
             dispatchers.FleaMarketDispatcher(self),
         )
 
-    def dispatch(self, request_data: dict) -> DispatcherResponse:
+    def dispatch(self, request_data: List[dict]) -> DispatcherResponse:
         with self.profile:
             self.inventory = self.profile.inventory
             self.__make_dispatchers()
 
-            # request.data should be dict at this moment
-            # noinspection PyTypeChecker
-            actions: List[dict] = request_data  # type: ignore
+            actions: List[dict] = request_data
 
             for action in actions:
                 logger.debug(action)
