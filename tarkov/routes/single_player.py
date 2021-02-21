@@ -1,6 +1,7 @@
 from pprint import pprint
-from typing import Any, List
+from typing import Any, Dict, List
 
+import pydantic
 import ujson
 from fastapi import Request
 from pydantic import BaseModel, parse_obj_as
@@ -13,7 +14,8 @@ from tarkov.lib import locations
 from tarkov.lib.bots import BotGenerator
 from tarkov.models import TarkovSuccessResponse
 from tarkov.profile import Profile
-from tarkov.profile.models import ProfileModel
+from tarkov.profile.models import BackendCounter, ProfileInfo, ProfileModel, Skills
+from tarkov.quests.models import Quest
 
 singleplayer_router = make_router(tags=["Singleplayer"])
 
@@ -137,6 +139,23 @@ async def singleplayer_raid_profile_save(request: Request) -> TarkovSuccessRespo
         # profile.pmc_profile['Info'] = profile_data['Info']
         # profile.pmc_profile['Encyclopedia'] = profile_data['Encyclopedia']
         # profile.pmc_profile['Skills'] = profile_data['Skills']
+        raid_profile = body["profile"]
+        profile.pmc_profile.Encyclopedia.update(raid_profile["Encyclopedia"])
+        profile.pmc_profile.Skills = Skills.parse_obj(raid_profile["Skills"])
+        profile.pmc_profile.Quests = pydantic.parse_obj_as(List[Quest], raid_profile["Quests"])
+
+        info = raid_profile["Info"]
+        info["LowerNickname"] = profile.pmc_profile.Info.LowerNickname
+        info["GameVersion"] = profile.pmc_profile.Info.GameVersion
+        info["LastTimePlayedAsSavage"] = profile.pmc_profile.Info.LastTimePlayedAsSavage
+        profile.pmc_profile.Info = ProfileInfo.parse_obj(info)
+
+        backend_counters = {k: v for k, v in raid_profile["BackendCounters"].items() if v["id"] and v["qid"]}
+        profile.pmc_profile.BackendCounters = pydantic.parse_obj_as(
+            Dict[str, BackendCounter],
+            backend_counters,
+        )
+        profile.pmc_profile.Stats = raid_profile["Stats"]
 
         raid_inventory_items: List[Item] = parse_obj_as(List[Item], body["profile"]["Inventory"]["items"])
         raid_inventory = SimpleInventory(items=raid_inventory_items)

@@ -17,6 +17,9 @@ class OfflineRaidSettings(Base):
 
 
 class ProfileInfo(Base):
+    class Config:
+        extra = Extra.ignore
+
     Nickname: str
     LowerNickname: str
     Side: str
@@ -25,14 +28,14 @@ class ProfileInfo(Base):
     Experience: int
     RegistrationDate: int
     GameVersion: str
-    AccountType: int
+    AccountType: int = 2
     MemberCategory: str = "UniqueId"
     lockedMoveCommands: StrictBool = False
     SavageLockTime: int
     LastTimePlayedAsSavage: int
     Settings: OfflineRaidSettings
-    NeedWipe: StrictBool
-    GlobalWipe: StrictBool
+    NeedWipe: StrictBool = False
+    GlobalWipe: StrictBool = False
     NicknameChangeDate: int
     Bans: list = Field(default_factory=list)
 

@@ -114,7 +114,7 @@ def nickname_validate(
 
 
 @profile_router.post("/client/game/profile/create")
-async def create_profile(
+def create_profile(
     profile_id: str = Cookie(..., alias="PHPSESSID"),  # type: ignore
     side: str = Body(..., embed=True),  # type: ignore
     nickname: str = Body(..., embed=True),  # type: ignore

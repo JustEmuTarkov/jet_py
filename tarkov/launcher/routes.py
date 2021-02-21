@@ -22,7 +22,7 @@ async def connect(request: Request) -> dict:
 
 
 @launcher_router.post("/launcher/profile/login")
-async def login(
+def login(
     email: str = Body(..., embed=True),  # type: ignore
     password: str = Body(..., embed=True),  # type: ignore
 ) -> PlainTextResponse:
