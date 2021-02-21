@@ -1,13 +1,22 @@
-from typing import Dict, Iterable, List
+from typing import Dict, Iterable, List, TYPE_CHECKING
 
 from pydantic import Field
 
+import tarkov.inventory_dispatcher.dispatchers.fleamarket
+import tarkov.inventory_dispatcher.dispatchers.hideout
+import tarkov.inventory_dispatcher.dispatchers.inventory
+import tarkov.inventory_dispatcher.dispatchers.quests
+import tarkov.inventory_dispatcher.dispatchers.trading
 from server import logger
 from tarkov.inventory import PlayerInventory
 from tarkov.inventory.models import Item
 from tarkov.models import Base
 from tarkov.profile import Profile
-from . import dispatchers
+
+
+if TYPE_CHECKING:
+    # pylint: disable=unused-import
+    from tarkov.inventory_dispatcher.dispatchers import Dispatcher
 
 
 class DispatcherResponseItems(Base):
@@ -40,7 +49,7 @@ class DispatcherManager:
 
     response: DispatcherResponse
 
-    dispatchers: Iterable["dispatchers.Dispatcher"]
+    dispatchers: Iterable["Dispatcher"]
 
     def __init__(self, profile: Profile):
         self.profile: Profile = profile
@@ -49,11 +58,11 @@ class DispatcherManager:
 
     def __make_dispatchers(self) -> None:
         self.dispatchers = (
-            dispatchers.InventoryDispatcher(self),
-            dispatchers.HideoutDispatcher(self),
-            dispatchers.TradingDispatcher(self),
-            dispatchers.QuestDispatcher(self),
-            dispatchers.FleaMarketDispatcher(self),
+            tarkov.inventory_dispatcher.dispatchers.inventory.InventoryDispatcher(self),
+            tarkov.inventory_dispatcher.dispatchers.hideout.HideoutDispatcher(self),
+            tarkov.inventory_dispatcher.dispatchers.trading.TradingDispatcher(self),
+            tarkov.inventory_dispatcher.dispatchers.quests.QuestDispatcher(self),
+            tarkov.inventory_dispatcher.dispatchers.fleamarket.FleaMarketDispatcher(self),
         )
 
     def dispatch(self, request_data: List[dict]) -> DispatcherResponse:

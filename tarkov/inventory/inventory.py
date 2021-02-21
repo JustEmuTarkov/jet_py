@@ -5,10 +5,7 @@ import copy
 import itertools
 from typing import Dict, Iterable, List, Optional, TYPE_CHECKING, Tuple, Union
 
-import ujson
-
-from server import logger, root_dir
-from server.utils import atomic_write
+from server import logger
 from tarkov.exceptions import NoSpaceError, NotFoundError
 from tarkov.models import Base
 from .dict_models import ItemExtraSize
@@ -761,6 +758,7 @@ class PlayerInventory(GridInventory):
     @property
     def equipment_id(self) -> str:
         return self.inventory.equipment
+
 
 def merge_extra_size(first: ItemExtraSize, second: ItemExtraSize) -> ItemExtraSize:
     extra_size = copy.deepcopy(first)

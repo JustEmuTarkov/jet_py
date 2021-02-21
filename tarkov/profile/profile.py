@@ -41,11 +41,11 @@ class Encyclopedia:
 
 
 class Profile:
-    class ProfileDoesNotExistsError(Exception):
-        pass
-
     # pylint: disable=too-many-instance-attributes
     # Disabling that in case of profile is reasonable
+
+    class ProfileDoesNotExistsError(Exception):
+        pass
 
     pmc_profile: ProfileModel
 
