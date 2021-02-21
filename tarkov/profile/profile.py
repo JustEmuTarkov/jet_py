@@ -88,7 +88,7 @@ class Profile:
         self.pmc_profile.Info.Experience += amount
 
     def __read(self) -> None:
-        if not self.profile_dir.exists():
+        if not self.profile_dir.exists() or not self.pmc_profile_path.exists():
             raise Profile.ProfileDoesNotExistsError
         self.pmc_profile: ProfileModel = ProfileModel.parse_file(self.pmc_profile_path)
 
