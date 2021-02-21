@@ -27,14 +27,12 @@ profile_router = make_router(tags=["Profile"])
     response_model_exclude_none=True,
     response_model_exclude_unset=False,
 )
-async def client_game_profile_item_move(
-    request: ZLibRequest,
+def client_game_profile_item_move(
     profile: Profile = Depends(with_profile),  # type: ignore
+    body: dict = Body(...),  # type: ignore
 ) -> Union[TarkovSuccessResponse[DispatcherResponse], TarkovErrorResponse]:
-    data = await request.json()
-
     dispatcher = DispatcherManager(profile)
-    response = dispatcher.dispatch(data["data"])
+    response = dispatcher.dispatch(body["data"])
     return TarkovSuccessResponse(data=response)
 
 
@@ -118,5 +116,8 @@ def create_profile(
     profile_id: str = Cookie(..., alias="PHPSESSID"),  # type: ignore
     side: str = Body(..., embed=True),  # type: ignore
     nickname: str = Body(..., embed=True),  # type: ignore
-) -> None:
-    profile_service.create_profile(nickname=nickname, side=side, profile_id=profile_id)
+) -> TarkovSuccessResponse[dict]:
+    profile = profile_service.create_profile(nickname=nickname, side=side, profile_id=profile_id)
+    return TarkovSuccessResponse(data={
+        "uid": profile.id
+    })
