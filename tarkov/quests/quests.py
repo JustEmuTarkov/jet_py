@@ -83,12 +83,10 @@ class Quests:
 
         quest_template = quests_repository.get_quest_template(quest_id)
         quest_condition = next(
-            cond for cond in
-            quest_template.conditions.AvailableForFinish
-            if cond.props['id'] == condition_id
+            cond for cond in quest_template.conditions.AvailableForFinish if cond.props["id"] == condition_id
         )
         # Amount of items required for quest condition
-        required_amount: int = int(quest_condition.props['value'])
+        required_amount: int = int(quest_condition.props["value"])
 
         removed_items: List[Item] = []
         changed_items: List[Item] = []
