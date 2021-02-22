@@ -1,14 +1,12 @@
 from __future__ import annotations
 
 import abc
-import copy
 import itertools
 from typing import Dict, Iterable, List, Optional, TYPE_CHECKING, Tuple, Union
 
 from server import logger
 from tarkov.exceptions import NoSpaceError, NotFoundError
 from tarkov.models import Base
-from .dict_models import ItemExtraSize
 from .helpers import generate_item_id
 from .models import (
     AnyItemLocation,
@@ -758,12 +756,3 @@ class PlayerInventory(GridInventory):
     @property
     def equipment_id(self) -> str:
         return self.inventory.equipment
-
-
-def merge_extra_size(first: ItemExtraSize, second: ItemExtraSize) -> ItemExtraSize:
-    extra_size = copy.deepcopy(first)
-    extra_size["left"] = max(first["left"], second["left"])
-    extra_size["right"] = max(first["right"], second["right"])
-    extra_size["up"] = max(first["up"], second["up"])
-    extra_size["down"] = max(first["down"], second["down"])
-    return extra_size

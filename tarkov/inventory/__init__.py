@@ -1,4 +1,3 @@
-from .dict_models import ItemExtraSize
 from .helpers import generate_item_id, regenerate_items_ids
 from .inventory import (
     GridInventory,
