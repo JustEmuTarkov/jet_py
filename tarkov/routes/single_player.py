@@ -150,11 +150,15 @@ async def singleplayer_raid_profile_save(request: Request) -> TarkovSuccessRespo
         info["LastTimePlayedAsSavage"] = profile.pmc_profile.Info.LastTimePlayedAsSavage
         profile.pmc_profile.Info = ProfileInfo.parse_obj(info)
 
-        backend_counters = {k: v for k, v in raid_profile["BackendCounters"].items() if v["id"] and v["qid"]}
-        profile.pmc_profile.BackendCounters = pydantic.parse_obj_as(
-            Dict[str, BackendCounter],
-            backend_counters,
-        )
+        backend_counters: Dict[str, BackendCounter] = {
+            k: BackendCounter.parse_obj(v)
+            for k, v in raid_profile["BackendCounters"].items()
+            if v["id"] and v["qid"]
+        }
+        for key, raid_counter in backend_counters.items():
+            profile_counter = profile.pmc_profile.BackendCounters.get(key, raid_counter)
+            profile.pmc_profile.BackendCounters[key] = max(raid_counter, profile_counter, key=lambda c: c.value)
+
         profile.pmc_profile.Stats = raid_profile["Stats"]
 
         raid_inventory_items: List[Item] = parse_obj_as(List[Item], body["profile"]["Inventory"]["items"])
