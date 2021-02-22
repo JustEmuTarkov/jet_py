@@ -7,7 +7,6 @@ from fastapi.params import Body, Cookie, Depends
 from starlette.requests import Request
 
 from server import root_dir
-from server.requests import ZLibRequest
 from server.utils import get_request_url_root, make_router
 from tarkov.dependencies import with_profile
 from tarkov.inventory_dispatcher import DispatcherManager

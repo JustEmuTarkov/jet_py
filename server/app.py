@@ -8,6 +8,7 @@ from starlette.requests import Request
 from starlette.responses import Response, StreamingResponse
 
 from server import root_dir
+from tarkov.bots.router import bots_router
 from tarkov.launcher.routes import launcher_router
 from tarkov.mail.routes import mail_router
 from tarkov.notifier.router import notifier_router
@@ -61,6 +62,7 @@ app.include_router(misc_router)
 app.include_router(flea_market_router)
 app.include_router(match_router)
 app.include_router(launcher_router)
+app.include_router(bots_router)
 
 app.mount(
     "/files",
