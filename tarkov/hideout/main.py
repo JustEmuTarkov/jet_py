@@ -127,7 +127,9 @@ class Hideout:
             assert generator_work_time >= 0
 
             # TODO: Move 0.15 into settings
-            production["Progress"] += generator_work_time + generator_idle_time * self.__GENERATOR_SPEED_WITHOUT_FUEL
+            production["Progress"] += (
+                generator_work_time + generator_idle_time * self.__GENERATOR_SPEED_WITHOUT_FUEL
+            )
             # production['SkipTime'] +=
 
     def __update_fuel(self) -> int:
