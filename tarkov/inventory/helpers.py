@@ -22,9 +22,7 @@ def regenerate_items_ids(items: List["Item"]) -> None:
     """
     Generates new ids for all items in list (mutates the list)
     """
-    items = [item for item in items if item.parent_id is not None]
-
-    id_map: Dict["ItemId", "ItemId"] = {item.id: generate_item_id() for item in items if item.parent_id}
+    id_map: Dict["ItemId", "ItemId"] = {item.id: generate_item_id() for item in items}
 
     for item in items:
         item.id = id_map[item.id]
