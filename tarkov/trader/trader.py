@@ -17,6 +17,7 @@ from tarkov.inventory import (
 from tarkov.inventory.models import Item, ItemUpd
 from tarkov.inventory.types import TemplateId
 from tarkov.quests.models import QuestStatus
+from tarkov.repositories.categories import category_repository
 from tarkov.trader.models import (
     BarterScheme,
     BarterSchemeEntry,
@@ -153,7 +154,7 @@ class TraderInventory(ImmutableInventory):
 
     def can_sell(self, item: Item) -> bool:
         try:
-            category_id = item_templates_repository.get_category(item)
+            category_id = category_repository.get_category(item.tpl).Id
         except KeyError:
             return False
         return category_id in self.base.sell_category
