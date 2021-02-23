@@ -9,8 +9,9 @@ from tarkov.inventory.implementations import SimpleInventory
 from tarkov.inventory.models import Item
 from tarkov.inventory.types import TemplateId
 from tarkov.inventory_dispatcher.models import ActionType, InventoryActions, Owner
-from tarkov.trader import TraderInventory, TraderType
+from tarkov.trader import TraderType
 from .base import Dispatcher
+from tarkov.trader.trader import Trader
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
@@ -74,7 +75,7 @@ class InventoryDispatcher(Dispatcher):
         if action.fromOwner.type == "Trader":
             trader_id = action.fromOwner.id
 
-            trader_inventory = TraderInventory(TraderType(trader_id), self.profile)
+            trader_inventory = Trader(TraderType(trader_id), self.profile).inventory
             item = trader_inventory.get(item_id)
             self.profile.encyclopedia.examine(item)
 
@@ -145,8 +146,8 @@ class InventoryDispatcher(Dispatcher):
 
     def _insure(self, action: InventoryActions.Insure) -> None:
         trader = TraderType(action.tid)
-        trader_inventory = TraderInventory(
-            trader=trader,
+        trader_inventory = Trader(
+            TraderType(action.tid),
             profile=self.profile,
         )
 

@@ -12,7 +12,7 @@ from tarkov.mail.models import (
     MailMessageItems,
     MailMessageType,
 )
-from tarkov.trader import TraderInventory, TraderType
+from tarkov.trader import TraderType
 from .models import (
     Quest,
     QuestRewardAssortUnlock,
@@ -23,6 +23,7 @@ from .models import (
 )
 from .repositories import quests_repository
 from tarkov.profile.models import BackendCounter
+from ..trader.trader import Trader
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
@@ -146,7 +147,7 @@ class Quests:
                 standing_change = float(reward.value)
                 trader_id = reward.target
 
-                trader = TraderInventory(TraderType(trader_id), self.profile)
+                trader = Trader(TraderType(trader_id), self.profile)
                 standing = trader.standing
                 standing.current_standing += standing_change
 

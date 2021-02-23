@@ -87,7 +87,7 @@ class Profile:
     def receive_experience(self, amount: int) -> None:
         self.pmc_profile.Info.Experience += amount
 
-    def __read(self) -> None:
+    def read(self) -> None:
         if not self.profile_dir.exists() or not self.pmc_profile_path.exists():
             raise Profile.ProfileDoesNotExistsError
         self.pmc_profile: ProfileModel = ProfileModel.parse_file(self.pmc_profile_path)
@@ -104,14 +104,14 @@ class Profile:
         self.mail = Mail(profile=self)
         self.mail.read()
 
-    def __write(self) -> None:
+    def write(self) -> None:
         self.hideout.write()
         self.mail.write()
         self.inventory.write()
         atomic_write(self.pmc_profile.json(exclude_defaults=True), self.pmc_profile_path)
 
     def __enter__(self) -> Profile:
-        self.__read()
+        self.read()
         return self
 
     def __exit__(
@@ -121,4 +121,4 @@ class Profile:
         exc_tb: Optional[TracebackType],
     ) -> None:
         if exc_type is None:
-            self.__write()
+            self.write()

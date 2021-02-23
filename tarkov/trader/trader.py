@@ -3,7 +3,7 @@ from __future__ import annotations
 import itertools
 import random
 import time
-from typing import Dict, Iterable, List, TYPE_CHECKING, Union
+from typing import ClassVar, Dict, Iterable, List, TYPE_CHECKING, Union
 
 import pydantic
 import ujson
@@ -34,38 +34,128 @@ if TYPE_CHECKING:
 FENCE_ASSORT_LIFETIME = 10 * 60
 
 
+class Trader:
+    def __init__(self, type_: TraderType, profile: Profile):
+        self.type: TraderType = type_
+        self.path = db_dir.joinpath("traders", self.type.value)
+        self.player_profile: Profile = profile
+
+        self._base: TraderBase = TraderBase.parse_file(self.path.joinpath("base.json"))
+        self.inventory = TraderInventory(self)
+
+    @property
+    def base(self) -> TraderBase:
+        trader_base = self._base.copy(deep=True)
+        trader_base.loyalty = self.standing
+        return trader_base
+
+    def can_sell(self, item: Item) -> bool:
+        try:
+            category_id = category_repository.get_category(item.tpl).Id
+        except KeyError:
+            return False
+        return category_id in self.base.sell_category
+
+    def get_item_price(self, item: Item) -> int:
+        price: float = 0
+
+        for i in itertools.chain([item], self.inventory.iter_item_children_recursively(item)):
+            item_template = item_templates_repository.get_template(i)
+            price += item_template.props.CreditsPrice
+
+        return int(price)
+
+    def get_sell_price(self, item: Item) -> int:
+        """
+        :returns Price of item and it's children
+        """
+        if not self.can_sell(item):
+            raise ValueError("Item is not sellable")
+
+        tpl = item_templates_repository.get_template(item)
+        price = tpl.props.CreditsPrice
+
+        for child in self.player_profile.inventory.iter_item_children_recursively(item):
+            child_tpl = item_templates_repository.get_template(child)
+            child_price = child_tpl.props.CreditsPrice
+            if self.can_sell(child):
+                price += child_price
+            else:
+                price += int(child_price * 0.85)
+
+        return int(price)
+
+    @staticmethod
+    def calculate_insurance_price(items: Union[Item, List[Item]]) -> int:
+        if isinstance(items, Item):
+            items = [items]
+
+        price: float = 0
+        for item in items:
+            item_template = item_templates_repository.get_template(item)
+            price += item_template.props.CreditsPrice * 0.1
+            #  Todo account for trader standing (subtract standing from insurance price, 0.5 (50%) max)
+
+        return int(price)
+
+    def buy_item(self, item_id: ItemId, count: int) -> List[BoughtItems]:
+        base_item = self.inventory.get(item_id)
+        item_template = item_templates_repository.get_template(base_item.tpl)
+        item_stack_size = item_template.props.StackMaxSize
+
+        bought_items_list: List[BoughtItems] = []
+
+        while count:
+            stack_size = min(count, item_stack_size)
+            count -= stack_size
+            item: Item = base_item.copy(deep=True)
+            item.upd.StackObjectsCount = 1
+            children_items: List[Item] = [
+                child.copy(deep=True) for child in self.inventory.iter_item_children_recursively(base_item)
+            ]
+
+            all_items = children_items + [item]
+            regenerate_items_ids(all_items)
+            for item in all_items:
+                item.upd.UnlimitedCount = False
+
+            item.upd = ItemUpd(StackObjectsCount=stack_size)
+            bought_items_list.append(BoughtItems(item=item, children_items=children_items))
+
+        return bought_items_list
+
+    @property
+    def standing(self) -> TraderStanding:
+        if self.type.value not in self.player_profile.pmc_profile.TraderStandings:
+            standing_copy: TraderStanding = self._base.loyalty.copy(deep=True)
+            self.player_profile.pmc_profile.TraderStandings[self.type.value] = TraderStanding.parse_obj(
+                standing_copy
+            )
+
+        return self.player_profile.pmc_profile.TraderStandings[self.type.value]
+
+
 class TraderInventory(ImmutableInventory):
-    trader: TraderType
-    profile: Profile
-    base: TraderBase
-    _barter_scheme: BarterScheme
-    _loyal_level_items: dict
-    quest_assort: dict
+    __fence_assort: ClassVar[List[Item]] = []
+    __fence_assort_created_at: ClassVar[int] = 0
 
-    __fence_assort: List[Item] = []
-    __fence_assort_created_at: int = 0
-
-    def __init__(self, trader: TraderType, profile: Profile):
+    def __init__(self, trader: Trader):
         self.trader = trader
-        self.profile = profile
-
-        trader_path = db_dir.joinpath("traders", self.trader.value)
 
         self.assort_items: Dict[ItemId, Item] = {
             item.id: item
             for item in pydantic.parse_obj_as(
                 List[Item],
-                ujson.load(trader_path.joinpath("items.json").open("r", encoding="utf8")),
+                ujson.load(self.trader.path.joinpath("items.json").open("r", encoding="utf8")),
             )
         }
-
-        self.base = TraderBase.parse_file(trader_path.joinpath("base.json"))
-
-        self._barter_scheme = BarterScheme.parse_file(trader_path.joinpath("barter_scheme.json"))
+        self._barter_scheme = BarterScheme.parse_file(self.trader.path.joinpath("barter_scheme.json"))
         self.loyal_level_items = ujson.load(
-            trader_path.joinpath("loyal_level_items.json").open("r", encoding="utf8")
+            self.trader.path.joinpath("loyal_level_items.json").open("r", encoding="utf8")
         )
-        self._quest_assort = ujson.load(trader_path.joinpath("questassort.json").open("r", encoding="utf8"))
+        self._quest_assort = ujson.load(
+            self.trader.path.joinpath("questassort.json").open("r", encoding="utf8")
+        )
 
     @property
     def items(self) -> Dict[ItemId, Item]:
@@ -73,7 +163,7 @@ class TraderInventory(ImmutableInventory):
 
     @property
     def assort(self) -> List[Item]:
-        if self.trader == TraderType.Fence:
+        if self.trader.type == TraderType.Fence:
             current_time = time.time()
             expired = current_time > (TraderInventory.__fence_assort_created_at + FENCE_ASSORT_LIFETIME)
 
@@ -86,8 +176,8 @@ class TraderInventory(ImmutableInventory):
 
     @property
     def barter_scheme(self) -> BarterScheme:
-        if self.trader == TraderType.Fence:
-            self._get_fence_barter_scheme()
+        if self.trader.type == TraderType.Fence:
+            return self._get_fence_barter_scheme()
 
         return self._barter_scheme
 
@@ -95,7 +185,7 @@ class TraderInventory(ImmutableInventory):
         barter_scheme = BarterScheme()
 
         for item in self.items.values():
-            item_price = self.get_item_price(item)
+            item_price = self.trader.get_item_price(item)
 
             barter_scheme[item.id] = [
                 [
@@ -128,7 +218,7 @@ class TraderInventory(ImmutableInventory):
 
             quest_id = self._quest_assort["success"][item.id]
             try:
-                quest = self.profile.quests.get_quest(quest_id)
+                quest = self.trader.player_profile.quests.get_quest(quest_id)
             except KeyError:
                 return False
             return quest.status == QuestStatus.Started
@@ -138,7 +228,7 @@ class TraderInventory(ImmutableInventory):
                 return True
 
             required_standing = self.loyal_level_items[item.id]
-            return self.standing.current_level >= required_standing
+            return self.trader.standing.current_level >= required_standing
 
         def filter_in_root(item: Item) -> bool:
             return item.slot_id == "hideout"
@@ -154,109 +244,3 @@ class TraderInventory(ImmutableInventory):
                 yield from self.iter_item_children_recursively(item)
 
         return list(assort_inner(items))
-
-    def can_sell(self, item: Item) -> bool:
-        try:
-            category_id = category_repository.get_category(item.tpl).Id
-        except KeyError:
-            return False
-        return category_id in self.base.sell_category
-
-    def get_item_price(self, item: Item) -> int:
-        price: float = 0
-
-        for i in itertools.chain([item], self.iter_item_children_recursively(item)):
-            item_template = item_templates_repository.get_template(i)
-            price += item_template.props.CreditsPrice
-
-        return int(price)
-
-    def get_sell_price(self, item: Item) -> int:
-        """
-        :returns Price of item and it's children
-        """
-        if not self.can_sell(item):
-            raise ValueError("Item is not sellable")
-
-        tpl = item_templates_repository.get_template(item)
-        price = tpl.props.CreditsPrice
-
-        for child in self.profile.inventory.iter_item_children_recursively(item):
-            child_tpl = item_templates_repository.get_template(child)
-            child_price = child_tpl.props.CreditsPrice
-            if self.can_sell(child):
-                price += child_price
-            else:
-                price += int(child_price * 0.85)
-
-        return int(price)
-
-    def buy_item(self, item_id: ItemId, count: int) -> List[BoughtItems]:
-        base_item = self.get(item_id)
-        item_template = item_templates_repository.get_template(base_item.tpl)
-        item_stack_size = item_template.props.StackMaxSize
-
-        bought_items_list: List[BoughtItems] = []
-
-        while count:
-            stack_size = min(count, item_stack_size)
-            count -= stack_size
-            item: Item = base_item.copy(deep=True)
-            item.upd.StackObjectsCount = 1
-            children_items: List[Item] = [
-                child.copy(deep=True) for child in self.iter_item_children_recursively(base_item)
-            ]
-
-            all_items = children_items + [item]
-            regenerate_items_ids(all_items)
-            for item in all_items:
-                item.upd.UnlimitedCount = False
-
-            item.upd = ItemUpd(StackObjectsCount=stack_size)
-            bought_items_list.append(BoughtItems(item=item, children_items=children_items))
-
-        return bought_items_list
-
-    @staticmethod
-    def calculate_insurance_price(items: Union[Item, List[Item]]) -> int:
-        if isinstance(items, Item):
-            items = [items]
-
-        price: float = 0
-        for item in items:
-            item_template = item_templates_repository.get_template(item)
-            price += item_template.props.CreditsPrice * 0.1
-            #  Todo account for trader standing (subtract standing from insurance price, 0.5 (50%) max)
-
-        return int(price)
-
-    def _increase_sales_sum(self, amount: int) -> None:
-        raise NotImplementedError
-
-    @property
-    def standing(self) -> TraderStanding:
-        if self.trader.value not in self.profile.pmc_profile.TraderStandings:
-            standing_copy: TraderStanding = self.base.loyalty.copy(deep=True)
-            self.profile.pmc_profile.TraderStandings[self.trader.value] = TraderStanding.parse_obj(
-                standing_copy
-            )
-
-        return self.profile.pmc_profile.TraderStandings[self.trader.value]
-
-
-def get_trader_bases() -> List[dict]:
-    traders_path = db_dir.joinpath("traders")
-
-    paths = set(traders_path.rglob("*/base.json")) - set(traders_path.rglob("ragfair/base.json"))
-
-    traders_data = [ujson.load(file.open("r", encoding="utf8")) for file in paths]
-    traders_data = sorted(traders_data, key=lambda trader: trader["_id"])
-
-    return traders_data
-
-
-def get_trader_base(trader_id: str) -> dict:
-    base_path = db_dir.joinpath("traders", trader_id, "base.json")
-    if not base_path.exists():
-        raise ValueError(f"Path {base_path} does not exists")
-    return ujson.load(base_path.open("r", encoding="utf8"))
