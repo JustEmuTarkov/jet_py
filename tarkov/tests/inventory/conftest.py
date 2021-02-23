@@ -10,6 +10,7 @@ import pytest  # type: ignore
 from server import root_dir
 from tarkov.inventory import PlayerInventory, item_templates_repository
 from tarkov.inventory.models import Item, ItemTemplate
+from tarkov.inventory.factories import item_factory
 from tarkov.profile import Profile
 
 TEST_RESOURCES_PATH = root_dir.joinpath("tarkov", "tests", "resources")
@@ -48,7 +49,6 @@ def random_items() -> List[Item]:
     )
 
     items: List[Item] = [
-        item_templates_repository.create_item(item_templates_repository.get_template(tpl.id))[0]
-        for tpl in random_templates
+        item_factory.create_item(item_templates_repository.get_template(tpl.id))[0] for tpl in random_templates
     ]
     return items

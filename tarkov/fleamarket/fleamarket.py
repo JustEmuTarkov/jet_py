@@ -28,6 +28,7 @@ from .models import (
     SortType,
 )
 from tarkov.globals_ import globals_repository
+from tarkov.inventory.factories import item_factory
 
 
 class OfferGenerator:
@@ -121,11 +122,11 @@ class OfferGenerator:
                 )
             )
             ammo_count = max(1, abs(ammo_count))
-            root_item, _ = item_templates_repository.create_item(item_template, 1)
+            root_item, _ = item_factory.create_item(item_template, 1)
             offer_items = [root_item]
             root_item.upd.StackObjectsCount = ammo_count
         else:
-            root_item, child_items = item_templates_repository.create_item(item_template)
+            root_item, child_items = item_factory.create_item(item_template)
             offer_items = [root_item, *child_items]
 
         offer_price = sum(self.item_prices[i.tpl] for i in offer_items)

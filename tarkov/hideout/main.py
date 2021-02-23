@@ -7,9 +7,9 @@ from pydantic import parse_obj_as
 from server import db_dir, logger
 from server.utils import atomic_write
 from tarkov import inventory
-from tarkov.inventory import item_templates_repository
 from tarkov.inventory.models import Item
 from .models import HideoutArea, HideoutAreaType, HideoutProduction
+from tarkov.inventory.factories import item_factory
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
@@ -101,7 +101,7 @@ class Hideout:
         product_tpl = recipe["endProduct"]
         count = recipe["count"]
 
-        items = item_templates_repository.create_items(product_tpl, count)
+        items = item_factory.create_items(product_tpl, count)
         items_list: List[Item] = []
         for item, child_items in items:
             items_list.append(item)

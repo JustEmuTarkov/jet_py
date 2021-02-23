@@ -17,6 +17,7 @@ from tarkov.inventory import (
 from tarkov.inventory.helpers import regenerate_item_ids_dict
 from tarkov.inventory.models import Item, ItemTemplate
 from tarkov.inventory.prop_models import CompoundProps, LootContainerProps, StackableItemProps
+from tarkov.inventory.factories import item_factory
 from tarkov.inventory.types import ItemId, TemplateId
 from tarkov.models import Base
 
@@ -154,9 +155,11 @@ class LocationGenerator:
                 random_template = random.choices(item_templates, item_template_weights, k=1)[0]
                 count = 1
                 if isinstance(random_template.props, StackableItemProps):
-                    count = random.randint(random_template.props.StackMinRandom, random_template.props.StackMaxRandom)
+                    count = random.randint(
+                        random_template.props.StackMinRandom, random_template.props.StackMaxRandom
+                    )
 
-                item, children = item_templates_repository.create_item(random_template, count=count)
+                item, children = item_factory.create_item(random_template, count=count)
                 try:
                     container_inventory.place_item(item, child_items=children)
                     break

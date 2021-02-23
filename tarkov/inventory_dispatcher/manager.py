@@ -7,12 +7,10 @@ import tarkov.inventory_dispatcher.dispatchers.hideout
 import tarkov.inventory_dispatcher.dispatchers.inventory
 import tarkov.inventory_dispatcher.dispatchers.quests
 import tarkov.inventory_dispatcher.dispatchers.trading
-from server import logger
 from tarkov.inventory import PlayerInventory
 from tarkov.inventory.models import Item
 from tarkov.models import Base
 from tarkov.profile import Profile
-
 
 if TYPE_CHECKING:
     # pylint: disable=unused-import
@@ -73,11 +71,9 @@ class DispatcherManager:
             actions: List[dict] = request_data
 
             for action in actions:
-                logger.debug(action)
                 for dispatcher in self.dispatchers:
                     try:
                         dispatcher.dispatch(action)
-                        logger.debug(f"Action was dispatched in {dispatcher.__class__.__name__}")
                         break
                     except NotImplementedError:
                         pass

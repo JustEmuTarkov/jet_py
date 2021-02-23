@@ -4,12 +4,12 @@ from typing import List, TYPE_CHECKING
 from server import logger
 from tarkov.exceptions import NotFoundError
 from tarkov.fleamarket.fleamarket import flea_market_instance
-from tarkov.inventory import item_templates_repository
 from tarkov.inventory.models import Item
 from tarkov.inventory_dispatcher.models import ActionType, RagfairActions
 from tarkov.mail.models import MailDialogueMessage, MailMessageItems, MailMessageType
 from tarkov.trader import TraderType
 from .base import Dispatcher
+from tarkov.inventory.factories import item_factory
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
@@ -71,9 +71,7 @@ class FleaMarketDispatcher(Dispatcher):
         required_items: List[Item] = []
         for requirement in action.requirements:
             # TODO: This will probably cause issues with nested items, create_item function have to be changed
-            required_items_list = item_templates_repository.create_items(
-                requirement.template_id, requirement.count
-            )
+            required_items_list = item_factory.create_items(requirement.template_id, requirement.count)
             for item, children in required_items_list:
                 required_items.extend([item, *children])
 
