@@ -64,8 +64,8 @@ class Quests:
         except KeyError:
             quest = self.create_quest(quest_id)
         print(quest.status)
-        if quest.status != QuestStatus.AvailableForStart.value:
-            raise ValueError("Quest is already accepted or locked")
+        # if quest.status != QuestStatus.AvailableForStart.value:
+        #     raise ValueError("Quest is already accepted or locked")
 
         quest.status = QuestStatus.Started
         quest.started_at = int(time.time())
