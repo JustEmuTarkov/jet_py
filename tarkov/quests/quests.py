@@ -94,7 +94,7 @@ class Quests:
         for item_id, count in items.items():
             if required_amount <= 0:
                 break
-            item = self.profile.inventory.get_item(item_id)
+            item = self.profile.inventory.get(item_id)
             # Amount that we will subtract from item stack
             amount_to_subtract = min(required_amount, count, item.upd.StackObjectsCount)
 

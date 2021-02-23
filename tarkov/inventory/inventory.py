@@ -38,24 +38,21 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
 
     @property
     @abc.abstractmethod
-    def items(self) -> List[Item]:
+    def items(self) -> Dict[ItemId, Item]:
         pass
 
-    def get_item(self, item_id: str) -> Item:
+    def get(self, item_id: ItemId) -> Item:
         """
         Retrieves item from inventory by it's id
-
-        :param item_id: Item id
-        :return: Item instance (dict)
         """
         try:
-            return next(item for item in self.items if item.id == item_id)
-        except StopIteration as error:
+            return self.items[item_id]
+        except KeyError as error:
             raise NotFoundError(f"Item with id {item_id} was not found in {self.__class__.__name__}") from error
 
-    def get_item_by_template(self, template_id: TemplateId) -> Item:
+    def get_by_template(self, template_id: TemplateId) -> Item:
         try:
-            return next(item for item in self.items if item.tpl == template_id)
+            return next(item for item in self.items.values() if item.tpl == template_id)
         except StopIteration as error:
             raise NotFoundError from error
 
@@ -137,23 +134,125 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
         """
         Iterates over item's children
         """
-        for children in self.items:
-            try:
-                if children.parent_id == item.id:
-                    yield children
-            except KeyError:
-                pass
+        for children in self.items.values():
+            if children.parent_id == item.id:
+                yield children
 
     def iter_item_children_recursively(self, item: Item) -> Iterable[Item]:
         """
         Iterates over item's children recursively
         """
-        items = list(self.iter_item_children(item))
+        stack = list(self.iter_item_children(item))
 
-        while items:
-            child: Item = items.pop()
-            items.extend(self.iter_item_children(child))
+        while stack:
+            child: Item = stack.pop()
+            stack.extend(self.iter_item_children(child))
             yield child
+
+
+class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
+    def remove_item(self, item: Item, remove_children: bool = True) -> None:
+        """
+        Removes item from inventory
+        """
+        del self.items[item.id]
+        if not remove_children:
+            return
+
+        children = list(self.iter_item_children_recursively(item))
+        for child in children:
+            del self.items[child.id]
+
+    def remove_items(self, items: Iterable[Item], remove_children: bool = True) -> None:
+        for item in items:
+            self.remove_item(item, remove_children=remove_children)
+
+    def add_item(self, item: Item, child_items: List[Item] = None) -> None:
+        """
+        Adds item into inventory
+        """
+        child_items = child_items or []
+
+        for item_to_add in itertools.chain([item], child_items):
+            if item_to_add.id in self.items:
+                raise ValueError(f"Item is already present in {self.__class__.__name__}")
+
+            self.items[item_to_add.id] = item_to_add
+            item_to_add.__inventory__ = self
+
+    @staticmethod
+    def merge(item: Item, with_: Item) -> None:
+        """
+        Merges item with target item, item template ids should be same
+
+        :param item: Item that will be merged and removed
+        :param with_: Target item
+        """
+        if not item.tpl == with_.tpl:
+            raise ValueError("Item templates don't match")
+
+        item.get_inventory().remove_item(item)
+        with_.upd.StackObjectsCount += item.upd.StackObjectsCount
+
+    @staticmethod
+    def transfer(item: Item, to: Item, count: int) -> None:
+        """
+        :param item: Donor item
+        :param to: Target item
+        :param count: Amount to transfer
+        """
+        item.upd.StackObjectsCount -= count
+        to.upd.StackObjectsCount += count
+
+        if item.upd.StackObjectsCount < 0:
+            raise ValueError("item.upd.StackObjectsCount < 0")
+
+        if item.upd.StackObjectsCount == 0:
+            item.get_inventory().remove_item(item)
+
+    @staticmethod
+    def fold(item: Item, folded: bool) -> None:
+        """
+        Folds item
+        """
+        item_template = item_templates_repository.get_template(item)
+
+        assert isinstance(item_template.props, (WeaponProps, StockProps))
+        item.upd.Foldable = ItemUpdFoldable(Folded=folded)
+
+    def take_item(self, template_id: TemplateId, amount: int) -> Tuple[List[Item], List[Item]]:
+        """
+        Deletes amount of items with given template_id
+        :returns Tuple[affected_items, deleted_items]
+        """
+        items = (item for item in self.items.values() if item.tpl == template_id)
+        amount_to_take = amount
+
+        affected_items = []
+        deleted_items = []
+
+        for item in items:
+            to_take = min(amount_to_take, item.upd.StackObjectsCount)
+            item.upd.StackObjectsCount -= to_take
+            amount_to_take -= to_take
+
+            if item.upd.StackObjectsCount == 0:
+                self.remove_item(item)
+                deleted_items.append(item)
+            else:
+                affected_items.append(item)
+
+            if amount_to_take == 0:
+                break
+
+        if amount_to_take > 0:
+            raise ValueError("Not enough items in inventory")
+
+        return affected_items, deleted_items
+
+    @staticmethod
+    def can_split(item: Item) -> bool:
+        return item.upd.StackObjectsCount > 1
 
 
 class StashMapItemFootprint(Base):
@@ -209,7 +308,7 @@ class GridInventoryStashMap:
     def __init__(self, inventory: GridInventory):
         self.inventory = inventory
         self.width, self.height = inventory.grid_size
-        inventory_root = inventory.get_item(inventory.root_id)
+        inventory_root = inventory.get(inventory.root_id)
 
         self.footprints = {}
         for item in inventory.iter_item_children(inventory_root):
@@ -254,7 +353,7 @@ class GridInventoryStashMap:
     def remove(self, item: Item, child_items: List[Item]) -> None:
         parent_item = item
         while not self._is_item_in_root(parent_item) and parent_item.parent_id is not None:
-            parent_item = self.inventory.get_item(parent_item.parent_id)
+            parent_item = self.inventory.get(parent_item.parent_id)
 
         # Recalculate parent item footprint, needed for disassembling
         try:
@@ -355,120 +454,6 @@ class GridInventoryStashMap:
         print(*lines, sep="\n")
 
 
-class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
-    def remove_item(self, item: Item, remove_children: bool = True) -> None:
-        """
-        Removes item from inventory
-        """
-        self.items.remove(item)
-        if not remove_children:
-            return
-
-        for child in self.iter_item_children_recursively(item):
-            self.items.remove(child)
-
-    def remove_items(self, items: Iterable[Item], remove_children: bool = True) -> None:
-        for item in items:
-            try:
-                self.remove_item(item, remove_children=remove_children)
-            except ValueError as e:
-                raise ValueError(f"Item with id {item.id} is not present in {self.__class__.__name__}") from e
-
-    def add_item(self, item: Item, child_items: List[Item]) -> None:
-        """
-        Adds item into inventory
-        """
-        for item_to_add in itertools.chain([item], child_items):
-            if item_to_add in self.items:
-                raise ValueError(f"Item is already present in {self.__class__.__name__}")
-            self.items.append(item_to_add)
-            item_to_add.__inventory__ = self
-
-    def add_items(self, items: Iterable[Item]) -> None:
-        """
-        Adds multiple items into inventory
-        """
-
-        self.items.extend(items)
-        for item in items:
-            item.__inventory__ = self
-
-    @staticmethod
-    def merge(item: Item, with_: Item) -> None:
-        """
-        Merges item with target item, item template ids should be same
-
-        :param item: Item that will be merged and removed
-        :param with_: Target item
-        """
-        if not item.tpl == with_.tpl:
-            raise ValueError("Item templates don't match")
-
-        item.get_inventory().remove_item(item)
-
-        with_.upd.StackObjectsCount += item.upd.StackObjectsCount
-
-    @staticmethod
-    def transfer(item: Item, with_: Item, count: int) -> None:
-        """
-        :param item: Donor item
-        :param with_: Target item
-        :param count: Amount to transfer
-        """
-        item.upd.StackObjectsCount -= count
-        with_.upd.StackObjectsCount += count
-
-        if item.upd.StackObjectsCount < 0:
-            raise ValueError("item.upd.StackObjectsCount < 0")
-
-        if item.upd.StackObjectsCount == 0:
-            item.get_inventory().remove_item(item)
-
-    @staticmethod
-    def fold(item: Item, folded: bool) -> None:
-        """
-        Folds item
-        """
-        item_template = item_templates_repository.get_template(item)
-
-        assert isinstance(item_template.props, (WeaponProps, StockProps))
-        item.upd.Foldable = ItemUpdFoldable(Folded=folded)
-
-    def take_item(self, template_id: TemplateId, amount: int) -> Tuple[List[Item], List[Item]]:
-        """
-        Deletes amount of items with given template_id
-        :returns Tuple[affected_items, deleted_items]
-        """
-        items = (item for item in self.items if item.tpl == template_id)
-        amount_to_take = amount
-
-        affected_items = []
-        deleted_items = []
-
-        for item in items:
-            to_take = min(amount_to_take, item.upd.StackObjectsCount)
-            item.upd.StackObjectsCount -= to_take
-            amount_to_take -= to_take
-
-            if item.upd.StackObjectsCount == 0:
-                self.remove_item(item)
-                deleted_items.append(item)
-            else:
-                affected_items.append(item)
-
-            if amount_to_take == 0:
-                break
-
-        if amount_to_take > 0:
-            raise ValueError("Not enough items in inventory")
-
-        return affected_items, deleted_items
-
-    @staticmethod
-    def can_split(item: Item) -> bool:
-        return item.upd.StackObjectsCount > 1
-
-
 class GridInventory(MutableInventory):
     stash_map: GridInventoryStashMap
 
@@ -493,7 +478,8 @@ class GridInventory(MutableInventory):
         self.stash_map.remove(item, list(self.iter_item_children_recursively(item)))
         super().remove_item(item, remove_children=remove_children)
 
-    def add_item(self, item: Item, child_items: List[Item]) -> None:
+    def add_item(self, item: Item, child_items: List[Item] = None) -> None:
+        child_items = child_items or []
         self.stash_map.add(item, child_items)
         super().add_item(item=item, child_items=child_items)
 
@@ -529,11 +515,13 @@ class GridInventory(MutableInventory):
         """
         Moves item to location
         """
+        try:
+            item_inventory = item.get_inventory()
 
-        item_inventory = item.get_inventory()
-
-        children_items = list(item_inventory.iter_item_children_recursively(item))
-        item_inventory.remove_item(item, remove_children=True)
+            children_items = list(item_inventory.iter_item_children_recursively(item))
+            item_inventory.remove_item(item, remove_children=True)
+        except ValueError:
+            children_items = []
 
         if isinstance(move_location, InventoryMoveLocation):
             self._move_item(item=item, child_items=children_items, move_location=move_location)
@@ -545,9 +533,6 @@ class GridInventory(MutableInventory):
         elif isinstance(move_location, PatronInWeaponMoveLocation):
             self.__place_ammo_into_weapon(ammo=item, move_location=move_location)
 
-        elif isinstance(move_location, ModMoveLocation):
-            self._move_item(item=item, child_items=children_items, move_location=move_location)
-
         else:
             raise ValueError(f"Unknown item location: {move_location}")
 
@@ -557,22 +542,23 @@ class GridInventory(MutableInventory):
         child_items: List[Item],
         move_location: Union[InventoryMoveLocation, ModMoveLocation],
     ) -> None:
-        if isinstance(move_location, InventoryMoveLocation) and move_location.container == "hideout":
+        if (
+            isinstance(move_location, InventoryMoveLocation)
+            and move_location.container == "hideout"
+            and move_location.location
+        ):
             if not self.stash_map.can_place(item, child_items, move_location.location):
                 raise ValueError("Cannot place item into location since it is taken")
 
         # self.stash_map.add(item, children_items)
         item.slot_id = move_location.container
         item.parent_id = move_location.id
-        if isinstance(move_location, ModMoveLocation):
-            item.location = None
-        else:
-            item.location = move_location.location
+        item.location = move_location.location
 
         self.add_item(item, child_items)
 
     def __place_ammo_into_magazine(self, ammo: Item, move_location: CartridgesMoveLocation) -> Optional[Item]:
-        magazine = self.get_item(move_location.id)
+        magazine = self.get(move_location.id)
         ammo_inside_mag = list(self.iter_item_children(magazine))
 
         self.add_item(item=ammo, child_items=[])
@@ -608,7 +594,7 @@ class GridInventory(MutableInventory):
         ammo: Item,
         move_location: PatronInWeaponMoveLocation,
     ) -> Item:
-        weapon = self.get_item(move_location.id)
+        weapon = self.get(move_location.id)
 
         ammo.slot_id = "patron_in_weapon"
         ammo.location = None
@@ -629,15 +615,11 @@ class GridInventory(MutableInventory):
             new_item.upd.StackObjectsCount = count
             item.upd.StackObjectsCount -= count
 
-            new_item.location = split_location.location
-            new_item.parent_id = split_location.id
-            new_item.slot_id = split_location.container
-
-            self.add_item(new_item, child_items=[])
+            self.move_item(item, split_location)
             return new_item
 
         if isinstance(split_location, CartridgesMoveLocation):
-            magazine = self.get_item(split_location.id)
+            magazine = self.get(split_location.id)
             ammo = item
 
             magazine_template = item_templates_repository.get_template(magazine)
@@ -668,7 +650,6 @@ class GridInventory(MutableInventory):
         if isinstance(split_location, PatronInWeaponMoveLocation):
             ammo = self.simple_split_item(item=item, count=1)
             return self.__place_ammo_into_weapon(ammo=ammo, move_location=split_location)
-        # TODO: I'm not checking for ModMoveLocation there since i don't know if it might cause any problems
 
         raise ValueError(f"Unknown split location: {split_location}")
 
@@ -728,13 +709,11 @@ class PlayerInventory(GridInventory):
         self.profile: "Profile" = profile
         self.inventory = profile.pmc_profile.Inventory
 
-        for item in self.items:
-            item.__inventory__ = self
-        self.stash_map = PlayerInventoryStashMap(inventory=self)
+        self.__items: Dict[ItemId, Item] = {}
 
     @property
     def grid_size(self) -> Tuple[int, int]:
-        stash_item = self.get_item(self.root_id)
+        stash_item = self.get(self.root_id)
         stash_template = item_templates_repository.get_template(stash_item)
         assert isinstance(stash_template.props, CompoundProps)
         stash_grids = stash_template.props.Grids
@@ -742,8 +721,8 @@ class PlayerInventory(GridInventory):
         return grids_props.width, grids_props.height
 
     @property
-    def items(self) -> List[Item]:
-        return self.inventory.items
+    def items(self) -> Dict[ItemId, Item]:
+        return self.__items
 
     @property
     def root_id(self) -> ItemId:
@@ -756,3 +735,12 @@ class PlayerInventory(GridInventory):
     @property
     def equipment_id(self) -> str:
         return self.inventory.equipment
+
+    def read(self) -> None:
+        for item in self.inventory.items:
+            item.__inventory__ = self
+            self.__items[item.id] = item
+        self.stash_map = PlayerInventoryStashMap(inventory=self)
+
+    def write(self) -> None:
+        self.inventory.items = list(self.items.values())

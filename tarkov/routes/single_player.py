@@ -128,15 +128,14 @@ async def singleplayer_raid_profile_save(request: Request) -> TarkovSuccessRespo
 
         raid_inventory_items: List[Item] = parse_obj_as(List[Item], body["profile"]["Inventory"]["items"])
         raid_inventory = SimpleInventory(items=raid_inventory_items)
-        equipment = profile.inventory.get_item(profile.inventory.inventory.equipment)
+        equipment = profile.inventory.get(profile.inventory.inventory.equipment)
 
         # Remove all equipment children
         profile.inventory.remove_item(equipment, remove_children=True)
-        profile.inventory.add_item(equipment, child_items=[])
 
-        raid_equipment = raid_inventory.iter_item_children_recursively(raid_inventory.get_item(equipment.id))
+        raid_equipment = raid_inventory.iter_item_children_recursively(raid_inventory.get(equipment.id))
         # regenerate_items_ids(equipment_items)  # Regenerate item ids to be 100% safe
-        profile.inventory.add_items(raid_equipment)
+        profile.inventory.add_item(equipment, list(raid_equipment))
 
     return TarkovSuccessResponse(data=None)
 

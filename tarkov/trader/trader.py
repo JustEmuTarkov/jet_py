@@ -3,7 +3,7 @@ from __future__ import annotations
 import itertools
 import random
 import time
-from typing import Iterable, List, TYPE_CHECKING, Union
+from typing import Dict, Iterable, List, TYPE_CHECKING, Union
 
 import pydantic
 import ujson
@@ -15,7 +15,7 @@ from tarkov.inventory import (
     regenerate_items_ids,
 )
 from tarkov.inventory.models import Item, ItemUpd
-from tarkov.inventory.types import TemplateId
+from tarkov.inventory.types import ItemId, TemplateId
 from tarkov.quests.models import QuestStatus
 from tarkov.repositories.categories import category_repository
 from tarkov.trader.models import (
@@ -37,7 +37,6 @@ FENCE_ASSORT_LIFETIME = 10 * 60
 class TraderInventory(ImmutableInventory):
     trader: TraderType
     profile: Profile
-    assort_items: List[Item]
     base: TraderBase
     _barter_scheme: BarterScheme
     _loyal_level_items: dict
@@ -52,10 +51,14 @@ class TraderInventory(ImmutableInventory):
 
         trader_path = db_dir.joinpath("traders", self.trader.value)
 
-        self.assort_items = pydantic.parse_obj_as(
-            List[Item],
-            ujson.load(trader_path.joinpath("items.json").open("r", encoding="utf8")),
-        )
+        self.assort_items: Dict[ItemId, Item] = {
+            item.id: item
+            for item in pydantic.parse_obj_as(
+                List[Item],
+                ujson.load(trader_path.joinpath("items.json").open("r", encoding="utf8")),
+            )
+        }
+
         self.base = TraderBase.parse_file(trader_path.joinpath("base.json"))
 
         self._barter_scheme = BarterScheme.parse_file(trader_path.joinpath("barter_scheme.json"))
@@ -65,7 +68,7 @@ class TraderInventory(ImmutableInventory):
         self._quest_assort = ujson.load(trader_path.joinpath("questassort.json").open("r", encoding="utf8"))
 
     @property
-    def items(self) -> List[Item]:
+    def items(self) -> Dict[ItemId, Item]:
         return self.assort_items
 
     @property
@@ -91,7 +94,7 @@ class TraderInventory(ImmutableInventory):
     def _get_fence_barter_scheme(self) -> BarterScheme:
         barter_scheme = BarterScheme()
 
-        for item in self.items:
+        for item in self.items.values():
             item_price = self.get_item_price(item)
 
             barter_scheme[item.id] = [
@@ -106,7 +109,7 @@ class TraderInventory(ImmutableInventory):
         return barter_scheme
 
     def _generate_fence_assort(self) -> List[Item]:
-        root_items = set(item for item in self.items if item.slot_id == "hideout")
+        root_items = set(item for item in self.items.values() if item.slot_id == "hideout")
         assort = random.sample(root_items, k=min(len(root_items), 200))
 
         child_items: List[Item] = []
@@ -140,7 +143,7 @@ class TraderInventory(ImmutableInventory):
         def filter_in_root(item: Item) -> bool:
             return item.slot_id == "hideout"
 
-        items = filter(filter_in_root, self.items)  # Filter root items
+        items = filter(filter_in_root, self.items.values())  # Filter root items
         items = filter(filter_quest_assort, items)  # Filter items that require quest completion
         items = filter(filter_loyal_level, items)  # Filter items that require loyalty level
 
@@ -188,8 +191,8 @@ class TraderInventory(ImmutableInventory):
 
         return int(price)
 
-    def buy_item(self, item_id: str, count: int) -> List[BoughtItems]:
-        base_item = self.get_item(item_id)
+    def buy_item(self, item_id: ItemId, count: int) -> List[BoughtItems]:
+        base_item = self.get(item_id)
         item_template = item_templates_repository.get_template(base_item.tpl)
         item_stack_size = item_template.props.StackMaxSize
 

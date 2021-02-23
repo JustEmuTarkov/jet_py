@@ -33,7 +33,7 @@ class HideoutDispatcher(Dispatcher):
             count = item_required["count"]
             item_id = item_required["id"]
 
-            item = self.profile.inventory.get_item(item_id)
+            item = self.profile.inventory.get(item_id)
             item.upd.StackObjectsCount -= count
             if not item.upd.StackObjectsCount:
                 self.profile.inventory.remove_item(item)
@@ -52,7 +52,7 @@ class HideoutDispatcher(Dispatcher):
 
         for slot_id, item_data in action.items.items():
             count, item_id = item_data["count"], item_data["id"]
-            item = self.profile.inventory.get_item(item_id)
+            item = self.profile.inventory.get(item_id)
 
             if self.profile.inventory.can_split(item):
                 splitted_item = self.profile.inventory.simple_split_item(item=item, count=count)
@@ -73,7 +73,7 @@ class HideoutDispatcher(Dispatcher):
             item_id = item_info["id"]
             count = item_info["count"]
 
-            item = inventory.get_item(item_id=item_id)
+            item = inventory.get(item_id=item_id)
 
             if not inventory.can_split(item):
                 inventory.remove_item(item)

@@ -183,7 +183,7 @@ class TradingActions(SimpleNamespace):
             extra = Extra.forbid
 
         tid: str
-        item_id: str
+        item_id: ItemId
         count: StrictInt
         scheme_id: StrictInt
         scheme_items: List[TradingSchemeItemModel]

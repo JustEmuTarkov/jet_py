@@ -265,7 +265,7 @@ class InventoryModel(Base):
 class InventoryMoveLocation(Base):
     id: ItemId
     container: str
-    location: ItemInventoryLocation
+    location: Optional[ItemInventoryLocation] = None
 
 
 class CartridgesMoveLocation(Base):

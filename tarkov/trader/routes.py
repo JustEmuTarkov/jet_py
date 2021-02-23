@@ -58,7 +58,7 @@ def get_user_assort_price(
     trader_inventory = TraderInventory(TraderType(trader_id), profile=profile)
     items = {}
 
-    for item in profile.inventory.items:
+    for item in profile.inventory.items.values():
         if not trader_inventory.can_sell(item):
             continue
 

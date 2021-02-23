@@ -45,7 +45,7 @@ class InventoryDispatcher(Dispatcher):
 
     def _move(self, action: InventoryActions.Move) -> None:
         donor_inventory = self.get_owner_inventory(action.fromOwner)
-        item = donor_inventory.get_item(action.item)
+        item = donor_inventory.get(action.item)
 
         self.inventory.move_item(
             item=item,
@@ -55,18 +55,19 @@ class InventoryDispatcher(Dispatcher):
 
     def _split(self, action: InventoryActions.Split) -> None:
         donor_inventory = self.get_owner_inventory(action.fromOwner)
-        item = donor_inventory.get_item(action.item)
+        item = donor_inventory.get(action.item)
+        new_item = self.inventory.simple_split_item(item, count=action.count)
 
-        new_item = self.inventory.split_item(item=item, split_location=action.container, count=action.count)
+        self.inventory.move_item(new_item, move_location=action.container)
 
         if new_item:
-            self.response.items.new.append(new_item)
+            self.response.items.new.append(new_item.copy(deep=True))
 
     def _examine(self, action: InventoryActions.Examine) -> None:
         item_id = action.item
 
         if action.fromOwner is None:
-            item = self.inventory.get_item(item_id)
+            item = self.inventory.get(item_id)
             self.profile.encyclopedia.examine(item)
             return
 
@@ -74,7 +75,7 @@ class InventoryDispatcher(Dispatcher):
             trader_id = action.fromOwner.id
 
             trader_inventory = TraderInventory(TraderType(trader_id), self.profile)
-            item = trader_inventory.get_item(item_id)
+            item = trader_inventory.get(item_id)
             self.profile.encyclopedia.examine(item)
 
         elif action.fromOwner.type in ("HideoutUpgrade", "HideoutProduction"):
@@ -94,8 +95,8 @@ class InventoryDispatcher(Dispatcher):
 
     def _merge(self, action: InventoryActions.Merge) -> None:
         donor_inventory = self.get_owner_inventory(action.fromOwner)
-        item = donor_inventory.get_item(item_id=action.item)
-        with_ = self.inventory.get_item(action.with_)
+        item = donor_inventory.get(item_id=action.item)
+        with_ = self.inventory.get(action.with_)
 
         self.inventory.merge(item=item, with_=with_)
 
@@ -104,18 +105,18 @@ class InventoryDispatcher(Dispatcher):
 
     def _transfer(self, action: InventoryActions.Transfer) -> None:
         donor_inventory = self.get_owner_inventory(action.fromOwner)
-        item = donor_inventory.get_item(item_id=action.item)
-        with_ = self.inventory.get_item(action.with_)
+        item = donor_inventory.get(item_id=action.item)
+        with_ = self.inventory.get(action.with_)
 
-        self.inventory.transfer(item=item, with_=with_, count=action.count)
+        self.inventory.transfer(item=item, to=with_, count=action.count)
         self.response.items.change.extend((item, with_))
 
     def _fold(self, action: InventoryActions.Fold) -> None:
-        item = self.inventory.get_item(action.item)
+        item = self.inventory.get(action.item)
         self.inventory.fold(item, action.value)
 
     def _remove(self, action: InventoryActions.Remove) -> None:
-        item = self.inventory.get_item(action.item)
+        item = self.inventory.get(action.item)
         self.inventory.remove_item(item)
 
         self.response.items.del_.append(item)
@@ -128,7 +129,7 @@ class InventoryDispatcher(Dispatcher):
         if action.changedItems is not None:
             changed_items: List[Tuple[Item, List[Item]]] = []
             for changed_item in action.changedItems:
-                item = self.inventory.get_item(changed_item.id)
+                item = self.inventory.get(changed_item.id)
                 child_items = list(self.inventory.iter_item_children_recursively(item))
                 self.inventory.remove_item(item, remove_children=True)
                 changed_items.append((item, child_items))
@@ -138,7 +139,7 @@ class InventoryDispatcher(Dispatcher):
 
         if action.deletedItems is not None:
             for deleted_item in action.deletedItems:
-                item = self.profile.inventory.get_item(deleted_item.id)
+                item = self.profile.inventory.get(deleted_item.id)
                 self.profile.inventory.remove_item(item)
                 self.response.items.del_.append(item)
 
@@ -152,7 +153,7 @@ class InventoryDispatcher(Dispatcher):
         rubles_tpl_id = tarkov.inventory.types.TemplateId("5449016a4bdc2d6f028b456f")
         total_price = 0
         for item_id in action.items:
-            item = self.profile.inventory.get_item(item_id)
+            item = self.profile.inventory.get(item_id)
             total_price += trader_inventory.calculate_insurance_price(item)
             self.profile.add_insurance(item, trader)
 

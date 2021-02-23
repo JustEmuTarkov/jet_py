@@ -32,7 +32,7 @@ async def items_list_cost(
         trader_items: Dict[TemplateId, int] = {}
 
         for item_id in request.items:
-            item = profile.inventory.get_item(item_id)
+            item = profile.inventory.get(item_id)
             trader_items[item.tpl] = trader_inventory.calculate_insurance_price(item)
 
         insurance_data[trader_id] = trader_items

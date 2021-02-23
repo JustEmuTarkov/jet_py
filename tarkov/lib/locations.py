@@ -40,10 +40,15 @@ class ContainerInventory(GridInventory):
 
     def __init__(self, container: dict):
         self.container = parse_obj_as(ContainerInventoryModel, container)
+        self._items = {i.id: i for i in self.container.Items}
 
-        root_item = self.get_item(self.container.Root)
+        root_item = self.get(self.container.Root)
         self.template = item_templates_repository.get_template(root_item.tpl)
         self.stash_map = GridInventoryStashMap(self)
+
+    @property
+    def items_list_view(self) -> List[dict]:
+        return list(i.dict(exclude_none=True) for i in self._items.values())
 
     @property
     def root_id(self) -> ItemId:
@@ -57,8 +62,8 @@ class ContainerInventory(GridInventory):
         return grid_props.width, grid_props.height
 
     @property
-    def items(self) -> List[Item]:
-        return self.container.Items
+    def items(self) -> Dict[ItemId, Item]:
+        return self._items
 
     def place_item(
         self,
@@ -166,7 +171,7 @@ class LocationGenerator:
                 except NoSpaceError:
                     pass
 
-        container["Items"] = container_inventory.container.dict(exclude_none=True)["Items"]
+        container["Items"] = container_inventory.items_list_view
 
     @staticmethod
     def __template_weight(template: ItemTemplate) -> Union[int, float]:

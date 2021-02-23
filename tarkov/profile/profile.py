@@ -94,6 +94,8 @@ class Profile:
 
         self.encyclopedia = Encyclopedia(profile=self)
         self.inventory = tarkov.inventory.PlayerInventory(profile=self)
+        self.inventory.read()
+
         self.quests = quests.Quests(profile=self)
 
         self.hideout = Hideout(profile=self)
@@ -103,9 +105,10 @@ class Profile:
         self.mail.read()
 
     def __write(self) -> None:
-        atomic_write(self.pmc_profile.json(exclude_defaults=True), self.pmc_profile_path)
         self.hideout.write()
         self.mail.write()
+        self.inventory.write()
+        atomic_write(self.pmc_profile.json(exclude_defaults=True), self.pmc_profile_path)
 
     def __enter__(self) -> Profile:
         self.__read()

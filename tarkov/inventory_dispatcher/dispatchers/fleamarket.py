@@ -54,7 +54,7 @@ class FleaMarketDispatcher(Dispatcher):
 
             # Take required items from inventory
             for req in offer_to_buy.requirements:
-                item = self.inventory.get_item(req.id)
+                item = self.inventory.get(req.id)
                 if req.count == item.upd.StackObjectsCount:
                     self.inventory.remove_item(item)
                     self.response.items.del_.append(item)
@@ -64,7 +64,7 @@ class FleaMarketDispatcher(Dispatcher):
 
     def _add_offer(self, action: RagfairActions.Add) -> None:
         # Todo: Add taxation
-        items = [self.inventory.get_item(item_id) for item_id in action.items]
+        items = [self.inventory.get(item_id) for item_id in action.items]
         self.response.items.del_.extend(item.copy(deep=True) for item in items)
         self.inventory.remove_items(items)
 

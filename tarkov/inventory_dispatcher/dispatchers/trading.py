@@ -48,7 +48,7 @@ class TradingDispatcher(Dispatcher):
 
         # Take required items from inventory
         for scheme_item in action.scheme_items:
-            item = self.inventory.get_item(scheme_item.id)
+            item = self.inventory.get(scheme_item.id)
             item.upd.StackObjectsCount -= scheme_item.count
             if not item.upd.StackObjectsCount:
                 self.inventory.remove_item(item)
@@ -61,7 +61,7 @@ class TradingDispatcher(Dispatcher):
         items_to_sell = action.items
         trader_inventory = TraderInventory(TraderType(trader_id), self.profile)
 
-        items = list(self.inventory.get_item(i.id) for i in items_to_sell)
+        items = list(self.inventory.get(i.id) for i in items_to_sell)
         price_sum: int = sum(trader_inventory.get_sell_price(item) for item in items)
 
         self.response.items.del_.extend(items)
