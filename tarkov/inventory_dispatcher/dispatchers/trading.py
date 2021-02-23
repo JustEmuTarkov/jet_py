@@ -34,9 +34,9 @@ class TradingDispatcher(Dispatcher):
         raise NotImplementedError(f"Trading action {action} not implemented")
 
     def __buy_from_trader(self, action: TradingActions.BuyFromTrader) -> None:
-        trader_inventory = Trader(TraderType(action.tid), self.profile)
+        trader = Trader(TraderType(action.tid), self.profile)
 
-        bought_items_list = trader_inventory.buy_item(action.item_id, action.count)
+        bought_items_list = trader.buy_item(action.item_id, action.count)
 
         for bought_item in bought_items_list:
             item = bought_item.item
@@ -57,6 +57,8 @@ class TradingDispatcher(Dispatcher):
                 self.response.items.del_.append(item)
             else:
                 self.response.items.change.append(item)
+
+        self.response.currentSalesSums[action.tid] = trader.standing.current_sales_sum
 
     def __sell_to_trader(self, action: TradingActions.SellToTrader) -> None:
         trader_id = action.tid
