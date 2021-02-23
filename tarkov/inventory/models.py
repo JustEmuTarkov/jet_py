@@ -110,8 +110,8 @@ class ItemUpdLockable(Base):
 
 
 class ItemUpdRepairable(Base):
-    MaxDurability: Optional[int] = None  # TODO: Some items in bot inventories don't have MaxDurability
-    Durability: int
+    MaxDurability: Optional[float] = None  # TODO: Some items in bot inventories don't have MaxDurability
+    Durability: float
 
 
 class ItemUpdFoldable(Base):

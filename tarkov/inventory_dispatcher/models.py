@@ -8,7 +8,6 @@ from tarkov import models
 from tarkov.fleamarket.models import OfferId
 from tarkov.inventory.models import AnyMoveLocation, Item
 from tarkov.inventory.types import ItemId, TemplateId
-from tarkov.models import Base
 
 
 class ActionType(enum.Enum):
@@ -84,6 +83,11 @@ class Owner(models.Base):
     type: Literal["Mail"]
 
 
+class RepairItem(models.Base):
+    item_id: ItemId = Field(alias="_id")
+    count: float
+
+
 class InventoryActions(SimpleNamespace):
     class ApplyInventoryChanges(ActionModel):
         changedItems: Optional[List[Item]]
@@ -128,6 +132,11 @@ class InventoryActions(SimpleNamespace):
     class Insure(ActionModel):
         items: List[ItemId]
         tid: str
+
+    class Repair(models.Base):
+        Action: Literal["Repair"]
+        tid: str
+        repairItems: List[RepairItem]
 
 
 class HideoutActions(SimpleNamespace):
@@ -215,18 +224,18 @@ class QuestActions(SimpleNamespace):
         removeExcessItems: StrictBool
 
 
-class RequiredItem(Base):
+class RequiredItem(models.Base):
     id: ItemId
     count: int
 
 
-class RagfairBuyOffer(Base):
+class RagfairBuyOffer(models.Base):
     offer_id: OfferId = Field(alias="id")
     count: int
     requirements: List[RequiredItem] = Field(alias="items")
 
 
-class RagfairOfferRequirement(Base):
+class RagfairOfferRequirement(models.Base):
     template_id: TemplateId = Field(alias="_tpl")
     count: int
     level: int

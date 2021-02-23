@@ -4,7 +4,7 @@ import tarkov.inventory
 from tarkov.exceptions import NotFoundError
 from tarkov.fleamarket.fleamarket import flea_market_instance
 from tarkov.fleamarket.models import OfferId
-from tarkov.inventory import MutableInventory
+from tarkov.inventory import MutableInventory, item_templates_repository
 from tarkov.inventory.implementations import SimpleInventory
 from tarkov.inventory.models import Item
 from tarkov.inventory.types import TemplateId
@@ -32,6 +32,7 @@ class InventoryDispatcher(Dispatcher):
             ActionType.ReadEncyclopedia: self._read_encyclopedia,
             ActionType.Insure: self._insure,
             ActionType.ApplyInventoryChanges: self._apply_inventory_changes,
+            ActionType.Repair: self._repair,
         }
 
     def get_owner_inventory(self, owner: Optional[Owner] = None) -> MutableInventory:
@@ -162,3 +163,40 @@ class InventoryDispatcher(Dispatcher):
 
         self.response.items.change.extend(affected_items)
         self.response.items.del_.extend(deleted_items)
+
+    def _repair(self, action: InventoryActions.Repair) -> None:
+        trader = Trader(TraderType(action.tid), self.profile)
+        try:
+            price_rate: float = 1 + trader.base.repair.price_rate / 100
+        except ZeroDivisionError:
+            price_rate = 1
+
+        for repair_item in action.repairItems:
+            item = self.inventory.get(repair_item.item_id)
+            item_template = item_templates_repository.get_template(item.tpl)
+            repair_cost_per_1_durability = item_template.props.RepairCost
+
+            if item.upd.FaceShield is not None:
+                item.upd.FaceShield.Hits = 0
+
+            assert item.upd.Repairable is not None
+            new_durability = item.upd.Repairable.Durability + repair_item.count
+            item.upd.Repairable.MaxDurability = new_durability
+            item.upd.Repairable.Durability = new_durability
+            self.response.items.change.append(item)
+
+            total_repair_cost: int = round(repair_cost_per_1_durability * price_rate)
+
+            assert trader.base.repair.currency is not None
+            while total_repair_cost > 0:
+                currency_item = self.inventory.get_by_template(trader.base.repair.currency)
+                amount_to_take = min(currency_item.upd.StackObjectsCount, total_repair_cost)
+                currency_item.upd.StackObjectsCount -= amount_to_take
+
+                total_repair_cost -= amount_to_take
+
+                if not currency_item.upd.StackObjectsCount:
+                    self.response.items.del_.append(currency_item.copy(deep=True))
+                    self.inventory.remove_item(currency_item)
+                else:
+                    self.response.items.change.append(currency_item)
