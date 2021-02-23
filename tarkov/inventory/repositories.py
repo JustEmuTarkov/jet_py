@@ -8,7 +8,7 @@ from server import db_dir
 from tarkov.exceptions import NotFoundError
 from .helpers import generate_item_id, regenerate_items_ids
 from .models import Item, ItemTemplate, ItemUpdMedKit, ItemUpdResource, NodeTemplate
-from .prop_models import FuelProps, MedsProps
+from .prop_models import AmmoBoxProps, FuelProps, MedsProps
 from .types import ItemId, TemplateId
 from tarkov.globals_ import globals_repository
 from tarkov.repositories.categories import CategoryId
@@ -146,16 +146,25 @@ class ItemTemplatesRepository:
         except NotFoundError:
             pass
 
+        item = Item(
+            id=generate_item_id(),
+            tpl=item_template.id,
+        )
+        if isinstance(item_template.props, AmmoBoxProps):
+            ammo_template_id: TemplateId = item_template.props.StackSlots[0]["_props"]["filters"][0]["Filter"][0]
+            ammo_template = item_templates_repository.get_template(ammo_template_id)
+            ammo, _ = item_templates_repository.create_item(ammo_template, 1)
+            ammo.upd.StackObjectsCount = count
+            ammo.parent_id = item.id
+            ammo.slot_id = "cartridges"
+
+            return item, [ammo]
+
         if count > item_template.props.StackMaxSize:
             raise ValueError(
                 f"Trying to create item with template id {item_template} with stack size "
                 f"of {count} but maximum stack size is {item_template.props.StackMaxSize}"
             )
-
-        item = Item(
-            id=generate_item_id(),
-            tpl=item_template.id,
-        )
 
         if count > 1:
             item.upd.StackObjectsCount = count
