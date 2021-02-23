@@ -18,8 +18,8 @@ def atomic_write(str_: str, path: Path, *, encoding: str = "utf8") -> None:
         with tmp_path.open(mode="w", encoding=encoding) as tmp_file:
             tmp_file.write(str_)
 
-        path.unlink(missing_ok=True)
-        tmp_path.rename(path)
+        # tmp_path.rename(path)
+        tmp_path.replace(path)
     finally:
         tmp_path.unlink(missing_ok=True)
 
