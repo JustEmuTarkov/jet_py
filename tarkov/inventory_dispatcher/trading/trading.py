@@ -74,8 +74,8 @@ class TradingDispatcher(Dispatcher):
         self.inventory.remove_items(items)
 
         currency_item = Item(
-                id=generate_item_id(),
-                tpl=TemplateId(trader.base.currency),
+            id=generate_item_id(),
+            tpl=TemplateId(trader.base.currency),
         )
         currency_item.upd = price_sum
 

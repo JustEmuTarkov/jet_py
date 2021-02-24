@@ -172,6 +172,7 @@ class Hideout:
         else:
             self.metadata = ujson.load(self.meta_path.open("r", encoding="utf8"))
 
+    def update(self) -> None:
         self.current_time = int(time.time())
         self.time_elapsed = self.current_time - self.metadata["updated_at"]
         time_generator_worked = self.__update_fuel()

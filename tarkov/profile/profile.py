@@ -110,6 +110,9 @@ class Profile:
         self.inventory.write()
         atomic_write(self.pmc_profile.json(exclude_defaults=True), self.pmc_profile_path)
 
+    def update(self) -> None:
+        self.hideout.update()
+
     def __enter__(self) -> Profile:
         self.read()
         return self

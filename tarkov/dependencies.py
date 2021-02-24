@@ -22,6 +22,7 @@ async def with_profile(
             profiles[profile_id].read()
 
         try:
+            profiles[profile_id].update()
             yield profiles[profile_id]
             # After completing request write profile if everything is ok
             profiles[profile_id].write()
