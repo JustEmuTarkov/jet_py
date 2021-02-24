@@ -1,8 +1,18 @@
 from typing import TYPE_CHECKING
 
 from tarkov.hideout.models import HideoutAreaType
-from tarkov.inventory_dispatcher.models import ActionType, HideoutActions
-from .base import Dispatcher
+from tarkov.inventory_dispatcher.models import ActionType
+from tarkov.inventory_dispatcher.base import Dispatcher
+
+from .models import (
+    PutItemsInAreaSlots,
+    SingleProductionStart,
+    TakeItemsFromAreaSlots,
+    TakeProduction,
+    ToggleArea,
+    Upgrade,
+    UpgradeComplete,
+)
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
@@ -22,7 +32,7 @@ class HideoutDispatcher(Dispatcher):
             ActionType.HideoutTakeItemsFromAreaSlots: self._hideout_take_items_from_area_slots,
         }
 
-    def _hideout_upgrade_start(self, action: HideoutActions.Upgrade) -> None:
+    def _hideout_upgrade_start(self, action: Upgrade) -> None:
         hideout = self.profile.hideout
 
         area_type = HideoutAreaType(action.areaType)
@@ -41,13 +51,13 @@ class HideoutDispatcher(Dispatcher):
             else:
                 self.response.items.change.append(item)
 
-    def _hideout_upgrade_finish(self, action: HideoutActions.UpgradeComplete) -> None:
+    def _hideout_upgrade_finish(self, action: UpgradeComplete) -> None:
         hideout = self.profile.hideout
 
         area_type = HideoutAreaType(action.areaType)
         hideout.area_upgrade_finish(area_type)
 
-    def _hideout_put_items_in_area_slots(self, action: HideoutActions.PutItemsInAreaSlots) -> None:
+    def _hideout_put_items_in_area_slots(self, action: PutItemsInAreaSlots) -> None:
         area_type = HideoutAreaType(action.areaType)
 
         for slot_id, item_data in action.items.items():
@@ -61,11 +71,11 @@ class HideoutDispatcher(Dispatcher):
                 self.profile.inventory.remove_item(item)
                 self.profile.hideout.put_items_in_area_slots(area_type, int(slot_id), item)
 
-    def _hideout_toggle_area(self, action: HideoutActions.ToggleArea) -> None:
+    def _hideout_toggle_area(self, action: ToggleArea) -> None:
         area_type = HideoutAreaType(action.areaType)
         self.profile.hideout.toggle_area(area_type, action.enabled)
 
-    def _hideout_single_production_start(self, action: HideoutActions.SingleProductionStart) -> None:
+    def _hideout_single_production_start(self, action: SingleProductionStart) -> None:
         items_info = action.items
         inventory = self.profile.inventory
 
@@ -88,13 +98,13 @@ class HideoutDispatcher(Dispatcher):
 
         self.profile.hideout.start_single_production(recipe_id=action.recipeId)
 
-    def _hideout_take_production(self, action: HideoutActions.TakeProduction) -> None:
+    def _hideout_take_production(self, action: TakeProduction) -> None:
         items = self.profile.hideout.take_production(action.recipeId)
         self.response.items.new.extend(items)
         for item in items:
             self.inventory.place_item(item)
 
-    def _hideout_take_items_from_area_slots(self, action: HideoutActions.TakeItemsFromAreaSlots) -> None:
+    def _hideout_take_items_from_area_slots(self, action: TakeItemsFromAreaSlots) -> None:
         hideout = self.profile.hideout
         area_type = HideoutAreaType(action.areaType)
         for slot_id in action.slots:

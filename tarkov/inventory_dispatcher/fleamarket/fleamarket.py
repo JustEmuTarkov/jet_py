@@ -5,11 +5,13 @@ from server import logger
 from tarkov.exceptions import NotFoundError
 from tarkov.fleamarket.fleamarket import flea_market_instance
 from tarkov.inventory.models import Item
-from tarkov.inventory_dispatcher.models import ActionType, RagfairActions
+from tarkov.inventory_dispatcher.models import ActionType
 from tarkov.mail.models import MailDialogueMessage, MailMessageItems, MailMessageType
 from tarkov.trader import TraderType
-from .base import Dispatcher
+from tarkov.inventory_dispatcher.base import Dispatcher
 from tarkov.inventory.factories import item_factory
+
+from .models import Add, Buy
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
@@ -24,7 +26,7 @@ class FleaMarketDispatcher(Dispatcher):
             ActionType.RagFairAddOffer: self._add_offer,
         }
 
-    def _buy_offer(self, action: RagfairActions.Buy) -> None:
+    def _buy_offer(self, action: Buy) -> None:
         for offer_to_buy in action.offers:
             try:
                 offer = flea_market_instance.get_offer(offer_to_buy.offer_id)
@@ -62,7 +64,7 @@ class FleaMarketDispatcher(Dispatcher):
                     item.upd.StackObjectsCount -= req.count
                     self.response.items.change.append(item)
 
-    def _add_offer(self, action: RagfairActions.Add) -> None:
+    def _add_offer(self, action: Add) -> None:
         # Todo: Add taxation
         items = [self.inventory.get(item_id) for item_id in action.items]
         self.response.items.del_.extend(item.copy(deep=True) for item in items)

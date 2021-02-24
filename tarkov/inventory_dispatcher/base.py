@@ -3,7 +3,7 @@ from __future__ import annotations
 import typing
 from typing import Callable, Dict, TYPE_CHECKING
 
-from tarkov.inventory_dispatcher.models import ActionModel, ActionType
+from tarkov.inventory_dispatcher.models import ActionType
 
 
 if TYPE_CHECKING:

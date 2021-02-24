@@ -2,20 +2,20 @@ from typing import Dict, Iterable, List, TYPE_CHECKING
 
 from pydantic import Field
 
-import tarkov.inventory_dispatcher.dispatchers.fleamarket
-import tarkov.inventory_dispatcher.dispatchers.hideout
-import tarkov.inventory_dispatcher.dispatchers.inventory
-import tarkov.inventory_dispatcher.dispatchers.quests
-import tarkov.inventory_dispatcher.dispatchers.trading
 from server import logger
 from tarkov.inventory import PlayerInventory
 from tarkov.inventory.models import Item
+from tarkov.inventory_dispatcher.fleamarket import FleaMarketDispatcher
+from tarkov.inventory_dispatcher.hideout import HideoutDispatcher
+from tarkov.inventory_dispatcher.inventory import InventoryDispatcher
+from tarkov.inventory_dispatcher.quests import QuestDispatcher
+from tarkov.inventory_dispatcher.trading import TradingDispatcher
 from tarkov.models import Base
 from tarkov.profile import Profile
 
 if TYPE_CHECKING:
     # pylint: disable=unused-import
-    from tarkov.inventory_dispatcher.dispatchers import Dispatcher
+    from tarkov.inventory_dispatcher.base import Dispatcher
 
 
 class DispatcherResponseItems(Base):
@@ -57,11 +57,11 @@ class DispatcherManager:
 
     def __make_dispatchers(self) -> None:
         self.dispatchers = (
-            tarkov.inventory_dispatcher.dispatchers.inventory.InventoryDispatcher(self),
-            tarkov.inventory_dispatcher.dispatchers.hideout.HideoutDispatcher(self),
-            tarkov.inventory_dispatcher.dispatchers.trading.TradingDispatcher(self),
-            tarkov.inventory_dispatcher.dispatchers.quests.QuestDispatcher(self),
-            tarkov.inventory_dispatcher.dispatchers.fleamarket.FleaMarketDispatcher(self),
+            InventoryDispatcher(self),
+            HideoutDispatcher(self),
+            TradingDispatcher(self),
+            QuestDispatcher(self),
+            FleaMarketDispatcher(self),
         )
 
     def dispatch(self, request_data: List[dict]) -> DispatcherResponse:

@@ -8,10 +8,24 @@ from tarkov.inventory import MutableInventory, item_templates_repository
 from tarkov.inventory.implementations import SimpleInventory
 from tarkov.inventory.models import Item
 from tarkov.inventory.types import TemplateId
-from tarkov.inventory_dispatcher.models import ActionType, InventoryActions, Owner
+from tarkov.inventory_dispatcher.models import ActionType, Owner
 from tarkov.trader import TraderType
-from .base import Dispatcher
+from tarkov.inventory_dispatcher.base import Dispatcher
 from tarkov.trader.trader import Trader
+
+from .models import (
+    ApplyInventoryChanges,
+    Examine,
+    Fold,
+    Insure,
+    Merge,
+    Move,
+    ReadEncyclopedia,
+    Remove,
+    Repair,
+    Split,
+    Transfer,
+)
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
@@ -45,7 +59,7 @@ class InventoryDispatcher(Dispatcher):
 
         raise ValueError(f"Cannot find inventory for owner: {owner}")
 
-    def _move(self, action: InventoryActions.Move) -> None:
+    def _move(self, action: Move) -> None:
         donor_inventory = self.get_owner_inventory(action.fromOwner)
         item = donor_inventory.get(action.item)
 
@@ -55,7 +69,7 @@ class InventoryDispatcher(Dispatcher):
         )
         self.response.items.new.append(item)
 
-    def _split(self, action: InventoryActions.Split) -> None:
+    def _split(self, action: Split) -> None:
         donor_inventory = self.get_owner_inventory(action.fromOwner)
         item = donor_inventory.get(action.item)
         new_item = self.inventory.simple_split_item(item, count=action.count)
@@ -65,7 +79,7 @@ class InventoryDispatcher(Dispatcher):
         if new_item:
             self.response.items.new.append(new_item.copy(deep=True))
 
-    def _examine(self, action: InventoryActions.Examine) -> None:
+    def _examine(self, action: Examine) -> None:
         item_id = action.item
 
         if action.fromOwner is None:
@@ -95,7 +109,7 @@ class InventoryDispatcher(Dispatcher):
             assert action.item == item.id
             self.profile.encyclopedia.examine(item)
 
-    def _merge(self, action: InventoryActions.Merge) -> None:
+    def _merge(self, action: Merge) -> None:
         donor_inventory = self.get_owner_inventory(action.fromOwner)
         item = donor_inventory.get(item_id=action.item)
         with_ = self.inventory.get(action.with_)
@@ -105,7 +119,7 @@ class InventoryDispatcher(Dispatcher):
         self.response.items.del_.append(item)
         self.response.items.change.append(with_)
 
-    def _transfer(self, action: InventoryActions.Transfer) -> None:
+    def _transfer(self, action: Transfer) -> None:
         donor_inventory = self.get_owner_inventory(action.fromOwner)
         item = donor_inventory.get(item_id=action.item)
         with_ = self.inventory.get(action.with_)
@@ -113,21 +127,21 @@ class InventoryDispatcher(Dispatcher):
         self.inventory.transfer(item=item, to=with_, count=action.count)
         self.response.items.change.extend((item, with_))
 
-    def _fold(self, action: InventoryActions.Fold) -> None:
+    def _fold(self, action: Fold) -> None:
         item = self.inventory.get(action.item)
         self.inventory.fold(item, action.value)
 
-    def _remove(self, action: InventoryActions.Remove) -> None:
+    def _remove(self, action: Remove) -> None:
         item = self.inventory.get(action.item)
         self.inventory.remove_item(item)
 
         self.response.items.del_.append(item)
 
-    def _read_encyclopedia(self, action: InventoryActions.ReadEncyclopedia) -> None:
+    def _read_encyclopedia(self, action: ReadEncyclopedia) -> None:
         for template_id in action.ids:
             self.profile.encyclopedia.read(template_id)
 
-    def _apply_inventory_changes(self, action: InventoryActions.ApplyInventoryChanges) -> None:
+    def _apply_inventory_changes(self, action: ApplyInventoryChanges) -> None:
         if action.changedItems is not None:
             changed_items: List[Tuple[Item, List[Item]]] = []
             for changed_item in action.changedItems:
@@ -145,7 +159,7 @@ class InventoryDispatcher(Dispatcher):
                 self.profile.inventory.remove_item(item)
                 self.response.items.del_.append(item)
 
-    def _insure(self, action: InventoryActions.Insure) -> None:
+    def _insure(self, action: Insure) -> None:
         trader = TraderType(action.tid)
         trader_inventory = Trader(
             TraderType(action.tid),
@@ -164,7 +178,7 @@ class InventoryDispatcher(Dispatcher):
         self.response.items.change.extend(affected_items)
         self.response.items.del_.extend(deleted_items)
 
-    def _repair(self, action: InventoryActions.Repair) -> None:
+    def _repair(self, action: Repair) -> None:
         trader = Trader(TraderType(action.tid), self.profile)
         try:
             price_rate: float = 1 + trader.base.repair.price_rate / 100

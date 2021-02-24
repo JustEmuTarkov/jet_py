@@ -4,11 +4,13 @@ import tarkov.inventory
 from tarkov.inventory import generate_item_id, item_templates_repository
 from tarkov.inventory.models import Item
 from tarkov.inventory.types import TemplateId
-from tarkov.inventory_dispatcher.models import ActionType, TradingActions
+from tarkov.inventory_dispatcher.models import ActionType
 from tarkov.trader import TraderType
 
-from .base import Dispatcher
+from tarkov.inventory_dispatcher.base import Dispatcher
 from tarkov.trader.trader import Trader
+
+from .models import BuyFromTrader, SellToTrader, Trading
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
@@ -22,18 +24,18 @@ class TradingDispatcher(Dispatcher):
             ActionType.TradingConfirm: self._trading_confirm,
         }
 
-    def _trading_confirm(self, action: TradingActions.Trading) -> None:
+    def _trading_confirm(self, action: Trading) -> None:
         if action.type == "buy_from_trader":
-            self.__buy_from_trader(TradingActions.BuyFromTrader(**action.dict()))
+            self.__buy_from_trader(BuyFromTrader(**action.dict()))
             return
 
         if action.type == "sell_to_trader":
-            self.__sell_to_trader(TradingActions.SellToTrader(**action.dict()))
+            self.__sell_to_trader(SellToTrader(**action.dict()))
             return
 
         raise NotImplementedError(f"Trading action {action} not implemented")
 
-    def __buy_from_trader(self, action: TradingActions.BuyFromTrader) -> None:
+    def __buy_from_trader(self, action: BuyFromTrader) -> None:
         trader = Trader(TraderType(action.tid), self.profile)
 
         bought_items_list = trader.buy_item(action.item_id, action.count)
@@ -60,7 +62,7 @@ class TradingDispatcher(Dispatcher):
 
         self.response.currentSalesSums[action.tid] = trader.standing.current_sales_sum
 
-    def __sell_to_trader(self, action: TradingActions.SellToTrader) -> None:
+    def __sell_to_trader(self, action: SellToTrader) -> None:
         trader_id = action.tid
         items_to_sell = action.items
         trader_inventory = Trader(TraderType(trader_id), self.profile)
