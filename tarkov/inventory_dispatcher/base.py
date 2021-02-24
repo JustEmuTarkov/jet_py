@@ -41,4 +41,4 @@ class Dispatcher:
         types = typing.get_type_hints(method)
         model_type = types["action"]
         # noinspection PyArgumentList
-        method(model_type(**action))  # type: ignore
+        method(model_type(**action))

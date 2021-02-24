@@ -5,7 +5,7 @@ from unittest.mock import patch
 from pathlib import Path
 from typing import Callable, List
 
-import pytest  # type: ignore
+import pytest
 
 from server import root_dir
 from tarkov.inventory import PlayerInventory, item_templates_repository
