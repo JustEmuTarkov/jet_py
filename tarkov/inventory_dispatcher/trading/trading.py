@@ -73,10 +73,10 @@ class TradingDispatcher(Dispatcher):
         self.response.items.del_.extend(items)
         self.inventory.remove_items(items)
 
-        rubles_tpl = item_templates_repository.get_template(
-            tarkov.inventory.types.TemplateId("5449016a4bdc2d6f028b456f")
+        currency_template = item_templates_repository.get_template(
+            tarkov.inventory.types.TemplateId(trader.base.currency)
         )
-        money_max_stack_size = rubles_tpl.props.StackMaxSize
+        money_max_stack_size = currency_template.props.StackMaxSize
 
         while price_sum:
             stack_size = min(money_max_stack_size, price_sum)
