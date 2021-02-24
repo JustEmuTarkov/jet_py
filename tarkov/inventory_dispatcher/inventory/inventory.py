@@ -203,4 +203,3 @@ class InventoryDispatcher(Dispatcher):
 
             assert trader.base.repair.currency is not None
             self.inventory.take_item(trader.base.repair.currency, total_repair_cost)
-

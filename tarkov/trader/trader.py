@@ -15,13 +15,14 @@ from tarkov.inventory import (
     regenerate_items_ids,
 )
 from tarkov.inventory.models import Item, ItemUpd
-from tarkov.inventory.types import ItemId, TemplateId
+from tarkov.inventory.types import CurrencyEnum, ItemId, TemplateId
 from tarkov.quests.models import QuestStatus
 from tarkov.repositories.categories import category_repository
 from tarkov.trader.models import (
     BarterScheme,
     BarterSchemeEntry,
     BoughtItems,
+    Price,
     TraderBase,
     TraderStanding,
     TraderType,
@@ -65,7 +66,7 @@ class Trader:
 
         return int(price)
 
-    def get_sell_price(self, item: Item) -> int:
+    def get_sell_price(self, item: Item) -> Price:
         """
         :returns Price of item and it's children
         """
@@ -73,17 +74,22 @@ class Trader:
             raise ValueError("Item is not sellable")
 
         tpl = item_templates_repository.get_template(item)
-        price = tpl.props.CreditsPrice
+        price_rub = tpl.props.CreditsPrice
 
         for child in self.player_profile.inventory.iter_item_children_recursively(item):
             child_tpl = item_templates_repository.get_template(child)
             child_price = child_tpl.props.CreditsPrice
             if self.can_sell(child):
-                price += child_price
-            else:
-                price += int(child_price * 0.85)
-
-        return int(price)
+                price_rub += child_price
+            # else:
+            #     price += int(child_price * 0.85)
+        currency_template_id: TemplateId = TemplateId(CurrencyEnum(self.base.currency).value)
+        currency_ratio = category_repository.item_categories[currency_template_id].Price
+        price = round(price_rub / currency_ratio)
+        return Price(
+            template_id=currency_template_id,
+            amount=price,
+        )
 
     @staticmethod
     def calculate_insurance_price(items: Union[Item, List[Item]]) -> int:

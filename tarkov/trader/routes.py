@@ -64,7 +64,7 @@ def get_user_assort_price(
             continue
 
         price = trader.get_sell_price(item)
-        items[item.id] = [[{"_tpl": "5449016a4bdc2d6f028b456f", "count": price}]]
+        items[item.id] = [[{"_tpl": price.template_id, "count": price.amount}]]
 
     # TODO: Calculate price for items to sell in specified trader
     # output is { "item._id": [[{ "_tpl": "", "count": 0 }]] }
