@@ -1,5 +1,5 @@
 from contextlib import contextmanager
-from typing import List, Optional, TYPE_CHECKING, Tuple
+from typing import Iterator, List, Optional, TYPE_CHECKING, Tuple
 
 import tarkov.inventory
 from tarkov.exceptions import NotFoundError
@@ -9,11 +9,10 @@ from tarkov.inventory import MutableInventory, item_templates_repository
 from tarkov.inventory.implementations import SimpleInventory
 from tarkov.inventory.models import Item
 from tarkov.inventory.types import TemplateId
+from tarkov.inventory_dispatcher.base import Dispatcher
 from tarkov.inventory_dispatcher.models import ActionType, Owner
 from tarkov.trader import TraderType
-from tarkov.inventory_dispatcher.base import Dispatcher
 from tarkov.trader.trader import Trader
-
 from .models import (
     ApplyInventoryChanges,
     Examine,
@@ -51,7 +50,7 @@ class InventoryDispatcher(Dispatcher):
         }
 
     @contextmanager
-    def owner_inventory(self, owner: Optional[Owner] = None) -> MutableInventory:
+    def owner_inventory(self, owner: Optional[Owner] = None) -> Iterator[MutableInventory]:
         if owner is None:
             yield self.inventory
             return

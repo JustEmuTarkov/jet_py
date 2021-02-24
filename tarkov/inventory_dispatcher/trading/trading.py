@@ -1,7 +1,6 @@
 from typing import TYPE_CHECKING
 
-import tarkov.inventory
-from tarkov.inventory import generate_item_id, item_templates_repository
+from tarkov.inventory import generate_item_id
 from tarkov.inventory.models import Item
 from tarkov.inventory.types import TemplateId
 from tarkov.inventory_dispatcher.models import ActionType
@@ -77,7 +76,7 @@ class TradingDispatcher(Dispatcher):
             id=generate_item_id(),
             tpl=TemplateId(trader.base.currency),
         )
-        currency_item.upd = price_sum
+        currency_item.upd.StackObjectsCount = price_sum
 
         currency_items = self.inventory.split_into_stacks(currency_item)
 
