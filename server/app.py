@@ -8,6 +8,7 @@ from starlette.requests import Request
 from starlette.responses import Response, StreamingResponse
 
 from server import root_dir
+from server.package_lib import PackageManager
 from tarkov.bots.router import bots_router
 from tarkov.launcher.routes import launcher_router
 from tarkov.mail.routes import mail_router
@@ -69,3 +70,7 @@ app.mount(
     StaticFiles(directory=str(root_dir.joinpath("resources", "static"))),
     name="static",
 )
+
+
+package_manager = PackageManager(root_dir.joinpath("mods"))
+package_manager.load_packages()
