@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from typing import List, Optional, TYPE_CHECKING, Tuple
 
 import tarkov.inventory
@@ -49,35 +50,40 @@ class InventoryDispatcher(Dispatcher):
             ActionType.Repair: self._repair,
         }
 
-    def get_owner_inventory(self, owner: Optional[Owner] = None) -> MutableInventory:
+    @contextmanager
+    def owner_inventory(self, owner: Optional[Owner] = None) -> MutableInventory:
         if owner is None:
-            return self.inventory
+            yield self.inventory
+            return
 
         if owner.type == "Mail":
             message = self.profile.mail.get_message(owner.id)
-            return SimpleInventory(message.items.data)
+            message_inventory = SimpleInventory(message.items.data)
+            yield message_inventory
+            message.items.data = list(message_inventory.items.values())
+            return
 
         raise ValueError(f"Cannot find inventory for owner: {owner}")
 
     def _move(self, action: Move) -> None:
-        donor_inventory = self.get_owner_inventory(action.fromOwner)
-        item = donor_inventory.get(action.item)
+        with self.owner_inventory(action.fromOwner) as owner_inventory:
+            item = owner_inventory.get(action.item)
 
-        self.inventory.move_item(
-            item=item,
-            move_location=action.to,
-        )
-        self.response.items.new.append(item)
+            self.inventory.move_item(
+                item=item,
+                move_location=action.to,
+            )
+            self.response.items.new.append(item)
 
     def _split(self, action: Split) -> None:
-        donor_inventory = self.get_owner_inventory(action.fromOwner)
-        item = donor_inventory.get(action.item)
-        new_item = self.inventory.simple_split_item(item, count=action.count)
+        with self.owner_inventory(action.fromOwner) as owner_inventory:
+            item = owner_inventory.get(action.item)
+            new_item = self.inventory.simple_split_item(item, count=action.count)
 
-        self.inventory.move_item(new_item, move_location=action.container)
+            self.inventory.move_item(new_item, move_location=action.container)
 
-        if new_item:
-            self.response.items.new.append(new_item.copy(deep=True))
+            if new_item:
+                self.response.items.new.append(new_item.copy(deep=True))
 
     def _examine(self, action: Examine) -> None:
         item_id = action.item
@@ -110,22 +116,22 @@ class InventoryDispatcher(Dispatcher):
             self.profile.encyclopedia.examine(item)
 
     def _merge(self, action: Merge) -> None:
-        donor_inventory = self.get_owner_inventory(action.fromOwner)
-        item = donor_inventory.get(item_id=action.item)
-        with_ = self.inventory.get(action.with_)
+        with self.owner_inventory(action.fromOwner) as owner_inventory:
+            item = owner_inventory.get(item_id=action.item)
+            with_ = self.inventory.get(action.with_)
 
-        self.inventory.merge(item=item, with_=with_)
+            self.inventory.merge(item=item, with_=with_)
 
-        self.response.items.del_.append(item)
-        self.response.items.change.append(with_)
+            self.response.items.del_.append(item)
+            self.response.items.change.append(with_)
 
     def _transfer(self, action: Transfer) -> None:
-        donor_inventory = self.get_owner_inventory(action.fromOwner)
-        item = donor_inventory.get(item_id=action.item)
-        with_ = self.inventory.get(action.with_)
+        with self.owner_inventory(action.fromOwner) as owner_inventory:
+            item = owner_inventory.get(item_id=action.item)
+            with_ = self.inventory.get(action.with_)
 
-        self.inventory.transfer(item=item, to=with_, count=action.count)
-        self.response.items.change.extend((item, with_))
+            self.inventory.transfer(item=item, to=with_, count=action.count)
+            self.response.items.change.extend((item, with_))
 
     def _fold(self, action: Fold) -> None:
         item = self.inventory.get(action.item)
