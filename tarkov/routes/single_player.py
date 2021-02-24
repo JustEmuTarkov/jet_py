@@ -167,3 +167,20 @@ def singleplayer_raid_menu_name() -> TarkovSuccessResponse:
 @singleplayer_router.get("/singleplayer/settings/weapon/durability")
 def weapon_durability() -> bool:
     return True
+
+
+@singleplayer_router.post("/player/health/sync")
+async def health_sync(
+        request: Request,
+        profile: Profile = Depends(with_profile)  # type: ignore
+) -> TarkovSuccessResponse:
+    body = await request.json()
+
+    profile.pmc_profile.Health["Hydration"]["Current"] = body["Hydration"]
+    profile.pmc_profile.Health["Energy"]["Current"] = body["Energy"]
+
+    for limb, health in body["Health"].items():
+        profile.pmc_profile.Health["BodyParts"][limb]["Health"] = health
+
+    return TarkovSuccessResponse(data=None)
+
