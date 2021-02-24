@@ -21,6 +21,7 @@ class Package(PackageBase):
         version: str = "0.0.1"
 
     def on_load(self) -> None:
+        # Any of the tarkov package internals can be manipulated from here
         print("Example mod on_load")
         print("Visit https://127.0.0.1:443/examplemod to see index page")
         app.mount('/examplemod', sub_api)
