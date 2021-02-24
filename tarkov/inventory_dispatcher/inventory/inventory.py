@@ -152,8 +152,8 @@ class InventoryDispatcher(Dispatcher):
             for changed_item in action.changedItems:
                 item = self.inventory.get(changed_item.id)
                 child_items = list(self.inventory.iter_item_children_recursively(item))
+                changed_items.append((changed_item, child_items))
                 self.inventory.remove_item(item, remove_children=True)
-                changed_items.append((item, child_items))
 
             for item, child_items in changed_items:
                 self.inventory.add_item(item=item, child_items=child_items)
