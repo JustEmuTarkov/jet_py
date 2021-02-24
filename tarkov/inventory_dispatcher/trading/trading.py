@@ -65,10 +65,10 @@ class TradingDispatcher(Dispatcher):
     def __sell_to_trader(self, action: SellToTrader) -> None:
         trader_id = action.tid
         items_to_sell = action.items
-        trader_inventory = Trader(TraderType(trader_id), self.profile)
+        trader = Trader(TraderType(trader_id), self.profile)
 
         items = list(self.inventory.get(i.id) for i in items_to_sell)
-        price_sum: int = sum(trader_inventory.get_sell_price(item).amount for item in items)
+        price_sum: int = sum(trader.get_sell_price(item).amount for item in items)
 
         self.response.items.del_.extend(items)
         self.inventory.remove_items(items)
@@ -84,7 +84,7 @@ class TradingDispatcher(Dispatcher):
 
             money_stack = Item(
                 id=generate_item_id(),
-                tpl=TemplateId(trader_inventory.base.currency),
+                tpl=TemplateId(trader.base.currency),
                 parent_id=self.inventory.root_id,
                 slot_id="hideout",
             )
