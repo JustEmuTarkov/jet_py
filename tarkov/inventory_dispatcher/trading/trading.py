@@ -73,22 +73,13 @@ class TradingDispatcher(Dispatcher):
         self.response.items.del_.extend(items)
         self.inventory.remove_items(items)
 
-        currency_template = item_templates_repository.get_template(
-            tarkov.inventory.types.TemplateId(trader.base.currency)
-        )
-        money_max_stack_size = currency_template.props.StackMaxSize
-
-        while price_sum:
-            stack_size = min(money_max_stack_size, price_sum)
-            price_sum -= stack_size
-
-            money_stack = Item(
+        currency_item = Item(
                 id=generate_item_id(),
                 tpl=TemplateId(trader.base.currency),
-                parent_id=self.inventory.root_id,
-                slot_id="hideout",
-            )
-            money_stack.upd.StackObjectsCount = stack_size
+        )
+        currency_item.upd = price_sum
 
-            self.inventory.place_item(money_stack)
-            self.response.items.new.append(money_stack)
+        currency_items = self.inventory.split_into_stacks(currency_item)
+
+        for item in currency_items:
+            self.inventory.place_item(item)
