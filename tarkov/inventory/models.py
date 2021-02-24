@@ -44,7 +44,7 @@ class NodeTemplateBase(Base):
 
     id: TemplateId
     name: str
-    parent: str
+    parent: TemplateId
     proto: Optional[str] = None
 
 

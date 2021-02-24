@@ -6,7 +6,7 @@ import ujson
 from fastapi.params import Body, Cookie, Depends
 from starlette.requests import Request
 
-from server import root_dir
+from server import logger, root_dir
 from server.utils import get_request_url_root, make_router
 from tarkov.dependencies import with_profile
 from tarkov.inventory_dispatcher import DispatcherManager
@@ -52,7 +52,8 @@ def client_game_profile_list(
                     scav_profile,
                 ]
             )
-    except Profile.ProfileDoesNotExistsError:
+    except Profile.ProfileDoesNotExistsError as error:
+        logger.exception(error)
         return TarkovSuccessResponse(data=[])
 
 

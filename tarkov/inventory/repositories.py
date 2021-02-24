@@ -94,9 +94,13 @@ class ItemTemplatesRepository:
             template = templates.pop()
             yield template
 
-            for child in itertools.chain(self._item_templates.values(), self._node_templates.values()):
-                if child.parent == template.id:
-                    templates.append(child)
+            for child_node in self._item_templates.values():
+                if child_node.parent == template.id:
+                    templates.append(child_node)
+
+            for child_item in self._node_templates.values():
+                if child_item.parent == template.id:
+                    templates.append(child_item)
 
     def get_template_items(self, template_id: TemplateId) -> List[ItemTemplate]:
         """

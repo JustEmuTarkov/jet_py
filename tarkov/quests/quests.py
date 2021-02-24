@@ -152,7 +152,8 @@ class Quests:
                 standing.current_standing += standing_change
 
             elif isinstance(reward, QuestRewardAssortUnlock):
-                raise ValueError
+                # We're checking for quest assort when generating it for specific player
+                pass
 
             else:
                 raise ValueError(f"Unknown reward: {reward.__class__.__name__} {reward}")

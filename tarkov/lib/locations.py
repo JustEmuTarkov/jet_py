@@ -123,8 +123,7 @@ class LocationGenerator:
     def __get_category_items(self, template_id: TemplateId) -> List[ItemTemplate]:
         if template_id not in self.__category_cache:
             self.__category_cache[template_id] = list(
-                tpl
-                for tpl in item_templates_repository.get_template_items(template_id)
+                tpl for tpl in item_templates_repository.get_template_items(template_id)
             )
 
         return self.__category_cache[template_id]
