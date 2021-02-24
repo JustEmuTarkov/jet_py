@@ -83,7 +83,7 @@ class Trader:
                 price_rub += child_price
             # else:
             #     price += int(child_price * 0.85)
-        currency_template_id: TemplateId = TemplateId(CurrencyEnum(self.base.currency).value)
+        currency_template_id: TemplateId = TemplateId(CurrencyEnum[self.base.currency].value)
         currency_ratio = category_repository.item_categories[currency_template_id].Price
         price = round(price_rub / currency_ratio)
         return Price(
