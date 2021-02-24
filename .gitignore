@@ -8,3 +8,4 @@
 __pycache__/main.cpython-38.pyc
 /certificates/
 /config/
+!/main.spec
