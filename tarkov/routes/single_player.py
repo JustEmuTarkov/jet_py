@@ -171,8 +171,8 @@ def weapon_durability() -> bool:
 
 @singleplayer_router.post("/player/health/sync")
 async def health_sync(
-        request: Request,
-        profile: Profile = Depends(with_profile)  # type: ignore
+    request: Request,
+    profile: Profile = Depends(with_profile),  # type: ignore
 ) -> TarkovSuccessResponse:
     body = await request.json()
 
@@ -183,4 +183,3 @@ async def health_sync(
         profile.pmc_profile.Health["BodyParts"][limb]["Health"] = health
 
     return TarkovSuccessResponse(data=None)
-
