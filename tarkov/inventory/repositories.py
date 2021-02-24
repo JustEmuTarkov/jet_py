@@ -1,3 +1,4 @@
+import itertools
 from typing import Dict, Iterable, List, Tuple, Union
 
 import pydantic
@@ -93,7 +94,7 @@ class ItemTemplatesRepository:
             template = templates.pop()
             yield template
 
-            for child in self._item_templates.values():
+            for child in itertools.chain(self._item_templates.values(), self._node_templates.values()):
                 if child.parent == template.id:
                     templates.append(child)
 
