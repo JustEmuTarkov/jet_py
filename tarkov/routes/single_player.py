@@ -97,16 +97,15 @@ async def singleplayer_raid_profile_save(
     # update profile on this request
     body = await request.json()
 
-    # profile.pmc_profile['Health']['BodyParts'] = data['health']['Health']
-    # for body_part in profile.pmc_profile['HealtPh']['BodyParts']:
-    #     del body_part['Effects']
-    #
-    # profile.pmc_profile['Health']['Hydration']['Current'] = data['health']['Hydration']
-    # profile.pmc_profile['Health']['Energy']['Current'] = data['health']['Energy']
+    pmc_health = profile.pmc_profile.Health
+    for body_part, health in body["health"]["Health"].items():
+        pmc_health["BodyParts"][body_part]["Health"]["Maximum"] = health["Maximum"]
+        pmc_health["BodyParts"][body_part]["Health"]["Current"] = health["Current"]
+        pmc_health["BodyParts"][body_part]["Effects"] = health["Effects"]
 
-    # profile.pmc_profile['Info'] = profile_data['Info']
-    # profile.pmc_profile['Encyclopedia'] = profile_data['Encyclopedia']
-    # profile.pmc_profile['Skills'] = profile_data['Skills']
+    pmc_health["Hydration"]["Current"] = body["health"]["Hydration"]
+    pmc_health["Energy"]["Current"] = body["health"]["Energy"]
+
     raid_profile = body["profile"]
     profile.pmc_profile.Encyclopedia.update(raid_profile["Encyclopedia"])
     profile.pmc_profile.Skills = Skills.parse_obj(raid_profile["Skills"])
@@ -137,7 +136,6 @@ async def singleplayer_raid_profile_save(
     profile.inventory.remove_item(equipment, remove_children=True)
 
     raid_equipment = raid_inventory.iter_item_children_recursively(raid_inventory.get(equipment.id))
-    # regenerate_items_ids(equipment_items)  # Regenerate item ids to be 100% safe
     profile.inventory.add_item(equipment, list(raid_equipment))
 
     return TarkovSuccessResponse(data=None)
