@@ -202,15 +202,5 @@ class InventoryDispatcher(Dispatcher):
             total_repair_cost: int = round(repair_cost_per_1_durability * price_rate)
 
             assert trader.base.repair.currency is not None
-            while total_repair_cost > 0:
-                currency_item = self.inventory.get_by_template(trader.base.repair.currency)
-                amount_to_take = min(currency_item.upd.StackObjectsCount, total_repair_cost)
-                currency_item.upd.StackObjectsCount -= amount_to_take
+            self.inventory.take_item(trader.base.repair.currency, total_repair_cost)
 
-                total_repair_cost -= amount_to_take
-
-                if not currency_item.upd.StackObjectsCount:
-                    self.response.items.del_.append(currency_item.copy(deep=True))
-                    self.inventory.remove_item(currency_item)
-                else:
-                    self.response.items.change.append(currency_item)
