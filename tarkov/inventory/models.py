@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import datetime
 import enum
-from typing import Any, List, Literal, NewType, Optional, TYPE_CHECKING, Union
+from typing import Any, Dict, List, Literal, NewType, Optional, TYPE_CHECKING, Union
 
 from pydantic import (
     Extra,
@@ -258,7 +258,7 @@ class InventoryModel(Base):
     stash: ItemId
     questRaidItems: ItemId
     questStashItems: ItemId
-    fastPanel: dict
+    fastPanel: Dict[str, ItemId]
     items: List[Item]
 
 
