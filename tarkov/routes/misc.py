@@ -8,6 +8,7 @@ from starlette.requests import Request
 
 from server import db_dir, start_time
 from server.utils import get_request_url_root, make_router
+from tarkov import config
 from tarkov.inventory import item_templates_repository
 from tarkov.inventory.repositories import AnyTemplate
 from tarkov.inventory.types import TemplateId
@@ -106,6 +107,7 @@ def client_globals() -> TarkovSuccessResponse[dict]:
     globals_path = db_dir.joinpath("base", "globals.json")
     globals_base = ujson.load(globals_path.open(encoding="utf8"))
     globals_base["time"] = int(datetime.datetime.now().timestamp())
+    globals_base["config"]["RagFair"]["minUserLevel"] = config.flea_market.level_required
     return TarkovSuccessResponse(data=globals_base)
 
 

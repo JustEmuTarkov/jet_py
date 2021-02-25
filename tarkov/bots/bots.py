@@ -2,16 +2,15 @@ import copy
 import random
 import time
 from pathlib import Path
-from typing import List
+from typing import Dict
 
 import ujson
 from pydantic import parse_obj_as
 
 from server import db_dir
-from tarkov.inventory import MutableInventory
-from tarkov.inventory.helpers import generate_item_id, regenerate_items_ids
+from tarkov.inventory import MutableInventory, generate_item_id, regenerate_items_ids
 from tarkov.inventory.models import InventoryModel, Item
-from tarkov.inventory.types import TemplateId
+from tarkov.inventory.types import ItemId, TemplateId
 
 
 class BotInventory(MutableInventory):
@@ -19,24 +18,25 @@ class BotInventory(MutableInventory):
 
     def __init__(self, bot_inventory: dict):
         self.data = parse_obj_as(InventoryModel, bot_inventory)
+        self.__items = {i.id: i for i in self.data.items}
 
     @property
-    def items(self) -> List[Item]:
-        return self.data.items
+    def items(self) -> Dict[ItemId, Item]:
+        return self.__items
 
     def regenerate_ids(self) -> None:
-        regenerate_items_ids(self.items)
+        regenerate_items_ids(list(self.items.values()))
 
-        equipment_item = self.get_item_by_template(TemplateId("55d7217a4bdc2d86028b456d"))
+        equipment_item = self.get_by_template(TemplateId("55d7217a4bdc2d86028b456d"))
         self.data.equipment = equipment_item.id
 
-        quest_raid_items = self.get_item_by_template(TemplateId("5963866286f7747bf429b572"))
+        quest_raid_items = self.get_by_template(TemplateId("5963866286f7747bf429b572"))
         self.data.questRaidItems = quest_raid_items.id
 
-        quest_stash_items = self.get_item_by_template(TemplateId("5963866b86f7747bfa1c4462"))
+        quest_stash_items = self.get_by_template(TemplateId("5963866b86f7747bfa1c4462"))
         self.data.questStashItems = quest_stash_items.id
 
-        stash = self.get_item_by_template(TemplateId("566abbc34bdc2d92178b4576"))
+        stash = self.get_by_template(TemplateId("566abbc34bdc2d92178b4576"))
         self.data.stash = stash.id
 
 

@@ -15,6 +15,7 @@ class PackageMeta:
 
 class PackageBase:
     Meta: PackageMeta
+    path: Path
 
     def __init__(self) -> None:
         pass
@@ -121,6 +122,7 @@ class PackageManager:
             module = importlib.import_module(module_name)
             if hasattr(module, "Package"):
                 package: Type[PackageBase] = getattr(module, "Package")
+                package.path = module_path
                 logger.debug(f"Package import: {package.Meta.name}")
                 self.register(package)
 

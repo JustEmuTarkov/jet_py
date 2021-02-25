@@ -28,6 +28,7 @@ from .models import (
     SortType,
 )
 from tarkov.globals_ import globals_repository
+from tarkov.inventory.factories import item_factory
 
 
 class OfferGenerator:
@@ -37,8 +38,8 @@ class OfferGenerator:
     item_templates: List[ItemTemplate]
     item_templates_weights: List[float]
 
-    percentile_high: int
-    percentile_low: int
+    percentile_high: float
+    percentile_low: float
 
     def __init__(self, flea_market: FleaMarket):
         self.flea_market = flea_market
@@ -121,11 +122,11 @@ class OfferGenerator:
                 )
             )
             ammo_count = max(1, abs(ammo_count))
-            root_item, _ = item_templates_repository.create_item(item_template, 1)
+            root_item, _ = item_factory.create_item(item_template, 1)
             offer_items = [root_item]
             root_item.upd.StackObjectsCount = ammo_count
         else:
-            root_item, child_items = item_templates_repository.create_item(item_template)
+            root_item, child_items = item_factory.create_item(item_template)
             offer_items = [root_item, *child_items]
 
         offer_price = sum(self.item_prices[i.tpl] for i in offer_items)
@@ -322,21 +323,16 @@ class FleaMarket:
         now = datetime.now()
         time_elapsed = now - self.updated_at
         self.updated_at = now
-        new_offers_amount: int = min(
-            self.offers_amount,
-            int(time_elapsed.total_seconds()),
-        )
-        offers_to_full = self.offers_amount - len(self.offers)
-        if new_offers_amount < offers_to_full:
-            new_offers_amount = offers_to_full
+
         try:
-            keys_to_delete = random.sample(list(self.offers.keys()), k=new_offers_amount)
+            keys_to_delete = random.sample(list(self.offers.keys()), k=int(time_elapsed.total_seconds()))
         except ValueError:
             keys_to_delete = []
 
         for key in keys_to_delete:
             del self.offers[key]
 
+        new_offers_amount: int = self.offers_amount - len(self.offers)
         new_offers = self.generator.generate_offers(new_offers_amount)
         logger.debug(f"Generated {len(new_offers)} items!")
         self.offers.update(new_offers)

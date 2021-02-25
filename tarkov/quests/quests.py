@@ -12,15 +12,18 @@ from tarkov.mail.models import (
     MailMessageItems,
     MailMessageType,
 )
-from tarkov.trader import TraderInventory, TraderType
+from tarkov.trader import TraderType
 from .models import (
+    Quest,
     QuestRewardAssortUnlock,
     QuestRewardExperience,
     QuestRewardItem,
     QuestRewardTraderStanding,
+    QuestStatus,
 )
 from .repositories import quests_repository
 from tarkov.profile.models import BackendCounter
+from ..trader.trader import Trader
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
@@ -29,18 +32,28 @@ if TYPE_CHECKING:
 
 class Quests:
     profile: "Profile"
-    data: List[dict]
+    quests: List[Quest]
 
     def __init__(
         self,
         profile: "Profile",
     ):
         self.profile: "Profile" = profile
-        self.data = self.profile.quests_data
+        self.quests = self.profile.pmc.Quests
 
-    def get_quest(self, quest_id: str) -> dict:
+    def create_quest(self, quest_id: str) -> Quest:
+        quest_template = quests_repository.get_quest_template(quest_id)
+        quest = Quest(
+            quest_id=quest_template.id,
+            started_at=0,
+            status=QuestStatus.AvailableForStart,
+        )
+        self.quests.append(quest)
+        return quest
+
+    def get_quest(self, quest_id: str) -> Quest:
         try:
-            return next(quest for quest in self.data if quest["qid"] == quest_id)
+            return next(quest for quest in self.quests if quest.quest_id == quest_id)
         except StopIteration as e:
             raise KeyError from e
 
@@ -48,14 +61,14 @@ class Quests:
         # TODO: Create quest if it does not exist
         try:
             quest = self.get_quest(quest_id)
-            if quest["status"] in ("Started", "Success"):
-                raise ValueError("Quest is already accepted")
         except KeyError:
-            pass
+            quest = self.create_quest(quest_id)
+        print(quest.status)
+        # if quest.status != QuestStatus.AvailableForStart.value:
+        #     raise ValueError("Quest is already accepted or locked")
 
-        quest = self.get_quest(quest_id)
-        quest["status"] = "Started"
-        quest["startTime"] = int(time.time())
+        quest.status = QuestStatus.Started
+        quest.started_at = int(time.time())
 
     def handover_items(
         self,
@@ -63,27 +76,39 @@ class Quests:
         condition_id: str,
         items: Dict[tarkov.inventory.types.ItemId, int],
     ) -> Tuple[List[inventory.models.Item], List[inventory.models.Item]]:
-
         try:
-            condition = self.profile.pmc_profile.BackendCounters[condition_id]
+            backend_counter = self.profile.pmc.BackendCounters[condition_id]
         except KeyError:
-            condition = BackendCounter(id=condition_id, qid=quest_id, value=0)
-            self.profile.pmc_profile.BackendCounters[condition_id] = condition
+            backend_counter = BackendCounter(id=condition_id, qid=quest_id, value=0)
+            self.profile.pmc.BackendCounters[condition_id] = backend_counter
 
-        removed_items = []
-        changed_items = []
+        quest_template = quests_repository.get_quest_template(quest_id)
+        quest_condition = next(
+            cond for cond in quest_template.conditions.AvailableForFinish if cond.props["id"] == condition_id
+        )
+        # Amount of items required for quest condition
+        required_amount: int = int(quest_condition.props["value"])
+
+        removed_items: List[Item] = []
+        changed_items: List[Item] = []
+
         for item_id, count in items.items():
-            item = self.profile.inventory.get_item(item_id)
+            if required_amount <= 0:
+                break
+            item = self.profile.inventory.get(item_id)
+            # Amount that we will subtract from item stack
+            amount_to_subtract = min(required_amount, count, item.upd.StackObjectsCount)
 
-            if not self.profile.inventory.can_split(item) and count == 1:
-                removed_items.append(item)
+            if amount_to_subtract == item.upd.StackObjectsCount:
+                removed_items.append(item.copy(deep=True))
                 self.profile.inventory.remove_item(item)
-            else:
-                changed_items.append(item)
-                self.profile.inventory.simple_split_item(item=item, count=count)
-                # removed_items.append(self.profile.inventory.split_item(item=item, count=count))
 
-            condition.value += count
+            else:
+                item.upd.StackObjectsCount -= amount_to_subtract
+                changed_items.append(item.copy(deep=True))
+
+            backend_counter.value += amount_to_subtract
+            required_amount -= amount_to_subtract
 
         return removed_items, changed_items
 
@@ -100,6 +125,8 @@ class Quests:
 
     def complete_quest(self, quest_id: str) -> None:
         quest_template = quests_repository.get_quest_template(quest_id)
+        quest = self.get_quest(quest_id)
+        quest.status = QuestStatus.Success
 
         reward_items: List[Item] = []
         for reward in quest_template.rewards.Success:
@@ -120,12 +147,13 @@ class Quests:
                 standing_change = float(reward.value)
                 trader_id = reward.target
 
-                trader = TraderInventory(TraderType(trader_id), self.profile)
+                trader = Trader(TraderType(trader_id), self.profile)
                 standing = trader.standing
                 standing.current_standing += standing_change
 
             elif isinstance(reward, QuestRewardAssortUnlock):
-                raise ValueError
+                # We're checking for quest assort when generating it for specific player
+                pass
 
             else:
                 raise ValueError(f"Unknown reward: {reward.__class__.__name__} {reward}")

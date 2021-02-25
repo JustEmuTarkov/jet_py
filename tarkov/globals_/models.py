@@ -19,7 +19,7 @@ class ItemPreset(Base):
 
     def get_items(self) -> Tuple[Item, List[Item]]:
         root_item = next(i for i in self.items if i.id == self.root_id).copy()
-        children = [i.copy() for i in self.items if i.id != self.root_id]
+        children = [i.copy() for i in self.items if i != root_item]
         regenerate_items_ids([root_item, *children])
         return root_item, children
 

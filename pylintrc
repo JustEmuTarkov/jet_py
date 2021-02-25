@@ -253,7 +253,7 @@ const-naming-style=UPPER_CASE
 
 # Regular expression matching correct constant names. Overrides const-naming-
 # style.
-#const-rgx=
+const-rgx=[_A-Z][_a-zA-Z0-9]*
 
 # Minimum line length for functions/classes that require docstrings, shorter
 # ones are exempt.
@@ -278,7 +278,8 @@ good-names=i,
            x_,
            y_,
            by,
-           e
+           e,
+           to
 
 # Good variable names regexes, separated by a comma. If names match any regex,
 # they will always be accepted

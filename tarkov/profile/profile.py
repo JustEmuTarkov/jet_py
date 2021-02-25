@@ -1,10 +1,7 @@
 from __future__ import annotations
 
 from types import TracebackType
-from typing import List, Optional, Union
-
-import ujson
-from typing_extensions import Type
+from typing import Optional, Union, Type
 
 import tarkov.inventory.repositories
 from server import root_dir
@@ -21,7 +18,7 @@ from .models import ItemInsurance, ProfileModel
 class Encyclopedia:
     def __init__(self, profile: Profile):
         self.profile = profile
-        self.data = profile.pmc_profile.Encyclopedia
+        self.data = profile.pmc.Encyclopedia
 
     def examine(self, item: Union[Item, TemplateId]) -> None:
         if isinstance(item, Item):
@@ -44,16 +41,16 @@ class Profile:
     # pylint: disable=too-many-instance-attributes
     # Disabling that in case of profile is reasonable
 
-    pmc_profile: ProfileModel
+    class ProfileDoesNotExistsError(Exception):
+        pass
+
+    pmc: ProfileModel
+    scav: ProfileModel
 
     hideout: Hideout
-
     quests: quests.Quests
-    quests_data: List[dict]
-
     inventory: inventory_.PlayerInventory
     encyclopedia: Encyclopedia
-
     mail: Mail
 
     def __init__(self, profile_id: str):
@@ -62,45 +59,30 @@ class Profile:
         self.profile_dir = root_dir.joinpath("resources", "profiles", profile_id)
 
         self.pmc_profile_path = self.profile_dir.joinpath("pmc_profile.json")
-
-        self.quests_path = self.profile_dir.joinpath("pmc_quests.json")
+        self.scav_profile_path = self.profile_dir.joinpath("scav_profile.json")
 
     @staticmethod
     def exists(profile_id: str) -> bool:
         return root_dir.joinpath("resources", "profiles", profile_id).exists()
 
-    def get_profile(self) -> dict:
-        profile_data = {}
-        for file in self.profile_dir.glob("pmc_*.json"):
-            profile_data[file.stem] = ujson.load(file.open("r", encoding="utf8"))
-
-        profile_base = self.pmc_profile.copy()
-        profile_base.Hideout = self.hideout.data
-        # profile_base['Inventory'] = self.inventory.inventory.dict()
-        profile_base.Quests = profile_data["pmc_quests"]
-        profile_base.Stats = profile_data["pmc_stats"]
-
-        return profile_base.dict(exclude_none=True)
-
     def add_insurance(self, item: Item, trader: TraderType) -> None:
-        self.pmc_profile.InsuredItems.append(ItemInsurance(item_id=item.id, trader_id=trader.value))
+        self.pmc.InsuredItems.append(ItemInsurance(item_id=item.id, trader_id=trader.value))
 
         #  Todo remove insurance from items that aren't present in inventory after raid
 
     def receive_experience(self, amount: int) -> None:
-        self.pmc_profile.Info.Experience += amount
+        self.pmc.Info.Experience += amount
 
-    def __read(self) -> None:
-        self.pmc_profile: ProfileModel = ProfileModel.parse_file(self.pmc_profile_path)
-
-        # self.pmc_profile: dict = ujson.load(self.pmc_profile_path.open('r', encoding='utf8'))
+    def read(self) -> None:
+        if not self.profile_dir.exists() or not self.pmc_profile_path.exists():
+            raise Profile.ProfileDoesNotExistsError
+        self.pmc = ProfileModel.parse_file(self.pmc_profile_path)
+        self.scav = ProfileModel.parse_file(self.scav_profile_path)
 
         self.encyclopedia = Encyclopedia(profile=self)
-
         self.inventory = tarkov.inventory.PlayerInventory(profile=self)
         self.inventory.read()
 
-        self.quests_data: List[dict] = ujson.load(self.quests_path.open("r", encoding="utf8"))
         self.quests = quests.Quests(profile=self)
 
         self.hideout = Hideout(profile=self)
@@ -109,17 +91,19 @@ class Profile:
         self.mail = Mail(profile=self)
         self.mail.read()
 
-    def __write(self) -> None:
-        atomic_write(self.pmc_profile.json(exclude_defaults=True), self.pmc_profile_path)
-        self.inventory.write()
+    def write(self) -> None:
         self.hideout.write()
-
-        atomic_write(ujson.dumps(self.quests_data, indent=4), self.quests_path)
-
         self.mail.write()
+        self.inventory.write()
+
+        atomic_write(self.pmc.json(exclude_defaults=True), self.pmc_profile_path)
+        atomic_write(self.scav.json(exclude_defaults=True), self.scav_profile_path)
+
+    def update(self) -> None:
+        self.hideout.update()
 
     def __enter__(self) -> Profile:
-        self.__read()
+        self.read()
         return self
 
     def __exit__(
@@ -129,4 +113,4 @@ class Profile:
         exc_tb: Optional[TracebackType],
     ) -> None:
         if exc_type is None:
-            self.__write()
+            self.write()

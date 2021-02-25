@@ -14,6 +14,7 @@ class FleaMarketConfig(BaseConfig):
     offers_amount: int = 7500
     percentile_high: float = 0.98
     percentile_low: float = 0.2
+    level_required: int = 10
 
 
 flea_market = FleaMarketConfig.load()

@@ -8,8 +8,9 @@ from tarkov.inventory.models import Item
 from tarkov.inventory.types import ItemId
 from tarkov.models import Base, TarkovErrorResponse, TarkovSuccessResponse
 from tarkov.profile import Profile
-from tarkov.trader import TraderInventory, TraderType, get_trader_base, get_trader_bases
+from tarkov.trader import TraderType
 from tarkov.trader.models import BarterSchemeEntry
+from tarkov.trader.trader import Trader
 
 trader_router = make_router(tags=["Traders"])
 
@@ -55,15 +56,15 @@ def get_user_assort_price(
     trader_id: str,
     profile: Profile = Depends(with_profile),  # type: ignore
 ) -> Union[TarkovSuccessResponse[Dict[ItemId, List[List[dict]]]], TarkovErrorResponse]:
-    trader_inventory = TraderInventory(TraderType(trader_id), profile=profile)
+    trader = Trader(TraderType(trader_id), profile=profile)
     items = {}
 
-    for item in profile.inventory.items:
-        if not trader_inventory.can_sell(item):
+    for item in profile.inventory.items.values():
+        if not trader.can_sell(item):
             continue
 
-        price = trader_inventory.get_sell_price(item)
-        items[item.id] = [[{"_tpl": "5449016a4bdc2d6f028b456f", "count": price}]]
+        price = trader.get_sell_price(item)
+        items[item.id] = [[{"_tpl": price.template_id, "count": price.amount}]]
 
     # TODO: Calculate price for items to sell in specified trader
     # output is { "item._id": [[{ "_tpl": "", "count": 0 }]] }
@@ -71,8 +72,15 @@ def get_user_assort_price(
 
 
 @trader_router.post("/client/trading/api/getTradersList")
-def get_trader_list() -> TarkovSuccessResponse[List[dict]]:
-    return TarkovSuccessResponse(data=get_trader_bases())
+def get_trader_list(
+    profile: Profile = Depends(with_profile),  # type: ignore
+) -> TarkovSuccessResponse[List[dict]]:
+    response = []
+    for trader_type in TraderType:
+        trader = Trader(trader_type, profile)
+        response.append(trader.base.dict(exclude_none=True))
+    response.sort(key=lambda base: base["_id"])
+    return TarkovSuccessResponse(data=response)
 
 
 class TraderAssortResponse(Base):
@@ -90,15 +98,19 @@ def get_trader_assort(
     trader_id: str,
     profile: Profile = Depends(with_profile),  # type: ignore
 ) -> Union[TarkovSuccessResponse[TraderAssortResponse], TarkovErrorResponse]:
-    trader_inventory = TraderInventory(TraderType(trader_id), profile=profile)
+    trader = Trader(TraderType(trader_id), profile=profile)
     assort_response = TraderAssortResponse(
-        barter_scheme=trader_inventory.barter_scheme.__root__,
-        items=trader_inventory.assort,
-        loyal_level_items=trader_inventory.loyal_level_items,
+        barter_scheme=trader.inventory.barter_scheme.__root__,
+        items=trader.inventory.assort,
+        loyal_level_items=trader.inventory.loyal_level_items,
     )
     return TarkovSuccessResponse(data=assort_response)
 
 
 @trader_router.post("/client/trading/api/getTrader/{trader_id}")
-def trader_base(trader_id: str) -> TarkovSuccessResponse[dict]:
-    return TarkovSuccessResponse(data=get_trader_base(trader_id=trader_id))
+def trading_api_get_trader(
+    trader_id: str,
+    profile: Profile = Depends(with_profile),  # type: ignore
+) -> TarkovSuccessResponse[dict]:
+    trader = Trader(TraderType(trader_id), profile)
+    return TarkovSuccessResponse(data=trader.base.dict(exclude_none=True))

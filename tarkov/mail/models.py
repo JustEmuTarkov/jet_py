@@ -53,6 +53,10 @@ class MailDialogueMessage(Base):
     maxStorageTime: int = StrictInt(datetime.timedelta(days=3).total_seconds())  # Storage time in seconds
     systemData: dict = Field(default_factory=dict)
 
+    @property
+    def arrived(self) -> bool:
+        return time.time() > self.dt
+
 
 class MailDialogue(Base):
     """

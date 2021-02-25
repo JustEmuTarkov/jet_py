@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from enum import Enum
 from typing import (
     Any,
@@ -6,6 +7,7 @@ from typing import (
     Literal,
     NamedTuple,
     Optional,
+    Set,
     ValuesView,
 )
 
@@ -26,6 +28,12 @@ class TraderType(Enum):
     Fence = "579dc571d53a0658a154fbec"
     Peacekeeper = "5935c25fb3acc3127c3d8cd9"
     Skier = "58330581ace78e27b8b10cee"
+
+
+@dataclass
+class Price:
+    template_id: TemplateId
+    amount: int
 
 
 class BoughtItems(NamedTuple):
@@ -95,7 +103,7 @@ class TraderBase(Base):
     discount: int
     discount_end: int
     buyer_up: StrictBool
-    currency: Literal["RUB", "USD"]
+    currency: Literal["RUB", "USD", "EUR"]
     supply_next_time: int
     medic: bool = False
 
@@ -104,7 +112,7 @@ class TraderBase(Base):
     repair: TraderRepair
     insurance: TraderInsurance
     loyalty: TraderStanding
-    sell_category: List[CategoryId]
+    sell_category: Set[CategoryId]
 
 
 class BarterSchemeEntry(Base):

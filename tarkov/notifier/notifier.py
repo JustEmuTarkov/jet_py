@@ -36,32 +36,20 @@ class ProfileNotifier:
                 )
                 self.unsent_notifications.append(notification)
 
-    @staticmethod
-    def ready_to_send(notification: MessageNotification, now: datetime) -> bool:
-        return now > datetime.fromtimestamp(notification.data.message.dt)
-
     @property
     def has_new_notifications(self) -> bool:
-        now = datetime.now()
         return bool(
-            [
-                notification
-                for notification in self.unsent_notifications
-                if self.ready_to_send(notification, now)
-            ]
+            [notification for notification in self.unsent_notifications if notification.data.message.arrived]
         )
 
     def notifications_ready_to_send_view(self) -> List[dict]:
-        now = datetime.now()
         messages_ready_to_send = [
             notification.dict(exclude_none=True)
             for notification in self.unsent_notifications
-            if self.ready_to_send(notification, now)
+            if notification.data.message.arrived
         ]
         self.unsent_notifications = [
-            notification
-            for notification in self.unsent_notifications
-            if not self.ready_to_send(notification, now)
+            notification for notification in self.unsent_notifications if not notification.data.message.arrived
         ]
 
         return messages_ready_to_send

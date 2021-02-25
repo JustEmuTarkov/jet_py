@@ -1,13 +1,21 @@
-from typing import Dict, Iterable, List
+from typing import Dict, Iterable, List, TYPE_CHECKING
 
 from pydantic import Field
 
 from server import logger
 from tarkov.inventory import PlayerInventory
 from tarkov.inventory.models import Item
+from tarkov.inventory_dispatcher.fleamarket import FleaMarketDispatcher
+from tarkov.inventory_dispatcher.hideout import HideoutDispatcher
+from tarkov.inventory_dispatcher.inventory import InventoryDispatcher
+from tarkov.inventory_dispatcher.quests import QuestDispatcher
+from tarkov.inventory_dispatcher.trading import TradingDispatcher
 from tarkov.models import Base
 from tarkov.profile import Profile
-from . import dispatchers
+
+if TYPE_CHECKING:
+    # pylint: disable=unused-import
+    from tarkov.inventory_dispatcher.base import Dispatcher
 
 
 class DispatcherResponseItems(Base):
@@ -40,7 +48,7 @@ class DispatcherManager:
 
     response: DispatcherResponse
 
-    dispatchers: Iterable["dispatchers.Dispatcher"]
+    dispatchers: Iterable["Dispatcher"]
 
     def __init__(self, profile: Profile):
         self.profile: Profile = profile
@@ -49,28 +57,25 @@ class DispatcherManager:
 
     def __make_dispatchers(self) -> None:
         self.dispatchers = (
-            dispatchers.InventoryDispatcher(self),
-            dispatchers.HideoutDispatcher(self),
-            dispatchers.TradingDispatcher(self),
-            dispatchers.QuestDispatcher(self),
-            dispatchers.FleaMarketDispatcher(self),
+            InventoryDispatcher(self),
+            HideoutDispatcher(self),
+            TradingDispatcher(self),
+            QuestDispatcher(self),
+            FleaMarketDispatcher(self),
         )
 
-    def dispatch(self, request_data: dict) -> DispatcherResponse:
+    def dispatch(self, request_data: List[dict]) -> DispatcherResponse:
         with self.profile:
             self.inventory = self.profile.inventory
             self.__make_dispatchers()
 
-            # request.data should be dict at this moment
-            # noinspection PyTypeChecker
-            actions: List[dict] = request_data  # type: ignore
+            actions: List[dict] = request_data
 
             for action in actions:
                 logger.debug(action)
                 for dispatcher in self.dispatchers:
                     try:
                         dispatcher.dispatch(action)
-                        logger.debug(f"Action was dispatched in {dispatcher.__class__.__name__}")
                         break
                     except NotImplementedError:
                         pass

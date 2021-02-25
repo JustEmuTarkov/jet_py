@@ -1,9 +1,21 @@
-from typing import Any, List, Literal, Union
+import enum
+from typing import Dict, List, Literal, Union
 
-from pydantic import StrictBool, StrictInt
+from pydantic import Field, StrictBool, StrictInt
 
 from tarkov import models
 from tarkov.inventory.models import Item
+
+
+class QuestStatus(enum.Enum):
+    Locked = "Locked"
+    AvailableForStart = "AvailableForStart"
+    Started = "Started"
+    AvailableForFinish = "AvailableForFinish"
+    Success = "Success"
+    Fail = "Fail"
+    FailRestartable = "FailRestartable"
+    MarkedAsFailed = "MarkedAsFailed"
 
 
 class QuestReward(models.Base):
@@ -65,6 +77,17 @@ class QuestRewards(models.Base):
     Fail: List[AnyReward]
 
 
+class QuestCondition(models.Base):
+    parent: str = Field(alias="_parent")
+    props: dict = Field(alias="_props")
+
+
+class QuestConditions(models.Base):
+    AvailableForStart: List[QuestCondition]
+    AvailableForFinish: List[QuestCondition]
+    Fail: List[QuestCondition]
+
+
 class QuestTemplate(models.Base):
     class Config:
         fields = {"id": "_id"}
@@ -83,4 +106,15 @@ class QuestTemplate(models.Base):
     secretQuest: StrictBool = False
     rewards: QuestRewards
 
-    conditions: Any
+    conditions: QuestConditions
+
+
+class Quest(models.Base):
+    class Config:
+        use_enum_values = False
+
+    quest_id: str = Field(alias="qid")
+    started_at: int = Field(alias="startTime")
+    completed_conditions: List[str] = Field(alias="completedConditions", default_factory=list)
+    status_timers: Dict[str, float] = Field(alias="statusTimers", default_factory=dict)
+    status: QuestStatus

@@ -1,39 +1,39 @@
 import random
-import unittest
-import unittest.mock
-from unittest.mock import patch
-from pathlib import Path
 from typing import Callable, List
+from unittest.mock import patch
 
-import pytest  # type: ignore
+import pytest
 
 from server import root_dir
 from tarkov.inventory import PlayerInventory, item_templates_repository
-from tarkov.inventory.models import Item, ItemTemplate
+from tarkov.inventory.factories import item_factory
+from tarkov.inventory.models import InventoryModel, Item, ItemTemplate
 from tarkov.profile import Profile
+from tarkov.profile.models import ProfileModel
 
 TEST_RESOURCES_PATH = root_dir.joinpath("tarkov", "tests", "resources")
 
 
 @pytest.fixture()
 def player_profile() -> Profile:
-    return Profile("profile_id")
+    profile = Profile("profile_id")
+    profile.pmc = ProfileModel.parse_file(TEST_RESOURCES_PATH.joinpath("pmc_profile.json"))
+    return profile
 
 
 @pytest.fixture()
 def inventory(player_profile: Profile) -> PlayerInventory:
-    empty_inventory_path = Path("tarkov/tests/inventory/empty_inventory.json").absolute()
     inventory = PlayerInventory(player_profile)
-    with unittest.mock.patch("pathlib.Path.open", empty_inventory_path.open):
-        inventory.read()
+    inventory.read()
     return inventory
 
 
 @pytest.fixture()
 def make_inventory(player_profile: Profile) -> Callable:
     def _make_inventory(inventory_path: str) -> PlayerInventory:
-        inventory = PlayerInventory(player_profile)
-        with patch.object(inventory, "_path", inventory_path):
+        target_inventory = InventoryModel.parse_file(inventory_path)
+        with patch.object(player_profile.pmc, "Inventory", target_inventory):
+            inventory = PlayerInventory(player_profile)
             inventory.read()
         return inventory
 
@@ -48,7 +48,6 @@ def random_items() -> List[Item]:
     )
 
     items: List[Item] = [
-        item_templates_repository.create_item(item_templates_repository.get_template(tpl.id))[0]
-        for tpl in random_templates
+        item_factory.create_item(item_templates_repository.get_template(tpl.id))[0] for tpl in random_templates
     ]
     return items

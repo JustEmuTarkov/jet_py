@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import datetime
 import enum
-from typing import Any, List, Literal, NewType, Optional, TYPE_CHECKING, Union
+from typing import Any, Dict, List, Literal, NewType, Optional, TYPE_CHECKING, Union
 
 from pydantic import (
     Extra,
@@ -11,6 +11,7 @@ from pydantic import (
     StrictBool,
     ValidationError,
     root_validator,
+    validator,
 )
 
 from server import logger
@@ -43,7 +44,7 @@ class NodeTemplateBase(Base):
 
     id: TemplateId
     name: str
-    parent: str
+    parent: TemplateId
     proto: Optional[str] = None
 
 
@@ -109,8 +110,8 @@ class ItemUpdLockable(Base):
 
 
 class ItemUpdRepairable(Base):
-    MaxDurability: Optional[int] = None  # TODO: Some items in bot inventories don't have MaxDurability
-    Durability: int
+    MaxDurability: Optional[float] = None  # TODO: Some items in bot inventories don't have MaxDurability
+    Durability: float
 
 
 class ItemUpdFoldable(Base):
@@ -175,6 +176,14 @@ class ItemInventoryLocation(Base):
     y: int
     r: str = ItemOrientationEnum.Vertical.value
     isSearched: Optional[bool] = None
+
+    @validator("r", pre=True)
+    def validate_rotation(cls, value: Any) -> Any:  # pylint: disable=no-self-argument, no-self-use
+        if value == 1:
+            return ItemOrientationEnum.Vertical.value
+        if value == 0:
+            return ItemOrientationEnum.Horizontal.value
+        return value
 
 
 AnyItemLocation = Union[ItemInventoryLocation, ItemAmmoStackPosition]
@@ -249,14 +258,14 @@ class InventoryModel(Base):
     stash: ItemId
     questRaidItems: ItemId
     questStashItems: ItemId
-    fastPanel: dict
+    fastPanel: Dict[str, ItemId]
     items: List[Item]
 
 
 class InventoryMoveLocation(Base):
     id: ItemId
     container: str
-    location: ItemInventoryLocation
+    location: Optional[ItemInventoryLocation] = None
 
 
 class CartridgesMoveLocation(Base):
@@ -269,33 +278,8 @@ class PatronInWeaponMoveLocation(Base):
     container: Literal["patron_in_weapon"]
 
 
-class ModMoveLocation(Base):
-    id: ItemId
-    container: str
-    # container: Literal[
-    #     'mod_handguard',
-    #     'mod_muzzle',
-    #     'mod_gas_block',
-    #     'mod_mount',
-    #     'mod_scope',
-    #     'mod_sight_rear',
-    #     'mod_sight_front',
-    #     'mod_tactical',
-    #     'mod_barrel',
-    #     'mod_pistol_grip',
-    #     'mod_magazine',
-    #     'mod_reciever',
-    #     'mod_stock',
-    #     'mod_charge',
-    #     'mod_mount_001',
-    #     'mod_mount_002',
-    #     'mod_foregrip'
-    # ]
-
-
 AnyMoveLocation = Union[
     InventoryMoveLocation,
     CartridgesMoveLocation,
     PatronInWeaponMoveLocation,
-    ModMoveLocation,
 ]

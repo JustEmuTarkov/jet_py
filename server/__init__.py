@@ -10,6 +10,7 @@ if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
     root_dir = Path(sys.executable).parent.absolute()
 else:
     root_dir = Path(__file__).parent.parent.absolute()
+sys.path.append(str(root_dir))
 
 db_dir = root_dir.joinpath("resources", "db")
 start_time = datetime.datetime.now()

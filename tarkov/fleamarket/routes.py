@@ -27,7 +27,7 @@ def client_items_prices() -> TarkovSuccessResponse:
 
 
 @flea_market_router.post("/client/ragfair/itemMarketPrice")
-async def client_ragfair_item_market_price(
+def client_ragfair_item_market_price(
     template_id: TemplateId = Body(..., alias="templateId", embed=True),  # type: ignore
 ) -> TarkovSuccessResponse:
     return TarkovSuccessResponse(data=flea_market_instance.item_price_view(template_id))

@@ -2,10 +2,9 @@ from __future__ import annotations
 
 import collections
 import random
-from typing import Any, DefaultDict, Dict, List, Tuple, Union
+from typing import Any, ClassVar, DefaultDict, Dict, Final, List, Tuple, Union
 
 import ujson
-from pydantic import parse_obj_as
 
 from server import db_dir
 from tarkov.exceptions import NoSpaceError
@@ -16,12 +15,13 @@ from tarkov.inventory import (
 )
 from tarkov.inventory.helpers import regenerate_item_ids_dict
 from tarkov.inventory.models import Item, ItemTemplate
-from tarkov.inventory.prop_models import CompoundProps, LootContainerProps
+from tarkov.inventory.prop_models import CompoundProps, LootContainerProps, StackableItemProps
+from tarkov.inventory.factories import item_factory
 from tarkov.inventory.types import ItemId, TemplateId
 from tarkov.models import Base
 
 
-class ContainerInventoryModel(Base):
+class ContainerModel(Base):
     Id: str
     IsStatic: bool
     useGravity: bool
@@ -35,14 +35,19 @@ class ContainerInventoryModel(Base):
 
 
 class ContainerInventory(GridInventory):
-    container: ContainerInventoryModel
+    container: ContainerModel
 
-    def __init__(self, container: dict):
-        self.container = parse_obj_as(ContainerInventoryModel, container)
+    def __init__(self, container: ContainerModel):
+        self.container = container
+        self._items = {i.id: i for i in self.container.Items}
 
-        root_item = self.get_item(self.container.Root)
+        root_item = self.get(self.container.Root)
         self.template = item_templates_repository.get_template(root_item.tpl)
         self.stash_map = GridInventoryStashMap(self)
+
+    @property
+    def items_list_view(self) -> List[dict]:
+        return list(i.dict(exclude_none=True) for i in self._items.values())
 
     @property
     def root_id(self) -> ItemId:
@@ -56,8 +61,8 @@ class ContainerInventory(GridInventory):
         return grid_props.width, grid_props.height
 
     @property
-    def items(self) -> List[Item]:
-        return self.container.Items
+    def items(self) -> Dict[ItemId, Item]:
+        return self._items
 
     def place_item(
         self,
@@ -66,6 +71,62 @@ class ContainerInventory(GridInventory):
     ) -> None:
         super().place_item(item, **kwargs)
         item.slot_id = "main"
+
+
+class ContainerLootGenerator:
+    ATTEMPTS_TO_PLACE_LOOT: Final[ClassVar[int]] = 10
+
+    def __init__(self, location_generator: LocationGenerator, container: ContainerModel):
+        # Reference to location generator
+        self.location_generator = location_generator
+        # Container model
+        self.container = container
+
+        self.container_template = item_templates_repository.get_template(container.Items[0].tpl)
+        assert isinstance(self.container_template.props, LootContainerProps)
+
+        # List of item templates that are allowed to spawn inside container
+        self.__item_templates: List[ItemTemplate] = []
+        for template_id in self.container_template.props.SpawnFilter:
+            self.__item_templates.extend(self.location_generator.get_category_items(template_id))
+        # Chances of templates to spawn
+        self.__item_templates_weights: List[float] = [
+            self.location_generator.template_weight(tpl) for tpl in self.__item_templates
+        ]
+
+    @staticmethod
+    def __get_amount_of_items() -> int:
+        """Returns amount of items that should be generated in container"""
+        mean, deviation = 2.5, 2.5
+        return max(round(random.gauss(mean, deviation)), 0)
+
+    def __generate_random_item(self) -> Tuple[Item, List[Item]]:
+        """Generates random item for this container"""
+        random_template = random.choices(self.__item_templates, self.__item_templates_weights, k=1)[0]
+        count = 1
+        if isinstance(random_template.props, StackableItemProps):
+            count = random.randint(random_template.props.StackMinRandom, random_template.props.StackMaxRandom)
+
+        return item_factory.create_item(random_template, count=count)
+
+    def generate_items(self) -> List[Item]:
+        """Generates list of items for container"""
+
+        # If no templates can spawn we can safely return empty list
+        if not self.__item_templates:
+            return []
+
+        container_inventory = ContainerInventory(self.container)
+
+        for _ in range(self.__get_amount_of_items()):
+            for _ in range(self.ATTEMPTS_TO_PLACE_LOOT):
+                try:
+                    item, children = self.__generate_random_item()
+                    container_inventory.place_item(item, child_items=children)
+                    break
+                except NoSpaceError:
+                    pass
+        return list(container_inventory.items.values())
 
 
 class LocationGenerator:
@@ -80,79 +141,56 @@ class LocationGenerator:
         self.__category_cache: Dict[str, List[ItemTemplate]] = {}
 
     def generate_location(self) -> dict:
-        self.__generate_location_loot()
+        self._generate_containers_loot()
+        self._generate_dynamic_loot()
         return self.__base
 
-    def __generate_location_loot(self) -> None:
+    def _generate_containers_loot(self) -> None:
         for container in self.__loot["static"]:
-            self.__populate_container(container)
-            self.__base["Loot"].append(container)
+            container_model = ContainerModel.parse_obj(container)
+            container_generator = ContainerLootGenerator(self, container_model)
+            container_model.Items = container_generator.generate_items()
 
+            self.__base["Loot"].append(container_model.dict(exclude_none=True))
+
+    def _generate_dynamic_loot(self) -> None:
+        # Grouping containers by their positions in world
         dynamic_loot_locations: DefaultDict[str, list] = collections.defaultdict(list)
-
         for dynamic_loot in self.__loot["dynamic"]:
             dynamic_loot = dynamic_loot["data"][0]
             position = dynamic_loot["Position"]
             position = ";".join(str(position[key]) for key in "xyz")
-
-            regenerate_item_ids_dict(dynamic_loot["Items"])
-            dynamic_loot["Id"] = dynamic_loot["Items"][0]["_id"]
-            dynamic_loot["Root"] = dynamic_loot["Items"][0]["_id"]
-
             dynamic_loot_locations[position].append(dynamic_loot)
 
-        self.__base["Loot"].extend(random.choice(loot) for loot in dynamic_loot_locations.values())
+        for position, loot_points in dynamic_loot_locations.items():
+            loot_point = random.choice(loot_points)
 
-    def __get_category_items(self, template_id: TemplateId) -> List[ItemTemplate]:
+            regenerate_item_ids_dict(loot_point["Items"])
+            root_item = loot_point["Items"][0]
+            loot_point["Root"] = loot_point["Items"][0]["_id"]
+
+            root_item_template = item_templates_repository.get_template(root_item["_tpl"])
+            should_spawn = random.uniform(0, 100) < root_item_template.props.SpawnChance
+            if not should_spawn:
+                continue
+
+            self.__base["Loot"].append(loot_point)
+
+    def get_category_items(self, template_id: TemplateId) -> List[ItemTemplate]:
         if template_id not in self.__category_cache:
             self.__category_cache[template_id] = list(
-                tpl
-                for tpl in item_templates_repository.iter_template_children(template_id)
-                if isinstance(tpl, ItemTemplate)
+                tpl for tpl in item_templates_repository.get_template_items(template_id)
             )
 
         return self.__category_cache[template_id]
 
-    def __populate_container(self, container: dict) -> None:
-        """
-        Populates given container with items
-        Mutates the container argument
-        """
-        # container_id = container["Root"]
-        container_template = item_templates_repository.get_template(container["Items"][0]["_tpl"])
+    def template_weight(self, template: ItemTemplate) -> Union[int, float]:
+        if (
+            template.props.AllowSpawnOnLocations
+            and not self.__base["Id"] in template.props.AllowSpawnOnLocations
+        ):
+            return 0
 
-        assert isinstance(container_template.props, LootContainerProps)
-        container_filter_templates: List[TemplateId] = container_template.props.SpawnFilter
-
-        mean, deviation = 2.5, 2.5
-        amount_of_items_in_container = max(round(random.gauss(mean, deviation)), 0)
-
-        container_inventory = ContainerInventory(container)
-
-        item_templates: List[ItemTemplate] = []
-        for template_id in container_filter_templates:
-            item_templates.extend(self.__get_category_items(template_id))
-
-        item_template_weights = [self.__template_weight(tpl) for tpl in item_templates]
-
-        if not item_templates:
-            return
-
-        for _ in range(amount_of_items_in_container):
-            for _ in range(10):
-                random_template = random.choices(item_templates, item_template_weights, k=1)[0]
-
-                item, children = item_templates_repository.create_item(random_template)
-                try:
-                    container_inventory.place_item(item, child_items=children)
-                    break
-                except NoSpaceError:
-                    pass
-
-        container["Items"] = container_inventory.container.dict(exclude_none=True)["Items"]
-
-    @staticmethod
-    def __template_weight(template: ItemTemplate) -> Union[int, float]:
         rarity_coefficients = {
             "Common": 1,
             "Rare": 1,

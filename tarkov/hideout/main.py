@@ -7,9 +7,9 @@ from pydantic import parse_obj_as
 from server import db_dir, logger
 from server.utils import atomic_write
 from tarkov import inventory
-from tarkov.inventory import item_templates_repository
 from tarkov.inventory.models import Item
 from .models import HideoutArea, HideoutAreaType, HideoutProduction
+from tarkov.inventory.factories import item_factory
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
@@ -29,10 +29,10 @@ class Hideout:
     current_time: int
 
     def __init__(self, profile: "Profile"):
-        self.path = profile.profile_dir.joinpath("pmc_hideout.json")
         self.meta_path = profile.profile_dir.joinpath("pmc_hideout.meta.json")
 
         self.profile: "Profile" = profile
+        self.data = profile.pmc.Hideout
 
     @staticmethod
     def get_recipe(recipe_id: str) -> dict:
@@ -101,7 +101,7 @@ class Hideout:
         product_tpl = recipe["endProduct"]
         count = recipe["count"]
 
-        items = item_templates_repository.create_items(product_tpl, count)
+        items = item_factory.create_items(product_tpl, count)
         items_list: List[Item] = []
         for item, child_items in items:
             items_list.append(item)
@@ -127,7 +127,9 @@ class Hideout:
             assert generator_work_time >= 0
 
             # TODO: Move 0.15 into settings
-            production["Progress"] += generator_work_time + generator_idle_time * 0.15
+            production["Progress"] += (
+                generator_work_time + generator_idle_time * self.__GENERATOR_SPEED_WITHOUT_FUEL
+            )
             # production['SkipTime'] +=
 
     def __update_fuel(self) -> int:
@@ -165,13 +167,12 @@ class Hideout:
         return int(fuel_consumed / self.__FUEL_BURN_RATE)
 
     def read(self) -> None:
-        self.data: dict = ujson.load(self.path.open("r", encoding="utf8"))
-
         if not self.meta_path.exists():
             self.metadata = {"updated_at": int(time.time())}
         else:
             self.metadata = ujson.load(self.meta_path.open("r", encoding="utf8"))
 
+    def update(self) -> None:
         self.current_time = int(time.time())
         self.time_elapsed = self.current_time - self.metadata["updated_at"]
         time_generator_worked = self.__update_fuel()
@@ -185,5 +186,4 @@ class Hideout:
         self.metadata["updated_at"] = self.current_time
 
     def write(self) -> None:
-        atomic_write(ujson.dumps(self.data, indent=4), self.path)
         atomic_write(ujson.dumps(self.metadata, indent=4), self.meta_path)
