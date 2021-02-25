@@ -48,6 +48,7 @@ class Profile:
         pass
 
     pmc: ProfileModel
+    scav: ProfileModel
 
     hideout: Hideout
 
@@ -65,19 +66,11 @@ class Profile:
         self.profile_dir = root_dir.joinpath("resources", "profiles", profile_id)
 
         self.pmc_profile_path = self.profile_dir.joinpath("pmc_profile.json")
+        self.scav_profile_path = self.profile_dir.joinpath("scav_profile.json")
 
     @staticmethod
     def exists(profile_id: str) -> bool:
         return root_dir.joinpath("resources", "profiles", profile_id).exists()
-
-    def get_profile(self) -> dict:
-        profile_data = {}
-        for file in self.profile_dir.glob("pmc_*.json"):
-            profile_data[file.stem] = ujson.load(file.open("r", encoding="utf8"))
-
-        profile_base = self.pmc.copy()
-
-        return profile_base.dict(exclude_none=True)
 
     def add_insurance(self, item: Item, trader: TraderType) -> None:
         self.pmc.InsuredItems.append(ItemInsurance(item_id=item.id, trader_id=trader.value))
@@ -90,7 +83,8 @@ class Profile:
     def read(self) -> None:
         if not self.profile_dir.exists() or not self.pmc_profile_path.exists():
             raise Profile.ProfileDoesNotExistsError
-        self.pmc: ProfileModel = ProfileModel.parse_file(self.pmc_profile_path)
+        self.pmc = ProfileModel.parse_file(self.pmc_profile_path)
+        self.scav = ProfileModel.parse_file(self.scav_profile_path)
 
         self.encyclopedia = Encyclopedia(profile=self)
         self.inventory = tarkov.inventory.PlayerInventory(profile=self)
@@ -108,7 +102,9 @@ class Profile:
         self.hideout.write()
         self.mail.write()
         self.inventory.write()
+
         atomic_write(self.pmc.json(exclude_defaults=True), self.pmc_profile_path)
+        atomic_write(self.scav.json(exclude_defaults=True), self.scav_profile_path)
 
     def update(self) -> None:
         self.hideout.update()
