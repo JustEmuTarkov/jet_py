@@ -25,6 +25,7 @@ from .models import (
     Repair,
     Split,
     Transfer,
+    Bind,
 )
 
 if TYPE_CHECKING:
@@ -47,6 +48,7 @@ class InventoryDispatcher(Dispatcher):
             ActionType.Insure: self._insure,
             ActionType.ApplyInventoryChanges: self._apply_inventory_changes,
             ActionType.Repair: self._repair,
+            ActionType.Bind: self._bind,
         }
 
     @contextmanager
@@ -210,3 +212,13 @@ class InventoryDispatcher(Dispatcher):
             affected, deleted = self.inventory.take_item(trader.base.repair.currency, total_repair_cost)
             self.response.items.change.extend(affected)
             self.response.items.del_.extend(deleted)
+
+    def _bind(self, action: Bind) -> None:
+        fast_panel = self.inventory.inventory.fastPanel
+
+        keys_to_delete = {k for k, v in fast_panel.items() if v == action.item}
+
+        for k in keys_to_delete:
+            del fast_panel[k]
+
+        fast_panel[action.index] = action.item

@@ -67,6 +67,11 @@ class Insure(ActionModel):
     tid: str
 
 
+class Bind(ActionModel):
+    item: ItemId
+    index: str
+
+
 class RepairItem(models.Base):
     item_id: ItemId = Field(alias="_id")
     count: float
