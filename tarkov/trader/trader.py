@@ -227,7 +227,7 @@ class TraderInventory(ImmutableInventory):
                 quest = self.trader.player_profile.quests.get_quest(quest_id)
             except KeyError:
                 return False
-            return quest.status == QuestStatus.Success
+            return quest.status == QuestStatus.SUCCESS
 
         def filter_loyal_level(item: Item) -> bool:
             if item.id not in self.loyal_level_items:

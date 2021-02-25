@@ -8,14 +8,14 @@ from tarkov.inventory.models import Item
 
 
 class QuestStatus(enum.Enum):
-    Locked = "Locked"
-    AvailableForStart = "AvailableForStart"
-    Started = "Started"
-    AvailableForFinish = "AvailableForFinish"
-    Success = "Success"
-    Fail = "Fail"
-    FailRestartable = "FailRestartable"
-    MarkedAsFailed = "MarkedAsFailed"
+    LOCKED = "Locked"
+    AVAILABLE_FOR_START = "AvailableForStart"
+    STARTED = "Started"
+    AVAILABLE_FOR_FINISH = "AvailableForFinish"
+    SUCCESS = "Success"
+    FAIL = "Fail"
+    FAIL_RESTARTABLE = "FailRestartable"
+    MARKED_AS_FAILED = "MarkedAsFailed"
 
 
 class QuestReward(models.Base):
