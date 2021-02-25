@@ -41,15 +41,10 @@ def client_game_profile_list(
 ) -> Union[TarkovSuccessResponse[List[dict]], TarkovErrorResponse]:
     try:
         with Profile(profile_id) as profile:
-            pmc_profile = profile.get_profile()
-            profile_dir = root_dir.joinpath("resources", "profiles", profile.profile_id)
-            scav_profile = ujson.load((profile_dir / "character_scav.json").open("r"))
             return TarkovSuccessResponse(
                 data=[
-                    ProfileModel.parse_obj(pmc_profile).dict(
-                        exclude_unset=False, exclude_defaults=False, exclude_none=True
-                    ),
-                    scav_profile,
+                    profile.pmc_profile.dict(exclude_none=True),
+                    ujson.load(profile.profile_dir.joinpath("character_scav.json").open("r")),
                 ]
             )
     except Profile.ProfileDoesNotExistsError as error:
