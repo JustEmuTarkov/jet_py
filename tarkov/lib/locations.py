@@ -185,7 +185,10 @@ class LocationGenerator:
         return self.__category_cache[template_id]
 
     def template_weight(self, template: ItemTemplate) -> Union[int, float]:
-        if not self.__base["Id"] in template.props.AllowSpawnOnLocations:
+        if (
+            template.props.AllowSpawnOnLocations
+            and not self.__base["Id"] in template.props.AllowSpawnOnLocations
+        ):
             return 0
 
         rarity_coefficients = {
