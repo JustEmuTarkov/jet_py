@@ -1,4 +1,4 @@
-from typing import Dict, List, NewType, Optional, Union
+from typing import Dict, Iterable, List, NewType, Optional, Union
 
 import pydantic
 
@@ -51,6 +51,11 @@ class CategoryRepository:
 
         tpl_category = self.item_categories[template_id]
         return self.categories[tpl_category.ParentId]
+
+    def parent_categories(self, category: CategoryModel) -> Iterable[CategoryModel]:
+        while category.ParentId is not None:
+            category = self.categories[category.ParentId]
+            yield category
 
     def has_parent_category(
         self,

@@ -52,10 +52,12 @@ class Trader:
 
     def can_sell(self, item: Item) -> bool:
         try:
-            category_id = category_repository.get_category(item.tpl).Id
+            category = category_repository.get_category(item.tpl)
+            return category.Id in self.base.sell_category or any(
+                c.Id in self.base.sell_category for c in category_repository.parent_categories(category)
+            )
         except KeyError:
             return False
-        return category_id in self.base.sell_category
 
     def get_item_price(self, item: Item) -> int:
         price: float = 0
