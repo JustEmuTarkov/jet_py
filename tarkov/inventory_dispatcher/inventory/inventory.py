@@ -207,4 +207,6 @@ class InventoryDispatcher(Dispatcher):
             total_repair_cost: int = round(repair_cost_per_1_durability * price_rate)
 
             assert trader.base.repair.currency is not None
-            self.inventory.take_item(trader.base.repair.currency, total_repair_cost)
+            affected, deleted = self.inventory.take_item(trader.base.repair.currency, total_repair_cost)
+            self.response.items.change.extend(affected)
+            self.response.items.del_.extend(deleted)
