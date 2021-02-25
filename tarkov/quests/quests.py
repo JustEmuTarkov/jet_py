@@ -46,7 +46,7 @@ class Quests:
         quest = Quest(
             quest_id=quest_template.id,
             started_at=0,
-            status=QuestStatus.AVAILABLE_FOR_START,
+            status=QuestStatus.AvailableForStart,
         )
         self.quests.append(quest)
         return quest
@@ -67,7 +67,7 @@ class Quests:
         # if quest.status != QuestStatus.AvailableForStart.value:
         #     raise ValueError("Quest is already accepted or locked")
 
-        quest.status = QuestStatus.STARTED
+        quest.status = QuestStatus.Started
         quest.started_at = int(time.time())
 
     def handover_items(
@@ -84,7 +84,7 @@ class Quests:
 
         quest_template = quests_repository.get_quest_template(quest_id)
         quest_condition = next(
-            cond for cond in quest_template.conditions.AVAILABLE_FOR_FINISH if cond.props["id"] == condition_id
+            cond for cond in quest_template.conditions.AvailableForFinish if cond.props["id"] == condition_id
         )
         # Amount of items required for quest condition
         required_amount: int = int(quest_condition.props["value"])
@@ -115,7 +115,7 @@ class Quests:
     @staticmethod
     def get_quest_reward(quest_id: str) -> Tuple[List[Item], List[Item]]:
         quest_template = quests_repository.get_quest_template(quest_id)
-        rewards = quest_template.rewards.SUCCESS
+        rewards = quest_template.rewards.Success
 
         for reward in rewards:
             if isinstance(reward, QuestRewardItem):
@@ -126,10 +126,10 @@ class Quests:
     def complete_quest(self, quest_id: str) -> None:
         quest_template = quests_repository.get_quest_template(quest_id)
         quest = self.get_quest(quest_id)
-        quest.status = QuestStatus.SUCCESS
+        quest.status = QuestStatus.Success
 
         reward_items: List[Item] = []
-        for reward in quest_template.rewards.SUCCESS:
+        for reward in quest_template.rewards.Success:
             if isinstance(reward, QuestRewardItem):
                 for reward_item in reward.items:
                     item_template = item_templates_repository.get_template(reward_item)
