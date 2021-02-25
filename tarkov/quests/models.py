@@ -110,9 +110,6 @@ class QuestTemplate(models.Base):
 
 
 class Quest(models.Base):
-    class Config:
-        use_enum_values = False
-
     quest_id: str = Field(alias="qid")
     started_at: int = Field(alias="startTime")
     completed_conditions: List[str] = Field(alias="completedConditions", default_factory=list)
