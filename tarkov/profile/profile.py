@@ -51,13 +51,9 @@ class Profile:
     scav: ProfileModel
 
     hideout: Hideout
-
     quests: quests.Quests
-    quests_data: List[dict]
-
     inventory: inventory_.PlayerInventory
     encyclopedia: Encyclopedia
-
     mail: Mail
 
     def __init__(self, profile_id: str):
