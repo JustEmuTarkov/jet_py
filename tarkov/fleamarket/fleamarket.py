@@ -323,21 +323,16 @@ class FleaMarket:
         now = datetime.now()
         time_elapsed = now - self.updated_at
         self.updated_at = now
-        new_offers_amount: int = min(
-            self.offers_amount,
-            int(time_elapsed.total_seconds()),
-        )
-        offers_to_full = self.offers_amount - len(self.offers)
-        if new_offers_amount < offers_to_full:
-            new_offers_amount = offers_to_full
+
         try:
-            keys_to_delete = random.sample(list(self.offers.keys()), k=new_offers_amount)
+            keys_to_delete = random.sample(list(self.offers.keys()), k=int(time_elapsed.total_seconds()))
         except ValueError:
             keys_to_delete = []
 
         for key in keys_to_delete:
             del self.offers[key]
 
+        new_offers_amount: int = self.offers_amount - len(self.offers)
         new_offers = self.generator.generate_offers(new_offers_amount)
         logger.debug(f"Generated {len(new_offers)} items!")
         self.offers.update(new_offers)
