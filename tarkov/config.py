@@ -17,4 +17,13 @@ class FleaMarketConfig(BaseConfig):
     level_required: int = 10
 
 
+class BotGenerationConfig(BaseConfig):
+    __config_path__: ClassVar[Path] = config_dir.joinpath("bot_generation.yaml")
+
+    scav_chance: float = 1
+    bear_chance: float = 0.5
+    usec_change: float = 0.5
+
+
 flea_market = FleaMarketConfig.load()
+bot_generation = BotGenerationConfig.load()
