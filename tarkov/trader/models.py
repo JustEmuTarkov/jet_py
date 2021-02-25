@@ -7,7 +7,7 @@ from typing import (
     Literal,
     NamedTuple,
     Optional,
-    ValuesView,
+    Set, ValuesView,
 )
 
 from pydantic import Field, StrictBool
@@ -111,7 +111,7 @@ class TraderBase(Base):
     repair: TraderRepair
     insurance: TraderInsurance
     loyalty: TraderStanding
-    sell_category: List[CategoryId]
+    sell_category: Set[CategoryId]
 
 
 class BarterSchemeEntry(Base):
