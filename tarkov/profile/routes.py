@@ -44,7 +44,7 @@ def client_game_profile_list(
             return TarkovSuccessResponse(
                 data=[
                     profile.pmc.dict(exclude_none=True),
-                    ujson.load(profile.profile_dir.joinpath("character_scav.json").open("r")),
+                    profile.scav.dict(exclude_none=True),
                 ]
             )
     except Profile.ProfileDoesNotExistsError as error:
