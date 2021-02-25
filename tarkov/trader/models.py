@@ -7,7 +7,8 @@ from typing import (
     Literal,
     NamedTuple,
     Optional,
-    Set, ValuesView,
+    Set,
+    ValuesView,
 )
 
 from pydantic import Field, StrictBool
