@@ -28,6 +28,6 @@ class HideoutProductionRepository:
         self.production = pydantic.parse_obj_as(List[HideoutProductionModel], production)
 
 
-production = HideoutProductionRepository(
+production_repository = HideoutProductionRepository(
     production=[ujson.load(path.open()) for path in db_dir.joinpath("hideout", "production").glob("*.json")]
 )

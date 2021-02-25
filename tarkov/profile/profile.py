@@ -1,10 +1,7 @@
 from __future__ import annotations
 
 from types import TracebackType
-from typing import List, Optional, Union
-
-import ujson
-from typing_extensions import Type
+from typing import Optional, Union, Type
 
 import tarkov.inventory.repositories
 from server import root_dir

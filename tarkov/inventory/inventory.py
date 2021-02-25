@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import abc
 import itertools
-from typing import Dict, Iterable, List, Optional, TYPE_CHECKING, Tuple, Union
+from typing import Dict, Iterable, List, Optional, TYPE_CHECKING, Tuple
 
 from server import logger
 from tarkov.exceptions import NoSpaceError, NotFoundError

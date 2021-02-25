@@ -1,5 +1,3 @@
-import ujson
-
 from server import db_dir
 from tarkov.models import Base
 
