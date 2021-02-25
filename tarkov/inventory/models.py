@@ -278,33 +278,8 @@ class PatronInWeaponMoveLocation(Base):
     container: Literal["patron_in_weapon"]
 
 
-class ModMoveLocation(Base):
-    id: ItemId
-    container: str
-    # container: Literal[
-    #     'mod_handguard',
-    #     'mod_muzzle',
-    #     'mod_gas_block',
-    #     'mod_mount',
-    #     'mod_scope',
-    #     'mod_sight_rear',
-    #     'mod_sight_front',
-    #     'mod_tactical',
-    #     'mod_barrel',
-    #     'mod_pistol_grip',
-    #     'mod_magazine',
-    #     'mod_reciever',
-    #     'mod_stock',
-    #     'mod_charge',
-    #     'mod_mount_001',
-    #     'mod_mount_002',
-    #     'mod_foregrip'
-    # ]
-
-
 AnyMoveLocation = Union[
     InventoryMoveLocation,
     CartridgesMoveLocation,
     PatronInWeaponMoveLocation,
-    ModMoveLocation,
 ]

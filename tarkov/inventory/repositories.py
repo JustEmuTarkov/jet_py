@@ -1,4 +1,3 @@
-import itertools
 from typing import Dict, Iterable, List, Tuple, Union
 
 import pydantic

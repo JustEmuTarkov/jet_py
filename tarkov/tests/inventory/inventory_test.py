@@ -17,7 +17,7 @@ def test_adds_items(inventory: PlayerInventory, random_items: List[Item]) -> Non
     for item in random_items:
         inventory.add_item(item, [])
 
-    assert all(item in inventory.inventory.items for item in random_items)
+    assert all(item in inventory.items.values() for item in random_items)
 
 
 # EOD stash should be 10x68

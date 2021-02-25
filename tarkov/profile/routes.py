@@ -2,11 +2,10 @@ from __future__ import annotations
 
 from typing import List, Union
 
-import ujson
 from fastapi.params import Body, Cookie, Depends
 from starlette.requests import Request
 
-from server import logger, root_dir
+from server import logger
 from server.utils import get_request_url_root, make_router
 from tarkov.dependencies import with_profile
 from tarkov.inventory_dispatcher import DispatcherManager
@@ -14,7 +13,6 @@ from tarkov.inventory_dispatcher.manager import DispatcherResponse
 from tarkov.launcher.accounts import account_service
 from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
 from tarkov.profile import Profile
-from tarkov.profile.models import ProfileModel
 from tarkov.profile.service import profile_service
 
 profile_router = make_router(tags=["Profile"])

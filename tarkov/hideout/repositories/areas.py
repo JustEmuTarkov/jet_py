@@ -24,6 +24,6 @@ class HideoutAreasRepository:
         self.areas = pydantic.parse_obj_as(List[HideoutAreaTemplate], areas)
 
 
-areas = HideoutAreasRepository(
+areas_repository = HideoutAreasRepository(
     areas=[ujson.load(path.open()) for path in db_dir.joinpath("hideout", "areas").glob("*.json")]
 )

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import abc
 import itertools
-from typing import Dict, Iterable, List, Optional, TYPE_CHECKING, Tuple, Union
+from typing import Dict, Iterable, List, Optional, TYPE_CHECKING, Tuple
 
 from server import logger
 from tarkov.exceptions import NoSpaceError, NotFoundError
@@ -19,7 +19,6 @@ from .models import (
     ItemInventoryLocation,
     ItemOrientationEnum,
     ItemUpdFoldable,
-    ModMoveLocation,
     PatronInWeaponMoveLocation,
 )
 from .prop_models import CompoundProps, MagazineProps, ModProps, StockProps, WeaponProps
@@ -536,20 +535,16 @@ class GridInventory(MutableInventory):
         self,
         item: Item,
         child_items: List[Item],
-        move_location: Union[InventoryMoveLocation, ModMoveLocation],
+        move_location: InventoryMoveLocation,
     ) -> None:
-        if (
-            isinstance(move_location, InventoryMoveLocation)
-            and move_location.container == "hideout"
-            and move_location.location
-        ):
+        if move_location.id == self.root_id and move_location.location is not None:
             if not self.stash_map.can_place(item, child_items, move_location.location):
                 raise ValueError("Cannot place item into location since it is taken")
 
-        # self.stash_map.add(item, children_items)
         item.slot_id = move_location.container
         item.parent_id = move_location.id
-        item.location = move_location.location
+        if move_location.location:
+            item.location = move_location.location
 
         self.add_item(item, child_items)
 
