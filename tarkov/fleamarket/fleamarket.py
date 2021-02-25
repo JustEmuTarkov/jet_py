@@ -38,8 +38,8 @@ class OfferGenerator:
     item_templates: List[ItemTemplate]
     item_templates_weights: List[float]
 
-    percentile_high: int
-    percentile_low: int
+    percentile_high: float
+    percentile_low: float
 
     def __init__(self, flea_market: FleaMarket):
         self.flea_market = flea_market
