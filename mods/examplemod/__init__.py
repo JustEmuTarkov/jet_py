@@ -2,7 +2,7 @@ from server.package_lib import PackageBase, PackageMeta
 from tarkov.hideout import repositories as hideout_repositories
 
 
-def set_production_time_to_1():
+def set_production_time_to_1() -> None:
     for production in hideout_repositories.production.production:
         production.productionTime = 1
 
