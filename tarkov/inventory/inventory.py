@@ -97,6 +97,10 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
         item_template = item_templates_repository.get_template(item)
         child_items = child_items or []
         width, height = ImmutableInventory.__get_item_size_without_folding(item, child_items)
+
+        if isinstance(item_template.props, StockProps) and item.upd.folded():
+            width -= item_template.props.SizeReduceRight
+
         if not isinstance(item_template.props, WeaponProps):
             return width, height
 
@@ -111,8 +115,8 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
                 continue
             if item_template.props.FoldedSlot == stock.slot_id:
                 item_or_stock_folded = stock.upd.folded() or item.upd.folded()
-                item_or_item_foldable = stock_template.props.Foldable or item_template.props.Foldable
-                if item_or_item_foldable and item_or_stock_folded:
+                item_or_stock_foldable = stock_template.props.Foldable or item_template.props.Foldable
+                if item_or_stock_foldable and item_or_stock_folded:
                     width -= max(
                         stock_template.props.SizeReduceRight,
                         stock_template.props.ExtraSizeRight,
