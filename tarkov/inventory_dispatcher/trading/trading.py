@@ -50,7 +50,7 @@ class TradingDispatcher(Dispatcher):
 
         # Take required items from inventory
         for scheme_item in action.scheme_items:
-            self.profile.pmc_profile.TraderStandings[action.tid].current_sales_sum += scheme_item.count
+            self.profile.pmc.TraderStandings[action.tid].current_sales_sum += scheme_item.count
             item = self.inventory.get(scheme_item.id)
             item.upd.StackObjectsCount -= scheme_item.count
             if not item.upd.StackObjectsCount:

@@ -32,7 +32,7 @@ class Hideout:
         self.meta_path = profile.profile_dir.joinpath("pmc_hideout.meta.json")
 
         self.profile: "Profile" = profile
-        self.data = profile.pmc_profile.Hideout
+        self.data = profile.pmc.Hideout
 
     @staticmethod
     def get_recipe(recipe_id: str) -> dict:

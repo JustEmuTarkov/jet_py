@@ -132,13 +132,13 @@ class Trader:
 
     @property
     def standing(self) -> TraderStanding:
-        if self.type.value not in self.player_profile.pmc_profile.TraderStandings:
+        if self.type.value not in self.player_profile.pmc.TraderStandings:
             standing_copy: TraderStanding = self._base.loyalty.copy(deep=True)
-            self.player_profile.pmc_profile.TraderStandings[self.type.value] = TraderStanding.parse_obj(
+            self.player_profile.pmc.TraderStandings[self.type.value] = TraderStanding.parse_obj(
                 standing_copy
             )
 
-        return self.player_profile.pmc_profile.TraderStandings[self.type.value]
+        return self.player_profile.pmc.TraderStandings[self.type.value]
 
 
 class TraderInventory(ImmutableInventory):

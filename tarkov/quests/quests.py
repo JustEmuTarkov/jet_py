@@ -39,7 +39,7 @@ class Quests:
         profile: "Profile",
     ):
         self.profile: "Profile" = profile
-        self.quests = self.profile.pmc_profile.Quests
+        self.quests = self.profile.pmc.Quests
 
     def create_quest(self, quest_id: str) -> Quest:
         quest_template = quests_repository.get_quest_template(quest_id)
@@ -77,10 +77,10 @@ class Quests:
         items: Dict[tarkov.inventory.types.ItemId, int],
     ) -> Tuple[List[inventory.models.Item], List[inventory.models.Item]]:
         try:
-            backend_counter = self.profile.pmc_profile.BackendCounters[condition_id]
+            backend_counter = self.profile.pmc.BackendCounters[condition_id]
         except KeyError:
             backend_counter = BackendCounter(id=condition_id, qid=quest_id, value=0)
-            self.profile.pmc_profile.BackendCounters[condition_id] = backend_counter
+            self.profile.pmc.BackendCounters[condition_id] = backend_counter
 
         quest_template = quests_repository.get_quest_template(quest_id)
         quest_condition = next(

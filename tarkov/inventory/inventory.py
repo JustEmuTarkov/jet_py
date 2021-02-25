@@ -703,7 +703,7 @@ class PlayerInventory(GridInventory):
     def __init__(self, profile: "Profile"):
         super().__init__()
         self.profile: "Profile" = profile
-        self.inventory = profile.pmc_profile.Inventory
+        self.inventory = profile.pmc.Inventory
 
         self.__items: Dict[ItemId, Item] = {}
 

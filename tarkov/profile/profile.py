@@ -21,7 +21,7 @@ from .models import ItemInsurance, ProfileModel
 class Encyclopedia:
     def __init__(self, profile: Profile):
         self.profile = profile
-        self.data = profile.pmc_profile.Encyclopedia
+        self.data = profile.pmc.Encyclopedia
 
     def examine(self, item: Union[Item, TemplateId]) -> None:
         if isinstance(item, Item):
@@ -47,7 +47,7 @@ class Profile:
     class ProfileDoesNotExistsError(Exception):
         pass
 
-    pmc_profile: ProfileModel
+    pmc: ProfileModel
 
     hideout: Hideout
 
@@ -75,22 +75,22 @@ class Profile:
         for file in self.profile_dir.glob("pmc_*.json"):
             profile_data[file.stem] = ujson.load(file.open("r", encoding="utf8"))
 
-        profile_base = self.pmc_profile.copy()
+        profile_base = self.pmc.copy()
 
         return profile_base.dict(exclude_none=True)
 
     def add_insurance(self, item: Item, trader: TraderType) -> None:
-        self.pmc_profile.InsuredItems.append(ItemInsurance(item_id=item.id, trader_id=trader.value))
+        self.pmc.InsuredItems.append(ItemInsurance(item_id=item.id, trader_id=trader.value))
 
         #  Todo remove insurance from items that aren't present in inventory after raid
 
     def receive_experience(self, amount: int) -> None:
-        self.pmc_profile.Info.Experience += amount
+        self.pmc.Info.Experience += amount
 
     def read(self) -> None:
         if not self.profile_dir.exists() or not self.pmc_profile_path.exists():
             raise Profile.ProfileDoesNotExistsError
-        self.pmc_profile: ProfileModel = ProfileModel.parse_file(self.pmc_profile_path)
+        self.pmc: ProfileModel = ProfileModel.parse_file(self.pmc_profile_path)
 
         self.encyclopedia = Encyclopedia(profile=self)
         self.inventory = tarkov.inventory.PlayerInventory(profile=self)
@@ -108,7 +108,7 @@ class Profile:
         self.hideout.write()
         self.mail.write()
         self.inventory.write()
-        atomic_write(self.pmc_profile.json(exclude_defaults=True), self.pmc_profile_path)
+        atomic_write(self.pmc.json(exclude_defaults=True), self.pmc_profile_path)
 
     def update(self) -> None:
         self.hideout.update()

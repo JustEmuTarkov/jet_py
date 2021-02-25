@@ -97,7 +97,7 @@ async def singleplayer_raid_profile_save(
     # update profile on this request
     body = await request.json()
 
-    pmc_health = profile.pmc_profile.Health
+    pmc_health = profile.pmc.Health
     for body_part, health in body["health"]["Health"].items():
         pmc_health["BodyParts"][body_part]["Health"]["Maximum"] = health["Maximum"]
         pmc_health["BodyParts"][body_part]["Health"]["Current"] = health["Current"]
@@ -107,15 +107,15 @@ async def singleplayer_raid_profile_save(
     pmc_health["Energy"]["Current"] = body["health"]["Energy"]
 
     raid_profile = body["profile"]
-    profile.pmc_profile.Encyclopedia.update(raid_profile["Encyclopedia"])
-    profile.pmc_profile.Skills = Skills.parse_obj(raid_profile["Skills"])
-    profile.pmc_profile.Quests = pydantic.parse_obj_as(List[Quest], raid_profile["Quests"])
+    profile.pmc.Encyclopedia.update(raid_profile["Encyclopedia"])
+    profile.pmc.Skills = Skills.parse_obj(raid_profile["Skills"])
+    profile.pmc.Quests = pydantic.parse_obj_as(List[Quest], raid_profile["Quests"])
 
     info = raid_profile["Info"]
-    info["LowerNickname"] = profile.pmc_profile.Info.LowerNickname
-    info["GameVersion"] = profile.pmc_profile.Info.GameVersion
-    info["LastTimePlayedAsSavage"] = profile.pmc_profile.Info.LastTimePlayedAsSavage
-    profile.pmc_profile.Info = ProfileInfo.parse_obj(info)
+    info["LowerNickname"] = profile.pmc.Info.LowerNickname
+    info["GameVersion"] = profile.pmc.Info.GameVersion
+    info["LastTimePlayedAsSavage"] = profile.pmc.Info.LastTimePlayedAsSavage
+    profile.pmc.Info = ProfileInfo.parse_obj(info)
 
     backend_counters: Dict[str, BackendCounter] = {
         k: BackendCounter.parse_obj(v)
@@ -123,10 +123,10 @@ async def singleplayer_raid_profile_save(
         if v["id"] and v["qid"]
     }
     for key, raid_counter in backend_counters.items():
-        profile_counter = profile.pmc_profile.BackendCounters.get(key, raid_counter)
-        profile.pmc_profile.BackendCounters[key] = max(raid_counter, profile_counter, key=lambda c: c.value)
+        profile_counter = profile.pmc.BackendCounters.get(key, raid_counter)
+        profile.pmc.BackendCounters[key] = max(raid_counter, profile_counter, key=lambda c: c.value)
 
-    profile.pmc_profile.Stats = raid_profile["Stats"]
+    profile.pmc.Stats = raid_profile["Stats"]
 
     raid_inventory_items: List[Item] = parse_obj_as(List[Item], body["profile"]["Inventory"]["items"])
     raid_inventory = SimpleInventory(items=raid_inventory_items)
@@ -173,10 +173,10 @@ async def health_sync(
 ) -> TarkovSuccessResponse:
     body = await request.json()
 
-    profile.pmc_profile.Health["Hydration"]["Current"] = body["Hydration"]
-    profile.pmc_profile.Health["Energy"]["Current"] = body["Energy"]
+    profile.pmc.Health["Hydration"]["Current"] = body["Hydration"]
+    profile.pmc.Health["Energy"]["Current"] = body["Energy"]
 
     for limb, health in body["Health"].items():
-        profile.pmc_profile.Health["BodyParts"][limb]["Health"] = health
+        profile.pmc.Health["BodyParts"][limb]["Health"] = health
 
     return TarkovSuccessResponse(data=None)

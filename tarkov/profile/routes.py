@@ -43,7 +43,7 @@ def client_game_profile_list(
         with Profile(profile_id) as profile:
             return TarkovSuccessResponse(
                 data=[
-                    profile.pmc_profile.dict(exclude_none=True),
+                    profile.pmc.dict(exclude_none=True),
                     ujson.load(profile.profile_dir.joinpath("character_scav.json").open("r")),
                 ]
             )

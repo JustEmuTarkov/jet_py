@@ -57,7 +57,7 @@ async def join(
     return TarkovSuccessResponse(
         data=[
             {
-                "profileid": profile.pmc_profile.id,
+                "profileid": profile.pmc.id,
                 "status": "busy",
                 "sid": "",
                 "ip": "127.0.0.1",
