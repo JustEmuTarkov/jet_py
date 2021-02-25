@@ -11,4 +11,4 @@ class HideoutSettingsModel(Base):
     gpuBoostRate: float
 
 
-settings = HideoutSettingsModel.parse_file(db_dir.joinpath('hideout', 'settings.json'))
+settings = HideoutSettingsModel.parse_file(db_dir.joinpath("hideout", "settings.json"))

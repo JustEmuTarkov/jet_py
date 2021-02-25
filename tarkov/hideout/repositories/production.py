@@ -32,5 +32,5 @@ class HideoutProductionRepository:
 
 
 production = HideoutProductionRepository(
-    production=[ujson.load(path.open()) for path in db_dir.joinpath('hideout', 'production').glob("*.json")]
+    production=[ujson.load(path.open()) for path in db_dir.joinpath("hideout", "production").glob("*.json")]
 )

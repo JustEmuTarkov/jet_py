@@ -9,7 +9,7 @@ from tarkov.models import Base
 
 
 class HideoutAreaTemplate(Base):
-    id: str = Field(alias='_id')
+    id: str = Field(alias="_id")
     type: int
     enabled: bool
     needsFuel: bool
@@ -28,5 +28,5 @@ class HideoutAreasRepository:
 
 
 areas = HideoutAreasRepository(
-    areas=[ujson.load(path.open()) for path in db_dir.joinpath('hideout', 'areas').glob("*.json")]
+    areas=[ujson.load(path.open()) for path in db_dir.joinpath("hideout", "areas").glob("*.json")]
 )
