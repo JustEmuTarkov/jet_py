@@ -686,10 +686,7 @@ class GridInventory(MutableInventory):
 
 
 class PlayerInventoryStashMap(GridInventoryStashMap):
-    inventory: PlayerInventory
-
-    def _is_item_in_root(self, item: Item) -> bool:
-        return item.parent_id in {self.inventory.root_id, self.inventory.equipment_id}
+    pass
 
 
 class PlayerInventory(GridInventory):
