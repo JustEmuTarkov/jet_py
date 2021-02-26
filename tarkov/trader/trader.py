@@ -3,7 +3,8 @@ from __future__ import annotations
 import itertools
 import random
 import time
-from typing import ClassVar, Dict, Iterable, List, TYPE_CHECKING, Union
+from datetime import timedelta
+from typing import ClassVar, Dict, List, TYPE_CHECKING, Union
 
 import pydantic
 import ujson
@@ -42,6 +43,7 @@ class Trader:
         self.player_profile: Profile = profile
 
         self._base: TraderBase = TraderBase.parse_file(self.path.joinpath("base.json"))
+        self._base.supply_next_time = int(time.time() + timedelta(hours=1).total_seconds())
         self.inventory = TraderInventory(self)
 
     @property
@@ -145,27 +147,28 @@ class TraderInventory(ImmutableInventory):
     __fence_assort: ClassVar[List[Item]] = []
     __fence_assort_created_at: ClassVar[int] = 0
 
+    # It can be done more nicely through some kind of proxy class
+    __loyal_level_items_cache: ClassVar[Dict[TraderType, dict]] = {}
+    __barter_scheme_cache: ClassVar[Dict[TraderType, BarterScheme]] = {}
+    __assort_cache: ClassVar[Dict[TraderType, Dict[ItemId, Item]]] = {}
+
     def __init__(self, trader: Trader):
         self.trader = trader
-
-        self.assort_items: Dict[ItemId, Item] = {
-            item.id: item
-            for item in pydantic.parse_obj_as(
-                List[Item],
-                ujson.load(self.trader.path.joinpath("items.json").open("r", encoding="utf8")),
-            )
-        }
-        self._barter_scheme = BarterScheme.parse_file(self.trader.path.joinpath("barter_scheme.json"))
-        self.loyal_level_items = ujson.load(
-            self.trader.path.joinpath("loyal_level_items.json").open("r", encoding="utf8")
-        )
         self._quest_assort = ujson.load(
             self.trader.path.joinpath("questassort.json").open("r", encoding="utf8")
         )
 
     @property
     def items(self) -> Dict[ItemId, Item]:
-        return self.assort_items
+        if self.trader.type not in self.__assort_cache:
+            self.__assort_cache[self.trader.type] = {
+                item.id: item
+                for item in pydantic.parse_file_as(
+                    List[Item],
+                    self.trader.path.joinpath("items.json"),
+                )
+            }
+        return self.__assort_cache[self.trader.type]
 
     @property
     def assort(self) -> List[Item]:
@@ -181,11 +184,23 @@ class TraderInventory(ImmutableInventory):
         return self._trader_assort()
 
     @property
+    def loyal_level_items(self) -> dict:
+        if self.trader.type not in TraderInventory.__loyal_level_items_cache:
+            TraderInventory.__loyal_level_items_cache[self.trader.type] = ujson.load(
+                self.trader.path.joinpath("loyal_level_items.json").open("r", encoding="utf8")
+            )
+        return TraderInventory.__loyal_level_items_cache[self.trader.type]
+
+    @property
     def barter_scheme(self) -> BarterScheme:
         if self.trader.type == TraderType.Fence:
             return self._get_fence_barter_scheme()
 
-        return self._barter_scheme
+        if self.trader.type not in TraderInventory.__barter_scheme_cache:
+            TraderInventory.__barter_scheme_cache[self.trader.type] = BarterScheme.parse_file(
+                self.trader.path.joinpath("barter_scheme.json")
+            )
+        return TraderInventory.__barter_scheme_cache[self.trader.type]
 
     def _get_fence_barter_scheme(self) -> BarterScheme:
         barter_scheme = BarterScheme()
@@ -236,17 +251,24 @@ class TraderInventory(ImmutableInventory):
             required_standing = self.loyal_level_items[item.id]
             return self.trader.standing.current_level >= required_standing
 
-        def filter_in_root(item: Item) -> bool:
-            return item.slot_id == "hideout"
+        # def filter_in_root(item: Item) -> bool:
+        #     return item.slot_id == "hideout"
 
-        items = filter(filter_in_root, self.items.values())  # Filter root items
-        items = filter(filter_quest_assort, items)  # Filter items that require quest completion
+        # items = filter(filter_in_root, self.items.values())  # Filter root items
+        items = filter(filter_quest_assort, self.items.values())  # Filter items that require quest completion
         items = filter(filter_loyal_level, items)  # Filter items that require loyalty level
 
-        def assort_inner(items_list: Iterable[Item]) -> Iterable[Item]:
-            """Return item and it's children from trader inventory"""
-            for item in items_list:
-                yield item
-                yield from self.iter_item_children_recursively(item)
+        assort = {item.id: item for item in items}
 
-        return list(assort_inner(items))
+        # Remove orphan items from assort
+        while True:
+            assort_size = len(assort)
+            assort = {
+                item.id: item
+                for item in assort.values()
+                if item.parent_id in assort or item.slot_id == "hideout"
+            }
+            if len(assort) == assort_size:
+                break
+
+        return list(assort.values())
