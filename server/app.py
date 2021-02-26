@@ -73,12 +73,14 @@ app.mount(
     name="static",
 )
 
+
 @app.middleware("http")
 async def log_response_time(request: Request, call_next: Callable) -> Response:
     start_time = time.time()
     response = await call_next(request)
     logger.debug(f"Request time: {time.time() - start_time}s")
     return response
+
 
 package_manager = PackageManager(root_dir.joinpath("mods"))
 package_manager.load_packages()
