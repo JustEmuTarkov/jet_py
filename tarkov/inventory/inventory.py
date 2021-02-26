@@ -4,7 +4,6 @@ import abc
 import itertools
 from typing import Dict, Iterable, List, Optional, TYPE_CHECKING, Tuple
 
-from server import logger
 from tarkov.exceptions import NoSpaceError, NotFoundError
 from tarkov.models import Base
 from .helpers import generate_item_id
@@ -97,6 +96,10 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
         item_template = item_templates_repository.get_template(item)
         child_items = child_items or []
         width, height = ImmutableInventory.__get_item_size_without_folding(item, child_items)
+
+        if isinstance(item_template.props, StockProps) and item.upd.folded():
+            width -= item_template.props.SizeReduceRight
+
         if not isinstance(item_template.props, WeaponProps):
             return width, height
 
@@ -111,8 +114,8 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
                 continue
             if item_template.props.FoldedSlot == stock.slot_id:
                 item_or_stock_folded = stock.upd.folded() or item.upd.folded()
-                item_or_item_foldable = stock_template.props.Foldable or item_template.props.Foldable
-                if item_or_item_foldable and item_or_stock_folded:
+                item_or_stock_foldable = stock_template.props.Foldable or item_template.props.Foldable
+                if item_or_stock_foldable and item_or_stock_folded:
                     width -= max(
                         stock_template.props.SizeReduceRight,
                         stock_template.props.ExtraSizeRight,
@@ -209,15 +212,18 @@ class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
         if item.upd.StackObjectsCount == 0:
             item.get_inventory().remove_item(item)
 
-    @staticmethod
-    def fold(item: Item, folded: bool) -> None:
+    def fold(self, item: Item, folded: bool) -> None:
         """
         Folds item
         """
         item_template = item_templates_repository.get_template(item)
 
         assert isinstance(item_template.props, (WeaponProps, StockProps))
+        children = list(self.iter_item_children_recursively(item))
+        # Remove and add item to update stash map
+        self.remove_item(item)
         item.upd.Foldable = ItemUpdFoldable(Folded=folded)
+        self.add_item(item, children)
 
     def take_item(self, template_id: TemplateId, amount: int) -> Tuple[List[Item], List[Item]]:
         """
@@ -290,9 +296,14 @@ class StashMapItemFootprint(Base):
 
         return False
 
+    def iter_cells(self) -> Iterable[Tuple[int, int]]:
+        for x in range(self.x, self.x_high):
+            for y in range(self.y, self.y_high):
+                yield x, y
+
 
 class GridInventoryStashMap:
-    class StashMapWarning(Warning):
+    class InvalidCellStateError(Exception):
         pass
 
     class OutOfBoundsError(Exception):
@@ -309,7 +320,7 @@ class GridInventoryStashMap:
         self.width, self.height = inventory.grid_size
         inventory_root = inventory.get(inventory.root_id)
 
-        self.footprints = {}
+        self.map: List[List[bool]] = [[False for y in range(self.height)] for x in range(self.width)]
         for item in inventory.iter_item_children(inventory_root):
             if self._is_item_in_root(item):
                 children_items = list(self.inventory.iter_item_children_recursively(item=item))
@@ -349,73 +360,99 @@ class GridInventoryStashMap:
         """
         return isinstance(item.location, ItemInventoryLocation) and item.parent_id == self.inventory.root_id
 
-    def remove(self, item: Item, child_items: List[Item]) -> None:
+    def get(self, x: int, y: int) -> bool:
+        if not 0 <= x < self.width:
+            raise IndexError
+        if not 0 <= y < self.height:
+            raise IndexError
+
+        return self.map[x][y]
+
+    def set(self, x: int, y: int, state: bool) -> None:
+        if self.map[x][y] == state:
+            raise self.InvalidCellStateError(f"Cell {x} {y} already has {state} state")
+        self.map[x][y] = state
+
+    def _get_parent_item_in_inventory_root(self, item: Item) -> Item:
         parent_item = item
-        while not self._is_item_in_root(parent_item) and parent_item.parent_id is not None:
+        while parent_item.parent_id != self.inventory.root_id and parent_item.parent_id is not None:
             parent_item = self.inventory.get(parent_item.parent_id)
+        return parent_item
 
-        # Recalculate parent item footprint, needed for disassembling
-        try:
-            del self.footprints[parent_item.id]
-        except KeyError:
-            pass
+    def remove(self, item: Item, child_items: List[Item]) -> None:
+        parent_item = self._get_parent_item_in_inventory_root(item)
+        if parent_item != item and parent_item.parent_id == self.inventory.root_id:
+            # If we're removing item that has a parent (weapon for example)
+            assert isinstance(parent_item.location, ItemInventoryLocation)
+            parent_children_set = set(self.inventory.iter_item_children_recursively(parent_item))
+            # Calculate and remove parent item footprint
+            parent_footprint = self._calculate_item_footprint(
+                parent_item,
+                # Make sure to include item and it's child items
+                list(parent_children_set.union({item, *child_items})),
+                parent_item.location,
+            )
+            for x, y in parent_footprint.iter_cells():
+                self.set(x, y, False)
 
-        if parent_item != item:
-            self.add(parent_item, child_items)
-            if self._is_item_in_root(item) and parent_item != item:
-                del self.footprints[item.id]
+            parent_footprint = self._calculate_item_footprint(
+                parent_item,
+                # Make sure to NOT include item and it's child_items
+                list(parent_children_set.difference({item, *child_items})),
+                parent_item.location,
+            )
+            for x, y in parent_footprint.iter_cells():
+                self.set(x, y, True)
+
+        elif item.parent_id == self.inventory.root_id:
+            assert isinstance(item.location, ItemInventoryLocation)
+            footprint = self._calculate_item_footprint(item, child_items, location=item.location)
+            for x, y in footprint.iter_cells():
+                self.set(x, y, False)
 
     def add(self, item: Item, child_items: List[Item]) -> None:
-        if self._is_item_in_root(item):
-            if item.location is None:
-                return
+        parent_item = self._get_parent_item_in_inventory_root(item)
+        if parent_item != item and parent_item.parent_id == self.inventory.root_id:
+            # Same as add but different operation order
+            assert isinstance(parent_item.location, ItemInventoryLocation)
+            parent_children_set = set(self.inventory.iter_item_children_recursively(parent_item))
+            parent_footprint = self._calculate_item_footprint(
+                parent_item,
+                list(parent_children_set.difference({item, *child_items})),
+                parent_item.location,
+            )
+            for x, y in parent_footprint.iter_cells():
+                self.set(x, y, False)
 
-            if not isinstance(item.location, ItemInventoryLocation):
-                raise ValueError("Item has no location")
+            parent_footprint = self._calculate_item_footprint(
+                parent_item,
+                list(parent_children_set.union({item, *child_items})),
+                parent_item.location,
+            )
+            for x, y in parent_footprint.iter_cells():
+                self.set(x, y, True)
 
-            if isinstance(item.location, int):  # ItemAmmoStackPosition
-                return
-
+        elif item.parent_id == self.inventory.root_id:
+            assert isinstance(item.location, ItemInventoryLocation)
             if not self.can_place(item, child_items, item.location):
-                logger.debug(item)
-                raise ValueError("Item location is taken")
+                raise GridInventoryStashMap.OutOfBoundsError
 
-            if item.id in self.footprints:
-                raise ValueError
-
-            self.footprints[item.id] = self._calculate_item_footprint(item, child_items, item.location)
+            footprint = self._calculate_item_footprint(item, child_items, item.location)
+            for x, y in footprint.iter_cells():
+                self.set(x, y, True)
 
     def can_place(self, item: Item, child_items: List[Item], location: ItemInventoryLocation) -> bool:
         """
         Checks if item can be placed into location
         """
         item_footprint = self._calculate_item_footprint(item, child_items, location)
-        if item_footprint.is_out_of_bounds(inventory_width=self.width, inventory_height=self.height):
-            logger.debug(item_footprint)
-            raise GridInventoryStashMap.OutOfBoundsError
-
-        for other_footprint in self.footprints.values():
-            if item_footprint.overlaps(other_footprint):
-                logger.debug(item_footprint, other_footprint)
+        for x, y in item_footprint.iter_cells():
+            try:
+                if self.get(x, y):
+                    return False
+            except IndexError:
                 return False
         return True
-
-    @staticmethod
-    def can_place_fast(x: int, y: int, width: int, height: int, stash_map: List[List[bool]]) -> bool:
-        for item_x in range(x, x + width):
-            for item_y in range(y, y + height):
-                # TODO: Possible IndexError here
-                if stash_map[item_x][item_y] is True:
-                    return False
-        return True
-
-    def _construct_map(self) -> List[List[bool]]:
-        stash_map: List[List[bool]] = [[False for _ in range(self.height)] for _ in range(self.width)]
-        for footprint in self.footprints.values():
-            for x in range(footprint.x, footprint.x + footprint.width):
-                for y in range(footprint.y, footprint.y + footprint.height):
-                    stash_map[x][y] = True
-        return stash_map
 
     def find_location_for_item(
         self,
@@ -426,34 +463,28 @@ class GridInventoryStashMap:
         """
         Finds location for an item or raises NoSpaceError if there's not space in inventory
         """
-        if child_items is None:
-            child_items = []
-        stash_map = self._construct_map()
-
+        child_items = child_items or []
+        item_width, item_height = self.inventory.get_item_size(item, child_items)
         for x, y in self._iter_cells():
             for orientation in ItemOrientationEnum:
                 location = ItemInventoryLocation(x=x, y=y, r=orientation.value)
-                width, height = self._get_item_size_in_stash(item, child_items, location=location)
+                width, height = item_width, item_height
+                if location.r == ItemOrientationEnum.Vertical.value:
+                    width, height = height, width
+
                 if x + width > self.width or y + height > self.height:
                     continue
-                # if self.can_place_fast(x, y, width, height, stash_map):
-                #     return location
-                if self.can_place_fast(x, y, width, height, stash_map):
+
+                if self.can_place(item, child_items, location):
                     return location
 
         raise NoSpaceError("Cannot place item into inventory")
 
-    def debug_print(self) -> None:
-        stash_map = self._construct_map()
-        lines = []
-        for y in range(self.height):
-            line = " ".join("■" if stash_map[x][y] else "□" for x in range(self.width))
-            lines.append(line)
-
-        print(*lines, sep="\n")
-
 
 class GridInventory(MutableInventory):
+    class InvalidItemLocation(Exception):
+        pass
+
     stash_map: GridInventoryStashMap
 
     @property
@@ -474,6 +505,8 @@ class GridInventory(MutableInventory):
         super().remove_item(item, remove_children=remove_children)
 
     def add_item(self, item: Item, child_items: List[Item] = None) -> None:
+        if item.location is None:
+            raise ValueError("Cannot simply add item that has no location into GridInventory")
         child_items = child_items or []
         self.stash_map.add(item, child_items)
         super().add_item(item=item, child_items=child_items)
@@ -493,12 +526,14 @@ class GridInventory(MutableInventory):
         item.slot_id = "hideout"
         item.parent_id = self.root_id
 
-        if location is None:
+        if item.location is None:
             item.location = self.stash_map.find_location_for_item(item, child_items=child_items)
 
         elif isinstance(location, ItemInventoryLocation):
             if not self.stash_map.can_place(item, child_items, location):
-                raise ValueError("Cannot place item into location since it is taken")
+                raise self.InvalidItemLocation(
+                    "Cannot place item into location since it is taken and/or out of bounds"
+                )
 
         self.add_item(item, child_items)
 

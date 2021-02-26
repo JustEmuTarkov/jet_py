@@ -65,21 +65,20 @@ class DispatcherManager:
         )
 
     def dispatch(self, request_data: List[dict]) -> DispatcherResponse:
-        with self.profile:
-            self.inventory = self.profile.inventory
-            self.__make_dispatchers()
+        self.inventory = self.profile.inventory
+        self.__make_dispatchers()
 
-            actions: List[dict] = request_data
+        actions: List[dict] = request_data
 
-            for action in actions:
-                logger.debug(action)
-                for dispatcher in self.dispatchers:
-                    try:
-                        dispatcher.dispatch(action)
-                        break
-                    except NotImplementedError:
-                        pass
-                else:
-                    raise NotImplementedError(f"Action {action} not implemented in any of the dispatchers")
+        for action in actions:
+            logger.debug(action)
+            for dispatcher in self.dispatchers:
+                try:
+                    dispatcher.dispatch(action)
+                    break
+                except NotImplementedError:
+                    pass
+            else:
+                raise NotImplementedError(f"Action {action} not implemented in any of the dispatchers")
 
         return self.response
