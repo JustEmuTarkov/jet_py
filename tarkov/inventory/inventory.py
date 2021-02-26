@@ -419,7 +419,7 @@ class GridInventoryStashMap:
             parent_footprint = self._calculate_item_footprint(
                 parent_item,
                 list(parent_children_set.difference({item, *child_items})),
-                parent_item.location,
+                   parent_item.location,
             )
             for x, y in parent_footprint.iter_cells():
                 self.set(x, y, False)
