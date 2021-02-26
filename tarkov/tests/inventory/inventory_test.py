@@ -13,9 +13,9 @@ from tarkov.inventory.factories import item_factory
 from tarkov.inventory.types import TemplateId
 
 
-def test_adds_items(inventory: PlayerInventory, random_items: List[Item]) -> None:
+def test_places_items(inventory: PlayerInventory, random_items: List[Item]) -> None:
     for item in random_items:
-        inventory.add_item(item, [])
+        inventory.place_item(item)
 
     assert all(item in inventory.items.values() for item in random_items)
 
