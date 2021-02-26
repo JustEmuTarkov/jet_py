@@ -505,8 +505,6 @@ class GridInventory(MutableInventory):
         super().remove_item(item, remove_children=remove_children)
 
     def add_item(self, item: Item, child_items: List[Item] = None) -> None:
-        if item.location is None:
-            raise ValueError("Cannot simply add item that has no location into GridInventory")
         child_items = child_items or []
         self.stash_map.add(item, child_items)
         super().add_item(item=item, child_items=child_items)
