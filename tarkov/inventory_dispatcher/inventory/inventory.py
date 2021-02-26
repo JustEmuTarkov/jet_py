@@ -74,7 +74,7 @@ class InventoryDispatcher(Dispatcher):
                 item=item,
                 move_location=action.to,
             )
-            self.response.items.new.append(item)
+            self.response.items.change.append(item)
 
     def _split(self, action: Split) -> None:
         with self.owner_inventory(action.fromOwner) as owner_inventory:
