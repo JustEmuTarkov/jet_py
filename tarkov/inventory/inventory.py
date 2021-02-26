@@ -373,27 +373,61 @@ class GridInventoryStashMap:
             raise self.InvalidCellStateError(f"Cell {x} {y} already has {state} state")
         self.map[x][y] = state
 
-    def remove(self, item: Item, child_items: List[Item]) -> None:
+    def _get_parent_item_in_inventory_root(self, item: Item) -> Item:
         parent_item = item
-        while not self._is_item_in_root(parent_item) and parent_item.parent_id is not None:
+        while parent_item.parent_id != self.inventory.root_id and parent_item.parent_id is not None:
             parent_item = self.inventory.get(parent_item.parent_id)
+        return parent_item
 
-        # Recalculate parent item footprint, needed for disassembling
-        assert isinstance(item.location, ItemInventoryLocation)
-        footprint = self._calculate_item_footprint(item, child_items, location=item.location)
-        for x, y in footprint.iter_cells():
-            self.set(x, y, False)
+    def remove(self, item: Item, child_items: List[Item]) -> None:
+        parent_item = self._get_parent_item_in_inventory_root(item)
+        if parent_item != item and parent_item.parent_id == self.inventory.root_id:
+            assert isinstance(parent_item.location, ItemInventoryLocation)
+            parent_children = list(self.inventory.iter_item_children_recursively(parent_item))
+            parent_footprint = self._calculate_item_footprint(
+                parent_item, parent_children, parent_item.location
+            )
+            for x, y in parent_footprint.iter_cells():
+                self.set(x, y, False)
+
+            parent_footprint = self._calculate_item_footprint(
+                parent_item, [c for c in parent_children if c not in {item, *child_items}], parent_item.location
+            )
+            for x, y in parent_footprint.iter_cells():
+                self.set(x, y, True)
+
+        elif item.parent_id == self.inventory.root_id:
+            assert isinstance(item.location, ItemInventoryLocation)
+            footprint = self._calculate_item_footprint(item, child_items, location=item.location)
+            for x, y in footprint.iter_cells():
+                self.set(x, y, False)
 
     def add(self, item: Item, child_items: List[Item]) -> None:
-        if not self._is_item_in_root(item):
-            return
         assert isinstance(item.location, ItemInventoryLocation)
         if not self.can_place(item, child_items, item.location):
             raise GridInventoryStashMap.OutOfBoundsError
 
-        footprint = self._calculate_item_footprint(item, child_items, item.location)
-        for x, y in footprint.iter_cells():
-            self.set(x, y, True)
+        parent_item = self._get_parent_item_in_inventory_root(item)
+
+        if parent_item != item and parent_item.parent_id == self.inventory.root_id:
+            assert isinstance(parent_item.location, ItemInventoryLocation)
+            parent_children = list(self.inventory.iter_item_children_recursively(parent_item))
+            parent_footprint = self._calculate_item_footprint(
+                parent_item, parent_children, parent_item.location
+            )
+            for x, y in parent_footprint.iter_cells():
+                self.set(x, y, False)
+
+            parent_footprint = self._calculate_item_footprint(
+                parent_item, list({*parent_children, item, *child_items}), parent_item.location
+            )
+            for x, y in parent_footprint.iter_cells():
+                self.set(x, y, True)
+
+        elif item.parent_id == self.inventory.root_id:
+            footprint = self._calculate_item_footprint(item, child_items, item.location)
+            for x, y in footprint.iter_cells():
+                self.set(x, y, True)
 
     def can_place(self, item: Item, child_items: List[Item], location: ItemInventoryLocation) -> bool:
         """
