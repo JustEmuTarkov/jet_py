@@ -1,13 +1,15 @@
 import typing
 import zlib
+from typing import Callable
 
+import time
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request
 from starlette.responses import Response, StreamingResponse
 
-from server import root_dir
+from server import logger, root_dir
 from server.package_lib import PackageManager
 from tarkov.bots.router import bots_router
 from tarkov.launcher.routes import launcher_router
@@ -71,6 +73,12 @@ app.mount(
     name="static",
 )
 
+@app.middleware("http")
+async def log_response_time(request: Request, call_next: Callable) -> Response:
+    start_time = time.time()
+    response = await call_next(request)
+    logger.debug(f"Request time: {time.time() - start_time}s")
+    return response
 
 package_manager = PackageManager(root_dir.joinpath("mods"))
 package_manager.load_packages()
