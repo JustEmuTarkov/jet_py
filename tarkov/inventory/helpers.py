@@ -35,5 +35,5 @@ def regenerate_item_ids_dict(items: List[Dict]) -> None:
 
     for item in items:
         item["_id"] = id_map[item["_id"]]
-        if item["parentId"] in id_map:
+        if "parentId" in item and item["parentId"] in id_map:
             item["parentId"] = id_map[item["parentId"]]
