@@ -81,3 +81,11 @@ class Repair(models.Base):
     Action: Literal["Repair"]
     tid: str
     repairItems: List[RepairItem]
+
+
+class Swap(ActionModel):
+    item: ItemId
+    to: AnyMoveLocation
+    item2: ItemId
+    to2: AnyMoveLocation
+    fromOwner: Optional[Owner] = None

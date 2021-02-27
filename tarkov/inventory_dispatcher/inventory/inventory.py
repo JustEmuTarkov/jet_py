@@ -26,6 +26,7 @@ from .models import (
     Split,
     Transfer,
     Bind,
+    Swap,
 )
 
 if TYPE_CHECKING:
@@ -49,6 +50,7 @@ class InventoryDispatcher(Dispatcher):
             ActionType.ApplyInventoryChanges: self._apply_inventory_changes,
             ActionType.Repair: self._repair,
             ActionType.Bind: self._bind,
+            ActionType.Swap: self._swap,
         }
 
     @contextmanager
@@ -222,3 +224,20 @@ class InventoryDispatcher(Dispatcher):
             del fast_panel[k]
 
         fast_panel[action.index] = action.item
+
+    def _swap(self, action: Swap) -> None:
+        with self.owner_inventory(action.fromOwner) as owner_inventory:
+            item = owner_inventory.get(action.item)
+            item2 = owner_inventory.get(action.item2)
+
+            self.inventory.move_item(
+                item=item,
+                move_location=action.to,
+            )
+            self.inventory.move_item(
+                item=item2,
+                move_location=action.to2,
+            )
+
+            self.response.items.change.append(item)
+            self.response.items.change.append(item2)
