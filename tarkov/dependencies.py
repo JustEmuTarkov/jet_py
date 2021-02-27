@@ -13,29 +13,44 @@ locks: Dict[str, Lock] = defaultdict(Lock)
 profiles: Dict[str, Profile] = {}
 
 
-async def save_profile_task(profile: Profile) -> None:
+def save_profile_task(profile: Profile) -> None:
     assert locks[profile.profile_id].locked()
     profile.write()
+
+
+def _get_or_create_profile(profile_id: str) -> Profile:
+    if profile_id not in profiles:
+        profiles[profile_id] = Profile(profile_id)
+        profiles[profile_id].read()
+    return profiles[profile_id]
 
 
 async def with_profile(
     background_tasks: BackgroundTasks,
     profile_id: str = Cookie(..., alias="PHPSESSID"),  # type: ignore
 ) -> AsyncIterable[Profile]:
-    if profile_id not in profiles:
-        profiles[profile_id] = Profile(profile_id)
-        profiles[profile_id].read()
-    profile = profiles[profile_id]
-
-    # After completing request flush profile to drive
-    background_tasks.add_task(save_profile_task, profile)
     async with locks[profile_id]:
+        profile = _get_or_create_profile(profile_id)
         try:
-            profiles.update()
-            yield profiles[profile_id]
+            background_tasks.add_task(save_profile_task, profile)
+            profile.update()
+            yield profile
 
         except Exception as error:
             # Else read it again from filesystem
-            profiles[profile_id].read()
+            profile.read()
+            logger.exception(error)
+            raise
+
+
+async def with_profile_readonly(
+    profile_id: str = Cookie(..., alias="PHPSESSID"),  # type: ignore
+) -> AsyncIterable[Profile]:
+    async with locks[profile_id]:
+        profile = _get_or_create_profile(profile_id)
+        try:
+            yield profile
+        except Exception as error:
+            profile.read()
             logger.exception(error)
             raise

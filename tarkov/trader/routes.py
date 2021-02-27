@@ -3,7 +3,7 @@ from typing import Dict, List, Optional, Union
 from fastapi.params import Cookie, Depends
 
 from server.utils import make_router
-from tarkov.dependencies import with_profile
+from tarkov.dependencies import with_profile, with_profile_readonly
 from tarkov.inventory.models import Item
 from tarkov.inventory.types import ItemId
 from tarkov.models import Base, TarkovErrorResponse, TarkovSuccessResponse
@@ -54,7 +54,7 @@ async def customization(
 )
 async def get_user_assort_price(
     trader_id: str,
-    profile: Profile = Depends(with_profile),  # type: ignore
+    profile: Profile = Depends(with_profile_readonly),  # type: ignore
 ) -> Union[TarkovSuccessResponse[Dict[ItemId, List[List[dict]]]], TarkovErrorResponse]:
     trader = Trader(TraderType(trader_id), profile=profile)
     items = {}
@@ -98,7 +98,7 @@ class TraderAssortResponse(Base):
 )
 async def get_trader_assort(
     trader_id: str,
-    profile: Profile = Depends(with_profile),  # type: ignore
+    profile: Profile = Depends(with_profile_readonly),  # type: ignore
 ) -> Union[TarkovSuccessResponse[TraderAssortResponse], TarkovErrorResponse]:
     trader = Trader(TraderType(trader_id), profile=profile)
     assort_response = TraderAssortResponse(
