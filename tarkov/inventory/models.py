@@ -92,8 +92,8 @@ class ItemUpdDogtag(Base):
 
 
 class ItemUpdTag(Base):
-    Name: str
-    Color: int
+    Name: Optional[str]
+    Color: Optional[int]
 
 
 class ItemUpdTogglable(Base):
