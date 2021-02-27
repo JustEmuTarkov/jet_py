@@ -3,7 +3,7 @@ from typing import Dict, List, Optional, Union
 from fastapi.params import Cookie, Depends
 
 from server.utils import make_router
-from tarkov.dependencies import with_profile
+from tarkov.dependencies import with_profile, with_profile_readonly
 from tarkov.inventory.models import Item
 from tarkov.inventory.types import ItemId
 from tarkov.models import Base, TarkovErrorResponse, TarkovSuccessResponse
@@ -19,7 +19,7 @@ trader_router = make_router(tags=["Traders"])
     "/client/trading/customization/storage",
     response_model=TarkovSuccessResponse[dict],
 )
-def customization_storage(
+async def customization_storage(
     profile_id: Optional[str] = Cookie(alias="PHPSESSID", default=None),  # type: ignore
 ) -> Union[TarkovSuccessResponse[dict], TarkovErrorResponse]:
     if profile_id is None:
@@ -31,7 +31,7 @@ def customization_storage(
 
 
 @trader_router.post("/client/trading/customization/{trader_id}")
-def customization(
+async def customization(
     trader_id: str,  # pylint: disable=unused-argument
 ) -> TarkovSuccessResponse:
     # suits_path = db_dir.joinpath('assort', trader_id, 'suits.json')
@@ -52,14 +52,16 @@ def customization(
     response_model_exclude_unset=True,
     response_model_exclude_none=True,
 )
-def get_user_assort_price(
+async def get_user_assort_price(
     trader_id: str,
-    profile: Profile = Depends(with_profile),  # type: ignore
+    profile: Profile = Depends(with_profile_readonly),  # type: ignore
 ) -> Union[TarkovSuccessResponse[Dict[ItemId, List[List[dict]]]], TarkovErrorResponse]:
     trader = Trader(TraderType(trader_id), profile=profile)
     items = {}
 
     for item in profile.inventory.items.values():
+        if item.parent_id != profile.inventory.root_id:
+            continue
         if not trader.can_sell(item):
             continue
 
@@ -72,7 +74,7 @@ def get_user_assort_price(
 
 
 @trader_router.post("/client/trading/api/getTradersList")
-def get_trader_list(
+async def get_trader_list(
     profile: Profile = Depends(with_profile),  # type: ignore
 ) -> TarkovSuccessResponse[List[dict]]:
     response = []
@@ -94,9 +96,9 @@ class TraderAssortResponse(Base):
     response_model=TarkovSuccessResponse[TraderAssortResponse],
     response_model_exclude_none=True,
 )
-def get_trader_assort(
+async def get_trader_assort(
     trader_id: str,
-    profile: Profile = Depends(with_profile),  # type: ignore
+    profile: Profile = Depends(with_profile_readonly),  # type: ignore
 ) -> Union[TarkovSuccessResponse[TraderAssortResponse], TarkovErrorResponse]:
     trader = Trader(TraderType(trader_id), profile=profile)
     assort_response = TraderAssortResponse(
@@ -108,7 +110,7 @@ def get_trader_assort(
 
 
 @trader_router.post("/client/trading/api/getTrader/{trader_id}")
-def trading_api_get_trader(
+async def trading_api_get_trader(
     trader_id: str,
     profile: Profile = Depends(with_profile),  # type: ignore
 ) -> TarkovSuccessResponse[dict]:
