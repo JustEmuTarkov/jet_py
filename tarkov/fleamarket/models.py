@@ -26,7 +26,7 @@ class FleaMarketRequest(BaseModel):
     handbookId: Union[TemplateId, CategoryId]
     limit: StrictInt
     linkedSearchId: TemplateId
-    neededSearchId: str
+    neededSearchId: TemplateId
     offerOwnerType: StrictInt
     oneHourExpiration: StrictBool
     onlyFunctional: StrictBool

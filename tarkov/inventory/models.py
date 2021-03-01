@@ -18,6 +18,7 @@ from server import logger
 from tarkov.inventory.prop_models import (
     AnyProp,
     BaseItemProps,
+    FilterProperty,
     props_models_map,
 )
 from tarkov.inventory.types import ItemId, TemplateId
@@ -75,6 +76,22 @@ class ItemTemplate(NodeTemplateBase):
             logger.debug(e)
             raise
         return values
+
+    def has_in_slots(self, template_id: TemplateId) -> bool:
+        """
+        Checks if  template has template_id in one of it's filters
+        """
+        props = self.props
+        for slot_filter in ("Cartridges", "Chambers", "Slots"):
+            if not hasattr(props, slot_filter):
+                continue
+
+            filters: List[FilterProperty] = getattr(props, slot_filter)
+            for slot in filters:
+                for filter_group in slot.props.filters:
+                    if template_id in filter_group.Filter:
+                        return True
+        return False
 
 
 class ItemUpdDogtag(Base):

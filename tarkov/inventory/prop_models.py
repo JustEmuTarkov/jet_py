@@ -31,9 +31,12 @@ TracerColor = Union[
 ]
 
 
-class FilterProps(Base):
+class Filter(Base):
     Filter: List[str] = Field(default_factory=list)
     ExcludedFilter: Optional[List[str]]
+    Shift: Optional[int]
+    AnimationIndex: Optional[int]
+    MaxStackCount: Optional[int]
 
 
 class _GridProps(Base):
@@ -41,7 +44,7 @@ class _GridProps(Base):
         allow_mutation = False
         fields = {"width": "cellsH", "height": "cellsV"}
 
-    filters: List[FilterProps]
+    filters: List[Filter]
     width: StrictInt
     height: StrictInt
     minCount: StrictInt
@@ -57,11 +60,11 @@ class Grid(Base):
     props: _GridProps = Field(alias="_props")
 
 
-class _CartridgesProps(Base):
-    filters: List[FilterProps]
+class _FilterProps(Base):
+    filters: List[Filter]
 
 
-class Cartridges(Base):
+class FilterProperty(Base):
     class Config:
         allow_mutation = False
         fields = {
@@ -71,14 +74,18 @@ class Cartridges(Base):
             "max_count": "_max_count",
             "props": "_props",
             "proto": "_proto",
+            "merges_slot_with_children": "_mergeSlotWithChildren",
+            "required": "_required",
         }
 
-    name: Literal["cartridges"]
+    required: Optional[bool]
+    name: str
     id: TemplateId
     parent: TemplateId
-    max_count: StrictInt
-    props: _CartridgesProps
+    max_count: int = 1
+    props: _FilterProps
     proto: str
+    merges_slot_with_children: Optional[bool]
 
 
 class Vector(Base):
@@ -239,7 +246,7 @@ class CompoundProps(BaseItemProps):
     __template_id__: str = "566162e44bdc2d3f298b4573"
 
     Grids: List[Grid]
-    Slots: list
+    Slots: List[FilterProperty]
     CanPutIntoDuringTheRaid: StrictBool
     CantRemoveFromSlotsDuringRaid: list
 
@@ -372,7 +379,7 @@ class ShaftProps(GearModProps):
 class MagazineProps(GearModProps):
     __template_id__: str = "5448bc234bdc2d3c308b4569"
     magAnimationIndex: StrictInt
-    Cartridges: List[Cartridges]
+    Cartridges: List[FilterProperty]
     CanFast: StrictBool
     CanHit: StrictBool
     CanAdmin: StrictBool
@@ -581,7 +588,7 @@ class WeaponProps(CompoundProps):
     defMagType: TemplateId
     defAmmo: TemplateId
     shotgunDispersion: StrictInt
-    Chambers: list
+    Chambers: List[FilterProperty]
     CameraRecoil: float
     CameraSnap: float
     ReloadMode: str

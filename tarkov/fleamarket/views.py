@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import collections
-from typing import Dict, Iterable, List, TYPE_CHECKING, Union
+from typing import Dict, List, TYPE_CHECKING, Union
 
 from tarkov.fleamarket.models import FleaMarketRequest, FleaMarketResponse, Offer, SortType
 from tarkov.inventory import item_templates_repository
@@ -24,30 +24,34 @@ class FleaMarketView:
     def get_response(self, request: FleaMarketRequest) -> FleaMarketResponse:
 
         # Take all offers from current flea market
-        offers_iterable: Iterable[Offer] = self.flea_market.offers.values()
+        offers: List[Offer] = list(self.flea_market.offers.values())
 
         # Apply linked search filter
         if request.linkedSearchId:
-            offers_iterable = self.__filter_linked_search(offers_iterable, request)
+            linked_search_template = item_templates_repository.get_template(request.linkedSearchId)
+            offers = [offer for offer in offers if linked_search_template.has_in_slots(offer.root_item.tpl)]
 
-        # Apply category filter
-        if request.handbookId:
-            offers_iterable = self.__filter_category_search(offers_iterable, request)
+        # Else apply required search filter
+        elif request.neededSearchId:
+            offers = [
+                offer
+                for offer in offers
+                if item_templates_repository.get_template(offer.root_item).has_in_slots(request.neededSearchId)
+            ]
 
-        offers: List[Offer] = list(offers_iterable)
-
-        # Categories is a dict with CategoryId or TemplateId and amount of that item/category on flea
         categories: Dict[Union[TemplateId, CategoryId], int]
-        if request.linkedSearchId:
-            # If it's linked search then we have to return categories for linked items
-            categories = collections.Counter(
-                offer.root_item.tpl
-                for offer in self.__filter_linked_search(self.flea_market.offers.values(), request)
-            )
-        else:
-            # Else we just return categories for all items
+        if not request.linkedSearchId and not request.neededSearchId:
+            # If it's not linked/required search then return categories for all offers
             categories = collections.Counter(offer.root_item.tpl for offer in self.flea_market.offers.values())
+        else:
+            # Else return categories for filtered offers
+            categories = collections.Counter(offer.root_item.tpl for offer in offers)
 
+        # Apply category filter to offers
+        if request.handbookId:
+            offers = list(self.__filter_category_search(offers, request))
+
+        # Offers pagination/sorting
         page_size = request.limit
         offers = self._sorted_offers(offers, request.sortType, reverse=request.sortDirection == 1)
         offers_view = offers[request.page * page_size : (request.page + 1) * page_size]
@@ -60,35 +64,8 @@ class FleaMarketView:
         )
 
     @staticmethod
-    def __filter_linked_search(offers: Iterable[Offer], request: FleaMarketRequest) -> Iterable[Offer]:
-        return (
-            offer
-            for offer in offers
-            if any(
-                (
-                    FleaMarketView.__slot_filter(offer, "Slots", request.linkedSearchId),
-                    FleaMarketView.__slot_filter(offer, "Chambers", request.linkedSearchId),
-                    # FleaMarketView.__slot_filter(offer, "Cartridges", request.linkedSearchId),
-                )
-            )
-        )
-
-    @staticmethod
-    def __slot_filter(offer: Offer, slot_filter: str, linked_search_id: TemplateId) -> bool:
-        template = item_templates_repository.get_template(linked_search_id)
-        props = template.props
-        if not hasattr(props, slot_filter):
-            return False
-
-        for slot in getattr(props, slot_filter):
-            for filter_group in slot["_props"]["filters"]:
-                if offer.root_item.tpl in filter_group["Filter"]:
-                    return True
-        return False
-
-    @staticmethod
-    def __filter_category_search(offers: Iterable[Offer], request: FleaMarketRequest) -> Iterable[Offer]:
-        return (
+    def __filter_category_search(offers: List[Offer], request: FleaMarketRequest) -> List[Offer]:
+        return [
             offer
             for offer in offers
             if category_repository.has_parent_category(
@@ -96,7 +73,7 @@ class FleaMarketView:
                 request.handbookId,
             )
             or offer.root_item.tpl == request.handbookId
-        )
+        ]
 
     @staticmethod
     def _sorted_offers(offers: List[Offer], sort_type: SortType, reverse: bool = False) -> List[Offer]:
