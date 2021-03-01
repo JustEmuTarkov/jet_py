@@ -46,9 +46,7 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
         try:
             return self.items[item_id]
         except KeyError as error:
-            raise NotFoundError(
-                f"Item with id {item_id} was not found in {self.__class__.__name__}"
-            ) from error
+            raise NotFoundError(f"Item with id {item_id} was not found in {self.__class__.__name__}") from error
 
     def get_by_template(self, template_id: TemplateId) -> Item:
         try:
@@ -57,9 +55,7 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
             raise NotFoundError from error
 
     @staticmethod
-    def __get_item_size_without_folding(
-        item: Item, child_items: List[Item]
-    ) -> Tuple[int, int]:
+    def __get_item_size_without_folding(item: Item, child_items: List[Item]) -> Tuple[int, int]:
         item_template = item_templates_repository.get_template(item)
         if not isinstance(item_template.props, (WeaponProps, ModProps)):
             return item_template.props.Width, item_template.props.Height
@@ -75,14 +71,8 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
         for child in child_items:
             child_template = item_templates_repository.get_template(child)
             if child_template.props.ExtraSizeForceAdd:
-                width += (
-                    child_template.props.ExtraSizeLeft
-                    + child_template.props.ExtraSizeRight
-                )
-                height += (
-                    child_template.props.ExtraSizeUp
-                    + child_template.props.ExtraSizeDown
-                )
+                width += child_template.props.ExtraSizeLeft + child_template.props.ExtraSizeRight
+                height += child_template.props.ExtraSizeUp + child_template.props.ExtraSizeDown
             else:
                 size_left = max(size_left, child_template.props.ExtraSizeLeft)
                 size_right = max(size_right, child_template.props.ExtraSizeRight)
@@ -105,9 +95,7 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
         """
         item_template = item_templates_repository.get_template(item)
         child_items = child_items or []
-        width, height = ImmutableInventory.__get_item_size_without_folding(
-            item, child_items
-        )
+        width, height = ImmutableInventory.__get_item_size_without_folding(item, child_items)
 
         if isinstance(item_template.props, StockProps) and item.upd.folded():
             width -= item_template.props.SizeReduceRight
@@ -126,9 +114,7 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
                 continue
             if item_template.props.FoldedSlot == stock.slot_id:
                 item_or_stock_folded = stock.upd.folded() or item.upd.folded()
-                item_or_stock_foldable = (
-                    stock_template.props.Foldable or item_template.props.Foldable
-                )
+                item_or_stock_foldable = stock_template.props.Foldable or item_template.props.Foldable
                 if item_or_stock_foldable and item_or_stock_folded:
                     width -= max(
                         stock_template.props.SizeReduceRight,
@@ -144,9 +130,7 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
         if item_template.props.Foldable and item.upd.folded():
             return width, height
 
-        return max(item_template.props.Width, width), max(
-            item_template.props.Height, height
-        )
+        return max(item_template.props.Width, width), max(item_template.props.Height, height)
 
     def iter_item_children(self, item: Item) -> Iterable[Item]:
         """
@@ -208,9 +192,7 @@ class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
 
         for item_to_add in itertools.chain([item], child_items):
             if item_to_add.id in self.items:
-                raise ValueError(
-                    f"Item is already present in {self.__class__.__name__}"
-                )
+                raise ValueError(f"Item is already present in {self.__class__.__name__}")
 
             self.items[item_to_add.id] = item_to_add
             item_to_add.__inventory__ = self
@@ -264,9 +246,7 @@ class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
         item.upd.Foldable = ItemUpdFoldable(Folded=folded)
         self.add_item(item, children)
 
-    def take_item(
-        self, template_id: TemplateId, amount: int
-    ) -> Tuple[List[Item], List[Item]]:
+    def take_item(self, template_id: TemplateId, amount: int) -> Tuple[List[Item], List[Item]]:
         """
         Deletes amount of items with given template_id
 
@@ -384,14 +364,10 @@ class GridInventoryStashMap:
         self.width, self.height = inventory.grid_size
         inventory_root = inventory.get(inventory.root_id)
 
-        self.map: List[List[bool]] = [
-            [False for y in range(self.height)] for x in range(self.width)
-        ]
+        self.map: List[List[bool]] = [[False for y in range(self.height)] for x in range(self.width)]
         for item in inventory.iter_item_children(inventory_root):
             if self._is_item_in_root(item):
-                children_items = list(
-                    self.inventory.iter_item_children_recursively(item=item)
-                )
+                children_items = list(self.inventory.iter_item_children_recursively(item=item))
                 self.add(item, children_items)
 
     def _get_item_size_in_stash(
@@ -556,9 +532,7 @@ class GridInventoryStashMap:
             for x, y in footprint.iter_cells():
                 self.set(x, y, True)
 
-    def can_place(
-        self, item: Item, child_items: List[Item], location: ItemInventoryLocation
-    ) -> bool:
+    def can_place(self, item: Item, child_items: List[Item], location: ItemInventoryLocation) -> bool:
         """
         Checks if item can be placed into a location.
 
