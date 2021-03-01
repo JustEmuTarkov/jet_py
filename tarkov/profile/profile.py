@@ -1,14 +1,15 @@
 from __future__ import annotations
 
 from types import TracebackType
-from typing import Optional, Union, Type
+from typing import Optional, Type, Union
 
 import tarkov.inventory.repositories
 from server import root_dir
 from server.utils import atomic_write
 from tarkov import inventory as inventory_, quests
 from tarkov.hideout import Hideout
-from tarkov.inventory.models import Item
+from tarkov.inventory import item_templates_repository
+from tarkov.inventory.models import Item, ItemTemplate
 from tarkov.inventory.types import TemplateId
 from tarkov.mail import Mail
 from tarkov.trader import TraderType
@@ -21,12 +22,9 @@ class Encyclopedia:
         self.data = profile.pmc.Encyclopedia
 
     def examine(self, item: Union[Item, TemplateId]) -> None:
-        if isinstance(item, Item):
-            self.data[item.tpl] = False
-
-        else:
-            item_template_id = item
-            self.data[item_template_id] = False
+        template: ItemTemplate = item_templates_repository.get_template(item)
+        self.data[template.id] = False
+        self.profile.receive_experience(template.props.ExamineExperience)
 
     def read(self, item: Union[Item, TemplateId]) -> None:
         if isinstance(item, Item):
