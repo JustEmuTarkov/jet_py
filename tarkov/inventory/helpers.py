@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 def generate_item_id() -> "ItemId":
     """
-    Generates new item id
+    Generates new item id.
 
     :return: Generated item id
     """
@@ -20,12 +20,15 @@ def generate_item_id() -> "ItemId":
 
 def regenerate_items_ids(items: List["Item"]) -> None:
     """
-    Generates new ids for all items in list (mutates the list)
+    Generates new ids for all items in list (mutates the list).
+
+    :param items: The list of items to edit.
     """
     id_map: Dict["ItemId", "ItemId"] = {item.id: generate_item_id() for item in items}
 
     for item in items:
         item.id = id_map[item.id]
+
         if item.parent_id in id_map:
             item.parent_id = id_map[item.parent_id]
 
@@ -35,5 +38,6 @@ def regenerate_item_ids_dict(items: List[Dict]) -> None:
 
     for item in items:
         item["_id"] = id_map[item["_id"]]
+
         if "parentId" in item and item["parentId"] in id_map:
             item["parentId"] = id_map[item["parentId"]]
