@@ -234,7 +234,7 @@ class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
         Fold or unfold an item.
 
         :param item: The item to fold/unfold.
-        :param folded: If the item is already folded or not.
+        :param folded: The new folded state of the item.
         """
         item_template = item_templates_repository.get_template(item)
 
