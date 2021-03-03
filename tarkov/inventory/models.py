@@ -279,10 +279,10 @@ class InventoryModel(Base):
     items: List[Item]
 
 
-class InventoryMoveLocation(Base):
+class MoveLocation(Base):
     id: ItemId
     container: str
-    location: Optional[ItemInventoryLocation] = None
+    location: Optional[ItemInventoryLocation]
 
 
 class CartridgesMoveLocation(Base):
@@ -290,13 +290,7 @@ class CartridgesMoveLocation(Base):
     container: Literal["cartridges"]
 
 
-class PatronInWeaponMoveLocation(Base):
-    id: ItemId
-    container: Literal["patron_in_weapon"]
-
-
 AnyMoveLocation = Union[
-    InventoryMoveLocation,
     CartridgesMoveLocation,
-    PatronInWeaponMoveLocation,
+    MoveLocation,
 ]

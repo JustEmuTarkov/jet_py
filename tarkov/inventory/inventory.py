@@ -12,13 +12,12 @@ from .models import (
     AnyMoveLocation,
     CartridgesMoveLocation,
     InventoryModel,
-    InventoryMoveLocation,
+    MoveLocation,
     Item,
     ItemAmmoStackPosition,
     ItemInventoryLocation,
     ItemOrientationEnum,
     ItemUpdFoldable,
-    PatronInWeaponMoveLocation,
 )
 from .prop_models import CompoundProps, MagazineProps, ModProps, StockProps, WeaponProps
 from .repositories import item_templates_repository
@@ -679,15 +678,11 @@ class GridInventory(MutableInventory):
         except ValueError:
             children_items = []
 
-        if isinstance(move_location, InventoryMoveLocation):
+        if isinstance(move_location, MoveLocation):
             self._move_item(item=item, child_items=children_items, move_location=move_location)
-            # self.place_item(item=item, children_items=children_items, location=move_location.location)
 
         elif isinstance(move_location, CartridgesMoveLocation):
             self.__place_ammo_into_magazine(ammo=item, move_location=move_location)
-
-        elif isinstance(move_location, PatronInWeaponMoveLocation):
-            self.__place_ammo_into_weapon(ammo=item, move_location=move_location)
 
         else:
             raise ValueError(f"Unknown item location: {move_location}")
@@ -696,7 +691,7 @@ class GridInventory(MutableInventory):
         self,
         item: Item,
         child_items: List[Item],
-        move_location: InventoryMoveLocation,
+        move_location: MoveLocation,
     ) -> None:
         """
         Moves an item to a location.
@@ -712,7 +707,7 @@ class GridInventory(MutableInventory):
 
         item.slot_id = move_location.container
         item.parent_id = move_location.id
-        if move_location.location:
+        if move_location.location is not None:
             item.location = move_location.location
 
         self.add_item(item, child_items)
@@ -752,29 +747,8 @@ class GridInventory(MutableInventory):
             ammo.location = ItemAmmoStackPosition(0)
 
         ammo.parent_id = magazine.id
-        ammo.slot_id = "cartridges"
+        ammo.slot_id = move_location.container
 
-        return ammo
-
-    def __place_ammo_into_weapon(
-        self,
-        ammo: Item,
-        move_location: PatronInWeaponMoveLocation,
-    ) -> Item:
-        """
-        Places ammo into a weapon.
-
-        :param ammo: The ammo to place.
-        :param move_location: The place where to the move the ammo to.
-        """
-
-        weapon = self.get(move_location.id)
-
-        ammo.slot_id = "patron_in_weapon"
-        ammo.location = None
-        ammo.parent_id = weapon.id
-
-        self.add_item(ammo, child_items=[])
         return ammo
 
     def split_item(self, item: Item, split_location: AnyMoveLocation, count: int) -> Optional[Item]:
@@ -783,7 +757,7 @@ class GridInventory(MutableInventory):
         :return: New item
         """
 
-        if isinstance(split_location, InventoryMoveLocation):
+        if isinstance(split_location, MoveLocation):
             new_item = item.copy(deep=True)
             new_item.id = generate_item_id()
             new_item.upd.StackObjectsCount = count
@@ -820,10 +794,6 @@ class GridInventory(MutableInventory):
             )
 
             return splitted_ammo
-
-        if isinstance(split_location, PatronInWeaponMoveLocation):
-            ammo = self.simple_split_item(item=item, count=1)
-            return self.__place_ammo_into_weapon(ammo=ammo, move_location=split_location)
 
         raise ValueError(f"Unknown split location: {split_location}")
 
