@@ -1,25 +1,47 @@
+from __future__ import annotations
+
 import copy
 import random
-import time
-from pathlib import Path
-from typing import Dict, List
+from typing import Dict, Final, Set
 
 import ujson
 from pydantic import parse_obj_as
 
 from server import db_dir
-from tarkov import config
-from tarkov.inventory import MutableInventory, generate_item_id, regenerate_items_ids
-from tarkov.inventory.models import InventoryModel, Item
+from tarkov.inventory import MutableInventory, generate_item_id, item_templates_repository, regenerate_items_ids
+from tarkov.inventory.models import InventoryModel, Item, ItemUpd
+from tarkov.inventory.prop_models import MagazineProps
 from tarkov.inventory.types import ItemId, TemplateId
 
 
 class BotInventory(MutableInventory):
-    data: InventoryModel
+    inventory: InventoryModel
 
     def __init__(self, bot_inventory: dict):
-        self.data = parse_obj_as(InventoryModel, bot_inventory)
-        self.__items = {i.id: i for i in self.data.items}
+        self.inventory = parse_obj_as(InventoryModel, bot_inventory)
+        self.__items = {i.id: i for i in self.inventory.items}
+
+    @staticmethod
+    def make_empty() -> BotInventory:
+        equipment_id = generate_item_id()
+        stash_id = generate_item_id()
+        quest_raid_items_id = generate_item_id()
+        quest_stash_items_id = generate_item_id()
+
+        bot_inventory = {
+            "items": [
+                {"_id": stash_id, "_tpl": "566abbc34bdc2d92178b4576"},
+                {"_id": quest_raid_items_id, "_tpl": "5963866286f7747bf429b572"},
+                {"_id": quest_stash_items_id, "_tpl": "5963866b86f7747bfa1c4462"},
+                {"_id": equipment_id, "_tpl": "55d7217a4bdc2d86028b456d"},
+            ],
+            "equipment": equipment_id,
+            "stash": stash_id,
+            "questRaidItems": quest_raid_items_id,
+            "questStashItems": quest_stash_items_id,
+            "fastPanel": {},
+        }
+        return BotInventory(bot_inventory)
 
     @property
     def items(self) -> Dict[ItemId, Item]:
@@ -29,118 +51,180 @@ class BotInventory(MutableInventory):
         regenerate_items_ids(list(self.items.values()))
 
         equipment_item = self.get_by_template(TemplateId("55d7217a4bdc2d86028b456d"))
-        self.data.equipment = equipment_item.id
+        self.inventory.equipment = equipment_item.id
 
         quest_raid_items = self.get_by_template(TemplateId("5963866286f7747bf429b572"))
-        self.data.questRaidItems = quest_raid_items.id
+        self.inventory.questRaidItems = quest_raid_items.id
 
         quest_stash_items = self.get_by_template(TemplateId("5963866b86f7747bfa1c4462"))
-        self.data.questStashItems = quest_stash_items.id
+        self.inventory.questStashItems = quest_stash_items.id
 
         stash = self.get_by_template(TemplateId("566abbc34bdc2d92178b4576"))
-        self.data.stash = stash.id
+        self.inventory.stash = stash.id
+
+    def __enter__(self) -> BotInventory:
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):  # type: ignore
+        if exc_type is None:
+            self.inventory.items = list(self.__items.values())
 
 
 class BotGenerator:
-    def __init__(self) -> None:
-        self.__bot_base = ujson.load(db_dir.joinpath("base", "botBase.json").open(encoding="utf8"))
-        self.bots_directory = db_dir.joinpath("bots")
+    _bot_base: Final[dict]
+    bot_inventory: BotInventory
 
-    @staticmethod
-    def __choose_bot_role(role: str) -> str:
-        if role != "assault":
-            return role
-        cfg = config.bot_generation
-        roles = {"assault": cfg.scav_chance, "bear": cfg.bear_chance, "usec": cfg.usec_change}
-        return random.choices(population=list(roles.keys()), weights=list(roles.values()), k=1)[0]
+    def __init__(self, bot_role: str) -> None:
+        self._bot_base = ujson.load(db_dir.joinpath("base", "botBase.json").open(encoding="utf8"))
+        self.dir = db_dir.joinpath("bots", bot_role)
+        self.bot_role = bot_role
 
-    def __choose_bot_name(self, role: str) -> str:
-        names_path = self.bots_directory.joinpath(role, "names.json")
-        names: List[str] = ujson.load(names_path.open(encoding="utf8"))
-        return random.choice(names)
+        self._inventory_preset: dict = ujson.load(self.dir.joinpath("inventory.json").open(encoding="utf8"))
+        self._chances_preset: dict = ujson.load(self.dir.joinpath("chances.json").open(encoding="utf8"))
+        self._health_base: dict = ujson.load(self.dir.joinpath("health.json").open(encoding="utf8"))
 
-    @staticmethod
-    def __get_bot_side(role: str) -> str:
-        sides_map = {
-            "bear": "Bear",
-            "usec": "Usec",
-            "scav": "Savage",
+    def generate(self) -> dict:
+        """
+        Generates bot profile with role specified in class constructor.
+        All bot parameters such as inventory and health are taken from database.
+
+        :return: Bot profile as dictionary
+        """
+
+        self.bot_inventory = BotInventory.make_empty()
+        bot_base = copy.deepcopy(self._bot_base)
+        with self.bot_inventory:
+            self.__generate_inventory()
+            self.bot_inventory.regenerate_ids()
+
+        bot_base["Inventory"] = self.bot_inventory.inventory.dict(exclude_none=True)
+        bot_base["Health"] = copy.deepcopy(self._health_base)
+
+        bot_base["_id"] = generate_item_id()
+        bot_base["Info"]["Side"] = "Savage"
+
+        return bot_base
+
+    def __generate_equipment_items(self) -> None:
+        """
+        Generates equipment items (Weapons, Backpack, Rig, etc)
+        """
+
+        # A set with equipment slots that should be generated
+        equipment_slots_to_generate: Set[str] = {
+            slot
+            for slot, template_ids in self._inventory_preset["equipment"].items()
+            if (
+                # If slot isn't present in the _chances then it should be always generated
+                slot not in self._chances_preset["equipment"]
+                # Else we check if it should spawn
+                or random.uniform(0, 100) <= self._chances_preset["equipment"][slot]
+            )
+            and template_ids
         }
-        try:
-            return sides_map[role.lower()]
-        except KeyError:
-            return "Savage"
+        # Force pistol to generate if primary weapon wasn't generated
+        weapon_slots = "FirstPrimaryWeapon", "SecondPrimaryWeapon"
+        if not any(slot in equipment_slots_to_generate for slot in weapon_slots):
+            equipment_slots_to_generate.add("Holster")
 
-    def __apply_customization(self, role: str, bot: dict) -> None:
-        customization_path = self.bots_directory.joinpath(role, "appearance.json")
-        customization: dict = ujson.load(customization_path.open(encoding="utf8"))
+        assert any(i in weapon_slots for i in ("FirstPrimaryWeapon", "SecondPrimaryWeapon", "Holster"))
 
-        bot["Customization"] = {
-            k: random.choice(values)
-            for k, values in customization.items()
-            if k in {"body", "feet", "hands", "head"}
-        }
-        bot["Info"]["Voice"] = random.choice(customization["voice"])
+        blocked_slots: Set[str] = set()
+        for equipment_slot in equipment_slots_to_generate:
+            template_ids = self._inventory_preset["equipment"][equipment_slot]
 
-    def generate_bot(self, role: str, difficulty: str) -> dict:
-        bot = copy.deepcopy(self.__bot_base)
+            item_template = item_templates_repository.get_template(random.choice(template_ids))
+            if equipment_slot in blocked_slots:
+                continue
 
-        bot_role = self.__choose_bot_role(role)
-        self.__apply_customization(bot_role, bot)
+            blocks_slots: Set[str] = {
+                k.lstrip("Blocks")
+                for k, v in item_template.props.dict().items()
+                if k.startswith("Blocks") and v is True
+            }
+            if not blocks_slots.isdisjoint(equipment_slots_to_generate):
+                continue
+            if any(
+                item.tpl in item_template.props.ConflictingItems for item in self.bot_inventory.items.values()
+            ):
+                continue
 
-        bot["_id"] = f"bot{generate_item_id()}"
-        bot["Info"]["Side"] = self.__get_bot_side(bot_role)
-        bot["Info"]["Nickname"] = self.__choose_bot_name(role)
+            blocked_slots.update(blocks_slots)
 
-        bot["Info"]["Settings"]["Role"] = role
-        bot["Info"]["Settings"]["BotDifficulty"] = difficulty
-        bot["Info"]["experience"] = 1
+            item = Item(
+                id=generate_item_id(),
+                tpl=item_template.id,
+                slot_id=equipment_slot,
+                parent_id=self.bot_inventory.inventory.equipment,
+            )
+            self.bot_inventory.add_item(item)
 
-        bot_path = db_dir.joinpath("bots", bot_role)
+    def __generate_inventory_items(self) -> None:
+        """
+        Generates equipment mods
+        """
+        amount_of_items = len(self.bot_inventory.items)
+        seen_templates: Set[str] = set()
+        conflicting_templates: Set[str] = set()
 
-        random_inventory_path: Path = random.choice(list(bot_path.joinpath("inventory").glob("*.json")))
+        while True:
+            for item_template_id, slots in self._inventory_preset["mods"].items():
+                # Skip iteration if item with parent_id we need isn't present in inventory
+                try:
+                    parent = next(i for i in self.bot_inventory.items.values() if i.tpl == item_template_id)
+                except StopIteration:
+                    continue
+                # Skip if we already generated children for that template
+                if item_template_id in seen_templates:
+                    continue
+                seen_templates.add(item_template_id)
 
-        bot_inventory = BotInventory(ujson.load(random_inventory_path.open(encoding="utf8")))
-        bot_inventory.regenerate_ids()
+                for slot, template_ids in slots.items():
+                    try:
+                        if not random.uniform(0, 100) <= self._chances_preset["mods"][slot]:
+                            continue
+                    except KeyError:
+                        pass
 
-        bot["Inventory"] = bot_inventory.data.dict(exclude_none=True)
+                    template_ids = [
+                        i
+                        for i in template_ids
+                        if i not in conflicting_templates
+                        or not set(item_templates_repository.get_template(i).props.ConflictingItems).isdisjoint(
+                            seen_templates
+                        )
+                    ]
+                    if not template_ids:
+                        continue
 
-        self.__generate_health(bot, bot_role)
+                    random_template = item_templates_repository.get_template(random.choice(template_ids))
+                    conflicting_templates.update(random_template.props.ConflictingItems)
+                    # If parent item is a magazine then we should set proper stack size for ammo
+                    upd = ItemUpd()
+                    if slot == "cartridges":
+                        parent_template = item_templates_repository.get_template(parent.tpl)
+                        assert isinstance(parent_template.props, MagazineProps)
+                        upd.StackObjectsCount = parent_template.props.Cartridges[0].max_count
 
-        return bot
+                    item = Item(
+                        id=generate_item_id(),
+                        tpl=random_template.id,
+                        slot_id=slot,
+                        parent_id=parent.id,
+                        upd=upd,
+                    )
+                    self.bot_inventory.add_item(item)
 
-    @staticmethod
-    def __generate_health(bot: dict, role: str) -> None:
-        health_base: dict = {
-            "Hydration": {"Current": 100, "Maximum": 100},
-            "Energy": {"Current": 100, "Maximum": 100},
-            "BodyParts": {
-                "Head": {"Health": {"Current": 35, "Maximum": 35}},
-                "Chest": {"Health": {"Current": 80, "Maximum": 80}},
-                "Stomach": {"Health": {"Current": 70, "Maximum": 70}},
-                "LeftArm": {"Health": {"Current": 60, "Maximum": 60}},
-                "RightArm": {"Health": {"Current": 60, "Maximum": 60}},
-                "LeftLeg": {"Health": {"Current": 65, "Maximum": 65}},
-                "RightLeg": {"Health": {"Current": 65, "Maximum": 65}},
-            },
-            "UpdateTime": 0,
-        }
+            # break from loop if we didn't generate any new items
+            if amount_of_items == len(self.bot_inventory.items):
+                break
+            amount_of_items = len(self.bot_inventory.items)
 
-        bot_health: dict = ujson.load(
-            db_dir.joinpath("bots", role).joinpath("health", "default.json").open(encoding="utf8")
-        )
+    def __generate_inventory(self) -> None:
+        self.__generate_equipment_items()
+        self.__generate_inventory_items()
 
-        # Set current and maximum energy and hydration
-        health_base["Hydration"]["Current"] = bot_health["Hydration"]
-        health_base["Hydration"]["Maximum"] = bot_health["Hydration"]
 
-        health_base["Energy"]["Current"] = bot_health["Energy"]
-        health_base["Energy"]["Maximum"] = bot_health["Energy"]
-
-        for key, body_part in health_base["BodyParts"].items():
-            bot_body_part_hp = bot_health["BodyParts"][key]
-            body_part["Health"]["Current"] = bot_body_part_hp
-            body_part["Health"]["Maximum"] = bot_body_part_hp
-
-        health_base["UpdateTime"] = int(time.time())
-        bot["Health"] = health_base
+if __name__ == "__main__":
+    bot_generator = BotGenerator("assault")
+    bot_profile = bot_generator.generate()

@@ -32,12 +32,13 @@ async def generate_bots(request: Request) -> TarkovSuccessResponse[List[dict]]:
     request_data: dict = await request.json()
 
     logger.debug(request_data)
-    bot_generator = BotGenerator()
     for condition in request_data["conditions"]:
+        # TODO: FixMe
+        bot_generator = BotGenerator(bot_role="assault")  # condition["Role"]
         bot_limit = condition["Limit"]
 
         for _ in range(bot_limit):
-            bot = bot_generator.generate_bot(role=condition["Role"], difficulty=condition["Difficulty"])
+            bot = bot_generator.generate()
             bots.append(bot)
 
     return TarkovSuccessResponse(data=bots)
