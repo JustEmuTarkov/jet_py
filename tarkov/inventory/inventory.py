@@ -154,23 +154,38 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
 class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
     def remove_item(self, item: Item, remove_children: bool = True) -> None:
         """
-        Removes item from inventory
+        Removes item from inventory.
+
+        :param item: The item to remove
+        :param remove_children: If it should remove its children items.
         """
         del self.items[item.id]
+
+        # Stops here if `remove_children` is set to `false`.
         if not remove_children:
             return
 
+        # Removes children items.
         children = list(self.iter_item_children_recursively(item))
         for child in children:
             del self.items[child.id]
 
     def remove_items(self, items: Iterable[Item], remove_children: bool = True) -> None:
+        """
+        Removes multiple items.
+
+        :param items: Iterable containing a list of items to remove.
+        :param remove_children: If the children should be removed too.
+        """
         for item in items:
             self.remove_item(item, remove_children=remove_children)
 
     def add_item(self, item: Item, child_items: List[Item] = None) -> None:
         """
         Adds item into inventory
+
+        :param item: The item to add to the inventory.
+        :param child_items: A list of children to add to the item.
         """
         child_items = child_items or []
 
@@ -184,10 +199,10 @@ class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
     @staticmethod
     def merge(item: Item, with_: Item) -> None:
         """
-        Merges item with target item, item template ids should be same
+        Merges item with target item, item template ids should be same.
 
-        :param item: Item that will be merged and removed
-        :param with_: Target item
+        :param item: Item that will be merged and removed.
+        :param with_: Target item.
         """
         if not item.tpl == with_.tpl:
             raise ValueError("Item templates don't match")
@@ -198,9 +213,11 @@ class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
     @staticmethod
     def transfer(item: Item, to: Item, count: int) -> None:
         """
-        :param item: Donor item
-        :param to: Target item
-        :param count: Amount to transfer
+        Transfer an amount of items to another item. (i.e: from one bullets stack to another)
+
+        :param item: Donor item.
+        :param to: Target item.
+        :param count: Amount to transfer.
         """
         item.upd.StackObjectsCount -= count
         to.upd.StackObjectsCount += count
@@ -213,12 +230,16 @@ class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
 
     def fold(self, item: Item, folded: bool) -> None:
         """
-        Folds item
+        Fold or unfold an item.
+
+        :param item: The item to fold/unfold.
+        :param folded: The new folded state of the item.
         """
         item_template = item_templates_repository.get_template(item)
 
         assert isinstance(item_template.props, (WeaponProps, StockProps))
         children = list(self.iter_item_children_recursively(item))
+
         # Remove and add item to update stash map
         self.remove_item(item)
         item.upd.Foldable = ItemUpdFoldable(Folded=folded)
@@ -227,7 +248,10 @@ class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
     def take_item(self, template_id: TemplateId, amount: int) -> Tuple[List[Item], List[Item]]:
         """
         Deletes amount of items with given template_id
-        :returns Tuple[affected_items, deleted_items]
+
+        :param template_id: The template ID to look for.
+        :param amount: The amount of items that should be deleted.
+        :returns: Tuple[affected_items, deleted_items]
         """
         items = (item for item in self.items.values() if item.tpl == template_id)
         amount_to_take = amount
@@ -256,6 +280,10 @@ class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
 
     @staticmethod
     def can_split(item: Item) -> bool:
+        """
+        If an item can be split or not. (i.e: a bullets stack)
+        :returns: If the item is splittable or not.
+        """
         return item.upd.StackObjectsCount > 1
 
 
@@ -276,17 +304,33 @@ class StashMapItemFootprint(Base):
         return self.y + self.height
 
     def overlaps(self, other: "StashMapItemFootprint") -> bool:
+        """
+        Determine if the item is overlapping with another item.
+
+        :param other: The item to compare to.
+        """
+
         if self == other:
             return True
 
+        # If the item is vertically overlapping.
         if self.y >= other.y_high or self.y_high <= other.y:
             return False
+
+        # If the item if horizontally overlapping.
         if self.x >= other.x_high or self.x_high <= other.x:
             return False
 
         return True
 
     def is_out_of_bounds(self, inventory_width: int, inventory_height: int) -> bool:
+        """
+        Determine if the item is out of the inventory bounds.
+
+        :param inventory_width: The width of the inventory
+        :param inventory_height: The height of the inventory
+        :returns: If the item is out of bound.
+        """
         if self.x < 0 or inventory_width < self.x_high:
             return True
 
@@ -329,9 +373,15 @@ class GridInventoryStashMap:
         self, item: Item, children_items: List[Item], location: ItemInventoryLocation
     ) -> Tuple[int, int]:
         """
-        Returns footprint (width, height) that item takes in inventory, takes rotation into account
+        Returns the footprint (width, height) that an item takes in the inventory, takes rotation into account.
+
+        :param item: The item to check.
+        :param children_items: The item's children items.
+        :param location: The location of the item and its rotation.
+        :returns: The item's footprint (width, height) in the inventory.
         """
         width, height = self.inventory.get_item_size(item=item, child_items=children_items)
+
         if location.r == ItemOrientationEnum.Vertical.value:
             width, height = height, width
 
@@ -340,7 +390,16 @@ class GridInventoryStashMap:
     def _calculate_item_footprint(
         self, item: Item, child_items: List[Item], location: ItemInventoryLocation
     ) -> StashMapItemFootprint:
+        """
+        Calculate an item's footprint (width, height).
+
+        :param item: The item to analyze.
+        :param child_items: The item's children items.
+        :param location: The item's location and rotation.
+        :returns: The calculated item's footprint.
+        """
         width, height = self._get_item_size_in_stash(item, child_items, location)
+
         return StashMapItemFootprint(
             x=location.x,
             y=location.y,
@@ -355,13 +414,17 @@ class GridInventoryStashMap:
 
     def _is_item_in_root(self, item: Item) -> bool:
         """
-        Determines if item is in inventory root
+        Determines if item is in inventory root.
+
+        :param item: The item to analyze.
+        :returns: If the item is at the inventory's root.
         """
         return isinstance(item.location, ItemInventoryLocation) and item.parent_id == self.inventory.root_id
 
     def get(self, x: int, y: int) -> bool:
         if not 0 <= x < self.width:
             raise IndexError
+
         if not 0 <= y < self.height:
             raise IndexError
 
@@ -370,20 +433,37 @@ class GridInventoryStashMap:
     def set(self, x: int, y: int, state: bool) -> None:
         if self.map[x][y] == state:
             raise self.InvalidCellStateError(f"Cell {x} {y} already has {state} state")
+
         self.map[x][y] = state
 
     def _get_parent_item_in_inventory_root(self, item: Item) -> Item:
+        """
+        Return an item's parent located on the inventory root.
+
+        :param item: The item to analyze.
+        :returns: The parent on the inventory root.
+        """
         parent_item = item
+
         while parent_item.parent_id != self.inventory.root_id and parent_item.parent_id is not None:
             parent_item = self.inventory.get(parent_item.parent_id)
+
         return parent_item
 
     def remove(self, item: Item, child_items: List[Item]) -> None:
+        """
+        Removes an item from the inventory.
+
+        :param item: The item to remove
+        :param child_items: Its eventual children.
+        """
         parent_item = self._get_parent_item_in_inventory_root(item)
+
         if parent_item != item and parent_item.parent_id == self.inventory.root_id:
             # If we're removing item that has a parent (weapon for example)
             assert isinstance(parent_item.location, ItemInventoryLocation)
             parent_children_set = set(self.inventory.iter_item_children_recursively(parent_item))
+
             # Calculate and remove parent item footprint
             parent_footprint = self._calculate_item_footprint(
                 parent_item,
@@ -391,6 +471,7 @@ class GridInventoryStashMap:
                 list(parent_children_set.union({item, *child_items})),
                 parent_item.location,
             )
+
             for x, y in parent_footprint.iter_cells():
                 self.set(x, y, False)
 
@@ -406,20 +487,30 @@ class GridInventoryStashMap:
         elif item.parent_id == self.inventory.root_id:
             assert isinstance(item.location, ItemInventoryLocation)
             footprint = self._calculate_item_footprint(item, child_items, location=item.location)
+
             for x, y in footprint.iter_cells():
                 self.set(x, y, False)
 
     def add(self, item: Item, child_items: List[Item]) -> None:
+        """
+        Adds an item to the inventory.
+
+        :param item: The item to add.
+        :param child_items: The item children to add.
+        """
         parent_item = self._get_parent_item_in_inventory_root(item)
+
         if parent_item != item and parent_item.parent_id == self.inventory.root_id:
             # Same as add but different operation order
             assert isinstance(parent_item.location, ItemInventoryLocation)
             parent_children_set = set(self.inventory.iter_item_children_recursively(parent_item))
+
             parent_footprint = self._calculate_item_footprint(
                 parent_item,
                 list(parent_children_set.difference({item, *child_items})),
                 parent_item.location,
             )
+
             for x, y in parent_footprint.iter_cells():
                 self.set(x, y, False)
 
@@ -442,15 +533,22 @@ class GridInventoryStashMap:
 
     def can_place(self, item: Item, child_items: List[Item], location: ItemInventoryLocation) -> bool:
         """
-        Checks if item can be placed into location
+        Checks if item can be placed into a location.
+
+        :param item: The item to use as a reference.
+        :param child_items: The items children.
+        :param location: The target location.
+        :returns: If the item can be place into the location.
         """
         item_footprint = self._calculate_item_footprint(item, child_items, location)
+
         for x, y in item_footprint.iter_cells():
             try:
                 if self.get(x, y):
                     return False
             except IndexError:
                 return False
+
         return True
 
     def find_location_for_item(
@@ -460,14 +558,20 @@ class GridInventoryStashMap:
         child_items: List[Item] = None,
     ) -> ItemInventoryLocation:
         """
-        Finds location for an item or raises NoSpaceError if there's not space in inventory
+        Finds location for an item or raises NoSpaceError if there's not space in inventory.
+
+        :param item: The item to place.
+        :param child_items: The item's children.
+        :returns: The found location.
         """
         child_items = child_items or []
         item_width, item_height = self.inventory.get_item_size(item, child_items)
+
         for x, y in self._iter_cells():
             for orientation in ItemOrientationEnum:
                 location = ItemInventoryLocation(x=x, y=y, r=orientation.value)
                 width, height = item_width, item_height
+
                 if location.r == ItemOrientationEnum.Vertical.value:
                     width, height = height, width
 
@@ -500,10 +604,22 @@ class GridInventory(MutableInventory):
         raise NotImplementedError
 
     def remove_item(self, item: Item, remove_children: bool = True) -> None:
+        """
+        Removes an item from inventory.
+
+        :param item: The item to remove.
+        :param remove_children: If the item's children should be removed too.
+        """
         self.stash_map.remove(item, list(self.iter_item_children_recursively(item)))
         super().remove_item(item, remove_children=remove_children)
 
     def add_item(self, item: Item, child_items: List[Item] = None) -> None:
+        """
+        Adds an item to the inventory.
+
+        :param item: The item to add.
+        :param child_items: The item's children.
+        """
         child_items = child_items or []
         self.stash_map.add(item, child_items)
         super().add_item(item=item, child_items=child_items)
@@ -515,8 +631,17 @@ class GridInventory(MutableInventory):
         child_items: List[Item] = None,
         location: AnyItemLocation = None,
     ) -> None:
+        """
+        Tries to place an item at a location or returns an error.
+
+        :param item: The item to place.
+        :param child_items: The item's children.
+        :param location: The target to location.
+        """
+
         if child_items is None:
             child_items = []
+
         #  This is kinda tricky but item given to StashMap should have
         #  slotId and parent_id otherwise it won't be considered as being in inventory
         item.location = location
@@ -540,7 +665,10 @@ class GridInventory(MutableInventory):
         move_location: AnyMoveLocation,
     ) -> None:
         """
-        Moves item to location
+        Moves item to location.
+
+        :param item: The item to move
+        :param move_location: The location to move the item to.
         """
         try:
             item_inventory = item.get_inventory()
@@ -565,6 +693,14 @@ class GridInventory(MutableInventory):
         child_items: List[Item],
         move_location: MoveLocation,
     ) -> None:
+        """
+        Moves an item to a location.
+
+        :param item:
+        :param child_items:
+        :param move_location:
+        """
+
         if move_location.id == self.root_id and move_location.location is not None:
             if not self.stash_map.can_place(item, child_items, move_location.location):
                 raise ValueError("Cannot place item into location since it is taken")
@@ -577,6 +713,13 @@ class GridInventory(MutableInventory):
         self.add_item(item, child_items)
 
     def __place_ammo_into_magazine(self, ammo: Item, move_location: CartridgesMoveLocation) -> Optional[Item]:
+        """
+        Places ammo into a magazine.
+
+        :param ammo: The ammo to place.
+        :param move_location: The magazine location.
+        """
+
         magazine = self.get(move_location.id)
         ammo_inside_mag = list(self.iter_item_children(magazine))
 
@@ -680,6 +823,11 @@ class GridInventory(MutableInventory):
 
     @staticmethod
     def split_into_stacks(item: Item) -> List[Item]:
+        """
+        Splits an item into stacks.
+
+        :param item: The item to split.
+        """
         item_template = item_templates_repository.get_template(item)
         count = item.upd.StackObjectsCount
 
@@ -713,9 +861,12 @@ class PlayerInventory(GridInventory):
     def grid_size(self) -> Tuple[int, int]:
         stash_item = self.get(self.root_id)
         stash_template = item_templates_repository.get_template(stash_item)
+
         assert isinstance(stash_template.props, CompoundProps)
+
         stash_grids = stash_template.props.Grids
         grids_props = stash_grids[0].props
+
         return grids_props.width, grids_props.height
 
     @property
