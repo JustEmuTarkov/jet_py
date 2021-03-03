@@ -6,7 +6,7 @@ from fastapi.params import Depends
 from pydantic import BaseModel, parse_obj_as
 
 from server.utils import make_router
-from tarkov.dependencies import with_profile
+from tarkov.dependencies import profile_manager
 from tarkov.inventory.implementations import SimpleInventory
 from tarkov.inventory.models import Item
 from tarkov.lib import locations
@@ -90,7 +90,7 @@ class ProfileSaveRequest(BaseModel):
 @singleplayer_router.put("/raid/profile/save")
 async def singleplayer_raid_profile_save(
     request: Request,
-    profile: Profile = Depends(with_profile),  # type: ignore
+    profile: Profile = Depends(profile_manager.with_profile),  # type: ignore
 ) -> TarkovSuccessResponse:
     # TODO: Add Saving profile here
     # data struct {exit, isPlayerScav, profile, health}
@@ -169,7 +169,7 @@ def weapon_durability() -> bool:
 @singleplayer_router.post("/player/health/sync")
 async def health_sync(
     request: Request,
-    profile: Profile = Depends(with_profile),  # type: ignore
+    profile: Profile = Depends(profile_manager.with_profile),  # type: ignore
 ) -> TarkovSuccessResponse:
     body = await request.json()
 

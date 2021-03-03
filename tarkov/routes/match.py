@@ -6,7 +6,7 @@ from fastapi.params import Depends
 
 from server import db_dir
 from server.utils import make_router
-from tarkov.dependencies import with_profile
+from tarkov.dependencies import profile_manager
 from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
 from tarkov.profile import Profile
 
@@ -51,7 +51,7 @@ def available() -> TarkovSuccessResponse[Literal[True]]:
 @match_router.post("/client/match/join")
 async def join(
     request: Request,
-    profile: Profile = Depends(with_profile),  # type: ignore
+    profile: Profile = Depends(profile_manager.with_profile),  # type: ignore
 ) -> Union[TarkovSuccessResponse[list], TarkovErrorResponse]:
     request_data: dict = await request.json()
     return TarkovSuccessResponse(
