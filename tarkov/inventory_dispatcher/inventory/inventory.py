@@ -27,7 +27,7 @@ from .models import (
     Transfer,
     Bind,
     Swap,
-    Toggle
+    Toggle,
 )
 
 if TYPE_CHECKING:
@@ -52,7 +52,7 @@ class InventoryDispatcher(Dispatcher):
             ActionType.Repair: self._repair,
             ActionType.Bind: self._bind,
             ActionType.Swap: self._swap,
-            ActionType.Toggle: self._toggle
+            ActionType.Toggle: self._toggle,
         }
 
     @contextmanager
