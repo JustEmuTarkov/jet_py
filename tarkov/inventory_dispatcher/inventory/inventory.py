@@ -246,9 +246,5 @@ class InventoryDispatcher(Dispatcher):
 
     def _toggle(self, action: Toggle) -> None:
         item = self.inventory.get(action.item)
-
-        if item.upd.toggled():
-            item.upd.Togglable.On = action.value
-        else:
-            # Item might be toggleable but not have it defined yet.
-            item.upd.Togglable = ItemUpdTogglable(On=action.value)
+        item.upd.Togglable = ItemUpdTogglable(On=action.value)
+        self.response.items.change.append(item)
