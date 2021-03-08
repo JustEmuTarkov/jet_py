@@ -89,3 +89,8 @@ class Swap(ActionModel):
     item2: ItemId
     to2: AnyMoveLocation
     fromOwner: Optional[Owner] = None
+
+
+class Toggle(ActionModel):
+    item: ItemId
+    value: StrictBool
