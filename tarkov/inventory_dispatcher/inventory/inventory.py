@@ -7,7 +7,7 @@ from tarkov.fleamarket.fleamarket import flea_market_instance
 from tarkov.fleamarket.models import OfferId
 from tarkov.inventory import MutableInventory, item_templates_repository
 from tarkov.inventory.implementations import SimpleInventory
-from tarkov.inventory.models import Item
+from tarkov.inventory.models import Item, ItemUpdTogglable
 from tarkov.inventory.types import TemplateId
 from tarkov.inventory_dispatcher.base import Dispatcher
 from tarkov.inventory_dispatcher.models import ActionType, Owner
@@ -27,6 +27,7 @@ from .models import (
     Transfer,
     Bind,
     Swap,
+    Toggle,
 )
 
 if TYPE_CHECKING:
@@ -51,6 +52,7 @@ class InventoryDispatcher(Dispatcher):
             ActionType.Repair: self._repair,
             ActionType.Bind: self._bind,
             ActionType.Swap: self._swap,
+            ActionType.Toggle: self._toggle,
         }
 
     @contextmanager
@@ -241,3 +243,8 @@ class InventoryDispatcher(Dispatcher):
 
             self.response.items.change.append(item)
             self.response.items.change.append(item2)
+
+    def _toggle(self, action: Toggle) -> None:
+        item = self.inventory.get(action.item)
+        item.upd.Togglable = ItemUpdTogglable(On=action.value)
+        self.response.items.change.append(item)

@@ -177,6 +177,9 @@ class ItemUpd(Base):
     def folded(self) -> bool:
         return self.Foldable is not None and self.Foldable.Folded
 
+    def toggled(self) -> bool:
+        return self.Togglable is not None and self.Togglable.On
+
 
 ItemAmmoStackPosition = NewType("ItemAmmoStackPosition", int)
 
