@@ -1,5 +1,5 @@
 import typing
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import Any, Dict, List, Literal, Optional, Set, Union
 
 from pydantic import BaseModel, Extra, Field, StrictBool, StrictFloat, StrictInt
 
@@ -143,7 +143,7 @@ class BaseItemProps(BaseModel):
     CanSellOnRagfair: StrictBool
     CanRequireOnRagfair: StrictBool
     BannedFromRagfair: StrictBool
-    ConflictingItems: List[TemplateId]
+    ConflictingItems: Set[TemplateId]
     FixedPrice: StrictBool
     Unlootable: StrictBool
     UnlootableFromSlot: str
