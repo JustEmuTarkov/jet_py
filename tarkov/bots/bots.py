@@ -2,14 +2,23 @@ from __future__ import annotations
 
 import copy
 import random
-from typing import Dict, Final, Set
+from pprint import pprint
+from typing import Dict, Final, List, Set
 
 import ujson
 from pydantic import parse_obj_as
 
 from server import db_dir
-from tarkov.inventory import MutableInventory, generate_item_id, item_templates_repository, regenerate_items_ids
-from tarkov.inventory.models import InventoryModel, Item, ItemUpd
+from tarkov.exceptions import NoSpaceError
+from tarkov.inventory import (
+    MutableInventory,
+    generate_item_id,
+    item_templates_repository,
+    regenerate_items_ids,
+)
+from tarkov.inventory.factories import item_factory
+from tarkov.inventory.implementations import MultiGridContainer
+from tarkov.inventory.models import InventoryModel, Item, ItemTemplate, ItemUpd
 from tarkov.inventory.prop_models import MagazineProps
 from tarkov.inventory.types import ItemId, TemplateId
 
@@ -79,6 +88,7 @@ class BotGenerator:
         self.dir = db_dir.joinpath("bots", bot_role)
         self.bot_role = bot_role
 
+        self._generation_preset: dict = ujson.load(self.dir.joinpath("generation.json").open(encoding="utf8"))
         self._inventory_preset: dict = ujson.load(self.dir.joinpath("inventory.json").open(encoding="utf8"))
         self._chances_preset: dict = ujson.load(self.dir.joinpath("chances.json").open(encoding="utf8"))
         self._health_base: dict = ujson.load(self.dir.joinpath("health.json").open(encoding="utf8"))
@@ -128,44 +138,52 @@ class BotGenerator:
             equipment_slots_to_generate.add("Holster")
 
         assert any(i in weapon_slots for i in ("FirstPrimaryWeapon", "SecondPrimaryWeapon", "Holster"))
-
-        blocked_slots: Set[str] = set()
         for equipment_slot in equipment_slots_to_generate:
             template_ids = self._inventory_preset["equipment"][equipment_slot]
 
-            item_template = item_templates_repository.get_template(random.choice(template_ids))
-            if equipment_slot in blocked_slots:
-                continue
+            # if equipment_slot in blocked_slots:
+            #     continue
 
-            blocks_slots: Set[str] = {
-                k.lstrip("Blocks")
-                for k, v in item_template.props.dict().items()
-                if k.startswith("Blocks") and v is True
-            }
-            if not blocks_slots.isdisjoint(equipment_slots_to_generate):
-                continue
-            if any(
-                item.tpl in item_template.props.ConflictingItems for item in self.bot_inventory.items.values()
-            ):
-                continue
+            def filter_conflicting_items(template_id: TemplateId) -> bool:
+                template = item_templates_repository.get_template(template_id)
+                blocks_slots: Set[str] = {
+                    k.lstrip("Blocks")
+                    for k, v in template.props.dict().items()
+                    if k.startswith("Blocks") and v is True
+                }
+                if not blocks_slots.isdisjoint(equipment_slots_to_generate):
+                    return False
+                # If template conflicts with any of the existing items
+                if any(
+                    item.tpl in template.props.ConflictingItems for item in self.bot_inventory.items.values()
+                ):
+                    return False
+                # If any of the existing items conflict with template
+                if any(
+                    template.id in item_templates_repository.get_template(item).props.ConflictingItems
+                    for item in self.bot_inventory.items.values()
+                ):
+                    return False
+                return True
 
-            blocked_slots.update(blocks_slots)
+            template_ids = list(filter(filter_conflicting_items, template_ids))
+            random_template_id = random.choice(template_ids)
 
-            item = Item(
-                id=generate_item_id(),
-                tpl=item_template.id,
-                slot_id=equipment_slot,
-                parent_id=self.bot_inventory.inventory.equipment,
+            self.bot_inventory.add_item(
+                Item(
+                    id=generate_item_id(),
+                    tpl=random_template_id,
+                    slot_id=equipment_slot,
+                    parent_id=self.bot_inventory.inventory.equipment,
+                )
             )
-            self.bot_inventory.add_item(item)
 
-    def __generate_inventory_items(self) -> None:
+    def __generate_gun_mods(self) -> None:
         """
         Generates equipment mods
         """
         amount_of_items = len(self.bot_inventory.items)
         seen_templates: Set[str] = set()
-        conflicting_templates: Set[str] = set()
 
         while True:
             for item_template_id, slots in self._inventory_preset["mods"].items():
@@ -186,19 +204,24 @@ class BotGenerator:
                     except KeyError:
                         pass
 
-                    template_ids = [
-                        i
-                        for i in template_ids
-                        if i not in conflicting_templates
-                        or not set(item_templates_repository.get_template(i).props.ConflictingItems).isdisjoint(
-                            seen_templates
-                        )
-                    ]
+                    def filter_conflicting_items(template_id: TemplateId) -> bool:
+                        template = item_templates_repository.get_template(template_id)
+
+                        for inventory_item in self.bot_inventory.items.values():
+                            item_template = item_templates_repository.get_template(inventory_item.tpl)
+
+                            if template_id in item_template.props.ConflictingItems:
+                                return False
+
+                            if inventory_item.tpl in template.props.ConflictingItems:
+                                return False
+                        return True
+
+                    template_ids = list(filter(filter_conflicting_items, template_ids))
                     if not template_ids:
                         continue
 
                     random_template = item_templates_repository.get_template(random.choice(template_ids))
-                    conflicting_templates.update(random_template.props.ConflictingItems)
                     # If parent item is a magazine then we should set proper stack size for ammo
                     upd = ItemUpd()
                     if slot == "cartridges":
@@ -222,9 +245,47 @@ class BotGenerator:
 
     def __generate_inventory(self) -> None:
         self.__generate_equipment_items()
-        self.__generate_inventory_items()
+        self.__generate_gun_mods()
+        self.__populate_containers()
+
+    def __populate_containers(self) -> None:
+        containers: List[Item] = [
+            i for i in self.bot_inventory.items.values() if i.slot_id in self._inventory_preset["items"]
+        ]
+        for container in containers:
+            assert container.slot_id is not None
+            self.__populate_container(container, container.slot_id)
+
+    def __populate_container(self, container: Item, container_slot: str) -> None:
+        templates: List[ItemTemplate] = [
+            item_templates_repository.get_template(tpl)
+            for tpl in self._inventory_preset["items"][container_slot]
+        ]
+        templates_chances: List[float] = [t.props.SpawnChance for t in templates]
+
+        items_to_generate: Final[int] = random.randint(
+            self._generation_preset["items"]["looseLoot"]["min"],
+            self._generation_preset["items"]["looseLoot"]["max"],
+        )
+
+        container_inventory = MultiGridContainer.from_item(container)
+
+        for _ in range(items_to_generate):
+            for _ in range(10):
+                item_template: ItemTemplate = random.choices(templates, templates_chances, k=1)[0]
+                item, child_items = item_factory.create_item(item_template, 1)
+                try:
+                    container_inventory.place_randomly(item, child_items)
+                    break
+                except NoSpaceError:
+                    continue
+
+        for sub_inventory in container_inventory.inventories:
+            self.bot_inventory.items.update(sub_inventory.items)
 
 
 if __name__ == "__main__":
     bot_generator = BotGenerator("assault")
     bot_profile = bot_generator.generate()
+    pprint(bot_profile["Inventory"]["items"])
+    print(len(bot_profile["Inventory"]["items"]))
