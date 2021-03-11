@@ -317,9 +317,13 @@ class GridInventoryStashMap:
     def __init__(self, inventory: GridInventory):
         self.inventory = inventory
         self.width, self.height = inventory.grid_size
-        inventory_root = inventory.get(inventory.root_id)
-
         self.map: List[List[bool]] = [[False for y in range(self.height)] for x in range(self.width)]
+
+        try:
+            inventory_root = inventory.get(inventory.root_id)
+        except NotFoundError:
+            return
+
         for item in inventory.iter_item_children(inventory_root):
             if self._is_item_in_root(item):
                 children_items = list(self.inventory.iter_item_children_recursively(item=item))
@@ -348,7 +352,7 @@ class GridInventoryStashMap:
             height=height,
         )
 
-    def _iter_cells(self) -> Iterable[Tuple[int, int]]:
+    def iter_cells(self) -> Iterable[Tuple[int, int]]:
         for y in range(self.height):
             for x in range(self.width):
                 yield x, y
@@ -464,7 +468,7 @@ class GridInventoryStashMap:
         """
         child_items = child_items or []
         item_width, item_height = self.inventory.get_item_size(item, child_items)
-        for x, y in self._iter_cells():
+        for x, y in self.iter_cells():
             for orientation in ItemOrientationEnum:
                 location = ItemInventoryLocation(x=x, y=y, r=orientation.value)
                 width, height = item_width, item_height
