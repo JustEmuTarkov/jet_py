@@ -65,21 +65,27 @@ class MultiGridContainer:
     Class representing container with multiple grids, like pockets or tactical rigs.
     """
 
-    def __init__(self, item_template: ItemTemplate, root_id: ItemId):
+    def __init__(self, item_template: ItemTemplate, root_id: ItemId, slot_id: str):
         if not isinstance(item_template.props, CompoundProps):
             raise ValueError("Props of item_template should be of type CompoundProps")
 
         self.root_id = root_id
-
+        self.slot_id = slot_id
+        self.template = item_template
         self.inventories: List[MultiGridSubInventory] = [
             MultiGridSubInventory(root_id, grid) for grid in item_template.props.Grids
         ]
 
     @classmethod
-    def from_item(cls, item: Item) -> MultiGridContainer:
-        return cls(item_templates_repository.get_template(item), item.id)
+    def from_item(cls, item: Item, slot_id: str) -> MultiGridContainer:
+        return cls(item_templates_repository.get_template(item), item.id, slot_id)
 
-    def place_randomly(self, item: Item, child_items: List[Item]) -> None:
+    @property
+    def size(self) -> int:
+        assert isinstance(self.template.props, CompoundProps)
+        return sum(grid.props.height * grid.props.width for grid in self.template.props.Grids)
+
+    def place_randomly(self, item: Item, child_items: List[Item] = None) -> None:
         """
         Places item into random location
 
@@ -87,13 +93,15 @@ class MultiGridContainer:
         :param child_items: Item's children
         :raises NoSpaceError: If there's no place for item in any of sub inventories
         """
+        child_items = child_items or []
+
         # Check for every possible location combination in each sub inventory
         for inventory in random.sample(self.inventories, k=len(self.inventories)):
             # Checks each cell in random order
             cells = list(inventory.stash_map.iter_cells())
             for x, y in random.sample(cells, k=len(cells)):
-                for r in ItemOrientationEnum:
-                    location = ItemInventoryLocation(x=x, y=y, r=r.value)
+                for orientation in ItemOrientationEnum:
+                    location = ItemInventoryLocation(x=x, y=y, r=orientation.value)
                     if inventory.stash_map.can_place(item, child_items, location):
                         inventory.place_item(item, child_items=child_items, location=location)
                         return

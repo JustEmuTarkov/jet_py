@@ -23,6 +23,7 @@ from tarkov.inventory.prop_models import (
 )
 from tarkov.inventory.types import ItemId, TemplateId
 from tarkov.models import Base
+from tarkov.inventory import generate_item_id
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
@@ -212,7 +213,7 @@ class Item(Base):
 
     __inventory__: Optional["MutableInventory"] = PrivateAttr(default=None)  # Link to the inventory
 
-    id: ItemId = Field(alias="_id")
+    id: ItemId = Field(alias="_id", default_factory=generate_item_id)
     tpl: TemplateId = Field(alias="_tpl")
     slot_id: Optional[str] = Field(alias="slotId")
     parent_id: Optional[ItemId] = Field(alias="parentId", default=None)
