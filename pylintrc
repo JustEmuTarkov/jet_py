@@ -395,7 +395,8 @@ ignore-docstrings=yes
 ignore-imports=yes
 
 # Minimum lines number of a similarity.
-min-similarity-lines=4
+# Often causes false-positives when implementing ABC or overriding class methods
+min-similarity-lines=8
 
 
 [SPELLING]
