@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import copy
 import random
-from pprint import pprint
 from typing import Dict, Final
 
 import ujson
@@ -61,8 +60,7 @@ class BotInventory(MutableInventory):
         for item in self.items.values():
             if item.slot_id == slot_id:
                 return item
-        else:
-            raise NotFoundError(f"Item with slot_id {slot_id} was not found")
+        raise NotFoundError(f"Item with slot_id {slot_id} was not found")
 
     @property
     def items(self) -> Dict[ItemId, Item]:

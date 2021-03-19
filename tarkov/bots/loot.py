@@ -114,7 +114,8 @@ class MedsGenerator:
         self.bot_loot_generator = bot_loot_generator
 
         self._meds_templates = [
-            tpl for tpl in item_templates_repository.templates.values()
+            tpl
+            for tpl in item_templates_repository.templates.values()
             if isinstance(tpl.props, MedsProps) and tpl.props.Rarity != "Not_Exists"
         ]
 
