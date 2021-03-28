@@ -15,6 +15,6 @@ In order to run/build the server install
 You should be able to just run `main.py`
 
 #### How bundle server into .exe
-To start server run `pyinstaller main.spec` that will create .exe executable from project files
+To start server run `pyinstaller main.spec` that will create .exe executable from project files  
 You still need resources directory for the server to work
 
