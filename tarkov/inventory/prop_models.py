@@ -33,8 +33,8 @@ TracerColor = Union[
 
 
 class Filter(Base):
-    Filter: List[str] = Field(default_factory=list)
-    ExcludedFilter: Optional[List[str]]
+    Filter: List[TemplateId] = Field(default_factory=list)
+    ExcludedFilter: List[TemplateId] = Field(default_factory=list)
     Shift: Optional[int]
     AnimationIndex: Optional[int]
     MaxStackCount: Optional[int]
