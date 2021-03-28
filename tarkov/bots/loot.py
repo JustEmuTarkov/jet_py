@@ -10,8 +10,9 @@ from tarkov.exceptions import NoSpaceError, NotFoundError
 from tarkov.inventory import item_templates_repository
 from tarkov.inventory.factories import item_factory
 from tarkov.inventory.implementations import MultiGridContainer
-from tarkov.inventory.models import Item, ItemTemplate
-from tarkov.inventory.prop_models import MedsProps
+from tarkov.inventory.models import Item, ItemAmmoStackPosition, ItemTemplate, ItemUpd
+from tarkov.inventory.prop_models import MagazineProps, MagazineReloadType, MedsProps
+from tarkov.inventory.types import TemplateId
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
@@ -175,6 +176,80 @@ class LooseLootGenerator:
         return item_factory.create_item(item_template, 1)
 
 
+class BotMagazineGenerator:
+    ATTEMPTS_TO_PLACE = 10
+
+    def __init__(self, bot_loot_generator: BotLootGenerator):
+        self.bot_loot_generator = bot_loot_generator
+        self.bot_inventory = self.bot_loot_generator.bot_inventory
+
+        self.magazines_to_generate = random.randint(
+            self.bot_loot_generator.config.magazines.min,
+            self.bot_loot_generator.config.magazines.max,
+        )
+
+    def generate(self) -> None:
+        slots = ["FirstPrimaryWeapon", "SecondPrimaryWeapon", "Holster"]
+        for slot in slots:
+            try:
+                weapon = self.bot_inventory.get_equipment(slot)
+            except NotFoundError:
+                continue
+            self.generate_magazines_for_weapon(weapon)
+
+    def generate_magazines_for_weapon(self, weapon: Item) -> None:
+        # Magazine template to generate for a bot
+        magazine_template: ItemTemplate
+        # Magazine that is currently in the weapon
+        magazine_in_weapon: Item
+
+        for item in self.bot_inventory.items.values():
+            item_template = item_templates_repository.get_template(item.tpl)
+            if isinstance(item_template.props, MagazineProps) and item.parent_id == weapon.id:
+                magazine_template = item_template
+                magazine_in_weapon = item
+                break
+        else:
+            raise ValueError("Magazine wasn't found")
+
+        assert isinstance(magazine_template.props, MagazineProps)
+        cartridges = random.choice(magazine_template.props.Cartridges)
+        ammo_types: List[TemplateId] = self.bot_loot_generator.bot_generator.inventory_preset["mods"][
+            magazine_template.id
+        ]["cartridges"]
+        ammo_type = item_templates_repository.get_template(random.choice(ammo_types))
+
+        # Generate ammo for current magazine
+        self.bot_inventory.add_item(self.make_ammo(ammo_type, magazine_in_weapon, cartridges.max_count))
+
+        reload_type = MagazineReloadType(magazine_template.props.ReloadMagType)
+        containers = self.bot_loot_generator.bot_inventory_containers
+
+        # Generate additional magazines if magazine is external
+        if reload_type == MagazineReloadType.ExternalMagazine:
+            for _ in range(self.magazines_to_generate):
+                for _ in range(self.ATTEMPTS_TO_PLACE):
+                    container = containers.random_container(include=["Pockets", "TacticalVest"])
+
+                    try:
+                        mag = Item(tpl=magazine_template.id)
+                        container.place_randomly(item=mag)
+                        self.bot_inventory.add_item(self.make_ammo(ammo_type, mag, cartridges.max_count))
+                        break
+                    except NoSpaceError:
+                        pass
+
+    @staticmethod
+    def make_ammo(ammo_template: ItemTemplate, parent: Item, count: int) -> Item:
+        return Item(
+            tpl=ammo_template.id,
+            parent_id=parent.id,
+            slot_id="cartridges",
+            location=ItemAmmoStackPosition(0),
+            upd=ItemUpd(StackObjectsCount=count, SpawnedInSession=True),
+        )
+
+
 class BotLootGenerator:
     bot_generator: BotGenerator
     bot_inventory: BotInventory
@@ -195,6 +270,10 @@ class BotLootGenerator:
         """
         meds_generator = MedsGenerator(self)
         meds_generator.generate(random.randint(self.config.healing.min, self.config.healing.max))
+        self.bot_inventory_containers.flush()
+
+        bot_magazine_generator = BotMagazineGenerator(self)
+        bot_magazine_generator.generate()
 
         loose_loot_generator = LooseLootGenerator(self)
         loose_loot_generator.generate(random.randint(self.config.loose_loot.min, self.config.loose_loot.max))

@@ -76,17 +76,9 @@ class BotWeaponGenerator:
             return
 
         random_template = item_templates_repository.get_template(random.choice(template_ids))
-        # If parent item is a magazine then we should set proper stack size for ammo
+        # Ammo generation will be handler later via BotMagazineGenerator class
         if slot == "cartridges":
-            parent_template = item_templates_repository.get_template(parent.tpl)
-            assert isinstance(parent_template.props, MagazineProps)
-            item = Item(
-                id=generate_item_id(),
-                tpl=random_template.id,
-                slot_id=slot,
-                location=ItemAmmoStackPosition(0),
-                upd=ItemUpd(StackObjectsCount=parent_template.props.Cartridges[0].max_count),
-            )
+            return
         else:
             item = Item(
                 id=generate_item_id(),
