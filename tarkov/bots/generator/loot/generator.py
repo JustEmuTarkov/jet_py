@@ -8,6 +8,7 @@ from ._meds import MedsGenerator
 from ._types import BotInventoryContainers, LootGenerationConfig
 
 if TYPE_CHECKING:
+    # pylint: disable=cyclic-import
     from tarkov.bots import BotGeneratorPreset
     from tarkov.bots.bots import BotInventory
 
@@ -30,13 +31,13 @@ class BotLootGenerator:
             BotMagazineGenerator,
             LooseLootGenerator,
         ]
-        for generator in generators:
-            g = generator(
+        for generator_type in generators:
+            generator = generator_type(
                 inventory_containers=self.bot_inventory_containers,
                 bot_inventory=self.bot_inventory,
                 config=self.config,
                 preset=self.preset,
             )
-            g.generate()
+            generator.generate()
 
         self.bot_inventory_containers.flush()

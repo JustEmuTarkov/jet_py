@@ -8,6 +8,7 @@ from tarkov.containers import Container
 from ._types import BotInventoryContainers, LootGenerationConfig
 
 if TYPE_CHECKING:
+    # pylint: disable=cyclic-import
     from tarkov.bots.bots import BotInventory
     from tarkov.bots import BotGeneratorPreset
     from tarkov.inventory import ItemTemplatesRepository
@@ -15,7 +16,7 @@ if TYPE_CHECKING:
 
 class BaseLootGenerator:
     @inject
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         inventory_containers: BotInventoryContainers,
         bot_inventory: BotInventory,

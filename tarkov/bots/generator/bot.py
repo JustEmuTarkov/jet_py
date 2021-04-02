@@ -15,6 +15,7 @@ from .loot import BotLootGenerator
 from .weapon import BotWeaponGenerator
 
 if TYPE_CHECKING:
+    # pylint: disable=cyclic-import
     from tarkov.bots import BotGeneratorPreset
 
 
