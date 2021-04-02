@@ -4,6 +4,7 @@ from typing import List, Tuple
 from tarkov.exceptions import NoSpaceError
 from tarkov.inventory.factories import item_factory
 from tarkov.inventory.models import Item, ItemTemplate
+from tarkov.inventory.prop_models import StackableItemProps
 from ._base import BaseLootGenerator
 
 
@@ -30,5 +31,12 @@ class LooseLootGenerator(BaseLootGenerator):
             self.templates_repository.get_template(tpl) for tpl in self.preset.inventory["items"][slot_id]
         ]
         templates_chances: List[float] = [t.props.SpawnChance for t in templates]
-        item_template: ItemTemplate = random.choices(templates, templates_chances, k=1)[0]
-        return item_factory.create_item(item_template, 1)
+        template: ItemTemplate = random.choices(templates, templates_chances, k=1)[0]
+
+        # If item is stackable then we have to generate count for it
+        if isinstance(template.props, StackableItemProps):
+            return item_factory.create_item(
+                template, count=random.randint(template.props.StackMinRandom, template.props.StackMaxRandom)
+            )
+
+        return item_factory.create_item(template)
