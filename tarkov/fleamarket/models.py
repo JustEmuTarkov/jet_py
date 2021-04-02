@@ -3,10 +3,10 @@ from typing import Dict, List, NewType, Optional, Tuple, Union
 
 from pydantic import BaseModel, Field, StrictBool, StrictInt
 
-from tarkov.repositories.categories import CategoryId
 from tarkov.inventory.models import Item
 from tarkov.inventory.types import ItemId, TemplateId
 from tarkov.models import Base
+from tarkov.repositories.categories import CategoryId
 
 
 class SortType(enum.Enum):

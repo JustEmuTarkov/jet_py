@@ -4,13 +4,12 @@ from typing import List, TYPE_CHECKING
 from server import logger
 from tarkov.exceptions import NotFoundError
 from tarkov.fleamarket.fleamarket import flea_market_instance
+from tarkov.inventory.factories import item_factory
 from tarkov.inventory.models import Item
+from tarkov.inventory_dispatcher.base import Dispatcher
 from tarkov.inventory_dispatcher.models import ActionType
 from tarkov.mail.models import MailDialogueMessage, MailMessageItems, MailMessageType
 from tarkov.trader import TraderType
-from tarkov.inventory_dispatcher.base import Dispatcher
-from tarkov.inventory.factories import item_factory
-
 from .models import Add, Buy
 
 if TYPE_CHECKING:

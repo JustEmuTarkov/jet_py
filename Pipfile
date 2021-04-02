@@ -12,6 +12,7 @@ orjson = "*"
 fastapi = {extras = ["all"], version = "*"}
 uvicorn = "*"
 aiofiles = "*"
+dependency-injector = "*"
 
 [dev-packages]
 pyinstaller = "==4.1"

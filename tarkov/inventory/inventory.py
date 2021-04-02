@@ -12,12 +12,12 @@ from .models import (
     AnyMoveLocation,
     CartridgesMoveLocation,
     InventoryModel,
-    MoveLocation,
     Item,
     ItemAmmoStackPosition,
     ItemInventoryLocation,
     ItemOrientationEnum,
     ItemUpdFoldable,
+    MoveLocation,
 )
 from .prop_models import CompoundProps, MagazineProps, ModProps, StockProps, WeaponProps
 from .repositories import item_templates_repository

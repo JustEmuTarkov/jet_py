@@ -1,9 +1,8 @@
 from typing import TYPE_CHECKING
 
 from tarkov.hideout.models import HideoutAreaType
-from tarkov.inventory_dispatcher.models import ActionType
 from tarkov.inventory_dispatcher.base import Dispatcher
-
+from tarkov.inventory_dispatcher.models import ActionType
 from .models import (
     PutItemsInAreaSlots,
     SingleProductionStart,

@@ -3,24 +3,20 @@ from __future__ import annotations
 import random
 from typing import List, Set, TYPE_CHECKING
 
-from tarkov.inventory.models import ItemAmmoStackPosition
 from tarkov.inventory import generate_item_id, item_templates_repository
-from tarkov.inventory.models import Item, ItemUpd
-from tarkov.inventory.prop_models import MagazineProps
+from tarkov.inventory.models import Item
 from tarkov.inventory.types import TemplateId
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
-    from .bots import BotGenerator
+    from tarkov.bots.bots import BotInventory
+    from tarkov.bots import BotGeneratorPreset
 
 
 class BotWeaponGenerator:
-    def __init__(self, bot_generator: BotGenerator):
-        self.bot_generator = bot_generator
-        self.bot_inventory = bot_generator.bot_inventory
-
-        self.inventory_preset = bot_generator.inventory_preset
-        self.chances_preset = bot_generator.chances_preset
+    def __init__(self, bot_inventory: BotInventory, preset: BotGeneratorPreset):
+        self.bot_inventory = bot_inventory
+        self.preset = preset
 
     def __filter_conflicting_items(self, template_id: TemplateId) -> bool:
         template = item_templates_repository.get_template(template_id)
@@ -44,7 +40,7 @@ class BotWeaponGenerator:
         seen_templates: Set[TemplateId] = set()
 
         while True:
-            for item_template_id, slots in self.inventory_preset["mods"].items():
+            for item_template_id, slots in self.preset.inventory["mods"].items():
                 try:
                     # Skip iteration if item with template id we need isn't present in inventory
                     parent = next(i for i in self.bot_inventory.items.values() if i.tpl == item_template_id)
@@ -66,7 +62,7 @@ class BotWeaponGenerator:
 
     def __generate_mod(self, slot: str, template_ids: List[TemplateId], parent: Item) -> None:
         try:
-            if not random.uniform(0, 100) <= self.chances_preset["mods"][slot]:
+            if not random.uniform(0, 100) <= self.preset.chances["mods"][slot]:
                 return
         except KeyError:
             return

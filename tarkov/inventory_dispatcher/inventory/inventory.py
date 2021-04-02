@@ -15,6 +15,7 @@ from tarkov.trader import TraderType
 from tarkov.trader.trader import Trader
 from .models import (
     ApplyInventoryChanges,
+    Bind,
     Examine,
     Fold,
     Insure,
@@ -24,9 +25,8 @@ from .models import (
     Remove,
     Repair,
     Split,
-    Transfer,
-    Bind,
     Swap,
+    Transfer,
 )
 
 if TYPE_CHECKING:

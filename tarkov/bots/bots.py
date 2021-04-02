@@ -1,16 +1,9 @@
 from __future__ import annotations
 
-import copy
-import random
-from typing import Dict, Final
+from typing import Dict
 
-import ujson
 from pydantic import parse_obj_as
 
-from server import db_dir
-from tarkov.bots.equipment import BotEquipmentGenerator
-from tarkov.bots.loot import BotLootGenerator
-from tarkov.bots.weapon import BotWeaponGenerator
 from tarkov.exceptions import NotFoundError
 from tarkov.inventory import (
     MutableInventory,
@@ -87,72 +80,3 @@ class BotInventory(MutableInventory):
     def __exit__(self, exc_type, exc_val, exc_tb):  # type: ignore
         if exc_type is None:
             self.inventory.items = list(self.__items.values())
-
-
-class BotGenerator:
-    bot_inventory: BotInventory
-
-    def __init__(self, bot_role: str) -> None:
-        self._bot_base: Final[dict] = ujson.load(db_dir.joinpath("base", "botBase.json").open(encoding="utf8"))
-        self.dir = db_dir.joinpath("bots", bot_role)
-        self.bot_role = bot_role
-
-        self.generation_preset: dict = ujson.load(self.dir.joinpath("generation.json").open(encoding="utf8"))
-        self.inventory_preset: dict = ujson.load(self.dir.joinpath("inventory.json").open(encoding="utf8"))
-        self.chances_preset: dict = ujson.load(self.dir.joinpath("chances.json").open(encoding="utf8"))
-        self.health_base: dict = ujson.load(self.dir.joinpath("health.json").open(encoding="utf8"))
-        self.appearance: dict = ujson.load(self.dir.joinpath("appearance.json").open(encoding="utf8 "))
-
-    def generate(self) -> dict:
-        """
-        Generates bot profile with role specified in class constructor.
-        All bot parameters such as inventory and health are taken from database.
-
-        :return: Bot profile as dictionary
-        """
-
-        self.bot_inventory = BotInventory.make_empty()
-        bot_base = copy.deepcopy(self._bot_base)
-
-        with self.bot_inventory:
-            equipment_generator = BotEquipmentGenerator(self)
-            equipment_generator.generate_equipment()
-
-            weapon_generator = BotWeaponGenerator(self)
-            weapon_generator.generate()
-
-            loot_generator = BotLootGenerator(self)
-            loot_generator.generate()
-            self.bot_inventory.regenerate_ids()
-
-        bot_base["Inventory"] = self.bot_inventory.inventory.dict(exclude_none=True)
-        bot_base["Health"] = copy.deepcopy(self.health_base)
-
-        bot_base["_id"] = generate_item_id()
-        bot_base["Info"]["Side"] = "Savage"
-        self.__generate_appearance(bot_base)
-
-        return bot_base
-
-    def __generate_appearance(self, bot_base: dict) -> None:
-        """
-        Changes bot_base appearance and voice to random ones from self.appearance
-
-        :param bot_base: Bot base to apply appearance
-        :return: None
-        """
-        bot_base["Info"]["Voice"] = random.choice(self.appearance["voice"])
-        # TODO customization probably have incorrect id's or it's from newer version
-        # So 9787 client doesn't work with it
-
-        # bot_base["Customization"]["Head"] = random.choice(self.appearance["head"])
-        # bot_base["Customization"]["Body"] = random.choice(self.appearance["body"])
-        # bot_base["Customization"]["Feet"] = random.choice(self.appearance["feet"])
-        # bot_base["Customization"]["Hands"] = random.choice(self.appearance["hands"])
-
-
-if __name__ == "__main__":
-    bot_generator = BotGenerator("assault")
-    bot_profile = bot_generator.generate()
-
-    print(ujson.dumps(bot_profile))

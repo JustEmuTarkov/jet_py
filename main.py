@@ -1,4 +1,14 @@
+import tarkov
+from tarkov.containers import Container
+from tarkov.bots.container import BotContainer
+
 if __name__ == "__main__":
+    container = Container()
+    container.wire(packages=[tarkov])
+
+    bot_container = BotContainer()
+    bot_container.wire(packages=[tarkov])
+
     import uvicorn  # type: ignore
 
     from server.app import app

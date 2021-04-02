@@ -1,22 +1,25 @@
 from typing import List
 
 import ujson
+from dependency_injector.wiring import Provide, inject
+from fastapi.params import Depends
 from starlette.requests import Request
 
 from server import db_dir, logger
 from server.utils import make_router
-from tarkov.bots.bots import BotGenerator
+from tarkov.bots import BotGenerator
+from tarkov.bots.container import BotContainer
 from tarkov.models import TarkovSuccessResponse
 
 bots_router = make_router(tags=["Bots"])
 
 
-@bots_router.get("/singleplayer/settings/bot/difficulty/{type_}/{difficulty}")
-def bot_difficulty_settings(type_: str, difficulty: str) -> dict:
-    if type_ == "core":
+@bots_router.get("/singleplayer/settings/bot/difficulty/{bot_type}/{difficulty}")
+def bot_difficulty_settings(bot_type: str, difficulty: str) -> dict:
+    if bot_type == "core":
         return ujson.load(db_dir.joinpath("base", "botCore.json").open(encoding="utf8"))
 
-    bot_file = db_dir.joinpath("bots", type_, "difficulty", f"{difficulty}.json").open(encoding="utf8")
+    bot_file = db_dir.joinpath("bots", bot_type, "difficulty", f"{difficulty}.json").open(encoding="utf8")
 
     return ujson.load(bot_file)
 
@@ -27,18 +30,20 @@ def settings_bot_limit(bot_type: str) -> int:  # pylint: disable=unused-argument
 
 
 @bots_router.post("/client/game/bot/generate")
-async def generate_bots(request: Request) -> TarkovSuccessResponse[List[dict]]:
+@inject
+async def generate_bots(
+    request: Request,
+    bot_generator: BotGenerator = Depends(Provide[BotContainer.bot_generator]),  # type: ignore
+) -> TarkovSuccessResponse[List[dict]]:
     bots: List[dict] = []
     request_data: dict = await request.json()
 
     logger.debug(request_data)
     for condition in request_data["conditions"]:
-        # TODO: FixMe
-        bot_generator = BotGenerator(bot_role="assault")  # condition["Role"]
         bot_limit = condition["Limit"]
 
         for _ in range(bot_limit):
-            bot = bot_generator.generate()
+            bot = bot_generator.generate(bot_role="assault")
             bots.append(bot)
 
     return TarkovSuccessResponse(data=bots)

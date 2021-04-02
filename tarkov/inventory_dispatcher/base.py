@@ -5,7 +5,6 @@ from typing import Callable, Dict, TYPE_CHECKING
 
 from tarkov.inventory_dispatcher.models import ActionType
 
-
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
     from tarkov.profile import Profile

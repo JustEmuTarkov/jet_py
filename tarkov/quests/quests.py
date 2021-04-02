@@ -12,6 +12,7 @@ from tarkov.mail.models import (
     MailMessageItems,
     MailMessageType,
 )
+from tarkov.profile.models import BackendCounter
 from tarkov.trader import TraderType
 from .models import (
     Quest,
@@ -22,7 +23,6 @@ from .models import (
     QuestStatus,
 )
 from .repositories import quests_repository
-from tarkov.profile.models import BackendCounter
 from ..trader.trader import Trader
 
 if TYPE_CHECKING:

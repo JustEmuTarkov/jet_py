@@ -2,8 +2,8 @@ from asyncio import Lock
 from collections import defaultdict
 from typing import AsyncIterable, Dict
 
-from fastapi.params import Cookie
 from fastapi import BackgroundTasks
+from fastapi.params import Cookie
 
 from server import logger
 from tarkov.profile import Profile
