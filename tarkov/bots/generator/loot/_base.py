@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from dependency_injector.wiring import Provide, inject
 
-from tarkov.containers import Container
+from tarkov.containers import RepositoriesContainer
 from ._types import BotInventoryContainers, LootGenerationConfig
 
 if TYPE_CHECKING:
@@ -22,7 +22,7 @@ class BaseLootGenerator:
         bot_inventory: BotInventory,
         config: LootGenerationConfig,
         preset: BotGeneratorPreset,
-        templates_repository: ItemTemplatesRepository = Provide[Container.templates_repository],
+        templates_repository: ItemTemplatesRepository = Provide[RepositoriesContainer.templates],
     ):
         self.inventory_containers = inventory_containers
         self.bot_inventory = bot_inventory

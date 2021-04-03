@@ -1,10 +1,10 @@
 import tarkov
-from tarkov.containers import ConfigContainer, Container
+from tarkov.containers import ConfigContainer, RepositoriesContainer
 from tarkov.bots.container import BotContainer
 from tarkov.fleamarket.containers import FleaMarketContainer
 
 if __name__ == "__main__":
-    container = Container()
+    container = RepositoriesContainer()
     container.wire(packages=[tarkov])
 
     bot_container = BotContainer()

@@ -4,8 +4,8 @@ from tarkov.config import BotGenerationConfig, FleaMarketConfig
 from tarkov.inventory import ItemTemplatesRepository
 
 
-class Container(containers.DeclarativeContainer):
-    templates_repository = providers.Singleton(ItemTemplatesRepository)
+class RepositoriesContainer(containers.DeclarativeContainer):
+    templates = providers.Singleton(ItemTemplatesRepository)
 
 
 class ConfigContainer(containers.DeclarativeContainer):
