@@ -48,6 +48,11 @@ class OfferGenerator:
         )
         self.item_prices.update({tpl: price for tpl, price in item_prices.items() if price > 0})
 
+        # Load seller usernames.
+        self.seller_names = pydantic.parse_file_as(
+            List[str], db_dir.joinpath("traders", "ragfair", "sellers.json")
+        )
+
         # All the item templates that we have prices for
         self.item_templates = [
             tpl for tpl in item_templates_repository.templates.values() if tpl.id in self.item_prices
@@ -148,11 +153,16 @@ class OfferGenerator:
             endTime=int(expires_at.timestamp()),
         )
 
-    @staticmethod
-    def _make_random_user() -> FleaUser:
+    def __get_random_username(self) -> str:
+        try:
+            return random.choice(self.seller_names)
+        except IndexError:
+            return "nickname"
+
+    def _make_random_user(self) -> FleaUser:
         return FleaUser(
             id=generate_item_id(),
-            nickname="nickname",
+            nickname=self.__get_random_username(),
             avatar="/files/trader/avatar/unknown.jpg",
             memberType=0,
             rating=0.0,

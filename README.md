@@ -1,21 +1,20 @@
 # JetPy
 Alternative server emulator for EFT
 
-#### How to run/build from source?
-Install:
-- Python of version 3.8.*
+#### Instllation
+In order to run/build the server install
+
+- Python 3.8.*
 - [Pipenv](https://pypi.org/project/pipenv/)
-- Project dependencies by running `pipenv install --dev`
+- Project dev dependencies via running `pipenv install --dev`
 
-##### How to start server
-To start server run `main.py`
+- Escape From Tarkov 12.8.9767
+- JET Launcher for that version of EFT
 
-##### How to bundle application into `.exe`
-To bundle application run `build.py`
+#### How to run the server
+You should be able to just run `main.py`
 
-#### Launcher  
-JET Launcher partially works and can login you with static profile id
+#### How bundle server into .exe
+To start server run `pyinstaller main.spec` that will create .exe executable from project files  
+You still need resources directory for the server to work
 
-#### Client
-
-Required client version: `12.8.9767`
