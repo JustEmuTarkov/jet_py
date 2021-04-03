@@ -22,6 +22,3 @@ class GlobalsRepository:
             return self.globals.ItemPresets[item_template.id]
         except KeyError as error:
             raise NotFoundError from error
-
-
-globals_repository = GlobalsRepository()

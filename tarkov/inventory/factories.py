@@ -1,7 +1,10 @@
 from typing import List, Tuple
 
+from dependency_injector.wiring import Provide, inject
+
+from tarkov.containers import RepositoriesContainer
 from tarkov.exceptions import NotFoundError
-from tarkov.globals_ import globals_repository
+from tarkov.globals_.repository import GlobalsRepository
 from tarkov.inventory import generate_item_id, item_templates_repository
 from tarkov.inventory.models import Item, ItemTemplate, ItemUpdMedKit, ItemUpdResource
 from tarkov.inventory.prop_models import AmmoBoxProps, FuelProps, MedsProps
@@ -10,7 +13,12 @@ from tarkov.inventory.types import TemplateId
 
 class ItemFactory:
     @staticmethod
-    def create_item(item_template: ItemTemplate, count: int = 1) -> Tuple[Item, List[Item]]:
+    @inject
+    def create_item(
+        item_template: ItemTemplate,
+        count: int = 1,
+        globals_repository: GlobalsRepository = Provide[RepositoriesContainer.globals],
+    ) -> Tuple[Item, List[Item]]:
         try:
             return globals_repository.item_preset(item_template).get_items()
         except NotFoundError:

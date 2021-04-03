@@ -10,7 +10,6 @@ import pydantic
 from dependency_injector.wiring import Provide, inject
 
 from server import db_dir
-from tarkov.globals_ import globals_repository
 from tarkov.inventory import generate_item_id, item_templates_repository
 from tarkov.inventory.factories import item_factory
 from tarkov.inventory.models import Item, ItemTemplate
@@ -18,7 +17,8 @@ from tarkov.inventory.prop_models import AmmoProps
 from tarkov.inventory.types import TemplateId
 from tarkov.repositories.categories import category_repository
 from .models import FleaUser, Offer, OfferId, OfferRequirement
-from ..containers import ConfigContainer
+from ..containers import ConfigContainer, RepositoriesContainer
+from ..globals_.repository import GlobalsRepository
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
@@ -102,7 +102,12 @@ class OfferGenerator:
             offers[offer.id] = offer
         return offers
 
-    def _generate_offer(self, item_template: ItemTemplate) -> Offer:
+    @inject
+    def _generate_offer(
+        self,
+        item_template: ItemTemplate,
+        globals_repository: GlobalsRepository = Provide[RepositoriesContainer.globals],
+    ) -> Offer:
         """
         Generates single offer
         """
