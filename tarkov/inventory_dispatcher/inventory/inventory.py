@@ -15,6 +15,7 @@ from tarkov.trader import TraderType
 from tarkov.trader.trader import Trader
 from .models import (
     ApplyInventoryChanges,
+    Bind,
     Examine,
     Fold,
     Insure,
@@ -24,9 +25,8 @@ from .models import (
     Remove,
     Repair,
     Split,
-    Transfer,
-    Bind,
     Swap,
+    Transfer,
     Toggle,
 )
 
@@ -210,7 +210,7 @@ class InventoryDispatcher(Dispatcher):
             item.upd.Repairable.Durability = new_durability
             self.response.items.change.append(item)
 
-            total_repair_cost: int = round(repair_cost_per_1_durability * price_rate)
+            total_repair_cost: int = round(repair_cost_per_1_durability * price_rate * repair_item.count)
 
             assert trader.base.repair.currency is not None
             affected, deleted = self.inventory.take_item(trader.base.repair.currency, total_repair_cost)

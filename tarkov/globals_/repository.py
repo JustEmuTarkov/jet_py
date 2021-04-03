@@ -3,8 +3,8 @@ from __future__ import annotations
 from typing_extensions import TYPE_CHECKING
 
 from server import db_dir
-from .models import GlobalsModel, ItemPreset
 from tarkov.exceptions import NotFoundError
+from .models import GlobalsModel, ItemPreset
 
 if TYPE_CHECKING:
     from tarkov.inventory.models import ItemTemplate

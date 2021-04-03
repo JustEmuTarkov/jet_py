@@ -4,7 +4,7 @@ from fastapi.params import Depends
 from pydantic import BaseModel
 
 from server.utils import make_router
-from tarkov.dependencies import with_profile
+from tarkov.dependencies import profile_manager
 from tarkov.inventory.types import ItemId, TemplateId
 from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
 from tarkov.profile import Profile
@@ -24,7 +24,7 @@ class InsuranceListCostRequest(BaseModel):
 @insurance_router.post("/client/insurance/items/list/cost")
 async def items_list_cost(
     request: InsuranceListCostRequest,
-    profile: Profile = Depends(with_profile),  # type: ignore
+    profile: Profile = Depends(profile_manager.with_profile),  # type: ignore
 ) -> Union[TarkovSuccessResponse[Dict[str, dict]], TarkovErrorResponse]:
     insurance_data: Dict[str, dict] = {}
 

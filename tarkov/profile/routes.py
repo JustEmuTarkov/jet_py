@@ -7,7 +7,7 @@ from starlette.requests import Request
 
 from server import logger
 from server.utils import get_request_url_root, make_router
-from tarkov.dependencies import with_profile
+from tarkov.dependencies import profile_manager
 from tarkov.inventory_dispatcher import DispatcherManager
 from tarkov.inventory_dispatcher.manager import DispatcherResponse
 from tarkov.launcher.accounts import account_service
@@ -25,7 +25,7 @@ profile_router = make_router(tags=["Profile"])
     response_model_exclude_unset=False,
 )
 def client_game_profile_item_move(
-    profile: Profile = Depends(with_profile),  # type: ignore
+    profile: Profile = Depends(profile_manager.with_profile),  # type: ignore
     body: dict = Body(...),  # type: ignore
 ) -> Union[TarkovSuccessResponse[DispatcherResponse], TarkovErrorResponse]:
     dispatcher = DispatcherManager(profile)
@@ -34,11 +34,12 @@ def client_game_profile_item_move(
 
 
 @profile_router.post("/client/game/profile/list")
-def client_game_profile_list(
+async def client_game_profile_list(
     profile_id: str = Cookie(..., alias="PHPSESSID"),  # type: ignore
 ) -> Union[TarkovSuccessResponse[List[dict]], TarkovErrorResponse]:
     try:
-        with Profile(profile_id) as profile:
+        async with profile_manager.locks[profile_id]:
+            profile = profile_manager.get_or_create_profile(profile_id)
             return TarkovSuccessResponse(
                 data=[
                     profile.pmc.dict(exclude_none=True),
@@ -65,7 +66,7 @@ def client_game_profile_list_select(request: Request) -> TarkovSuccessResponse[d
 
 @profile_router.post("/client/profile/status")
 def client_profile_status(
-    profile: Profile = Depends(with_profile),  # type: ignore
+    profile: Profile = Depends(profile_manager.with_profile),  # type: ignore
 ) -> Union[TarkovSuccessResponse[List[dict]], TarkovErrorResponse]:
     response = []
     for profile_type in ("scav", "pmc"):

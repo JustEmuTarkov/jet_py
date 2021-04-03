@@ -1,12 +1,12 @@
 from typing import List
 
 from server.utils import make_router
+from tarkov.hideout import repositories as hideout_repositories
 from tarkov.hideout.repositories.areas import HideoutAreaTemplate
 from tarkov.hideout.repositories.production import HideoutProductionModel
 from tarkov.hideout.repositories.scavcase_production import ScavcaseProductionModel
 from tarkov.hideout.repositories.settings import HideoutSettingsModel
 from tarkov.models import TarkovSuccessResponse
-from tarkov.hideout import repositories as hideout_repositories
 
 hideout_router = make_router(tags=["Hideout"])
 

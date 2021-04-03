@@ -15,6 +15,7 @@ from pydantic import (
 )
 
 from server import logger
+from tarkov.inventory import generate_item_id
 from tarkov.inventory.prop_models import (
     AnyProp,
     BaseItemProps,
@@ -215,7 +216,7 @@ class Item(Base):
 
     __inventory__: Optional["MutableInventory"] = PrivateAttr(default=None)  # Link to the inventory
 
-    id: ItemId = Field(alias="_id")
+    id: ItemId = Field(alias="_id", default_factory=generate_item_id)
     tpl: TemplateId = Field(alias="_tpl")
     slot_id: Optional[str] = Field(alias="slotId")
     parent_id: Optional[ItemId] = Field(alias="parentId", default=None)

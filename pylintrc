@@ -395,7 +395,8 @@ ignore-docstrings=yes
 ignore-imports=yes
 
 # Minimum lines number of a similarity.
-min-similarity-lines=4
+# Often causes false-positives when implementing ABC or overriding class methods
+min-similarity-lines=8
 
 
 [SPELLING]
@@ -469,7 +470,8 @@ ignored-classes=optparse.Values,thread._local,_thread._local
 ignored-modules=
     ujson,
     orjson,
-    pydantic
+    pydantic,
+    dependency_injector
 
 # Show a hint with possible names when a member name was not found. The aspect
 # of finding the hint is based on edit distance.

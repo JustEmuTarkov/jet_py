@@ -78,7 +78,8 @@ app.mount(
 async def log_response_time(request: Request, call_next: Callable) -> Response:
     start_time = time.time()
     response = await call_next(request)
-    logger.debug(f"Request time: {time.time() - start_time}s")
+    response_time = round(time.time() - start_time, 3)
+    logger.debug(f"Response time: {response_time}s")
     return response
 
 

@@ -5,9 +5,9 @@ import pydantic
 
 from server import root_dir
 from server.utils import atomic_write
-from .models import Account
 from tarkov.exceptions import NotFoundError
 from tarkov.inventory import generate_item_id
+from .models import Account
 
 
 class AccountService:

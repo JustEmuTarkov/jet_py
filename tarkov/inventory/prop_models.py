@@ -1,5 +1,6 @@
+import enum
 import typing
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import Any, Dict, List, Literal, Optional, Set, Union
 
 from pydantic import BaseModel, Extra, Field, StrictBool, StrictFloat, StrictInt
 
@@ -32,8 +33,8 @@ TracerColor = Union[
 
 
 class Filter(Base):
-    Filter: List[str] = Field(default_factory=list)
-    ExcludedFilter: Optional[List[str]]
+    Filter: List[TemplateId] = Field(default_factory=list)
+    ExcludedFilter: List[TemplateId] = Field(default_factory=list)
     Shift: Optional[int]
     AnimationIndex: Optional[int]
     MaxStackCount: Optional[int]
@@ -143,7 +144,7 @@ class BaseItemProps(BaseModel):
     CanSellOnRagfair: StrictBool
     CanRequireOnRagfair: StrictBool
     BannedFromRagfair: StrictBool
-    ConflictingItems: List[TemplateId]
+    ConflictingItems: Set[TemplateId]
     FixedPrice: StrictBool
     Unlootable: StrictBool
     UnlootableFromSlot: str
@@ -376,8 +377,17 @@ class ShaftProps(GearModProps):
     __template_id__: str = "55818a604bdc2db5418b457e"
 
 
+class MagazineReloadType(enum.Enum):
+    ExternalMagazine = "ExternalMagazine"
+    InternalMagazine = "InternalMagazine"
+
+
 class MagazineProps(GearModProps):
+    class Config:
+        use_enum_values = True
+
     __template_id__: str = "5448bc234bdc2d3c308b4569"
+
     magAnimationIndex: StrictInt
     Cartridges: List[FilterProperty]
     CanFast: StrictBool
@@ -386,7 +396,7 @@ class MagazineProps(GearModProps):
     LoadUnloadModifier: StrictInt
     CheckTimeModifier: StrictInt
     CheckOverride: StrictInt
-    ReloadMagType: str
+    ReloadMagType: MagazineReloadType
     VisibleAmmoRangesString: str
 
 

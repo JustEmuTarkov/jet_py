@@ -1,8 +1,7 @@
 from typing import TYPE_CHECKING
 
-from tarkov.inventory_dispatcher.models import ActionType
 from tarkov.inventory_dispatcher.base import Dispatcher
-
+from tarkov.inventory_dispatcher.models import ActionType
 from .models import Accept, Complete, Handover
 
 if TYPE_CHECKING:
