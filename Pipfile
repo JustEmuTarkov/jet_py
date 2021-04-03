@@ -5,9 +5,9 @@ name = "pypi"
 
 [packages]
 flask = ">=1.1.*"
-pyopenssl = "==20.0.0"
-pydantic = "==1.7.3"
-pyyaml = "==5.4.1"
+pyopenssl = ">=20.0.0"
+pydantic = ">=1.7.3"
+pyyaml = ">=5.4.1"
 orjson = "*"
 fastapi = {extras = ["all"], version = "*"}
 uvicorn = "*"
@@ -15,7 +15,7 @@ aiofiles = "*"
 dependency-injector = "*"
 
 [dev-packages]
-pyinstaller = "==4.1"
+pyinstaller = ">=4.1"
 pylint = "*"
 flake8 = "*"
 tox = "*"
