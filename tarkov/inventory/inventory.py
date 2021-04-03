@@ -529,9 +529,7 @@ class GridInventoryStashMap:
         elif item.parent_id == self.inventory.root_id:
             assert isinstance(item.location, ItemInventoryLocation)
             if not self.can_place(item, child_items, item.location):
-                raise 
-                
-                .OutOfBoundsError
+                raise self.OutOfBoundsError
 
             footprint = self._calculate_item_footprint(item, child_items, item.location)
             for x, y in footprint.iter_cells():
@@ -572,8 +570,8 @@ class GridInventoryStashMap:
         """
         child_items = child_items or []
         item_width, item_height = self.inventory.get_item_size(item, child_items)
-        
-        for x, y in self._iter_cells():
+
+        for x, y in self.iter_cells():
             for orientation in ItemOrientationEnum:
                 location = ItemInventoryLocation(x=x, y=y, r=orientation.value)
                 width, height = item_width, item_height
