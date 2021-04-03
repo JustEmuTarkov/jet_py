@@ -1,6 +1,7 @@
 import tarkov
-from tarkov.containers import Container
+from tarkov.containers import ConfigContainer, Container
 from tarkov.bots.container import BotContainer
+from tarkov.fleamarket.containers import FleaMarketContainer
 
 if __name__ == "__main__":
     container = Container()
@@ -8,6 +9,12 @@ if __name__ == "__main__":
 
     bot_container = BotContainer()
     bot_container.wire(packages=[tarkov])
+
+    flea_container = FleaMarketContainer()
+    flea_container.wire(packages=[tarkov])
+
+    config_container = ConfigContainer()
+    config_container.wire(packages=[tarkov])
 
     import uvicorn  # type: ignore
 

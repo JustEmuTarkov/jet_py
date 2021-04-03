@@ -1,9 +1,12 @@
+from __future__ import annotations
+
 from datetime import datetime, timedelta
 from typing import List, TYPE_CHECKING
 
+from dependency_injector.wiring import Provide, inject
+
 from server import logger
 from tarkov.exceptions import NotFoundError
-from tarkov.fleamarket.fleamarket import flea_market_instance
 from tarkov.inventory.factories import item_factory
 from tarkov.inventory.models import Item
 from tarkov.inventory_dispatcher.base import Dispatcher
@@ -11,24 +14,32 @@ from tarkov.inventory_dispatcher.models import ActionType
 from tarkov.mail.models import MailDialogueMessage, MailMessageItems, MailMessageType
 from tarkov.trader import TraderType
 from .models import Add, Buy
+from tarkov.fleamarket.containers import FleaMarketContainer
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
     from tarkov.inventory_dispatcher.manager import DispatcherManager
+    from tarkov.fleamarket.fleamarket import FleaMarket
 
 
 class FleaMarketDispatcher(Dispatcher):
-    def __init__(self, manager: "DispatcherManager") -> None:
+    @inject
+    def __init__(
+        self,
+        manager: "DispatcherManager",
+        flea_market: FleaMarket = Provide[FleaMarketContainer.market],
+    ) -> None:
         super().__init__(manager)
         self.dispatch_map = {
             ActionType.RagFairBuyOffer: self._buy_offer,
             ActionType.RagFairAddOffer: self._add_offer,
         }
+        self.flea_market = flea_market
 
     def _buy_offer(self, action: Buy) -> None:
         for offer_to_buy in action.offers:
             try:
-                offer = flea_market_instance.get_offer(offer_to_buy.offer_id)
+                offer = self.flea_market.get_offer(offer_to_buy.offer_id)
             except NotFoundError:
                 self.response.append_error(
                     title="Flea Market Error",
@@ -44,10 +55,10 @@ class FleaMarketDispatcher(Dispatcher):
 
                 if not offer.root_item.upd.StackObjectsCount:
                     # I Guess flea market itself can delete offers like these
-                    flea_market_instance.remove_offer(offer)
+                    self.flea_market.remove_offer(offer)
             else:
                 bough_item, child_items = offer.get_items()
-                flea_market_instance.remove_offer(offer)
+                self.flea_market.remove_offer(offer)
 
                 self.inventory.place_item(item=bough_item, child_items=child_items)
                 self.response.items.new.append(bough_item)
@@ -76,8 +87,8 @@ class FleaMarketDispatcher(Dispatcher):
             for item, children in required_items_list:
                 required_items.extend([item, *children])
 
-        selling_price_rub = flea_market_instance.items_price(required_items)
-        selling_time: timedelta = flea_market_instance.selling_time(items, selling_price_rub)
+        selling_price_rub = self.flea_market.items_price(required_items)
+        selling_time: timedelta = self.flea_market.selling_time(items, selling_price_rub)
         logger.debug(f"Requirements cost in rubles: {selling_price_rub}")
         logger.debug(f"Selling time: {selling_time}")
 

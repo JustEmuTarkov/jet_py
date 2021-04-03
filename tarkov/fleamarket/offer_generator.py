@@ -7,9 +7,9 @@ from datetime import datetime, timedelta
 from typing import Dict, List, TYPE_CHECKING
 
 import pydantic
+from dependency_injector.wiring import Provide, inject
 
 from server import db_dir
-from tarkov import config
 from tarkov.globals_ import globals_repository
 from tarkov.inventory import generate_item_id, item_templates_repository
 from tarkov.inventory.factories import item_factory
@@ -18,10 +18,12 @@ from tarkov.inventory.prop_models import AmmoProps
 from tarkov.inventory.types import TemplateId
 from tarkov.repositories.categories import category_repository
 from .models import FleaUser, Offer, OfferId, OfferRequirement
+from ..containers import ConfigContainer
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
     from .fleamarket import FleaMarket
+    from tarkov.config import FleaMarketConfig
 
 
 class OfferGenerator:
@@ -34,9 +36,12 @@ class OfferGenerator:
     percentile_high: float
     percentile_low: float
 
-    def __init__(self, flea_market: FleaMarket):
-        self.flea_market = flea_market
-
+    @inject
+    def __init__(
+        self,
+        config: FleaMarketConfig = Provide[ConfigContainer.flea_market],
+    ) -> None:
+        self.config = config
         # Creates dictionary with item prices from templates and updates it with prices from flea_prices.json
         self.item_prices = {
             tpl.id: tpl.props.CreditsPrice
@@ -61,8 +66,8 @@ class OfferGenerator:
         median_price = statistics.median(prices)
         prices_sorted = sorted(prices)
         # Calculates low/high percentile, they're used to weight too cheap/expensive items
-        self.percentile_high: int = prices_sorted[int(len(prices) * config.flea_market.percentile_high)]
-        self.percentile_low: int = prices_sorted[int(len(prices) * config.flea_market.percentile_low)]
+        self.percentile_high: int = prices_sorted[int(len(prices) * self.config.percentile_high)]
+        self.percentile_low: int = prices_sorted[int(len(prices) * self.config.percentile_low)]
 
         self.item_templates_weights = [
             self._get_item_template_weight(tpl, median_price) for tpl in self.item_templates

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import collections
-from typing import Dict, List, TYPE_CHECKING, Union
+from typing import Dict, List, Sequence, TYPE_CHECKING, Union
 
 from tarkov.fleamarket.models import FleaMarketRequest, FleaMarketResponse, Offer, SortType
 from tarkov.inventory import item_templates_repository

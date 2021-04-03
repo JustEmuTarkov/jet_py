@@ -4,7 +4,7 @@ import math
 import random
 import statistics
 from datetime import datetime, timedelta
-from typing import Dict, List
+from typing import Callable, Dict, List
 
 from server import logger
 from tarkov import config
@@ -17,20 +17,18 @@ from .views import FleaMarketView
 
 
 class FleaMarket:
-    offers_amount: int
-    updated_at: datetime
-    generator: OfferGenerator
-    _view: FleaMarketView
-    offers: Dict[OfferId, Offer]
+    def __init__(
+        self,
+        offer_generator: OfferGenerator,
+        flea_view_factory: Callable[..., FleaMarketView],
+    ) -> None:
+        self.offers_amount: int = config.flea_market.offers_amount
 
-    def __init__(self) -> None:
-        self.offers_amount = config.flea_market.offers_amount
+        self.updated_at: datetime = datetime.fromtimestamp(0)
 
-        self.updated_at = datetime.fromtimestamp(0)
-
-        self.generator = OfferGenerator(self)
-        self._view = FleaMarketView(self)
-        self.offers = {}
+        self.generator: OfferGenerator = offer_generator
+        self._view_factory: Callable[..., FleaMarketView] = flea_view_factory
+        self.offers: Dict[OfferId, Offer] = {}
 
     def get_offer(self, offer_id: OfferId) -> Offer:
         """
@@ -143,7 +141,4 @@ class FleaMarket:
     @property
     def view(self) -> FleaMarketView:
         self.__update_offers()
-        return self._view
-
-
-flea_market_instance = FleaMarket()
+        return self._view_factory(self)

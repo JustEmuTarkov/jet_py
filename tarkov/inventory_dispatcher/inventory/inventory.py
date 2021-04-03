@@ -1,9 +1,12 @@
+from __future__ import annotations
+
 from contextlib import contextmanager
 from typing import Iterator, List, Optional, TYPE_CHECKING, Tuple
 
+from dependency_injector.wiring import Provide, inject
+
 import tarkov.inventory
 from tarkov.exceptions import NotFoundError
-from tarkov.fleamarket.fleamarket import flea_market_instance
 from tarkov.fleamarket.models import OfferId
 from tarkov.inventory import MutableInventory, item_templates_repository
 from tarkov.inventory.implementations import SimpleInventory
@@ -29,15 +32,21 @@ from .models import (
     Transfer,
     Toggle,
 )
+from ...fleamarket.containers import FleaMarketContainer
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
     from tarkov.inventory_dispatcher.manager import DispatcherManager
+    from tarkov.fleamarket.fleamarket import FleaMarket
 
 
 class InventoryDispatcher(Dispatcher):
-    def __init__(self, manager: "DispatcherManager"):
+    @inject
+    def __init__(
+        self, manager: "DispatcherManager", flea_market: FleaMarket = Provide[FleaMarketContainer.market]
+    ):
         super().__init__(manager)
+        self.flea_market = flea_market
         self.dispatch_map = {
             ActionType.Move: self._move,
             ActionType.Split: self._split,
@@ -111,7 +120,7 @@ class InventoryDispatcher(Dispatcher):
 
         elif action.fromOwner.type == "RagFair":
             try:
-                offer = flea_market_instance.get_offer(OfferId(action.fromOwner.id))
+                offer = self.flea_market.get_offer(OfferId(action.fromOwner.id))
             except NotFoundError:
                 self.response.append_error(title="Item examination error", message="Offer can not be found")
                 return
