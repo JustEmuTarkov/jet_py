@@ -31,7 +31,7 @@ from tarkov.trader.models import (
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
-    from tarkov.profile import Profile
+    from tarkov.profile.profile import Profile
 
 FENCE_ASSORT_LIFETIME = 10 * 60
 

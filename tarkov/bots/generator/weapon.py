@@ -13,7 +13,7 @@ from tarkov.inventory.types import TemplateId
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
     from tarkov.bots.bots import BotInventory
-    from tarkov.bots import BotGeneratorPreset
+    from tarkov.bots.generator.preset import BotGeneratorPreset
     from tarkov.inventory.repositories import ItemTemplatesRepository
 
 

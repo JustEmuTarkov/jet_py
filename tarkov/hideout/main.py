@@ -15,7 +15,7 @@ from ..inventory.factories import ItemFactory
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
-    from tarkov.profile import Profile
+    from tarkov.profile.profile import Profile
 
 
 class Hideout:

@@ -16,6 +16,7 @@ from tarkov.mail import Mail
 from tarkov.trader import TraderType
 from .models import ItemInsurance, ProfileModel
 from ..inventory.inventory import PlayerInventory
+from ..quests.quests import Quests
 
 if TYPE_CHECKING:
     from tarkov.inventory.repositories import ItemTemplatesRepository
@@ -56,7 +57,7 @@ class Profile:
     scav: ProfileModel
 
     hideout: Hideout
-    quests: quests.Quests
+    quests: Quests
     inventory: PlayerInventory
     encyclopedia: Encyclopedia
     mail: Mail
@@ -91,7 +92,7 @@ class Profile:
         self.inventory = PlayerInventory(profile=self)
         self.inventory.read()
 
-        self.quests = quests.Quests(profile=self)
+        self.quests = Quests(profile=self)
 
         self.hideout = Hideout(profile=self)
         self.hideout.read()

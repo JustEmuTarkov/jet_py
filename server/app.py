@@ -25,9 +25,11 @@ from tarkov.routes.misc import misc_router
 from tarkov.routes.single_player import singleplayer_router
 from tarkov.trader.routes import trader_router
 
+container = AppContainer()
+container.wire(packages=[tarkov])
+
 app = FastAPI()
-app.container = AppContainer()
-app.container.wire(packages=[tarkov])
+app.container = container  # type: ignore
 
 app.include_router(mail_router)
 app.include_router(notifier_router)

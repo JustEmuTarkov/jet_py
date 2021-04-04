@@ -7,7 +7,7 @@ from tarkov.inventory_dispatcher.models import ActionType
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
-    from tarkov.profile import Profile
+    from tarkov.profile.profile import Profile
     from tarkov.inventory.inventory import PlayerInventory
     from tarkov.inventory_dispatcher.manager import (
         DispatcherManager,

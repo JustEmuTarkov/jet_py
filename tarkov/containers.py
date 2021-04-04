@@ -1,4 +1,5 @@
 from dependency_injector import containers, providers
+from dependency_injector.providers import Dependency
 
 from tarkov.config import BotGenerationConfig, FleaMarketConfig
 from tarkov.globals_.repository import GlobalsRepository
@@ -20,8 +21,8 @@ class RepositoriesContainer(containers.DeclarativeContainer):
 
 
 class ItemsContainer(containers.DeclarativeContainer):
-    templates_repository: RepositoriesContainer = providers.Dependency()
-    globals_repository: GlobalsRepository = providers.Dependency()
+    templates_repository: Dependency[ItemTemplatesRepository] = providers.Dependency()
+    globals_repository: Dependency[GlobalsRepository] = providers.Dependency()
 
     factory = providers.Singleton(
         ItemFactory,

@@ -59,7 +59,7 @@ class FleaMarketView:
         # Offers pagination/sorting
         page_size = request.limit
         offers = self._sorted_offers(offers, request.sortType, reverse=request.sortDirection == 1)
-        offers_view = offers[request.page * page_size: (request.page + 1) * page_size]
+        offers_view = offers[request.page * page_size : (request.page + 1) * page_size]
 
         return FleaMarketResponse(
             offers=offers_view,
@@ -77,7 +77,7 @@ class FleaMarketView:
                 category_repository.get_category(offer.root_item.tpl),
                 request.handbookId,
             )
-               or offer.root_item.tpl == request.handbookId
+            or offer.root_item.tpl == request.handbookId
         ]
 
     def _sorted_offers(self, offers: List[Offer], sort_type: SortType, reverse: bool = False) -> List[Offer]:

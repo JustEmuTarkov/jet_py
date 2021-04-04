@@ -84,9 +84,7 @@ class Mail:
 
     @inject
     def add_message(
-        self,
-        message: MailDialogueMessage,
-        notifier: NotifierService = Provide[AppContainer.notifier.service]
+        self, message: MailDialogueMessage, notifier: NotifierService = Provide[AppContainer.notifier.service]
     ) -> None:
         """Adds message to mail and creates notification in notifier"""
         category: MailDialogue = self.get_dialogue(message.uid)

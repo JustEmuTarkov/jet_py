@@ -12,7 +12,7 @@ from tarkov.inventory.types import TemplateId
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
-    from tarkov.bots import BotGeneratorPreset
+    from tarkov.bots.generator.preset import BotGeneratorPreset
     from tarkov.bots.bots import BotInventory
     from tarkov.inventory.repositories import ItemTemplatesRepository
 
@@ -61,12 +61,12 @@ class BotEquipmentGenerator:
             slot
             for slot, template_ids in self.preset.inventory["equipment"].items()
             if (
-                   # If slot isn't present in the _chances then it should be always generated
-                   slot not in self.preset.chances["equipment"]
-                   # Else we check if it should spawn
-                   or random.uniform(0, 100) <= self.preset.chances["equipment"][slot]
-               )
-               and template_ids
+                # If slot isn't present in the _chances then it should be always generated
+                slot not in self.preset.chances["equipment"]
+                # Else we check if it should spawn
+                or random.uniform(0, 100) <= self.preset.chances["equipment"][slot]
+            )
+            and template_ids
         }
         # Force pistol to generate if primary weapon wasn't generated
         weapon_slots = "FirstPrimaryWeapon", "SecondPrimaryWeapon"

@@ -3,7 +3,7 @@ from __future__ import annotations
 import time
 from typing import Dict, List, TYPE_CHECKING, Tuple
 
-from dependency_injector.wiring import Provide
+from dependency_injector.wiring import Provide, inject
 from pydantic import StrictInt
 
 import tarkov.inventory.types
@@ -26,12 +26,12 @@ from .models import (
     QuestRewardTraderStanding,
     QuestStatus,
 )
-from .repositories import quests_repository
+from .repositories import QuestsRepository
 from ..trader.trader import Trader
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
-    from tarkov.profile import Profile
+    from tarkov.profile.profile import Profile
     from tarkov.inventory.repositories import ItemTemplatesRepository
 
 
@@ -39,15 +39,19 @@ class Quests:
     profile: "Profile"
     quests: List[Quest]
 
+    @inject
     def __init__(
         self,
         profile: "Profile",
+        quests_repository: QuestsRepository = Provide[AppContainer.quests.repository],
     ):
+        self.__quests_repository = quests_repository
+
         self.profile: "Profile" = profile
         self.quests = self.profile.pmc.Quests
 
     def create_quest(self, quest_id: str) -> Quest:
-        quest_template = quests_repository.get_quest_template(quest_id)
+        quest_template = self.__quests_repository.get_quest_template(quest_id)
         quest = Quest(
             quest_id=quest_template.id,
             started_at=0,
@@ -87,7 +91,7 @@ class Quests:
             backend_counter = BackendCounter(id=condition_id, qid=quest_id, value=0)
             self.profile.pmc.BackendCounters[condition_id] = backend_counter
 
-        quest_template = quests_repository.get_quest_template(quest_id)
+        quest_template = self.__quests_repository.get_quest_template(quest_id)
         quest_condition = next(
             cond for cond in quest_template.conditions.AvailableForFinish if cond.props["id"] == condition_id
         )
@@ -117,9 +121,8 @@ class Quests:
 
         return removed_items, changed_items
 
-    @staticmethod
-    def get_quest_reward(quest_id: str) -> Tuple[List[Item], List[Item]]:
-        quest_template = quests_repository.get_quest_template(quest_id)
+    def get_quest_reward(self, quest_id: str) -> Tuple[List[Item], List[Item]]:
+        quest_template = self.__quests_repository.get_quest_template(quest_id)
         rewards = quest_template.rewards.Success
 
         for reward in rewards:
@@ -133,7 +136,7 @@ class Quests:
         quest_id: str,
         templates_repository: ItemTemplatesRepository = Provide[AppContainer.repos.templates],
     ) -> None:
-        quest_template = quests_repository.get_quest_template(quest_id)
+        quest_template = self.__quests_repository.get_quest_template(quest_id)
         quest = self.get_quest(quest_id)
         quest.status = QuestStatus.Success
 
