@@ -1,8 +1,12 @@
 import random
 from typing import List, Tuple
 
+from dependency_injector.wiring import Provide, inject
+
+from tarkov.containers.container import Container
+
 from tarkov.exceptions import NoSpaceError
-from tarkov.inventory.factories import item_factory
+from tarkov.inventory.factories import ItemFactory
 from tarkov.inventory.models import Item, ItemTemplate
 from tarkov.inventory.prop_models import StackableItemProps
 from ._base import BaseLootGenerator
@@ -26,7 +30,10 @@ class LooseLootGenerator(BaseLootGenerator):
                 except NoSpaceError:
                     continue
 
-    def _make_random_item(self, slot_id: str) -> Tuple[Item, List[Item]]:
+    @inject
+    def _make_random_item(
+        self, slot_id: str, item_factory: ItemFactory = Provide[Container.item_factory]
+    ) -> Tuple[Item, List[Item]]:
         templates: List[ItemTemplate] = [
             self.templates_repository.get_template(tpl) for tpl in self.preset.inventory["items"][slot_id]
         ]

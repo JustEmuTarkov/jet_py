@@ -5,11 +5,11 @@ from typing import Dict
 from pydantic import parse_obj_as
 
 from tarkov.exceptions import NotFoundError
-from tarkov.inventory import (
-    MutableInventory,
+from tarkov.inventory.helpers import (
     generate_item_id,
     regenerate_items_ids,
 )
+from tarkov.inventory.inventory import MutableInventory
 from tarkov.inventory.models import InventoryModel, Item
 from tarkov.inventory.types import ItemId, TemplateId
 

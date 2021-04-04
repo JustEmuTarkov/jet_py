@@ -10,14 +10,18 @@ import pydantic
 from dependency_injector.wiring import Provide, inject
 
 from server import db_dir
-from tarkov.inventory import generate_item_id, item_templates_repository
-from tarkov.inventory.factories import item_factory
+from tarkov.inventory.repositories import ItemTemplatesRepository
+from tarkov.inventory.helpers import generate_item_id
+from tarkov.inventory.factories import ItemFactory
 from tarkov.inventory.models import Item, ItemTemplate
 from tarkov.inventory.prop_models import AmmoProps
 from tarkov.inventory.types import TemplateId
 from tarkov.repositories.categories import category_repository
 from .models import FleaUser, Offer, OfferId, OfferRequirement
-from ..containers import ConfigContainer, RepositoriesContainer
+from tarkov.containers.config import ConfigContainer
+from tarkov.containers.container import Container
+from tarkov.containers.repositories import RepositoriesContainer
+
 from ..globals_.repository import GlobalsRepository
 
 if TYPE_CHECKING:
@@ -40,12 +44,14 @@ class OfferGenerator:
     def __init__(
         self,
         config: FleaMarketConfig = Provide[ConfigContainer.flea_market],
+        templates_repository: ItemTemplatesRepository = Provide[RepositoriesContainer.templates],
     ) -> None:
         self.config = config
+        self.templates_repository = templates_repository
         # Creates dictionary with item prices from templates and updates it with prices from flea_prices.json
         self.item_prices = {
             tpl.id: tpl.props.CreditsPrice
-            for tpl in item_templates_repository.templates.values()
+            for tpl in self.templates_repository.templates.values()
             if tpl.id in category_repository.item_categories and tpl.props.CreditsPrice
         }
         item_prices: Dict[TemplateId, int] = pydantic.parse_file_as(
@@ -60,7 +66,7 @@ class OfferGenerator:
 
         # All the item templates that we have prices for
         self.item_templates = [
-            tpl for tpl in item_templates_repository.templates.values() if tpl.id in self.item_prices
+            tpl for tpl in self.templates_repository.templates.values() if tpl.id in self.item_prices
         ]
         prices = list(self.item_prices.values())
         median_price = statistics.median(prices)
@@ -107,6 +113,7 @@ class OfferGenerator:
         self,
         item_template: ItemTemplate,
         globals_repository: GlobalsRepository = Provide[RepositoriesContainer.globals],
+        item_factory: ItemFactory = Provide[Container.item_factory],
     ) -> Offer:
         """
         Generates single offer

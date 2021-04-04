@@ -3,13 +3,15 @@ import random
 from typing import Dict, Optional, Type, Union
 
 import ujson
-from fastapi.params import Cookie
+from dependency_injector.wiring import Provide, inject
+from fastapi.params import Cookie, Depends
 from starlette.requests import Request
 
 from server import db_dir, start_time
 from server.utils import get_request_url_root, make_router
 from tarkov import config
-from tarkov.inventory import item_templates_repository
+from tarkov.containers.repositories import RepositoriesContainer
+from tarkov.inventory.repositories import ItemTemplatesRepository
 from tarkov.inventory.repositories import AnyTemplate
 from tarkov.inventory.types import TemplateId
 from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
@@ -87,8 +89,11 @@ def client_game_keepalive(
     # response_model=TarkovSuccessResponse[Dict[TemplateId, AnyTemplate]]
     # Disable response_model since validating Templates via pydantic is really expensive
 )
-def client_items() -> TarkovSuccessResponse[Dict[TemplateId, Union[AnyTemplate]]]:
-    return TarkovSuccessResponse(data=item_templates_repository.client_items_view)
+@inject
+def client_items(
+    templates_repository: ItemTemplatesRepository = Depends(Provide[RepositoriesContainer.templates]),  # type: ignore
+) -> TarkovSuccessResponse[Dict[TemplateId, Union[AnyTemplate]]]:
+    return TarkovSuccessResponse(data=templates_repository.client_items_view)
 
 
 @misc_router.post("/client/customization")

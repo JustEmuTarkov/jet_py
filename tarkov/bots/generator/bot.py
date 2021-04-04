@@ -9,7 +9,7 @@ from dependency_injector.wiring import inject
 
 from server import db_dir
 from tarkov.bots.bots import BotInventory
-from tarkov.inventory import generate_item_id
+from tarkov.inventory.helpers import generate_item_id
 from .equipment import BotEquipmentGenerator
 from .loot import BotLootGenerator
 from .weapon import BotWeaponGenerator

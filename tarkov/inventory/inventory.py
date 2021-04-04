@@ -4,6 +4,10 @@ import abc
 import itertools
 from typing import Dict, Iterable, List, Optional, TYPE_CHECKING, Tuple
 
+from dependency_injector.wiring import Provide, inject
+
+from tarkov.containers.repositories import RepositoriesContainer
+
 from tarkov.exceptions import NoSpaceError, NotFoundError
 from tarkov.models import Base
 from .helpers import generate_item_id
@@ -20,18 +24,25 @@ from .models import (
     MoveLocation,
 )
 from .prop_models import CompoundProps, MagazineProps, ModProps, StockProps, WeaponProps
-from .repositories import item_templates_repository
 from .types import ItemId, TemplateId
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
     from tarkov.profile import Profile
+    from .repositories import ItemTemplatesRepository
 
 
 class ImmutableInventory(metaclass=abc.ABCMeta):
     """
     Implements inventory_manager access methods like searching for item, getting it's children without mutating state
     """
+
+    @inject
+    def __init__(
+        self,
+        templates_repository: ItemTemplatesRepository = Provide[RepositoriesContainer.templates],
+    ):
+        self.templates_repository = templates_repository
 
     @property
     @abc.abstractmethod
@@ -53,9 +64,8 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
         except StopIteration as error:
             raise NotFoundError from error
 
-    @staticmethod
-    def __get_item_size_without_folding(item: Item, child_items: List[Item]) -> Tuple[int, int]:
-        item_template = item_templates_repository.get_template(item)
+    def __get_item_size_without_folding(self, item: Item, child_items: List[Item]) -> Tuple[int, int]:
+        item_template = self.templates_repository.get_template(item)
         if not isinstance(item_template.props, (WeaponProps, ModProps)):
             return item_template.props.Width, item_template.props.Height
 
@@ -68,7 +78,7 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
         height = item_template.props.Height
 
         for child in child_items:
-            child_template = item_templates_repository.get_template(child)
+            child_template = self.templates_repository.get_template(child)
             if child_template.props.ExtraSizeForceAdd:
                 width += child_template.props.ExtraSizeLeft + child_template.props.ExtraSizeRight
                 height += child_template.props.ExtraSizeUp + child_template.props.ExtraSizeDown
@@ -83,18 +93,17 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
 
         return width, height
 
-    @staticmethod
     def get_item_size(  # noqa: C901 - Guess there's nothing i can do about this function complexity
-        item: Item, child_items: List[Item] = None
+        self, item: Item, child_items: List[Item] = None
     ) -> Tuple[int, int]:
         """
         Return size of the item according to it's attachments, etc.
 
         :return: Tuple[width, height]
         """
-        item_template = item_templates_repository.get_template(item)
+        item_template = self.templates_repository.get_template(item)
         child_items = child_items or []
-        width, height = ImmutableInventory.__get_item_size_without_folding(item, child_items)
+        width, height = self.__get_item_size_without_folding(item, child_items)
 
         if isinstance(item_template.props, StockProps) and item.upd.folded():
             width -= item_template.props.SizeReduceRight
@@ -108,7 +117,7 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
             return width, height
 
         for stock in child_items:
-            stock_template = item_templates_repository.get_template(stock)
+            stock_template = self.templates_repository.get_template(stock)
             if not isinstance(stock_template.props, StockProps):
                 continue
             if item_template.props.FoldedSlot == stock.slot_id:
@@ -235,7 +244,7 @@ class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
         :param item: The item to fold/unfold.
         :param folded: The new folded state of the item.
         """
-        item_template = item_templates_repository.get_template(item)
+        item_template = self.templates_repository.get_template(item)
 
         assert isinstance(item_template.props, (WeaponProps, StockProps))
         children = list(self.iter_item_children_recursively(item))
@@ -774,7 +783,7 @@ class GridInventory(MutableInventory):
             magazine = self.get(split_location.id)
             ammo = item
 
-            magazine_template = item_templates_repository.get_template(magazine)
+            magazine_template = self.templates_repository.get_template(magazine)
             assert isinstance(magazine_template.props, MagazineProps)
 
             magazine_capacity: int = magazine_template.props.Cartridges[0].max_count
@@ -825,14 +834,13 @@ class GridInventory(MutableInventory):
 
         return item_copy
 
-    @staticmethod
-    def split_into_stacks(item: Item) -> List[Item]:
+    def split_into_stacks(self, item: Item) -> List[Item]:
         """
         Splits an item into stacks.
 
         :param item: The item to split.
         """
-        item_template = item_templates_repository.get_template(item)
+        item_template = self.templates_repository.get_template(item)
         count = item.upd.StackObjectsCount
 
         items = []
@@ -864,7 +872,7 @@ class PlayerInventory(GridInventory):
     @property
     def grid_size(self) -> Tuple[int, int]:
         stash_item = self.get(self.root_id)
-        stash_template = item_templates_repository.get_template(stash_item)
+        stash_template = self.templates_repository.get_template(stash_item)
 
         assert isinstance(stash_template.props, CompoundProps)
 

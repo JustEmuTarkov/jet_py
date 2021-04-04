@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import collections
-from typing import Dict, List, Sequence, TYPE_CHECKING, Union
+from typing import Dict, List, TYPE_CHECKING, Union
+
+from dependency_injector.wiring import Provide, inject
 
 from tarkov.fleamarket.models import FleaMarketRequest, FleaMarketResponse, Offer, SortType
-from tarkov.inventory import item_templates_repository
+from tarkov.inventory.repositories import ItemTemplatesRepository
 from tarkov.inventory.types import TemplateId
 from tarkov.repositories.categories import CategoryId, category_repository
+from tarkov.containers.repositories import RepositoriesContainer
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
@@ -18,7 +21,13 @@ class FleaMarketView:
     Class to process requests from "/client/ragfair/find" route
     """
 
-    def __init__(self, flea_market: FleaMarket):
+    @inject
+    def __init__(
+        self,
+        flea_market: FleaMarket,
+        templates_repository: ItemTemplatesRepository = Provide[RepositoriesContainer.templates],
+    ):
+        self.templates_repository = templates_repository
         self.flea_market = flea_market
 
     def get_response(self, request: FleaMarketRequest) -> FleaMarketResponse:
@@ -28,7 +37,7 @@ class FleaMarketView:
 
         # Apply linked search filter
         if request.linkedSearchId:
-            linked_search_template = item_templates_repository.get_template(request.linkedSearchId)
+            linked_search_template = self.templates_repository.get_template(request.linkedSearchId)
             offers = [offer for offer in offers if linked_search_template.has_in_slots(offer.root_item.tpl)]
 
         # Else apply required search filter
@@ -36,7 +45,7 @@ class FleaMarketView:
             offers = [
                 offer
                 for offer in offers
-                if item_templates_repository.get_template(offer.root_item).has_in_slots(request.neededSearchId)
+                if self.templates_repository.get_template(offer.root_item).has_in_slots(request.neededSearchId)
             ]
 
         categories: Dict[Union[TemplateId, CategoryId], int]
@@ -75,12 +84,11 @@ class FleaMarketView:
             or offer.root_item.tpl == request.handbookId
         ]
 
-    @staticmethod
-    def _sorted_offers(offers: List[Offer], sort_type: SortType, reverse: bool = False) -> List[Offer]:
+    def _sorted_offers(self, offers: List[Offer], sort_type: SortType, reverse: bool = False) -> List[Offer]:
         """Sorts offers in place"""
 
         def sort_by_title(offer: Offer) -> str:
-            item_tpl = item_templates_repository.get_template(offer.root_item)
+            item_tpl = self.templates_repository.get_template(offer.root_item)
             return item_tpl.name  # Swap to localization later
 
         sort_map = {

@@ -1,7 +1,7 @@
 import pytest
 
-from tarkov.inventory import PlayerInventory
-from tarkov.tests.inventory.conftest import TEST_RESOURCES_PATH
+from tarkov.inventory.inventory import PlayerInventory
+from .conftest import TEST_RESOURCES_PATH
 
 test_inventories = TEST_RESOURCES_PATH.joinpath("folding").rglob("*.json")
 

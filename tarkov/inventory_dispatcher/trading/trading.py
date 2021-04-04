@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from tarkov.inventory import generate_item_id
+from tarkov.inventory.helpers import generate_item_id
 from tarkov.inventory.models import Item
 from tarkov.inventory.types import CurrencyEnum, TemplateId
 from tarkov.inventory_dispatcher.base import Dispatcher

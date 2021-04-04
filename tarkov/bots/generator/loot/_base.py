@@ -4,14 +4,15 @@ from typing import TYPE_CHECKING
 
 from dependency_injector.wiring import Provide, inject
 
-from tarkov.containers import RepositoriesContainer
+from tarkov.containers.repositories import RepositoriesContainer
+
 from ._types import BotInventoryContainers, LootGenerationConfig
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
     from tarkov.bots.bots import BotInventory
     from tarkov.bots import BotGeneratorPreset
-    from tarkov.inventory import ItemTemplatesRepository
+    from tarkov.inventory.repositories import ItemTemplatesRepository
 
 
 class BaseLootGenerator:

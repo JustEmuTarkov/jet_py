@@ -15,7 +15,8 @@ from pydantic import (
 )
 
 from server import logger
-from tarkov.inventory import generate_item_id
+from tarkov.inventory.helpers import generate_item_id
+
 from tarkov.inventory.prop_models import (
     AnyProp,
     BaseItemProps,
@@ -27,7 +28,7 @@ from tarkov.models import Base
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
-    from tarkov.inventory import MutableInventory
+    from tarkov.inventory.inventory import MutableInventory
 
 
 class NodeTemplateBase(Base):

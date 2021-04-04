@@ -2,14 +2,16 @@ import time
 from typing import Dict, List, TYPE_CHECKING, cast
 
 import ujson
+from dependency_injector.wiring import Provide, inject
 from pydantic import parse_obj_as
 
 from server import db_dir, logger
 from server.utils import atomic_write
 from tarkov import inventory
-from tarkov.inventory.factories import item_factory
 from tarkov.inventory.models import Item
 from .models import HideoutArea, HideoutAreaType, HideoutProduction
+from tarkov.containers.container import Container
+from ..inventory.factories import ItemFactory
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
@@ -95,7 +97,10 @@ class Hideout:
 
         self.data["Production"][recipe_id] = production
 
-    def take_production(self, recipe_id: str) -> List[inventory.models.Item]:
+    @inject
+    def take_production(
+        self, recipe_id: str, item_factory: ItemFactory = Provide[Container.item_factory]
+    ) -> List[inventory.models.Item]:
         recipe = self.get_recipe(recipe_id)
 
         product_tpl = recipe["endProduct"]

@@ -3,10 +3,15 @@ from typing import Callable, List
 from unittest.mock import patch
 
 import pytest
+from dependency_injector.wiring import Provide, inject
 
 from server import root_dir
-from tarkov.inventory import PlayerInventory, item_templates_repository
-from tarkov.inventory.factories import item_factory
+from tarkov.containers.container import Container
+from tarkov.containers.repositories import RepositoriesContainer
+
+from tarkov.inventory.repositories import ItemTemplatesRepository
+from tarkov.inventory.factories import ItemFactory
+from tarkov.inventory.inventory import PlayerInventory
 from tarkov.inventory.models import InventoryModel, Item, ItemTemplate
 from tarkov.profile import Profile
 from tarkov.profile.models import ProfileModel
@@ -41,14 +46,18 @@ def make_inventory(player_profile: Profile) -> Callable:
 
 
 @pytest.fixture()
-def random_items() -> List[Item]:
+@inject
+def random_items(
+    templates_repository: ItemTemplatesRepository = Provide[RepositoriesContainer.templates],
+    item_factory: ItemFactory = Provide[Container.item_factory],
+) -> List[Item]:
     random.seed(42)
     random_templates = random.sample(
-        [tpl for tpl in item_templates_repository._item_templates.values() if isinstance(tpl, ItemTemplate)],
+        [tpl for tpl in templates_repository._item_templates.values() if isinstance(tpl, ItemTemplate)],
         k=100,
     )
 
     items: List[Item] = [
-        item_factory.create_item(item_templates_repository.get_template(tpl.id))[0] for tpl in random_templates
+        item_factory.create_item(templates_repository.get_template(tpl.id))[0] for tpl in random_templates
     ]
     return items

@@ -8,13 +8,13 @@ from typing import ClassVar, Dict, List, TYPE_CHECKING, Union
 
 import pydantic
 import ujson
+from dependency_injector.wiring import Provide, inject
 
 from server import db_dir
-from tarkov.inventory import (
-    ImmutableInventory,
-    item_templates_repository,
-    regenerate_items_ids,
-)
+from tarkov.containers.repositories import RepositoriesContainer
+from tarkov.inventory.helpers import regenerate_items_ids
+from tarkov.inventory.repositories import ItemTemplatesRepository
+from tarkov.inventory.inventory import ImmutableInventory
 from tarkov.inventory.models import Item, ItemUpd
 from tarkov.inventory.types import CurrencyEnum, ItemId, TemplateId
 from tarkov.quests.models import QuestStatus
@@ -37,7 +37,14 @@ FENCE_ASSORT_LIFETIME = 10 * 60
 
 
 class Trader:
-    def __init__(self, type_: TraderType, profile: Profile):
+    @inject
+    def __init__(
+        self,
+        type_: TraderType,
+        profile: Profile,
+        templates_repository: ItemTemplatesRepository = Provide[RepositoriesContainer.templates],
+    ):
+        self.templates_repository = templates_repository
         self.type: TraderType = type_
         self.path = db_dir.joinpath("traders", self.type.value)
         self.player_profile: Profile = profile
@@ -65,7 +72,7 @@ class Trader:
         price: float = 0
 
         for i in itertools.chain([item], self.inventory.iter_item_children_recursively(item)):
-            item_template = item_templates_repository.get_template(i)
+            item_template = self.templates_repository.get_template(i)
             price += item_template.props.CreditsPrice
 
         return int(price)
@@ -77,11 +84,11 @@ class Trader:
         if not self.can_sell(item):
             raise ValueError("Item is not sellable")
 
-        tpl = item_templates_repository.get_template(item)
+        tpl = self.templates_repository.get_template(item)
         price_rub = tpl.props.CreditsPrice
 
         for child in self.player_profile.inventory.iter_item_children_recursively(item):
-            child_tpl = item_templates_repository.get_template(child)
+            child_tpl = self.templates_repository.get_template(child)
             child_price = child_tpl.props.CreditsPrice
             if self.can_sell(child):
                 price_rub += child_price
@@ -95,14 +102,13 @@ class Trader:
             amount=price,
         )
 
-    @staticmethod
-    def calculate_insurance_price(items: Union[Item, List[Item]]) -> int:
+    def calculate_insurance_price(self, items: Union[Item, List[Item]]) -> int:
         if isinstance(items, Item):
             items = [items]
 
         price: float = 0
         for item in items:
-            item_template = item_templates_repository.get_template(item)
+            item_template = self.templates_repository.get_template(item)
             price += item_template.props.CreditsPrice * 0.1
             #  Todo account for trader standing (subtract standing from insurance price, 0.5 (50%) max)
 
@@ -110,7 +116,7 @@ class Trader:
 
     def buy_item(self, item_id: ItemId, count: int) -> List[BoughtItems]:
         base_item = self.inventory.get(item_id)
-        item_template = item_templates_repository.get_template(base_item.tpl)
+        item_template = self.templates_repository.get_template(base_item.tpl)
         item_stack_size = item_template.props.StackMaxSize
 
         bought_items_list: List[BoughtItems] = []

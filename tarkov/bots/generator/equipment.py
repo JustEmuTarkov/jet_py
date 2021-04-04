@@ -3,7 +3,11 @@ from __future__ import annotations
 import random
 from typing import Set, TYPE_CHECKING
 
-from tarkov.inventory import generate_item_id, item_templates_repository
+from dependency_injector.wiring import Provide, inject
+
+from tarkov.containers.repositories import RepositoriesContainer
+
+from tarkov.inventory.helpers import generate_item_id
 from tarkov.inventory.models import Item
 from tarkov.inventory.types import TemplateId
 
@@ -11,17 +15,25 @@ if TYPE_CHECKING:
     # pylint: disable=cyclic-import
     from tarkov.bots import BotGeneratorPreset
     from tarkov.bots.bots import BotInventory
+    from tarkov.inventory.repositories import ItemTemplatesRepository
 
 
 class BotEquipmentGenerator:
-    def __init__(self, bot_inventory: BotInventory, preset: BotGeneratorPreset):
+    @inject
+    def __init__(
+        self,
+        bot_inventory: BotInventory,
+        preset: BotGeneratorPreset,
+        templates_repository: ItemTemplatesRepository = Provide[RepositoriesContainer.templates],
+    ):
         self.bot_inventory = bot_inventory
         self.preset = preset
+        self.templates_repository = templates_repository
 
     def __filter_conflicting_items(
         self, template_id: TemplateId, equipment_slots_to_generate: Set[str]
     ) -> bool:
-        template = item_templates_repository.get_template(template_id)
+        template = self.templates_repository.get_template(template_id)
         blocks_slots: Set[str] = {
             k.lstrip("Blocks") for k, v in template.props.dict().items() if k.startswith("Blocks") and v is True
         }
@@ -33,7 +45,7 @@ class BotEquipmentGenerator:
             return False
         # If any of the existing items conflict with template
         if any(
-            template.id in item_templates_repository.get_template(item).props.ConflictingItems
+            template.id in self.templates_repository.get_template(item).props.ConflictingItems
             for item in self.bot_inventory.items.values()
         ):
             return False

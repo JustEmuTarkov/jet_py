@@ -3,7 +3,11 @@ from __future__ import annotations
 import random
 from typing import List, Set, TYPE_CHECKING
 
-from tarkov.inventory import generate_item_id, item_templates_repository
+from dependency_injector.wiring import Provide, inject
+
+from tarkov.containers.repositories import RepositoriesContainer
+
+from tarkov.inventory.helpers import generate_item_id
 from tarkov.inventory.models import Item
 from tarkov.inventory.types import TemplateId
 
@@ -11,18 +15,26 @@ if TYPE_CHECKING:
     # pylint: disable=cyclic-import
     from tarkov.bots.bots import BotInventory
     from tarkov.bots import BotGeneratorPreset
+    from tarkov.inventory.repositories import ItemTemplatesRepository
 
 
 class BotWeaponGenerator:
-    def __init__(self, bot_inventory: BotInventory, preset: BotGeneratorPreset):
+    @inject
+    def __init__(
+        self,
+        bot_inventory: BotInventory,
+        preset: BotGeneratorPreset,
+        templates_repository: ItemTemplatesRepository = Provide[RepositoriesContainer.templates],
+    ):
+        self.templates_repository = templates_repository
         self.bot_inventory = bot_inventory
         self.preset = preset
 
     def __filter_conflicting_items(self, template_id: TemplateId) -> bool:
-        template = item_templates_repository.get_template(template_id)
+        template = self.templates_repository.get_template(template_id)
 
         for inventory_item in self.bot_inventory.items.values():
-            item_template = item_templates_repository.get_template(inventory_item.tpl)
+            item_template = self.templates_repository.get_template(inventory_item.tpl)
 
             if template_id in item_template.props.ConflictingItems:
                 return False
@@ -71,7 +83,7 @@ class BotWeaponGenerator:
         if not template_ids:
             return
 
-        random_template = item_templates_repository.get_template(random.choice(template_ids))
+        random_template = self.templates_repository.get_template(random.choice(template_ids))
         # Ammo generation will be handler later via BotMagazineGenerator class
         if slot == "cartridges":
             return

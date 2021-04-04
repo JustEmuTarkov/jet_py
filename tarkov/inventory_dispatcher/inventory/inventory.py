@@ -8,8 +8,8 @@ from dependency_injector.wiring import Provide, inject
 import tarkov.inventory
 from tarkov.exceptions import NotFoundError
 from tarkov.fleamarket.models import OfferId
-from tarkov.inventory import MutableInventory, item_templates_repository
 from tarkov.inventory.implementations import SimpleInventory
+from tarkov.inventory.inventory import MutableInventory
 from tarkov.inventory.models import Item, ItemUpdTogglable
 from tarkov.inventory.types import TemplateId
 from tarkov.inventory_dispatcher.base import Dispatcher
@@ -29,24 +29,32 @@ from .models import (
     Repair,
     Split,
     Swap,
-    Transfer,
     Toggle,
+    Transfer,
 )
-from ...fleamarket.containers import FleaMarketContainer
+from tarkov.containers.repositories import RepositoriesContainer
+from tarkov.fleamarket.containers import FleaMarketContainer
+
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
     from tarkov.inventory_dispatcher.manager import DispatcherManager
     from tarkov.fleamarket.fleamarket import FleaMarket
+    from tarkov.inventory.repositories import ItemTemplatesRepository
 
 
 class InventoryDispatcher(Dispatcher):
     @inject
     def __init__(
-        self, manager: "DispatcherManager", flea_market: FleaMarket = Provide[FleaMarketContainer.market]
+        self,
+        manager: "DispatcherManager",
+        flea_market: FleaMarket = Provide[FleaMarketContainer.market],
+        templates_repository: ItemTemplatesRepository = Provide[RepositoriesContainer.templates],
     ):
         super().__init__(manager)
         self.flea_market = flea_market
+        self.templates_repository = templates_repository
+
         self.dispatch_map = {
             ActionType.Move: self._move,
             ActionType.Split: self._split,
@@ -207,7 +215,7 @@ class InventoryDispatcher(Dispatcher):
 
         for repair_item in action.repairItems:
             item = self.inventory.get(repair_item.item_id)
-            item_template = item_templates_repository.get_template(item.tpl)
+            item_template = self.templates_repository.get_template(item.tpl)
             repair_cost_per_1_durability = item_template.props.RepairCost
 
             if item.upd.FaceShield is not None:

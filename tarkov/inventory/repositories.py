@@ -112,6 +112,3 @@ class ItemTemplatesRepository:
         if isinstance(template, ItemTemplate):
             return [template]
         return [tpl for tpl in self.iter_template_children(template_id) if isinstance(tpl, ItemTemplate)]
-
-
-item_templates_repository = ItemTemplatesRepository()

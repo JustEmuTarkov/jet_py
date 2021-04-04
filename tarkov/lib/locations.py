@@ -5,16 +5,17 @@ import random
 from typing import Any, ClassVar, DefaultDict, Dict, Final, List, Tuple, Union
 
 import ujson
+from dependency_injector.wiring import Provide, inject
 
 from server import db_dir
+from tarkov.containers.container import Container
+from tarkov.containers.repositories import RepositoriesContainer
+
 from tarkov.exceptions import NoSpaceError
-from tarkov.inventory import (
-    GridInventory,
-    GridInventoryStashMap,
-    item_templates_repository,
-)
-from tarkov.inventory.factories import item_factory
+from tarkov.inventory.repositories import ItemTemplatesRepository
+from tarkov.inventory.factories import ItemFactory
 from tarkov.inventory.helpers import regenerate_item_ids_dict
+from tarkov.inventory.inventory import GridInventory, GridInventoryStashMap
 from tarkov.inventory.models import Item, ItemTemplate
 from tarkov.inventory.prop_models import CompoundProps, LootContainerProps, StackableItemProps
 from tarkov.inventory.types import ItemId, TemplateId
@@ -37,12 +38,18 @@ class ContainerModel(Base):
 class ContainerInventory(GridInventory):
     container: ContainerModel
 
-    def __init__(self, container: ContainerModel):
+    @inject
+    def __init__(
+        self,
+        container: ContainerModel,
+        templates_repository: ItemTemplatesRepository = Provide[RepositoriesContainer.templates],
+    ):
+        super().__init__()
         self.container = container
         self._items = {i.id: i for i in self.container.Items}
 
         root_item = self.get(self.container.Root)
-        self.template = item_templates_repository.get_template(root_item.tpl)
+        self.template = templates_repository.get_template(root_item.tpl)
         self.stash_map = GridInventoryStashMap(self)
 
     @property
@@ -76,13 +83,19 @@ class ContainerInventory(GridInventory):
 class ContainerLootGenerator:
     ATTEMPTS_TO_PLACE_LOOT: Final[ClassVar[int]] = 10
 
-    def __init__(self, location_generator: LocationGenerator, container: ContainerModel):
+    @inject
+    def __init__(
+        self,
+        location_generator: LocationGenerator,
+        container: ContainerModel,
+        templates_repository: ItemTemplatesRepository = Provide[RepositoriesContainer.templates],
+    ):
         # Reference to location generator
         self.location_generator = location_generator
         # Container model
         self.container = container
 
-        self.container_template = item_templates_repository.get_template(container.Items[0].tpl)
+        self.container_template = templates_repository.get_template(container.Items[0].tpl)
         assert isinstance(self.container_template.props, LootContainerProps)
 
         # List of item templates that are allowed to spawn inside container
@@ -100,7 +113,10 @@ class ContainerLootGenerator:
         mean, deviation = 2.5, 2.5
         return max(round(random.gauss(mean, deviation)), 0)
 
-    def __generate_random_item(self) -> Tuple[Item, List[Item]]:
+    @inject
+    def __generate_random_item(
+        self, item_factory: ItemFactory = Provide[Container.item_factory]
+    ) -> Tuple[Item, List[Item]]:
         """Generates random item for this container"""
         random_template = random.choices(self.__item_templates, self.__item_templates_weights, k=1)[0]
         count = 1
@@ -130,7 +146,13 @@ class ContainerLootGenerator:
 
 
 class LocationGenerator:
-    def __init__(self, location: str):
+    @inject
+    def __init__(
+        self,
+        location: str,
+        templates_repository: ItemTemplatesRepository = Provide[RepositoriesContainer.templates],
+    ):
+        self.templates_repository = templates_repository
         location_file_path = db_dir.joinpath("locations", f"{location}.json")
         self.__location: dict = ujson.load(location_file_path.open(encoding="utf8"))
         self.__base: dict = self.__location["base"]
@@ -169,7 +191,7 @@ class LocationGenerator:
             root_item = loot_point["Items"][0]
             loot_point["Root"] = loot_point["Items"][0]["_id"]
 
-            root_item_template = item_templates_repository.get_template(root_item["_tpl"])
+            root_item_template = self.templates_repository.get_template(root_item["_tpl"])
             should_spawn = random.uniform(0, 100) < root_item_template.props.SpawnChance
             if not should_spawn:
                 continue
@@ -179,7 +201,7 @@ class LocationGenerator:
     def get_category_items(self, template_id: TemplateId) -> List[ItemTemplate]:
         if template_id not in self.__category_cache:
             self.__category_cache[template_id] = list(
-                tpl for tpl in item_templates_repository.get_template_items(template_id)
+                tpl for tpl in self.templates_repository.get_template_items(template_id)
             )
 
         return self.__category_cache[template_id]

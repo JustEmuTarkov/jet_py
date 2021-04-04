@@ -1,19 +1,24 @@
 from __future__ import annotations
 
 from types import TracebackType
-from typing import Optional, Type, Union
+from typing import Optional, TYPE_CHECKING, Type, Union
 
-import tarkov.inventory.repositories
+from dependency_injector.wiring import Provide, inject
+
 from server import root_dir
 from server.utils import atomic_write
-from tarkov import inventory as inventory_, quests
+from tarkov import quests
 from tarkov.hideout import Hideout
-from tarkov.inventory import item_templates_repository
 from tarkov.inventory.models import Item, ItemTemplate
 from tarkov.inventory.types import TemplateId
 from tarkov.mail import Mail
 from tarkov.trader import TraderType
 from .models import ItemInsurance, ProfileModel
+from tarkov.containers.repositories import RepositoriesContainer
+from ..inventory.inventory import PlayerInventory
+
+if TYPE_CHECKING:
+    from tarkov.inventory.repositories import ItemTemplatesRepository
 
 
 class Encyclopedia:
@@ -21,8 +26,13 @@ class Encyclopedia:
         self.profile = profile
         self.data = profile.pmc.Encyclopedia
 
-    def examine(self, item: Union[Item, TemplateId]) -> None:
-        template: ItemTemplate = item_templates_repository.get_template(item)
+    @inject
+    def examine(
+        self,
+        item: Union[Item, TemplateId],
+        templates_repository: ItemTemplatesRepository = Provide[RepositoriesContainer.templates],
+    ) -> None:
+        template: ItemTemplate = templates_repository.get_template(item)
         self.data[template.id] = False
         self.profile.receive_experience(template.props.ExamineExperience)
 
@@ -47,7 +57,7 @@ class Profile:
 
     hideout: Hideout
     quests: quests.Quests
-    inventory: inventory_.PlayerInventory
+    inventory: PlayerInventory
     encyclopedia: Encyclopedia
     mail: Mail
 
@@ -78,7 +88,7 @@ class Profile:
         self.scav = ProfileModel.parse_file(self.scav_profile_path)
 
         self.encyclopedia = Encyclopedia(profile=self)
-        self.inventory = tarkov.inventory.PlayerInventory(profile=self)
+        self.inventory = PlayerInventory(profile=self)
         self.inventory.read()
 
         self.quests = quests.Quests(profile=self)

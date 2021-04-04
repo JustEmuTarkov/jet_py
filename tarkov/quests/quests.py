@@ -1,11 +1,13 @@
+from __future__ import annotations
 import time
 from typing import Dict, List, TYPE_CHECKING, Tuple
 
+from dependency_injector.wiring import Provide
 from pydantic import StrictInt
 
 import tarkov.inventory.types
 from tarkov import inventory
-from tarkov.inventory import PlayerInventory, item_templates_repository
+from tarkov.inventory.inventory import PlayerInventory
 from tarkov.inventory.models import Item
 from tarkov.mail.models import (
     MailDialogueMessage,
@@ -23,11 +25,13 @@ from .models import (
     QuestStatus,
 )
 from .repositories import quests_repository
+from tarkov.containers.repositories import RepositoriesContainer
 from ..trader.trader import Trader
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
     from tarkov.profile import Profile
+    from tarkov.inventory.repositories import ItemTemplatesRepository
 
 
 class Quests:
@@ -123,7 +127,11 @@ class Quests:
 
         return [], []
 
-    def complete_quest(self, quest_id: str) -> None:
+    def complete_quest(
+        self,
+        quest_id: str,
+        templates_repository: ItemTemplatesRepository = Provide[RepositoriesContainer.templates],
+    ) -> None:
         quest_template = quests_repository.get_quest_template(quest_id)
         quest = self.get_quest(quest_id)
         quest.status = QuestStatus.Success
@@ -132,7 +140,7 @@ class Quests:
         for reward in quest_template.rewards.Success:
             if isinstance(reward, QuestRewardItem):
                 for reward_item in reward.items:
-                    item_template = item_templates_repository.get_template(reward_item)
+                    item_template = templates_repository.get_template(reward_item)
                     stack_size: int = item_template.props.StackMaxSize
 
                     while reward_item.upd.StackObjectsCount > 0:

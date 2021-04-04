@@ -3,7 +3,7 @@ from typing import Dict, Iterable, List, TYPE_CHECKING
 from pydantic import Field
 
 from server import logger
-from tarkov.inventory import PlayerInventory
+from tarkov.inventory.inventory import PlayerInventory
 from tarkov.inventory.models import Item
 from tarkov.inventory_dispatcher.fleamarket import FleaMarketDispatcher
 from tarkov.inventory_dispatcher.hideout import HideoutDispatcher

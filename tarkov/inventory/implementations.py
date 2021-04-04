@@ -3,8 +3,13 @@ from __future__ import annotations
 import random
 from typing import Dict, List, Tuple
 
+from dependency_injector.wiring import Provide, inject
+
+from tarkov.containers.repositories import RepositoriesContainer
+
 from tarkov.exceptions import NoSpaceError
-from tarkov.inventory import GridInventory, GridInventoryStashMap, MutableInventory, item_templates_repository
+from tarkov.inventory.repositories import ItemTemplatesRepository
+from tarkov.inventory.inventory import GridInventory, GridInventoryStashMap, MutableInventory
 from tarkov.inventory.models import (
     AnyItemLocation,
     Item,
@@ -77,7 +82,13 @@ class MultiGridContainer:
         ]
 
     @classmethod
-    def from_item(cls, item: Item, slot_id: str) -> MultiGridContainer:
+    @inject
+    def from_item(
+        cls,
+        item: Item,
+        slot_id: str,
+        item_templates_repository: ItemTemplatesRepository = Provide[RepositoriesContainer.templates],
+    ) -> MultiGridContainer:
         return cls(item_templates_repository.get_template(item), item.id, slot_id)
 
     @property
