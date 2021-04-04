@@ -14,7 +14,7 @@ from tarkov.mail.models import (
     MailDialoguePreview,
     MailDialogues,
 )
-from tarkov.notifier.notifier import Notifier
+from tarkov.notifier.notifier import NotifierService
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
@@ -86,7 +86,7 @@ class Mail:
     def add_message(
         self,
         message: MailDialogueMessage,
-        notifier: Notifier = Provide[AppContainer.notifier.notifier]
+        notifier: NotifierService = Provide[AppContainer.notifier.service]
     ) -> None:
         """Adds message to mail and creates notification in notifier"""
         category: MailDialogue = self.get_dialogue(message.uid)

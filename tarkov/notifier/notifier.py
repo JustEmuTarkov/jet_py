@@ -56,7 +56,7 @@ class ProfileNotifier:
         self.unsent_notifications.append(notification)
 
 
-class Notifier:
+class NotifierService:
     """Notifier that contains multiple Profile Notifiers"""
 
     def __init__(self) -> None:

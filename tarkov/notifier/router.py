@@ -11,9 +11,9 @@ from server import logger
 from server.container import AppContainer
 from server.utils import get_request_url_root, make_router
 from tarkov.models import TarkovSuccessResponse
-from .notifier import Notifier
+from .notifier import NotifierService
 
-notifier_router = make_router(tags=["Notifier"])
+notifier_router = make_router(tags=["NotifierService"])
 
 
 @notifier_router.post("/client/notifier/channel/create")
@@ -38,7 +38,7 @@ def client_notifier_channel_create(
 @inject
 async def notifierserver_get(
     profile_id: str,
-    notifier: Notifier = Depends(Provide[AppContainer.notifier.notifier]),  # type: ignore
+    notifier: NotifierService = Depends(Provide[AppContainer.notifier.service]),  # type: ignore
 ) -> PlainTextResponse:
     for _ in range(90):
         if notifier.has_notifications(profile_id):
@@ -46,7 +46,7 @@ async def notifierserver_get(
             logger.debug(f"New notifications for profile {profile_id}")
             logger.debug(notifications)
             response = "\n".join([orjson.dumps(notification).decode("utf8") for notification in notifications])
-            logger.debug(f"Notifier response: {response}")
+            logger.debug(f"NotifierService response: {response}")
             return PlainTextResponse(
                 content=response,
                 media_type="application/json",
