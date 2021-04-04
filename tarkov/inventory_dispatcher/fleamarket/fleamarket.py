@@ -6,8 +6,8 @@ from typing import List, TYPE_CHECKING
 from dependency_injector.wiring import Provide, inject
 
 from server import logger
+from server.container import AppContainer
 from tarkov.exceptions import NotFoundError
-from tarkov.fleamarket.containers import FleaMarketContainer
 from tarkov.inventory.factories import ItemFactory
 from tarkov.inventory.models import Item
 from tarkov.inventory_dispatcher.base import Dispatcher
@@ -15,7 +15,6 @@ from tarkov.inventory_dispatcher.models import ActionType
 from tarkov.mail.models import MailDialogueMessage, MailMessageItems, MailMessageType
 from tarkov.trader import TraderType
 from .models import Add, Buy
-from tarkov.containers import Container
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
@@ -28,7 +27,7 @@ class FleaMarketDispatcher(Dispatcher):
     def __init__(
         self,
         manager: "DispatcherManager",
-        flea_market: FleaMarket = Provide[FleaMarketContainer.market],
+        flea_market: FleaMarket = Provide[AppContainer.flea.market],
     ) -> None:
         super().__init__(manager)
         self.dispatch_map = {
@@ -76,7 +75,7 @@ class FleaMarketDispatcher(Dispatcher):
                     self.response.items.change.append(item)
 
     @inject
-    def _add_offer(self, action: Add, item_factory: ItemFactory = Provide[Container.item_factory]) -> None:
+    def _add_offer(self, action: Add, item_factory: ItemFactory = Provide[AppContainer.items.factory]) -> None:
         # Todo: Add taxation
         items = [self.inventory.get(item_id) for item_id in action.items]
         self.response.items.del_.extend(item.copy(deep=True) for item in items)

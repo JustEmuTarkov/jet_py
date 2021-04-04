@@ -1,24 +1,14 @@
 import tarkov
 from tarkov.bots.container import BotContainer
-from tarkov.containers import ConfigContainer, Container, RepositoriesContainer
-from tarkov.fleamarket.containers import FleaMarketContainer
+from tarkov.containers import ConfigContainer
 from tarkov.launcher.container import LauncherContainer
 
 if __name__ == "__main__":
     launcher_container = LauncherContainer()
     launcher_container.wire(packages=[tarkov])
 
-    container = Container()
-    container.wire(packages=[tarkov])
-
-    repositories_container = RepositoriesContainer()
-    repositories_container.wire(packages=[tarkov])
-
     bot_container = BotContainer()
     bot_container.wire(packages=[tarkov])
-
-    flea_container = FleaMarketContainer()
-    flea_container.wire(packages=[tarkov])
 
     config_container = ConfigContainer()
     config_container.wire(packages=[tarkov])

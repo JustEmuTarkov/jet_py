@@ -8,15 +8,14 @@ import ujson
 from dependency_injector.wiring import Provide, inject
 
 from server import db_dir
-from tarkov.containers import Container, RepositoriesContainer
-
+from server.container import AppContainer
 from tarkov.exceptions import NoSpaceError
-from tarkov.inventory.repositories import ItemTemplatesRepository
 from tarkov.inventory.factories import ItemFactory
 from tarkov.inventory.helpers import regenerate_item_ids_dict
 from tarkov.inventory.inventory import GridInventory, GridInventoryStashMap
 from tarkov.inventory.models import Item, ItemTemplate
 from tarkov.inventory.prop_models import CompoundProps, LootContainerProps, StackableItemProps
+from tarkov.inventory.repositories import ItemTemplatesRepository
 from tarkov.inventory.types import ItemId, TemplateId
 from tarkov.models import Base
 
@@ -41,7 +40,7 @@ class ContainerInventory(GridInventory):
     def __init__(
         self,
         container: ContainerModel,
-        templates_repository: ItemTemplatesRepository = Provide[RepositoriesContainer.templates],
+        templates_repository: ItemTemplatesRepository = Provide[AppContainer.repos.templates],
     ):
         super().__init__()
         self.container = container
@@ -87,7 +86,7 @@ class ContainerLootGenerator:
         self,
         location_generator: LocationGenerator,
         container: ContainerModel,
-        templates_repository: ItemTemplatesRepository = Provide[RepositoriesContainer.templates],
+        templates_repository: ItemTemplatesRepository = Provide[AppContainer.repos.templates],
     ):
         # Reference to location generator
         self.location_generator = location_generator
@@ -114,7 +113,7 @@ class ContainerLootGenerator:
 
     @inject
     def __generate_random_item(
-        self, item_factory: ItemFactory = Provide[Container.item_factory]
+        self, item_factory: ItemFactory = Provide[AppContainer.items.factory]
     ) -> Tuple[Item, List[Item]]:
         """Generates random item for this container"""
         random_template = random.choices(self.__item_templates, self.__item_templates_weights, k=1)[0]
@@ -149,7 +148,7 @@ class LocationGenerator:
     def __init__(
         self,
         location: str,
-        templates_repository: ItemTemplatesRepository = Provide[RepositoriesContainer.templates],
+        templates_repository: ItemTemplatesRepository = Provide[AppContainer.repos.templates],
     ):
         self.templates_repository = templates_repository
         location_file_path = db_dir.joinpath("locations", f"{location}.json")

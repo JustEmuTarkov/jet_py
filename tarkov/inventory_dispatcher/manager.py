@@ -11,7 +11,7 @@ from tarkov.inventory_dispatcher.inventory import InventoryDispatcher
 from tarkov.inventory_dispatcher.quests import QuestDispatcher
 from tarkov.inventory_dispatcher.trading import TradingDispatcher
 from tarkov.models import Base
-from tarkov.profile import Profile
+from tarkov.profile.profile import Profile
 
 if TYPE_CHECKING:
     # pylint: disable=unused-import

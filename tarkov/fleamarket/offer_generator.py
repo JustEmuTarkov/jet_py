@@ -7,25 +7,23 @@ from datetime import datetime, timedelta
 from typing import Dict, List, TYPE_CHECKING
 
 import pydantic
-from dependency_injector.wiring import Provide, inject
+from dependency_injector.wiring import inject
 
 from server import db_dir
-from tarkov.inventory.repositories import ItemTemplatesRepository
-from tarkov.inventory.helpers import generate_item_id
 from tarkov.inventory.factories import ItemFactory
+from tarkov.inventory.helpers import generate_item_id
 from tarkov.inventory.models import Item, ItemTemplate
 from tarkov.inventory.prop_models import AmmoProps
+from tarkov.inventory.repositories import ItemTemplatesRepository
 from tarkov.inventory.types import TemplateId
 from tarkov.repositories.categories import category_repository
 from .models import FleaUser, Offer, OfferId, OfferRequirement
-from tarkov.containers import ConfigContainer, Container, RepositoriesContainer
-
+from ..config import FleaMarketConfig
 from ..globals_.repository import GlobalsRepository
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
     from .fleamarket import FleaMarket
-    from tarkov.config import FleaMarketConfig
 
 
 class OfferGenerator:
@@ -41,15 +39,20 @@ class OfferGenerator:
     @inject
     def __init__(
         self,
-        config: FleaMarketConfig = Provide[ConfigContainer.flea_market],
-        templates_repository: ItemTemplatesRepository = Provide[RepositoriesContainer.templates],
+        config: FleaMarketConfig,
+        templates_repository: ItemTemplatesRepository,
+        globals_repository: GlobalsRepository,
+        item_factory: ItemFactory,
     ) -> None:
-        self.config = config
-        self.templates_repository = templates_repository
+        self.__config = config
+        self.__templates_repository = templates_repository
+        self.__globals_repository = globals_repository
+        self.__item_factory = item_factory
+
         # Creates dictionary with item prices from templates and updates it with prices from flea_prices.json
         self.item_prices = {
             tpl.id: tpl.props.CreditsPrice
-            for tpl in self.templates_repository.templates.values()
+            for tpl in self.__templates_repository.templates.values()
             if tpl.id in category_repository.item_categories and tpl.props.CreditsPrice
         }
         item_prices: Dict[TemplateId, int] = pydantic.parse_file_as(
@@ -64,14 +67,14 @@ class OfferGenerator:
 
         # All the item templates that we have prices for
         self.item_templates = [
-            tpl for tpl in self.templates_repository.templates.values() if tpl.id in self.item_prices
+            tpl for tpl in self.__templates_repository.templates.values() if tpl.id in self.item_prices
         ]
         prices = list(self.item_prices.values())
         median_price = statistics.median(prices)
         prices_sorted = sorted(prices)
         # Calculates low/high percentile, they're used to weight too cheap/expensive items
-        self.percentile_high: int = prices_sorted[int(len(prices) * self.config.percentile_high)]
-        self.percentile_low: int = prices_sorted[int(len(prices) * self.config.percentile_low)]
+        self.percentile_high: int = prices_sorted[int(len(prices) * self.__config.percentile_high)]
+        self.percentile_low: int = prices_sorted[int(len(prices) * self.__config.percentile_low)]
 
         self.item_templates_weights = [
             self._get_item_template_weight(tpl, median_price) for tpl in self.item_templates
@@ -110,8 +113,6 @@ class OfferGenerator:
     def _generate_offer(
         self,
         item_template: ItemTemplate,
-        globals_repository: GlobalsRepository = Provide[RepositoriesContainer.globals],
-        item_factory: ItemFactory = Provide[Container.item_factory],
     ) -> Offer:
         """
         Generates single offer
@@ -121,8 +122,8 @@ class OfferGenerator:
         root_item: Item
         sell_in_one_piece = False
 
-        if globals_repository.has_preset(item_template):
-            preset = globals_repository.item_preset(item_template)
+        if self.__globals_repository.has_preset(item_template):
+            preset = self.__globals_repository.item_preset(item_template)
             root_item, children = preset.get_items()
             offer_items = [root_item, *children]
             sell_in_one_piece = True
@@ -135,11 +136,11 @@ class OfferGenerator:
                 )
             )
             ammo_count = max(1, abs(ammo_count))
-            root_item, _ = item_factory.create_item(item_template, 1)
+            root_item, _ = self.__item_factory.create_item(item_template, 1)
             offer_items = [root_item]
             root_item.upd.StackObjectsCount = ammo_count
         else:
-            root_item, child_items = item_factory.create_item(item_template)
+            root_item, child_items = self.__item_factory.create_item(item_template)
             offer_items = [root_item, *child_items]
 
         offer_price = sum(self.item_prices[i.tpl] for i in offer_items)

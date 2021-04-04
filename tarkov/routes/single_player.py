@@ -11,8 +11,8 @@ from tarkov.inventory.implementations import SimpleInventory
 from tarkov.inventory.models import Item
 from tarkov.lib import locations
 from tarkov.models import TarkovSuccessResponse
-from tarkov.profile import Profile
 from tarkov.profile.models import BackendCounter, ProfileInfo, ProfileModel, Skills
+from tarkov.profile.profile import Profile
 from tarkov.quests.models import Quest
 
 singleplayer_router = make_router(tags=["Singleplayer"])

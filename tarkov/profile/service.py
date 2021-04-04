@@ -2,8 +2,8 @@ import ujson
 from dependency_injector.wiring import Provide, inject
 
 from server import db_dir, root_dir
-from tarkov.launcher.container import LauncherContainer
 from tarkov.launcher.accounts import AccountService
+from tarkov.launcher.container import LauncherContainer
 from tarkov.profile.models import ProfileModel
 
 

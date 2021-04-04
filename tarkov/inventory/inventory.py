@@ -6,8 +6,7 @@ from typing import Dict, Iterable, List, Optional, TYPE_CHECKING, Tuple
 
 from dependency_injector.wiring import Provide, inject
 
-from tarkov.containers import RepositoriesContainer
-
+from server.container import AppContainer
 from tarkov.exceptions import NoSpaceError, NotFoundError
 from tarkov.models import Base
 from .helpers import generate_item_id
@@ -40,7 +39,7 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
     @inject
     def __init__(
         self,
-        templates_repository: ItemTemplatesRepository = Provide[RepositoriesContainer.templates],
+        templates_repository: ItemTemplatesRepository = Provide[AppContainer.repos.templates],
     ):
         self.templates_repository = templates_repository
 

@@ -3,13 +3,10 @@ from __future__ import annotations
 import collections
 from typing import Dict, List, TYPE_CHECKING, Union
 
-from dependency_injector.wiring import Provide, inject
-
 from tarkov.fleamarket.models import FleaMarketRequest, FleaMarketResponse, Offer, SortType
 from tarkov.inventory.repositories import ItemTemplatesRepository
 from tarkov.inventory.types import TemplateId
 from tarkov.repositories.categories import CategoryId, category_repository
-from tarkov.containers import RepositoriesContainer
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
@@ -21,11 +18,10 @@ class FleaMarketView:
     Class to process requests from "/client/ragfair/find" route
     """
 
-    @inject
     def __init__(
         self,
         flea_market: FleaMarket,
-        templates_repository: ItemTemplatesRepository = Provide[RepositoriesContainer.templates],
+        templates_repository: ItemTemplatesRepository,
     ):
         self.templates_repository = templates_repository
         self.flea_market = flea_market
@@ -63,7 +59,7 @@ class FleaMarketView:
         # Offers pagination/sorting
         page_size = request.limit
         offers = self._sorted_offers(offers, request.sortType, reverse=request.sortDirection == 1)
-        offers_view = offers[request.page * page_size : (request.page + 1) * page_size]
+        offers_view = offers[request.page * page_size: (request.page + 1) * page_size]
 
         return FleaMarketResponse(
             offers=offers_view,
@@ -81,7 +77,7 @@ class FleaMarketView:
                 category_repository.get_category(offer.root_item.tpl),
                 request.handbookId,
             )
-            or offer.root_item.tpl == request.handbookId
+               or offer.root_item.tpl == request.handbookId
         ]
 
     def _sorted_offers(self, offers: List[Offer], sort_type: SortType, reverse: bool = False) -> List[Offer]:

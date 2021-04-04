@@ -6,7 +6,7 @@ from fastapi import BackgroundTasks
 from fastapi.params import Cookie
 
 from server import logger
-from tarkov.profile import Profile
+from tarkov.profile.profile import Profile
 
 
 class ProfileManager:

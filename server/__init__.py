@@ -5,7 +5,6 @@ from logging import LogRecord, StreamHandler
 from pathlib import Path
 from typing import Optional
 
-
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
     root_dir = Path(sys.executable).parent.absolute()
 else:

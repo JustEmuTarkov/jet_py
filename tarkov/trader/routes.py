@@ -7,7 +7,7 @@ from tarkov.dependencies import profile_manager
 from tarkov.inventory.models import Item
 from tarkov.inventory.types import ItemId
 from tarkov.models import Base, TarkovErrorResponse, TarkovSuccessResponse
-from tarkov.profile import Profile
+from tarkov.profile.profile import Profile
 from tarkov.trader import TraderType
 from tarkov.trader.models import BarterSchemeEntry
 from tarkov.trader.trader import Trader

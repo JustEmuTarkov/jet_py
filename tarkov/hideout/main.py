@@ -6,11 +6,11 @@ from dependency_injector.wiring import Provide, inject
 from pydantic import parse_obj_as
 
 from server import db_dir, logger
+from server.container import AppContainer
 from server.utils import atomic_write
 from tarkov import inventory
 from tarkov.inventory.models import Item
 from .models import HideoutArea, HideoutAreaType, HideoutProduction
-from tarkov.containers import Container
 from ..inventory.factories import ItemFactory
 
 if TYPE_CHECKING:
@@ -99,7 +99,7 @@ class Hideout:
 
     @inject
     def take_production(
-        self, recipe_id: str, item_factory: ItemFactory = Provide[Container.item_factory]
+        self, recipe_id: str, item_factory: ItemFactory = Provide[AppContainer.items.factory]
     ) -> List[inventory.models.Item]:
         recipe = self.get_recipe(recipe_id)
 

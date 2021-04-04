@@ -3,13 +3,12 @@ from typing import List, Tuple
 import pytest
 from dependency_injector.wiring import Provide, inject
 
-from tarkov.containers import Container, RepositoriesContainer
-
+from server.container import AppContainer
 from tarkov.exceptions import NoSpaceError
-from tarkov.inventory.repositories import ItemTemplatesRepository
 from tarkov.inventory.factories import ItemFactory
 from tarkov.inventory.inventory import PlayerInventory
 from tarkov.inventory.models import Item, ItemInventoryLocation, ItemOrientationEnum
+from tarkov.inventory.repositories import ItemTemplatesRepository
 from tarkov.inventory.types import TemplateId
 
 
@@ -29,8 +28,8 @@ def test_places_items(inventory: PlayerInventory, random_items: List[Item]) -> N
 def test_should_not_be_able_to_place_items_out_of_bounds(
     inventory: PlayerInventory,
     test_coords: Tuple[int, int],
-    item_templates_repository: ItemTemplatesRepository = Provide[RepositoriesContainer.templates],
-    item_factory: ItemFactory = Provide[Container.item_factory],
+    item_templates_repository: ItemTemplatesRepository = Provide[AppContainer.repos.templates],
+    item_factory: ItemFactory = Provide[AppContainer.items.factory],
 ) -> None:
     magbox = item_factory.create_item(
         item_templates_repository.get_template(TemplateId("5c127c4486f7745625356c13"))
@@ -46,8 +45,8 @@ def test_should_not_be_able_to_place_items_out_of_bounds(
 @inject
 def test_finds_locations(
     inventory: PlayerInventory,
-    item_templates_repository: ItemTemplatesRepository = Provide[RepositoriesContainer.templates],
-    item_factory: ItemFactory = Provide[Container.item_factory],
+    item_templates_repository: ItemTemplatesRepository = Provide[AppContainer.repos.templates],
+    item_factory: ItemFactory = Provide[AppContainer.items.factory],
 ) -> None:
     # Should be able to completely fill EOD stash with PSUs
     width, height = inventory.grid_size

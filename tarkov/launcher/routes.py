@@ -1,5 +1,4 @@
 import zlib
-from typing import TYPE_CHECKING
 
 from dependency_injector.wiring import Provide, inject
 from fastapi.params import Body, Depends
@@ -8,10 +7,9 @@ from starlette.responses import PlainTextResponse
 
 from server.utils import get_request_url_root, make_router
 from tarkov.exceptions import NotFoundError
+from tarkov.launcher.accounts import AccountService
 from tarkov.launcher.container import LauncherContainer
 from tarkov.launcher.models import Account
-
-from tarkov.launcher.accounts import AccountService
 
 launcher_router = make_router(tags=["Launcher"])
 

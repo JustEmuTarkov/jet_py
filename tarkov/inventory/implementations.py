@@ -5,10 +5,8 @@ from typing import Dict, List, Tuple
 
 from dependency_injector.wiring import Provide, inject
 
-from tarkov.containers import RepositoriesContainer
-
+from server.container import AppContainer
 from tarkov.exceptions import NoSpaceError
-from tarkov.inventory.repositories import ItemTemplatesRepository
 from tarkov.inventory.inventory import GridInventory, GridInventoryStashMap, MutableInventory
 from tarkov.inventory.models import (
     AnyItemLocation,
@@ -18,6 +16,7 @@ from tarkov.inventory.models import (
     ItemTemplate,
 )
 from tarkov.inventory.prop_models import CompoundProps, Grid
+from tarkov.inventory.repositories import ItemTemplatesRepository
 from tarkov.inventory.types import ItemId
 
 
@@ -87,7 +86,7 @@ class MultiGridContainer:
         cls,
         item: Item,
         slot_id: str,
-        item_templates_repository: ItemTemplatesRepository = Provide[RepositoriesContainer.templates],
+        item_templates_repository: ItemTemplatesRepository = Provide[AppContainer.repos.templates],
     ) -> MultiGridContainer:
         return cls(item_templates_repository.get_template(item), item.id, slot_id)
 

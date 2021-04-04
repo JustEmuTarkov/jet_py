@@ -12,7 +12,7 @@ from tarkov.inventory_dispatcher.manager import DispatcherResponse
 from tarkov.launcher.accounts import AccountService
 from tarkov.launcher.container import LauncherContainer
 from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
-from tarkov.profile import Profile
+from tarkov.profile.profile import Profile
 from tarkov.profile.service import profile_service
 
 profile_router = make_router(tags=["Profile"])

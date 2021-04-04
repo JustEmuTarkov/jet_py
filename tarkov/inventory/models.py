@@ -16,7 +16,6 @@ from pydantic import (
 
 from server import logger
 from tarkov.inventory.helpers import generate_item_id
-
 from tarkov.inventory.prop_models import (
     AnyProp,
     BaseItemProps,

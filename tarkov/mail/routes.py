@@ -6,7 +6,7 @@ from server.utils import make_router
 from tarkov.dependencies import profile_manager
 from tarkov.mail.requests import GetAllAttachmentsRequest, MailDialogViewRequest
 from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
-from tarkov.profile import Profile
+from tarkov.profile.profile import Profile
 
 mail_router = make_router(tags=["Notifier"])
 

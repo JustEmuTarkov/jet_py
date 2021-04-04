@@ -6,14 +6,13 @@ import pytest
 from dependency_injector.wiring import Provide, inject
 
 from server import root_dir
-from tarkov.containers import Container, RepositoriesContainer
-
-from tarkov.inventory.repositories import ItemTemplatesRepository
+from server.container import AppContainer
 from tarkov.inventory.factories import ItemFactory
 from tarkov.inventory.inventory import PlayerInventory
 from tarkov.inventory.models import InventoryModel, Item, ItemTemplate
-from tarkov.profile import Profile
+from tarkov.inventory.repositories import ItemTemplatesRepository
 from tarkov.profile.models import ProfileModel
+from tarkov.profile.profile import Profile
 
 TEST_RESOURCES_PATH = root_dir.joinpath("tarkov", "tests", "resources")
 
@@ -47,8 +46,8 @@ def make_inventory(player_profile: Profile) -> Callable:
 @pytest.fixture()
 @inject
 def random_items(
-    templates_repository: ItemTemplatesRepository = Provide[RepositoriesContainer.templates],
-    item_factory: ItemFactory = Provide[Container.item_factory],
+    templates_repository: ItemTemplatesRepository = Provide[AppContainer.repos.templates],
+    item_factory: ItemFactory = Provide[AppContainer.items.factory],
 ) -> List[Item]:
     random.seed(42)
     random_templates = random.sample(

@@ -11,11 +11,11 @@ import ujson
 from dependency_injector.wiring import Provide, inject
 
 from server import db_dir
-from tarkov.containers import RepositoriesContainer
+from server.container import AppContainer
 from tarkov.inventory.helpers import regenerate_items_ids
-from tarkov.inventory.repositories import ItemTemplatesRepository
 from tarkov.inventory.inventory import ImmutableInventory
 from tarkov.inventory.models import Item, ItemUpd
+from tarkov.inventory.repositories import ItemTemplatesRepository
 from tarkov.inventory.types import CurrencyEnum, ItemId, TemplateId
 from tarkov.quests.models import QuestStatus
 from tarkov.repositories.categories import category_repository
@@ -42,7 +42,7 @@ class Trader:
         self,
         type_: TraderType,
         profile: Profile,
-        templates_repository: ItemTemplatesRepository = Provide[RepositoriesContainer.templates],
+        templates_repository: ItemTemplatesRepository = Provide[AppContainer.repos.templates],
     ):
         self.templates_repository = templates_repository
         self.type: TraderType = type_

@@ -7,7 +7,7 @@ from server.utils import make_router
 from tarkov.dependencies import profile_manager
 from tarkov.inventory.types import ItemId, TemplateId
 from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
-from tarkov.profile import Profile
+from tarkov.profile.profile import Profile
 from tarkov.trader import TraderType
 from tarkov.trader.trader import Trader
 

@@ -19,9 +19,12 @@ class RepositoriesContainer(containers.DeclarativeContainer):
     globals = providers.Singleton(GlobalsRepository)
 
 
-class Container(containers.DeclarativeContainer):
-    item_factory = providers.Singleton(
+class ItemsContainer(containers.DeclarativeContainer):
+    templates_repository: RepositoriesContainer = providers.Dependency()
+    globals_repository: GlobalsRepository = providers.Dependency()
+
+    factory = providers.Singleton(
         ItemFactory,
-        templates_repository=RepositoriesContainer.templates,
-        globals_repository=RepositoriesContainer.globals,
+        templates_repository=templates_repository,
+        globals_repository=globals_repository,
     )

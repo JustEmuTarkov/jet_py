@@ -6,6 +6,7 @@ from typing import Iterator, List, Optional, TYPE_CHECKING, Tuple
 from dependency_injector.wiring import Provide, inject
 
 import tarkov.inventory
+from server.container import AppContainer
 from tarkov.exceptions import NotFoundError
 from tarkov.fleamarket.models import OfferId
 from tarkov.inventory.implementations import SimpleInventory
@@ -32,9 +33,6 @@ from .models import (
     Toggle,
     Transfer,
 )
-from tarkov.containers import RepositoriesContainer
-from tarkov.fleamarket.containers import FleaMarketContainer
-
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
@@ -48,8 +46,8 @@ class InventoryDispatcher(Dispatcher):
     def __init__(
         self,
         manager: "DispatcherManager",
-        flea_market: FleaMarket = Provide[FleaMarketContainer.market],
-        templates_repository: ItemTemplatesRepository = Provide[RepositoriesContainer.templates],
+        flea_market: FleaMarket = Provide[AppContainer.flea.market],
+        templates_repository: ItemTemplatesRepository = Provide[AppContainer.repos.templates],
     ):
         super().__init__(manager)
         self.flea_market = flea_market

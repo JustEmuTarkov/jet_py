@@ -8,7 +8,7 @@ from server import db_dir
 from server.utils import make_router
 from tarkov.dependencies import profile_manager
 from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
-from tarkov.profile import Profile
+from tarkov.profile.profile import Profile
 
 match_router = make_router(tags=["Match"])
 

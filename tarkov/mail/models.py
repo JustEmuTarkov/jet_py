@@ -8,7 +8,6 @@ from typing import Dict, ItemsView, List
 from pydantic import Field, StrictBool, StrictInt
 
 from tarkov.inventory.helpers import generate_item_id, regenerate_items_ids
-
 from tarkov.inventory.models import Item
 from tarkov.models import Base
 

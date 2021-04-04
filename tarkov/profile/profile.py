@@ -6,6 +6,7 @@ from typing import Optional, TYPE_CHECKING, Type, Union
 from dependency_injector.wiring import Provide, inject
 
 from server import root_dir
+from server.container import AppContainer
 from server.utils import atomic_write
 from tarkov import quests
 from tarkov.hideout import Hideout
@@ -14,7 +15,6 @@ from tarkov.inventory.types import TemplateId
 from tarkov.mail import Mail
 from tarkov.trader import TraderType
 from .models import ItemInsurance, ProfileModel
-from tarkov.containers import RepositoriesContainer
 from ..inventory.inventory import PlayerInventory
 
 if TYPE_CHECKING:
@@ -30,7 +30,7 @@ class Encyclopedia:
     def examine(
         self,
         item: Union[Item, TemplateId],
-        templates_repository: ItemTemplatesRepository = Provide[RepositoriesContainer.templates],
+        templates_repository: ItemTemplatesRepository = Provide[AppContainer.repos.templates],
     ) -> None:
         template: ItemTemplate = templates_repository.get_template(item)
         self.data[template.id] = False

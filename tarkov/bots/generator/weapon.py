@@ -5,8 +5,7 @@ from typing import List, Set, TYPE_CHECKING
 
 from dependency_injector.wiring import Provide, inject
 
-from tarkov.containers import RepositoriesContainer
-
+from server.container import AppContainer
 from tarkov.inventory.helpers import generate_item_id
 from tarkov.inventory.models import Item
 from tarkov.inventory.types import TemplateId
@@ -24,7 +23,7 @@ class BotWeaponGenerator:
         self,
         bot_inventory: BotInventory,
         preset: BotGeneratorPreset,
-        templates_repository: ItemTemplatesRepository = Provide[RepositoriesContainer.templates],
+        templates_repository: ItemTemplatesRepository = Provide[AppContainer.repos.templates],
     ):
         self.templates_repository = templates_repository
         self.bot_inventory = bot_inventory

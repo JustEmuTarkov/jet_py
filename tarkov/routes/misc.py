@@ -8,11 +8,10 @@ from fastapi.params import Cookie, Depends
 from starlette.requests import Request
 
 from server import db_dir, start_time
+from server.container import AppContainer
 from server.utils import get_request_url_root, make_router
 from tarkov import config
-from tarkov.containers import RepositoriesContainer
-from tarkov.inventory.repositories import ItemTemplatesRepository
-from tarkov.inventory.repositories import AnyTemplate
+from tarkov.inventory.repositories import AnyTemplate, ItemTemplatesRepository
 from tarkov.inventory.types import TemplateId
 from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
 
@@ -91,7 +90,7 @@ def client_game_keepalive(
 )
 @inject
 def client_items(
-    templates_repository: ItemTemplatesRepository = Depends(Provide[RepositoriesContainer.templates]),  # type: ignore
+    templates_repository: ItemTemplatesRepository = Depends(Provide[AppContainer.repos.templates]),  # type: ignore
 ) -> TarkovSuccessResponse[Dict[TemplateId, Union[AnyTemplate]]]:
     return TarkovSuccessResponse(data=templates_repository.client_items_view)
 

@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import time
 from typing import Dict, List, TYPE_CHECKING, Tuple
 
@@ -6,6 +7,7 @@ from dependency_injector.wiring import Provide
 from pydantic import StrictInt
 
 import tarkov.inventory.types
+from server.container import AppContainer
 from tarkov import inventory
 from tarkov.inventory.inventory import PlayerInventory
 from tarkov.inventory.models import Item
@@ -25,7 +27,6 @@ from .models import (
     QuestStatus,
 )
 from .repositories import quests_repository
-from tarkov.containers import RepositoriesContainer
 from ..trader.trader import Trader
 
 if TYPE_CHECKING:
@@ -130,7 +131,7 @@ class Quests:
     def complete_quest(
         self,
         quest_id: str,
-        templates_repository: ItemTemplatesRepository = Provide[RepositoriesContainer.templates],
+        templates_repository: ItemTemplatesRepository = Provide[AppContainer.repos.templates],
     ) -> None:
         quest_template = quests_repository.get_quest_template(quest_id)
         quest = self.get_quest(quest_id)
