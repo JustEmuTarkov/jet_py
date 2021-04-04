@@ -4,6 +4,4 @@ from tarkov.launcher.accounts import AccountService
 
 
 class LauncherContainer(containers.DeclarativeContainer):
-    account_service = providers.Singleton(
-        AccountService
-    )
+    account_service = providers.Singleton(AccountService)

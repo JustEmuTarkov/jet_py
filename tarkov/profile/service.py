@@ -14,7 +14,7 @@ class ProfileService:
         nickname: str,
         side: str,
         profile_id: str,
-        account_service: AccountService = Provide[LauncherContainer.account_service]
+        account_service: AccountService = Provide[LauncherContainer.account_service],
     ) -> ProfileModel:
         account = account_service.get_account(profile_id)
         base_profile_dir = db_dir.joinpath("profile", account.edition)
