@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import List, Union
 
 from dependency_injector.wiring import Provide, inject
@@ -11,8 +9,8 @@ from server.utils import get_request_url_root, make_router
 from tarkov.dependencies import profile_manager
 from tarkov.inventory_dispatcher import DispatcherManager
 from tarkov.inventory_dispatcher.manager import DispatcherResponse
-from tarkov.launcher import LauncherContainer
 from tarkov.launcher.accounts import AccountService
+from tarkov.launcher.container import LauncherContainer
 from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
 from tarkov.profile import Profile
 from tarkov.profile.service import profile_service

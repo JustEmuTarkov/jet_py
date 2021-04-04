@@ -8,11 +8,10 @@ from starlette.responses import PlainTextResponse
 
 from server.utils import get_request_url_root, make_router
 from tarkov.exceptions import NotFoundError
-from tarkov.launcher import LauncherContainer
+from tarkov.launcher.container import LauncherContainer
 from tarkov.launcher.models import Account
 
-if TYPE_CHECKING:
-    from tarkov.launcher.accounts import AccountService
+from tarkov.launcher.accounts import AccountService
 
 launcher_router = make_router(tags=["Launcher"])
 

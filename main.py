@@ -1,13 +1,12 @@
 import tarkov
-from tarkov.containers import ConfigContainer, Container, RepositoriesContainer
 from tarkov.bots.container import BotContainer
+from tarkov.containers import ConfigContainer, Container, RepositoriesContainer
 from tarkov.fleamarket.containers import FleaMarketContainer
+from tarkov.launcher.container import LauncherContainer
 
 if __name__ == "__main__":
-    import uvicorn  # type: ignore
-
-    from server.app import app
-    from server.certs import generate_ssl_certificate, is_ssl_certificate_expired
+    launcher_container = LauncherContainer()
+    launcher_container.wire(packages=[tarkov])
 
     container = Container()
     container.wire(packages=[tarkov])
@@ -23,6 +22,11 @@ if __name__ == "__main__":
 
     config_container = ConfigContainer()
     config_container.wire(packages=[tarkov])
+
+    import uvicorn  # type: ignore
+
+    from server.app import app
+    from server.certs import generate_ssl_certificate, is_ssl_certificate_expired
 
     try:
         if is_ssl_certificate_expired():
