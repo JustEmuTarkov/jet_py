@@ -18,6 +18,7 @@ class BotInventory(MutableInventory):
     inventory: InventoryModel
 
     def __init__(self, bot_inventory: dict):
+        super().__init__()
         self.inventory = parse_obj_as(InventoryModel, bot_inventory)
         self.__items = {i.id: i for i in self.inventory.items}
 

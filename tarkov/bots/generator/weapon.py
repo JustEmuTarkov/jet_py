@@ -86,11 +86,11 @@ class BotWeaponGenerator:
         # Ammo generation will be handler later via BotMagazineGenerator class
         if slot == "cartridges":
             return
-        else:
-            item = Item(
-                id=generate_item_id(),
-                tpl=random_template.id,
-                slot_id=slot,
-                parent_id=parent.id,
-            )
+
+        item = Item(
+            id=generate_item_id(),
+            tpl=random_template.id,
+            slot_id=slot,
+            parent_id=parent.id,
+        )
         self.bot_inventory.add_item(item)

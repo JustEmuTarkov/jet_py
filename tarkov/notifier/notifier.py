@@ -3,11 +3,12 @@ from __future__ import annotations
 import collections
 from datetime import datetime
 from typing import DefaultDict, Dict, List, Optional, TYPE_CHECKING
+from tarkov.notifier.models import MessageNotification, MessageNotificationData
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
     from tarkov.profile.profile import Profile
-    from tarkov.mail.models import MailDialogueMessage, MessageNotification, MessageNotificationData
+    from tarkov.mail.models import MailDialogueMessage
 
 
 class ProfileNotifier:

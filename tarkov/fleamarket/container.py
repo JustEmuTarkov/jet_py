@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from dependency_injector import containers, providers
-from dependency_injector.providers import Dependency
+from dependency_injector.providers import Dependency  # pylint: disable=no-name-in-module
 
 from tarkov.fleamarket.fleamarket import FleaMarket
 from tarkov.fleamarket.offer_generator import OfferGenerator

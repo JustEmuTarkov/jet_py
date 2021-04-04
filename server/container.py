@@ -4,6 +4,7 @@ from dependency_injector import containers, providers
 
 from tarkov.containers import ConfigContainer, ItemsContainer, RepositoriesContainer
 from tarkov.fleamarket.container import FleaMarketContainer
+from tarkov.mail.container import MailContainer
 from tarkov.notifier.container import NotifierContainer
 from tarkov.quests.container import QuestsContainer
 
@@ -45,6 +46,20 @@ class AppContainer(containers.DeclarativeContainer):
         ),
     )
 
-    notifier: NotifierContainer = cast(NotifierContainer, providers.Container(NotifierContainer))
+    notifier: NotifierContainer = cast(
+        NotifierContainer,
+        providers.Container(NotifierContainer),
+    )
 
-    quests: QuestsContainer = cast(QuestsContainer, providers.Container(QuestsContainer))
+    quests: QuestsContainer = cast(
+        QuestsContainer,
+        providers.Container(QuestsContainer),
+    )
+
+    mail: MailContainer = cast(
+        MailContainer,
+        providers.Container(
+            MailContainer,
+            notifier_service=notifier.service,
+        ),
+    )

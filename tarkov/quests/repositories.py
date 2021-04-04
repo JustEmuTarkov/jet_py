@@ -3,7 +3,6 @@ from typing import Dict
 
 import ujson
 
-from server import db_dir
 from tarkov.exceptions import NotFoundError
 from tarkov.quests.models import QuestTemplate
 

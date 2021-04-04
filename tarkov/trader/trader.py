@@ -159,6 +159,7 @@ class TraderInventory(ImmutableInventory):
     __assort_cache: ClassVar[Dict[TraderType, Dict[ItemId, Item]]] = {}
 
     def __init__(self, trader: Trader):
+        super().__init__()
         self.trader = trader
         self._quest_assort = ujson.load(
             self.trader.path.joinpath("questassort.json").open("r", encoding="utf8")

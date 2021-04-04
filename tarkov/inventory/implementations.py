@@ -22,6 +22,7 @@ from tarkov.inventory.types import ItemId
 
 class SimpleInventory(MutableInventory):
     def __init__(self, items: List[Item]):
+        super().__init__()
         self.__items: Dict[ItemId, Item] = {i.id: i for i in items}
 
         for item in self.__items.values():
@@ -34,6 +35,7 @@ class SimpleInventory(MutableInventory):
 
 class MultiGridSubInventory(GridInventory):
     def __init__(self, root_id: ItemId, grid: Grid):
+        super().__init__()
         self._root_id = root_id
         self._slot_id = grid.name
         self._grid = grid

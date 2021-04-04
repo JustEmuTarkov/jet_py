@@ -3,9 +3,8 @@ from __future__ import annotations
 import datetime
 from typing import Dict, List, TYPE_CHECKING
 
-from dependency_injector.wiring import Provide, inject
+from dependency_injector.wiring import inject
 
-from server.container import AppContainer
 from server.utils import atomic_write
 from tarkov.mail.models import (
     DialoguePreviewList,
@@ -68,7 +67,9 @@ class Mail:
     dialogues: MailDialogues
     view: MailView
 
-    def __init__(self, profile: Profile):
+    def __init__(self, profile: Profile, notifier_service: NotifierService):
+        self.__notifier_service = notifier_service
+
         self.profile = profile
         self.view = MailView(mail=self)
         self.path = self.profile.profile_dir.joinpath("dialogue.json")
@@ -84,13 +85,14 @@ class Mail:
 
     @inject
     def add_message(
-        self, message: MailDialogueMessage, notifier: NotifierService = Provide[AppContainer.notifier.service]
+        self,
+        message: MailDialogueMessage,
     ) -> None:
         """Adds message to mail and creates notification in notifier"""
         category: MailDialogue = self.get_dialogue(message.uid)
         category.messages.insert(0, message)
 
-        notifier.add_message_notification(profile_id=self.profile.profile_id, message=message)
+        self.__notifier_service.add_message_notification(profile_id=self.profile.profile_id, message=message)
 
     def get_message(self, message_id: str) -> MailDialogueMessage:
         """Returns MailDialogueMessage by it's id"""

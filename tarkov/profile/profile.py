@@ -8,15 +8,15 @@ from dependency_injector.wiring import Provide, inject
 from server import root_dir
 from server.container import AppContainer
 from server.utils import atomic_write
-from tarkov import quests
 from tarkov.hideout import Hideout
+from tarkov.inventory.inventory import PlayerInventory
 from tarkov.inventory.models import Item, ItemTemplate
 from tarkov.inventory.types import TemplateId
 from tarkov.mail import Mail
+from tarkov.quests.quests import Quests
 from tarkov.trader import TraderType
 from .models import ItemInsurance, ProfileModel
-from ..inventory.inventory import PlayerInventory
-from ..quests.quests import Quests
+from tarkov.notifier.notifier import NotifierService
 
 if TYPE_CHECKING:
     from tarkov.inventory.repositories import ItemTemplatesRepository
@@ -82,7 +82,8 @@ class Profile:
     def receive_experience(self, amount: int) -> None:
         self.pmc.Info.Experience += amount
 
-    def read(self) -> None:
+    @inject
+    def read(self, notifier_service: NotifierService = Provide[AppContainer.notifier.service]) -> None:
         if not self.profile_dir.exists() or not self.pmc_profile_path.exists():
             raise Profile.ProfileDoesNotExistsError
         self.pmc = ProfileModel.parse_file(self.pmc_profile_path)
@@ -97,7 +98,7 @@ class Profile:
         self.hideout = Hideout(profile=self)
         self.hideout.read()
 
-        self.mail = Mail(profile=self)
+        self.mail = Mail(self, notifier_service)
         self.mail.read()
 
     def write(self) -> None:

@@ -2,6 +2,7 @@ import uuid
 from typing import Dict, List, TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
+    # pylint: disable=cyclic-import
     from tarkov.inventory.models import Item
     from tarkov.inventory.types import ItemId
 
