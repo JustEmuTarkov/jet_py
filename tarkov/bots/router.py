@@ -7,7 +7,7 @@ from starlette.requests import Request
 
 from server import db_dir, logger
 from server.utils import make_router
-from tarkov.bots import BotGenerator
+from tarkov.bots.generator import BotGenerator
 from tarkov.bots.container import BotContainer
 from tarkov.models import TarkovSuccessResponse
 

@@ -2,14 +2,16 @@ import asyncio
 from typing import Optional
 
 import orjson
+from dependency_injector.wiring import Provide, inject
 from fastapi import Request
-from fastapi.params import Cookie
+from fastapi.params import Cookie, Depends
 from starlette.responses import PlainTextResponse
 
 from server import logger
+from server.container import AppContainer
 from server.utils import get_request_url_root, make_router
 from tarkov.models import TarkovSuccessResponse
-from .notifier import notifier_instance
+from .notifier import Notifier
 
 notifier_router = make_router(tags=["Notifier"])
 
@@ -33,12 +35,14 @@ def client_notifier_channel_create(
 
 
 @notifier_router.get("/notifierServer/get/{profile_id}")
+@inject
 async def notifierserver_get(
     profile_id: str,
+    notifier: Notifier = Depends(Provide[AppContainer.notifier.notifier]),  # type: ignore
 ) -> PlainTextResponse:
     for _ in range(90):
-        if notifier_instance.has_notifications(profile_id):
-            notifications = notifier_instance.get_notifications_view(profile_id)
+        if notifier.has_notifications(profile_id):
+            notifications = notifier.get_notifications_view(profile_id)
             logger.debug(f"New notifications for profile {profile_id}")
             logger.debug(notifications)
             response = "\n".join([orjson.dumps(notification).decode("utf8") for notification in notifications])

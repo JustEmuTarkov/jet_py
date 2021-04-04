@@ -154,3 +154,18 @@ class MailMessageType(enum.Enum):
     QuestFail = 11
     QuestSuccess = 12
     MessageWithItems = 13
+
+
+class MessageNotificationData(Base):
+    """Model bound to MessageNotification"""
+
+    dialogue_id: str = Field(alias="dialogId")
+    message: MailDialogueMessage
+
+
+class MessageNotification(Base):
+    """Notification for a mail message"""
+
+    type: str = "new_message"
+    event_id: str = Field(alias="eventId")
+    data: MessageNotificationData

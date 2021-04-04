@@ -4,12 +4,10 @@ import collections
 from datetime import datetime
 from typing import DefaultDict, Dict, List, Optional, TYPE_CHECKING
 
-from tarkov.mail.models import MailDialogueMessage
-from .models import MessageNotification, MessageNotificationData
-
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
-    from tarkov.profile import Profile
+    from tarkov.profile.profile import Profile
+    from tarkov.mail.models import MailDialogueMessage, MessageNotification, MessageNotificationData
 
 
 class ProfileNotifier:
@@ -83,6 +81,3 @@ class Notifier:
     @staticmethod
     def get_empty_notification() -> dict:
         return {"type": "ping", "eventId": "ping"}
-
-
-notifier_instance = Notifier()

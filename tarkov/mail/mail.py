@@ -3,6 +3,9 @@ from __future__ import annotations
 import datetime
 from typing import Dict, List, TYPE_CHECKING
 
+from dependency_injector.wiring import Provide, inject
+
+from server.container import AppContainer
 from server.utils import atomic_write
 from tarkov.mail.models import (
     DialoguePreviewList,
@@ -11,11 +14,11 @@ from tarkov.mail.models import (
     MailDialoguePreview,
     MailDialogues,
 )
-from tarkov.notifier.notifier import notifier_instance
+from tarkov.notifier.notifier import Notifier
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
-    from tarkov.profile import Profile
+    from tarkov.profile.profile import Profile
 
 
 class MailView:
@@ -79,12 +82,17 @@ class Mail:
             self.dialogues[trader_id] = dialogue
             return dialogue
 
-    def add_message(self, message: MailDialogueMessage) -> None:
+    @inject
+    def add_message(
+        self,
+        message: MailDialogueMessage,
+        notifier: Notifier = Provide[AppContainer.notifier.notifier]
+    ) -> None:
         """Adds message to mail and creates notification in notifier"""
         category: MailDialogue = self.get_dialogue(message.uid)
         category.messages.insert(0, message)
 
-        notifier_instance.add_message_notification(profile_id=self.profile.profile_id, message=message)
+        notifier.add_message_notification(profile_id=self.profile.profile_id, message=message)
 
     def get_message(self, message_id: str) -> MailDialogueMessage:
         """Returns MailDialogueMessage by it's id"""

@@ -1,7 +1,8 @@
 from dependency_injector import containers, providers
 
 from server import db_dir
-from tarkov.bots import BotGenerator, BotGeneratorPreset
+from tarkov.bots.generator import BotGenerator
+from tarkov.bots.generator.preset import BotGeneratorPreset
 
 
 class BotContainer(containers.DeclarativeContainer):
