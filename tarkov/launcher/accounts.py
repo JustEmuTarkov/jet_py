@@ -7,7 +7,6 @@ from server import root_dir
 from server.utils import atomic_write
 from tarkov.exceptions import NotFoundError
 from tarkov.inventory.helpers import generate_item_id
-
 from .models import Account
 
 
@@ -64,6 +63,3 @@ class AccountService:
         self.path.parent.mkdir(exist_ok=True, parents=True)
         accounts = [a.dict() for a in self.accounts]
         atomic_write(orjson.dumps(accounts).decode("utf8"), self.path)
-
-
-account_service = AccountService()

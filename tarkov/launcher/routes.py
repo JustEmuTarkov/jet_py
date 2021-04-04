@@ -1,13 +1,18 @@
 import zlib
+from typing import TYPE_CHECKING
 
-from fastapi.params import Body
+from dependency_injector.wiring import Provide, inject
+from fastapi.params import Body, Depends
 from starlette.requests import Request
 from starlette.responses import PlainTextResponse
 
 from server.utils import get_request_url_root, make_router
 from tarkov.exceptions import NotFoundError
-from tarkov.launcher.accounts import account_service
+from tarkov.launcher import LauncherContainer
 from tarkov.launcher.models import Account
+
+if TYPE_CHECKING:
+    from tarkov.launcher.accounts import AccountService
 
 launcher_router = make_router(tags=["Launcher"])
 
@@ -22,9 +27,11 @@ async def connect(request: Request) -> dict:
 
 
 @launcher_router.post("/launcher/profile/login")
+@inject
 def login(
     email: str = Body(..., embed=True),  # type: ignore
     password: str = Body(..., embed=True),  # type: ignore
+    account_service: AccountService = Depends(Provide[LauncherContainer.account_service]),  # type: ignore
 ) -> PlainTextResponse:
     try:
         account_service.find(email=email, password=password)
@@ -34,9 +41,11 @@ def login(
 
 
 @launcher_router.post("/launcher/profile/get")
+@inject
 async def get_profile(
     email: str = Body(..., embed=True),  # type: ignore
     password: str = Body(..., embed=True),  # type: ignore
+    account_service: AccountService = Depends(Provide[LauncherContainer.account_service]),  # type: ignore
 ) -> Account:
     return account_service.find(email, password)
 
@@ -45,10 +54,12 @@ async def get_profile(
     "/launcher/profile/register",
     response_class=PlainTextResponse,
 )
+@inject
 def register_account(
     email: str = Body(..., embed=True),  # type: ignore
     password: str = Body(..., embed=True),  # type: ignore
     edition: str = Body(..., embed=True),  # type: ignore
+    account_service: AccountService = Depends(Provide[LauncherContainer.account_service]),  # type: ignore
 ) -> PlainTextResponse:
     try:
         account_service.find(email=email, password=password)

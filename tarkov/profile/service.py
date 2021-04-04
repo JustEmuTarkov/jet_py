@@ -1,13 +1,21 @@
 import ujson
+from dependency_injector.wiring import Provide, inject
 
 from server import db_dir, root_dir
-from tarkov.launcher.accounts import account_service
+from tarkov.launcher import LauncherContainer
+from tarkov.launcher.accounts import AccountService
 from tarkov.profile.models import ProfileModel
 
 
 class ProfileService:
     @staticmethod
-    def create_profile(nickname: str, side: str, profile_id: str) -> ProfileModel:
+    @inject
+    def create_profile(
+        nickname: str,
+        side: str,
+        profile_id: str,
+        account_service: AccountService = Provide[LauncherContainer.account_service]
+    ) -> ProfileModel:
         account = account_service.get_account(profile_id)
         base_profile_dir = db_dir.joinpath("profile", account.edition)
 
