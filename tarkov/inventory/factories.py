@@ -2,9 +2,8 @@ from __future__ import annotations
 
 from typing import List, TYPE_CHECKING, Tuple
 
-from dependency_injector.wiring import Provide, inject
+from dependency_injector.wiring import inject
 
-from tarkov.containers.repositories import RepositoriesContainer
 from tarkov.exceptions import NotFoundError
 from tarkov.inventory.helpers import generate_item_id
 from tarkov.inventory.models import Item, ItemTemplate, ItemUpdMedKit, ItemUpdResource
@@ -20,8 +19,8 @@ class ItemFactory:
     @inject
     def __init__(
         self,
-        globals_repository: GlobalsRepository = Provide[RepositoriesContainer.globals],
-        templates_repository: ItemTemplatesRepository = Provide[RepositoriesContainer.templates],
+        globals_repository: GlobalsRepository,
+        templates_repository: ItemTemplatesRepository,
     ):
         self.globals_repository = globals_repository
         self.templates_repository = templates_repository

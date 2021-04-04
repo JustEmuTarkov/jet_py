@@ -5,7 +5,7 @@ from typing import Dict, List, Tuple
 
 from dependency_injector.wiring import Provide, inject
 
-from tarkov.containers.repositories import RepositoriesContainer
+from tarkov.containers import RepositoriesContainer
 
 from tarkov.exceptions import NoSpaceError
 from tarkov.inventory.repositories import ItemTemplatesRepository

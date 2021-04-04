@@ -14,7 +14,7 @@ from tarkov.inventory.types import TemplateId
 from tarkov.mail import Mail
 from tarkov.trader import TraderType
 from .models import ItemInsurance, ProfileModel
-from tarkov.containers.repositories import RepositoriesContainer
+from tarkov.containers import RepositoriesContainer
 from ..inventory.inventory import PlayerInventory
 
 if TYPE_CHECKING:

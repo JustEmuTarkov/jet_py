@@ -25,7 +25,7 @@ from .models import (
     QuestStatus,
 )
 from .repositories import quests_repository
-from tarkov.containers.repositories import RepositoriesContainer
+from tarkov.containers import RepositoriesContainer
 from ..trader.trader import Trader
 
 if TYPE_CHECKING:

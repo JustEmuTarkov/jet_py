@@ -3,7 +3,7 @@ from typing import List, Tuple
 
 from dependency_injector.wiring import Provide, inject
 
-from tarkov.containers.container import Container
+from tarkov.containers import Container
 
 from tarkov.exceptions import NoSpaceError
 from tarkov.inventory.factories import ItemFactory

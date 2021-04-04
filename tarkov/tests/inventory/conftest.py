@@ -6,8 +6,7 @@ import pytest
 from dependency_injector.wiring import Provide, inject
 
 from server import root_dir
-from tarkov.containers.container import Container
-from tarkov.containers.repositories import RepositoriesContainer
+from tarkov.containers import Container, RepositoriesContainer
 
 from tarkov.inventory.repositories import ItemTemplatesRepository
 from tarkov.inventory.factories import ItemFactory

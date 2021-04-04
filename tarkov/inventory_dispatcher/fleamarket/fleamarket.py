@@ -15,7 +15,7 @@ from tarkov.inventory_dispatcher.models import ActionType
 from tarkov.mail.models import MailDialogueMessage, MailMessageItems, MailMessageType
 from tarkov.trader import TraderType
 from .models import Add, Buy
-from tarkov.containers.container import Container
+from tarkov.containers import Container
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import

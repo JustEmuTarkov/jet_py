@@ -9,7 +9,7 @@ from tarkov.fleamarket.models import FleaMarketRequest, FleaMarketResponse, Offe
 from tarkov.inventory.repositories import ItemTemplatesRepository
 from tarkov.inventory.types import TemplateId
 from tarkov.repositories.categories import CategoryId, category_repository
-from tarkov.containers.repositories import RepositoriesContainer
+from tarkov.containers import RepositoriesContainer
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import

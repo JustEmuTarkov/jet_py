@@ -8,8 +8,7 @@ import ujson
 from dependency_injector.wiring import Provide, inject
 
 from server import db_dir
-from tarkov.containers.container import Container
-from tarkov.containers.repositories import RepositoriesContainer
+from tarkov.containers import Container, RepositoriesContainer
 
 from tarkov.exceptions import NoSpaceError
 from tarkov.inventory.repositories import ItemTemplatesRepository

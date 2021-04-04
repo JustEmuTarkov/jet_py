@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from dependency_injector.wiring import Provide, inject
 
-from tarkov.containers.repositories import RepositoriesContainer
+from tarkov.containers import RepositoriesContainer
 
 from ._types import BotInventoryContainers, LootGenerationConfig
 

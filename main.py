@@ -1,7 +1,5 @@
 import tarkov
-from tarkov.containers.config import ConfigContainer
-from tarkov.containers.container import Container
-from tarkov.containers.repositories import RepositoriesContainer
+from tarkov.containers import ConfigContainer, Container, RepositoriesContainer
 from tarkov.bots.container import BotContainer
 from tarkov.fleamarket.containers import FleaMarketContainer
 

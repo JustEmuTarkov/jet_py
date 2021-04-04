@@ -10,7 +10,7 @@ from starlette.requests import Request
 from server import db_dir, start_time
 from server.utils import get_request_url_root, make_router
 from tarkov import config
-from tarkov.containers.repositories import RepositoriesContainer
+from tarkov.containers import RepositoriesContainer
 from tarkov.inventory.repositories import ItemTemplatesRepository
 from tarkov.inventory.repositories import AnyTemplate
 from tarkov.inventory.types import TemplateId

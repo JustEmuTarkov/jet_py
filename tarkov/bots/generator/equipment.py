@@ -5,7 +5,7 @@ from typing import Set, TYPE_CHECKING
 
 from dependency_injector.wiring import Provide, inject
 
-from tarkov.containers.repositories import RepositoriesContainer
+from tarkov.containers import RepositoriesContainer
 
 from tarkov.inventory.helpers import generate_item_id
 from tarkov.inventory.models import Item

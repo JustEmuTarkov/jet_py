@@ -11,7 +11,7 @@ import ujson
 from dependency_injector.wiring import Provide, inject
 
 from server import db_dir
-from tarkov.containers.repositories import RepositoriesContainer
+from tarkov.containers import RepositoriesContainer
 from tarkov.inventory.helpers import regenerate_items_ids
 from tarkov.inventory.repositories import ItemTemplatesRepository
 from tarkov.inventory.inventory import ImmutableInventory

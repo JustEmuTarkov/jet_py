@@ -32,7 +32,7 @@ from .models import (
     Toggle,
     Transfer,
 )
-from tarkov.containers.repositories import RepositoriesContainer
+from tarkov.containers import RepositoriesContainer
 from tarkov.fleamarket.containers import FleaMarketContainer
 
 

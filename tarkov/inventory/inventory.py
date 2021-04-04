@@ -6,7 +6,7 @@ from typing import Dict, Iterable, List, Optional, TYPE_CHECKING, Tuple
 
 from dependency_injector.wiring import Provide, inject
 
-from tarkov.containers.repositories import RepositoriesContainer
+from tarkov.containers import RepositoriesContainer
 
 from tarkov.exceptions import NoSpaceError, NotFoundError
 from tarkov.models import Base

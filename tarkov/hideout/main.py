@@ -10,7 +10,7 @@ from server.utils import atomic_write
 from tarkov import inventory
 from tarkov.inventory.models import Item
 from .models import HideoutArea, HideoutAreaType, HideoutProduction
-from tarkov.containers.container import Container
+from tarkov.containers import Container
 from ..inventory.factories import ItemFactory
 
 if TYPE_CHECKING:

@@ -18,9 +18,7 @@ from tarkov.inventory.prop_models import AmmoProps
 from tarkov.inventory.types import TemplateId
 from tarkov.repositories.categories import category_repository
 from .models import FleaUser, Offer, OfferId, OfferRequirement
-from tarkov.containers.config import ConfigContainer
-from tarkov.containers.container import Container
-from tarkov.containers.repositories import RepositoriesContainer
+from tarkov.containers import ConfigContainer, Container, RepositoriesContainer
 
 from ..globals_.repository import GlobalsRepository
 
