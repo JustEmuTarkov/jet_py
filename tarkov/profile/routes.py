@@ -115,7 +115,7 @@ def create_profile(
     profile_id: str = Cookie(..., alias="PHPSESSID"),  # type: ignore
     side: str = Body(..., embed=True),  # type: ignore
     nickname: str = Body(..., embed=True),  # type: ignore
-    profile_service: ProfileService = Depends(Provide[AppContainer.profile.service])
+    profile_service: ProfileService = Depends(Provide[AppContainer.profile.service]),
 ) -> TarkovSuccessResponse[dict]:
     profile = profile_service.create_profile(nickname=nickname, side=side, profile_id=profile_id)
     return TarkovSuccessResponse(data={"uid": profile.id})
