@@ -5,12 +5,12 @@ from fastapi.params import Body, Cookie, Depends
 from starlette.requests import Request
 
 from server import logger
+from server.container import AppContainer
 from server.utils import get_request_url_root, make_router
 from tarkov.dependencies import profile_manager
 from tarkov.inventory_dispatcher import DispatcherManager
 from tarkov.inventory_dispatcher.manager import DispatcherResponse
 from tarkov.launcher.accounts import AccountService
-from tarkov.launcher.container import LauncherContainer
 from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
 from tarkov.profile.profile import Profile
 from tarkov.profile.service import profile_service
@@ -88,7 +88,7 @@ def client_profile_status(
 @inject
 def nickname_reserved(
     profile_id: str = Cookie(..., alias="PHPSESSID"),  # type: ignore
-    account_service: AccountService = Depends(Provide[LauncherContainer.account_service]),  # type: ignore
+    account_service: AccountService = Depends(Provide[AppContainer.launcher.account_service]),  # type: ignore
 ) -> TarkovSuccessResponse[str]:
     account = account_service.get_account(profile_id)
     return TarkovSuccessResponse(data=account.nickname)
@@ -98,7 +98,7 @@ def nickname_reserved(
 @inject
 def nickname_validate(
     nickname: str = Body(..., embed=True),  # type: ignore
-    account_service: AccountService = Depends(Provide[LauncherContainer.account_service]),  # type: ignore
+    account_service: AccountService = Depends(Provide[AppContainer.launcher.account_service]),  # type: ignore
 ) -> Union[TarkovSuccessResponse, TarkovErrorResponse]:
     if len(nickname) < 3:
         return TarkovErrorResponse(errmsg="Nickname is too short", err=256)

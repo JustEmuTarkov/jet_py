@@ -5,10 +5,10 @@ from fastapi.params import Body, Depends
 from starlette.requests import Request
 from starlette.responses import PlainTextResponse
 
+from server.container import AppContainer
 from server.utils import get_request_url_root, make_router
 from tarkov.exceptions import NotFoundError
 from tarkov.launcher.accounts import AccountService
-from tarkov.launcher.container import LauncherContainer
 from tarkov.launcher.models import Account
 
 launcher_router = make_router(tags=["Launcher"])
@@ -28,7 +28,7 @@ async def connect(request: Request) -> dict:
 def login(
     email: str = Body(..., embed=True),  # type: ignore
     password: str = Body(..., embed=True),  # type: ignore
-    account_service: AccountService = Depends(Provide[LauncherContainer.account_service]),  # type: ignore
+    account_service: AccountService = Depends(Provide[AppContainer.launcher.account_service]),  # type: ignore
 ) -> PlainTextResponse:
     try:
         account_service.find(email=email, password=password)
@@ -42,7 +42,7 @@ def login(
 async def get_profile(
     email: str = Body(..., embed=True),  # type: ignore
     password: str = Body(..., embed=True),  # type: ignore
-    account_service: AccountService = Depends(Provide[LauncherContainer.account_service]),  # type: ignore
+    account_service: AccountService = Depends(Provide[AppContainer.launcher.account_service]),  # type: ignore
 ) -> Account:
     return account_service.find(email, password)
 
@@ -56,7 +56,7 @@ def register_account(
     email: str = Body(..., embed=True),  # type: ignore
     password: str = Body(..., embed=True),  # type: ignore
     edition: str = Body(..., embed=True),  # type: ignore
-    account_service: AccountService = Depends(Provide[LauncherContainer.account_service]),  # type: ignore
+    account_service: AccountService = Depends(Provide[AppContainer.launcher.account_service]),  # type: ignore
 ) -> PlainTextResponse:
     try:
         account_service.find(email=email, password=password)

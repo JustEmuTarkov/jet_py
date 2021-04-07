@@ -2,8 +2,8 @@ import ujson
 from dependency_injector.wiring import Provide, inject
 
 from server import db_dir, root_dir
+from server.container import AppContainer
 from tarkov.launcher.accounts import AccountService
-from tarkov.launcher.container import LauncherContainer
 from tarkov.profile.models import ProfileModel
 
 
@@ -14,7 +14,7 @@ class ProfileService:
         nickname: str,
         side: str,
         profile_id: str,
-        account_service: AccountService = Provide[LauncherContainer.account_service],
+        account_service: AccountService = Provide[AppContainer.launcher.account_service],
     ) -> ProfileModel:
         account = account_service.get_account(profile_id)
         base_profile_dir = db_dir.joinpath("profile", account.edition)

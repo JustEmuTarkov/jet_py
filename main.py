@@ -1,12 +1,8 @@
 import tarkov
 from tarkov.bots.container import BotContainer
 from tarkov.containers import ConfigContainer
-from tarkov.launcher.container import LauncherContainer
 
 if __name__ == "__main__":
-    launcher_container = LauncherContainer()
-    launcher_container.wire(packages=[tarkov])
-
     bot_container = BotContainer()
     bot_container.wire(packages=[tarkov])
 
