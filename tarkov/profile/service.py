@@ -1,22 +1,30 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import ujson
-from dependency_injector.wiring import Provide, inject
 
 from server import db_dir, root_dir
-from server.container import AppContainer
-from tarkov.launcher.accounts import AccountService
-from tarkov.profile.models import ProfileModel
+
+if TYPE_CHECKING:
+    from tarkov.launcher.accounts import AccountService
+    from tarkov.profile.models import ProfileModel
 
 
 class ProfileService:
-    @staticmethod
-    @inject
+    def __init__(self, account_service: AccountService):
+        self.__account_service = account_service
+
     def create_profile(
+        self,
         nickname: str,
         side: str,
         profile_id: str,
-        account_service: AccountService = Provide[AppContainer.launcher.account_service],
     ) -> ProfileModel:
-        account = account_service.get_account(profile_id)
+        # TODO: That's just disgusting but i don't want to deal with cyclic imports right now
+        from tarkov.profile.models import ProfileModel
+
+        account = self.__account_service.get_account(profile_id)
         base_profile_dir = db_dir.joinpath("profile", account.edition)
 
         starting_outfit = ujson.load(base_profile_dir.joinpath("starting_outfit.json").open())
@@ -42,6 +50,3 @@ class ProfileService:
             file.write(profile.json())
 
         return profile
-
-
-profile_service = ProfileService()

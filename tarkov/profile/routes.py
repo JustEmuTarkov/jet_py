@@ -13,7 +13,7 @@ from tarkov.inventory_dispatcher.manager import DispatcherResponse
 from tarkov.launcher.accounts import AccountService
 from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
 from tarkov.profile.profile import Profile
-from tarkov.profile.service import profile_service
+from tarkov.profile.service import ProfileService
 
 profile_router = make_router(tags=["Profile"])
 
@@ -110,10 +110,12 @@ def nickname_validate(
 
 
 @profile_router.post("/client/game/profile/create")
+@inject
 def create_profile(
     profile_id: str = Cookie(..., alias="PHPSESSID"),  # type: ignore
     side: str = Body(..., embed=True),  # type: ignore
     nickname: str = Body(..., embed=True),  # type: ignore
+    profile_service: ProfileService = Depends(Provide[AppContainer.profile.service])
 ) -> TarkovSuccessResponse[dict]:
     profile = profile_service.create_profile(nickname=nickname, side=side, profile_id=profile_id)
     return TarkovSuccessResponse(data={"uid": profile.id})

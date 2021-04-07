@@ -7,6 +7,7 @@ from tarkov.fleamarket.container import FleaMarketContainer
 from tarkov.launcher.container import LauncherContainer
 from tarkov.mail.container import MailContainer
 from tarkov.notifier.container import NotifierContainer
+from tarkov.profile.container import ProfileContainer
 from tarkov.quests.container import QuestsContainer
 
 
@@ -66,3 +67,5 @@ class AppContainer(containers.DeclarativeContainer):
     )
 
     launcher: LauncherContainer = cast(LauncherContainer, providers.Container(LauncherContainer))
+
+    profile: ProfileContainer = cast(ProfileContainer, providers.Container(ProfileContainer))
