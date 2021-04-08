@@ -3,7 +3,7 @@ from __future__ import annotations
 import time
 from abc import abstractmethod
 from datetime import timedelta
-from typing import Callable, Dict, Iterable, List, Protocol, TYPE_CHECKING
+from typing import Callable, Dict, Final, Iterable, List, Protocol, TYPE_CHECKING
 
 import pydantic
 
@@ -29,6 +29,8 @@ if TYPE_CHECKING:
     # pylint: disable=cyclic-import
     from tarkov.profile.profile import Profile
 
+TRADER_RESUPPLY_TIME_SECONDS: Final[int] = int(timedelta(minutes=30).total_seconds())
+
 
 class Trader:
     def __init__(
@@ -40,11 +42,19 @@ class Trader:
         self.__templates_repository = templates_repository
         self.__view_factory = trader_view_factory
 
-        self.type: TraderType = trader_type
+        self.type: Final[TraderType] = trader_type
         self.path = db_dir.joinpath("traders", self.type.value)
 
-        self._base: TraderBase = TraderBase.parse_file(self.path.joinpath("base.json"))
-        self._base.supply_next_time = int(time.time() + timedelta(hours=1).total_seconds())
+        self.barter_scheme: Final[BarterScheme] = BarterScheme.parse_file(
+            self.path.joinpath("barter_scheme.json")
+        )
+        self.loyal_level_items: Final[Dict[str, int]] = pydantic.parse_file_as(
+            Dict[str, int], self.path.joinpath("loyal_level_items.json")
+        )
+        self.quest_assort: Final[QuestAssort] = QuestAssort.parse_file(self.path.joinpath("questassort.json"))
+
+        self._base: Final[TraderBase] = TraderBase.parse_file(self.path.joinpath("base.json"))
+        self._base.supply_next_time = int(time.time() + TRADER_RESUPPLY_TIME_SECONDS)
         self.inventory = TraderInventory(self)
 
     def view(self, player_profile: Profile) -> BaseTraderView:
@@ -150,13 +160,9 @@ class TraderView(BaseTraderView):
         self.__profile = player_profile
         self.__templates_repository = templates_repository
 
-        self.barter_scheme: BarterScheme = BarterScheme.parse_file(
-            self.__trader.path.joinpath("barter_scheme.json")
-        )
-        self.loyal_level_items = pydantic.parse_file_as(
-            Dict[str, int], self.__trader.path.joinpath("loyal_level_items.json")
-        )
-        self.quest_assort = QuestAssort.parse_file(self.__trader.path.joinpath("questassort.json"))
+        self.barter_scheme: BarterScheme = self.__trader.barter_scheme
+        self.loyal_level_items = self.__trader.loyal_level_items
+        self.quest_assort = self.__trader.quest_assort
 
     @property
     def assort(self) -> List[Item]:
