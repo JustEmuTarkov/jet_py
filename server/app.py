@@ -23,7 +23,7 @@ from tarkov.routes.lang import lang_router
 from tarkov.routes.match import match_router
 from tarkov.routes.misc import misc_router
 from tarkov.routes.single_player import singleplayer_router
-from tarkov.trader.routes import trader_router
+from tarkov.trader.router import trader_router
 
 container = AppContainer()
 container.wire(packages=[tarkov])
