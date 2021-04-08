@@ -5,7 +5,7 @@ from tarkov.inventory.models import Item
 from tarkov.inventory.types import CurrencyEnum, TemplateId
 from tarkov.inventory_dispatcher.base import Dispatcher
 from tarkov.inventory_dispatcher.models import ActionType
-from tarkov.trader import TraderType
+from tarkov.trader.models import TraderType
 from tarkov.trader.trader import Trader
 from .models import BuyFromTrader, SellToTrader, Trading
 

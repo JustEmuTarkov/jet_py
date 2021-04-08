@@ -17,7 +17,7 @@ from tarkov.mail.models import (
     MailMessageType,
 )
 from tarkov.profile.models import BackendCounter
-from tarkov.trader import TraderType
+from tarkov.trader.models import TraderType
 from .models import (
     Quest,
     QuestRewardAssortUnlock,

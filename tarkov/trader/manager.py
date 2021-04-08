@@ -1,6 +1,6 @@
 from typing import Dict
 
-from tarkov.trader import TraderType
+from tarkov.trader.models import TraderType
 from tarkov.trader.trader import Trader
 
 

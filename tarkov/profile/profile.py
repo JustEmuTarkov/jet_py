@@ -14,7 +14,7 @@ from tarkov.inventory.models import Item, ItemTemplate
 from tarkov.inventory.types import TemplateId
 from tarkov.mail import Mail
 from tarkov.quests.quests import Quests
-from tarkov.trader import TraderType
+from tarkov.trader.models import TraderType
 from .models import ItemInsurance, ProfileModel
 from tarkov.notifier.notifier import NotifierService
 

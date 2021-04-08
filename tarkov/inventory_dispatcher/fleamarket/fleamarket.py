@@ -13,8 +13,8 @@ from tarkov.inventory.models import Item
 from tarkov.inventory_dispatcher.base import Dispatcher
 from tarkov.inventory_dispatcher.models import ActionType
 from tarkov.mail.models import MailDialogueMessage, MailMessageItems, MailMessageType
-from tarkov.trader import TraderType
 from .models import Add, Buy
+from ...trader.models import TraderType
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import

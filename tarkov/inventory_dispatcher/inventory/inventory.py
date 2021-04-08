@@ -15,7 +15,6 @@ from tarkov.inventory.models import Item, ItemUpdTogglable
 from tarkov.inventory.types import TemplateId
 from tarkov.inventory_dispatcher.base import Dispatcher
 from tarkov.inventory_dispatcher.models import ActionType, Owner
-from tarkov.trader import TraderType
 from tarkov.trader.trader import Trader
 from .models import (
     ApplyInventoryChanges,
@@ -33,6 +32,7 @@ from .models import (
     Toggle,
     Transfer,
 )
+from ...trader.models import TraderType
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import

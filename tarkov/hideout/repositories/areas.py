@@ -9,7 +9,7 @@ from server import db_dir
 from tarkov.hideout.models import HideoutAreaType
 from tarkov.inventory.types import TemplateId
 from tarkov.models import Base
-from tarkov.trader import TraderType
+from tarkov.trader.models import TraderType
 
 
 class Requirements(SimpleNamespace):
