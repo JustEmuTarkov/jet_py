@@ -33,14 +33,14 @@ if TYPE_CHECKING:
 class Trader:
     def __init__(
         self,
-        type_: TraderType,
+        trader_type: TraderType,
         templates_repository: ItemTemplatesRepository,
         trader_view_factory: Callable[..., TraderView],
     ):
         self.__templates_repository = templates_repository
         self.__view_factory = trader_view_factory
 
-        self.type: TraderType = type_
+        self.type: TraderType = trader_type
         self.path = db_dir.joinpath("traders", self.type.value)
 
         self._base: TraderBase = TraderBase.parse_file(self.path.joinpath("base.json"))
