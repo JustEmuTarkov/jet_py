@@ -116,7 +116,7 @@ class InventoryDispatcher(Dispatcher):
         if action.fromOwner.type == "Trader":
             trader_id = action.fromOwner.id
 
-            trader_inventory = Trader(TraderType(trader_id), self.profile).inventory
+            trader_inventory = Trader(TraderType(trader_id)).inventory
             item = trader_inventory.get(item_id)
             self.profile.encyclopedia.examine(item)
 
@@ -186,18 +186,16 @@ class InventoryDispatcher(Dispatcher):
                 self.response.items.del_.append(item)
 
     def _insure(self, action: Insure) -> None:
-        trader = TraderType(action.tid)
-        trader_inventory = Trader(
-            TraderType(action.tid),
-            profile=self.profile,
-        )
+        trader_type = TraderType(action.tid)
+        trader = Trader(TraderType(action.tid))
+        trader_view = trader.view(self.profile)
 
         rubles_tpl_id = tarkov.inventory.types.TemplateId("5449016a4bdc2d6f028b456f")
         total_price = 0
         for item_id in action.items:
             item = self.profile.inventory.get(item_id)
-            total_price += trader_inventory.calculate_insurance_price(item)
-            self.profile.add_insurance(item, trader)
+            total_price += trader_view.insurance_price([item])
+            self.profile.add_insurance(item, trader_type)
 
         affected_items, deleted_items = self.profile.inventory.take_item(rubles_tpl_id, total_price)
 
@@ -205,9 +203,10 @@ class InventoryDispatcher(Dispatcher):
         self.response.items.del_.extend(deleted_items)
 
     def _repair(self, action: Repair) -> None:
-        trader = Trader(TraderType(action.tid), self.profile)
+        trader = Trader(TraderType(action.tid))
+        trader_view = trader.view(self.profile)
         try:
-            price_rate: float = 1 + trader.base.repair.price_rate / 100
+            price_rate: float = 1 + trader_view.base.repair.price_rate / 100
         except ZeroDivisionError:
             price_rate = 1
 
@@ -227,8 +226,8 @@ class InventoryDispatcher(Dispatcher):
 
             total_repair_cost: int = round(repair_cost_per_1_durability * price_rate * repair_item.count)
 
-            assert trader.base.repair.currency is not None
-            affected, deleted = self.inventory.take_item(trader.base.repair.currency, total_repair_cost)
+            assert trader_view.base.repair.currency is not None
+            affected, deleted = self.inventory.take_item(trader_view.base.repair.currency, total_repair_cost)
             self.response.items.change.extend(affected)
             self.response.items.del_.extend(deleted)
 

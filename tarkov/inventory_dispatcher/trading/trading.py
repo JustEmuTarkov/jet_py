@@ -33,7 +33,7 @@ class TradingDispatcher(Dispatcher):
         raise NotImplementedError(f"Trading action {action} not implemented")
 
     def __buy_from_trader(self, action: BuyFromTrader) -> None:
-        trader = Trader(TraderType(action.tid), self.profile)
+        trader = Trader(TraderType(action.tid))
 
         bought_items_list = trader.buy_item(action.item_id, action.count)
 
@@ -57,22 +57,27 @@ class TradingDispatcher(Dispatcher):
             else:
                 self.response.items.change.append(item)
 
-        self.response.currentSalesSums[action.tid] = trader.standing.current_sales_sum
+        trader_view = trader.view(self.profile)
+        self.response.currentSalesSums[action.tid] = trader_view.standing.current_sales_sum
 
     def __sell_to_trader(self, action: SellToTrader) -> None:
         trader_id = action.tid
         items_to_sell = action.items
-        trader = Trader(TraderType(trader_id), self.profile)
+        trader = Trader(TraderType(trader_id))
+        trader_view = trader.view(self.profile)
 
         items = list(self.inventory.get(i.id) for i in items_to_sell)
-        price_sum: int = sum(trader.get_sell_price(item).amount for item in items)
+        price_sum: int = sum(
+            trader.get_sell_price(self.inventory.get(i.id), children_items=[]).amount for i in items_to_sell
+        )
+        # price_sum: int = sum(trader.get_sell_price(item, children_items=[]).amount for item in items)
 
         self.response.items.del_.extend(items)
         self.inventory.remove_items(items)
 
         currency_item = Item(
             id=generate_item_id(),
-            tpl=TemplateId(CurrencyEnum[trader.base.currency].value),
+            tpl=TemplateId(CurrencyEnum[trader_view.base.currency].value),
         )
         currency_item.upd.StackObjectsCount = price_sum
 

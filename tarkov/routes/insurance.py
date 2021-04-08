@@ -29,12 +29,13 @@ async def items_list_cost(
     insurance_data: Dict[str, dict] = {}
 
     for trader_id in request.traders:
-        trader = Trader(TraderType(trader_id), profile=profile)
+        trader = Trader(TraderType(trader_id))
+        trader_view = trader.view(player_profile=profile)
         trader_items: Dict[TemplateId, int] = {}
 
         for item_id in request.items:
             item = profile.inventory.get(item_id)
-            trader_items[item.tpl] = trader.calculate_insurance_price(item)
+            trader_items[item.tpl] = trader_view.insurance_price([item])
 
         insurance_data[trader_id] = trader_items
 

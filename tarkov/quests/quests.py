@@ -159,8 +159,9 @@ class Quests:
                 standing_change = float(reward.value)
                 trader_id = reward.target
 
-                trader = Trader(TraderType(trader_id), self.profile)
-                standing = trader.standing
+                trader = Trader(TraderType(trader_id))
+                trader_view = trader.view(player_profile=self.profile)
+                standing = trader_view.standing
                 standing.current_standing += standing_change
 
             elif isinstance(reward, QuestRewardAssortUnlock):
