@@ -11,6 +11,7 @@ from typing import (
     ValuesView,
 )
 
+import pydantic
 from pydantic import Field, StrictBool
 
 from tarkov.inventory.models import Item
@@ -133,3 +134,10 @@ class BarterScheme(Base):
 
     def values(self) -> ValuesView[List[List[BarterSchemeEntry]]]:
         return self.__root__.values()
+
+
+class QuestAssort(pydantic.BaseModel):
+    # QuestId, ItemId
+    started: Dict[str, ItemId]
+    success: Dict[str, ItemId]
+    fail: Dict[str, ItemId]

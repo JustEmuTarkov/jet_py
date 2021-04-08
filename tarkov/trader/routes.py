@@ -56,7 +56,7 @@ async def get_user_assort_price(
     trader_id: str,
     profile: Profile = Depends(profile_manager.with_profile_readonly),  # type: ignore
 ) -> Union[TarkovSuccessResponse[Dict[ItemId, List[List[dict]]]], TarkovErrorResponse]:
-    trader = Trader(TraderType(trader_id), profile=profile)
+    trader = Trader(TraderType(trader_id))
     items = {}
 
     for item in profile.inventory.items.values():
@@ -65,7 +65,8 @@ async def get_user_assort_price(
         if not trader.can_sell(item):
             continue
 
-        price = trader.get_sell_price(item)
+        children_items = profile.inventory.iter_item_children_recursively(item)
+        price = trader.get_sell_price(item, children_items=children_items)
         items[item.id] = [[{"_tpl": price.template_id, "count": price.amount}]]
 
     # TODO: Calculate price for items to sell in specified trader
@@ -79,8 +80,9 @@ async def get_trader_list(
 ) -> TarkovSuccessResponse[List[dict]]:
     response = []
     for trader_type in TraderType:
-        trader = Trader(trader_type, profile)
-        response.append(trader.base.dict(exclude_none=True))
+        trader = Trader(trader_type)
+        trader_view = trader.view(profile)
+        response.append(trader_view.base.dict(exclude_none=True))
     response.sort(key=lambda base: base["_id"])
     return TarkovSuccessResponse(data=response)
 
@@ -100,11 +102,13 @@ async def get_trader_assort(
     trader_id: str,
     profile: Profile = Depends(profile_manager.with_profile_readonly),  # type: ignore
 ) -> Union[TarkovSuccessResponse[TraderAssortResponse], TarkovErrorResponse]:
-    trader = Trader(TraderType(trader_id), profile=profile)
+    trader = Trader(TraderType(trader_id))
+    view = trader.view(player_profile=profile)
+
     assort_response = TraderAssortResponse(
-        barter_scheme=trader.inventory.barter_scheme.__root__,
-        items=trader.inventory.assort,
-        loyal_level_items=trader.inventory.loyal_level_items,
+        barter_scheme=view.barter_scheme.__root__,
+        items=view.assort,
+        loyal_level_items=view.loyal_level_items,
     )
     return TarkovSuccessResponse(data=assort_response)
 
@@ -114,5 +118,6 @@ async def trading_api_get_trader(
     trader_id: str,
     profile: Profile = Depends(profile_manager.with_profile),  # type: ignore
 ) -> TarkovSuccessResponse[dict]:
-    trader = Trader(TraderType(trader_id), profile)
-    return TarkovSuccessResponse(data=trader.base.dict(exclude_none=True))
+    trader = Trader(TraderType(trader_id))
+    trader_view = trader.view(player_profile=profile)
+    return TarkovSuccessResponse(data=trader_view.base.dict(exclude_none=True))
