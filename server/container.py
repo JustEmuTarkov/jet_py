@@ -71,4 +71,6 @@ class AppContainer(containers.DeclarativeContainer):
 
     profile: ProfileContainer = cast(ProfileContainer, providers.Container(ProfileContainer))
 
-    trader: TraderContainer = cast(TraderContainer, providers.Container(TraderContainer))
+    trader: TraderContainer = cast(
+        TraderContainer, providers.Container(TraderContainer, templates_repository=repos.templates)
+    )

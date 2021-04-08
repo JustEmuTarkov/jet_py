@@ -15,12 +15,10 @@ from tarkov.inventory.types import ItemId, TemplateId
 
 
 class BotInventory(MutableInventory):
-    inventory: InventoryModel
-
     def __init__(self, bot_inventory: dict):
         super().__init__()
-        self.inventory = parse_obj_as(InventoryModel, bot_inventory)
-        self.__items = {i.id: i for i in self.inventory.items}
+        self.inventory: InventoryModel = parse_obj_as(InventoryModel, bot_inventory)
+        self.__items: Dict[ItemId, Item] = {i.id: i for i in self.inventory.items}
 
     @staticmethod
     def make_empty() -> BotInventory:

@@ -1,15 +1,17 @@
 from typing import Dict, List, Union
 
+from dependency_injector.wiring import Provide, inject
 from fastapi.params import Depends
 from pydantic import BaseModel
 
+from server.container import AppContainer
 from server.utils import make_router
 from tarkov.dependencies import profile_manager
 from tarkov.inventory.types import ItemId, TemplateId
 from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
 from tarkov.profile.profile import Profile
+from tarkov.trader.manager import TraderManager
 from tarkov.trader.models import TraderType
-from tarkov.trader.trader import Trader
 
 insurance_router = make_router(tags=["Insurance"])
 
@@ -22,14 +24,16 @@ class InsuranceListCostRequest(BaseModel):
 
 
 @insurance_router.post("/client/insurance/items/list/cost")
+@inject
 async def items_list_cost(
     request: InsuranceListCostRequest,
     profile: Profile = Depends(profile_manager.with_profile),  # type: ignore
+    trader_manager: TraderManager = Depends(Provide[AppContainer.trader.manager]),  # type: ignore
 ) -> Union[TarkovSuccessResponse[Dict[str, dict]], TarkovErrorResponse]:
     insurance_data: Dict[str, dict] = {}
 
     for trader_id in request.traders:
-        trader = Trader(TraderType(trader_id))
+        trader = trader_manager.get_trader(TraderType(trader_id))
         trader_view = trader.view(player_profile=profile)
         trader_items: Dict[TemplateId, int] = {}
 

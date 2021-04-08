@@ -1,22 +1,31 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
+from dependency_injector.wiring import Provide, inject
+
+from server.container import AppContainer
 from tarkov.inventory.helpers import generate_item_id
 from tarkov.inventory.models import Item
 from tarkov.inventory.types import CurrencyEnum, TemplateId
 from tarkov.inventory_dispatcher.base import Dispatcher
 from tarkov.inventory_dispatcher.models import ActionType
 from tarkov.trader.models import TraderType
-from tarkov.trader.trader import Trader
 from .models import BuyFromTrader, SellToTrader, Trading
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
     from tarkov.inventory_dispatcher.manager import DispatcherManager
+    from tarkov.trader.manager import TraderManager
 
 
 class TradingDispatcher(Dispatcher):
-    def __init__(self, manager: "DispatcherManager"):
+    @inject
+    def __init__(
+        self, manager: DispatcherManager, trader_manager: TraderManager = Provide[AppContainer.trader.manager]
+    ):
         super().__init__(manager)
+        self.__trader_manager = trader_manager
         self.dispatch_map = {
             ActionType.TradingConfirm: self._trading_confirm,
         }
@@ -33,7 +42,7 @@ class TradingDispatcher(Dispatcher):
         raise NotImplementedError(f"Trading action {action} not implemented")
 
     def __buy_from_trader(self, action: BuyFromTrader) -> None:
-        trader = Trader(TraderType(action.tid))
+        trader = self.__trader_manager.get_trader(TraderType(action.tid))
 
         bought_items_list = trader.buy_item(action.item_id, action.count)
 
@@ -63,7 +72,7 @@ class TradingDispatcher(Dispatcher):
     def __sell_to_trader(self, action: SellToTrader) -> None:
         trader_id = action.tid
         items_to_sell = action.items
-        trader = Trader(TraderType(trader_id))
+        trader = self.__trader_manager.get_trader(TraderType(trader_id))
         trader_view = trader.view(self.profile)
 
         items = list(self.inventory.get(i.id) for i in items_to_sell)

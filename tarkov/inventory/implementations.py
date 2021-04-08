@@ -1,13 +1,17 @@
 from __future__ import annotations
 
 import random
-from typing import Dict, List, Tuple
+from typing import Dict, List, TYPE_CHECKING, Tuple
 
 from dependency_injector.wiring import Provide, inject
 
 from server.container import AppContainer
 from tarkov.exceptions import NoSpaceError
-from tarkov.inventory.inventory import GridInventory, GridInventoryStashMap, MutableInventory
+from tarkov.inventory.inventory import (
+    GridInventory,
+    GridInventoryStashMap,
+    MutableInventory,
+)
 from tarkov.inventory.models import (
     AnyItemLocation,
     Item,
@@ -17,7 +21,9 @@ from tarkov.inventory.models import (
 )
 from tarkov.inventory.prop_models import CompoundProps, Grid
 from tarkov.inventory.repositories import ItemTemplatesRepository
-from tarkov.inventory.types import ItemId
+
+if TYPE_CHECKING:
+    from tarkov.inventory.types import ItemId
 
 
 class SimpleInventory(MutableInventory):

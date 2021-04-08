@@ -3,13 +3,11 @@ from __future__ import annotations
 import time
 from abc import abstractmethod
 from datetime import timedelta
-from typing import Dict, Iterable, List, Protocol, TYPE_CHECKING
+from typing import Callable, Dict, Iterable, List, Protocol, TYPE_CHECKING
 
 import pydantic
-from dependency_injector.wiring import Provide, inject
 
 from server import db_dir
-from server.container import AppContainer
 from tarkov.inventory.helpers import regenerate_items_ids
 from tarkov.inventory.inventory import ImmutableInventory
 from tarkov.inventory.models import Item, ItemUpd
@@ -31,17 +29,17 @@ if TYPE_CHECKING:
     # pylint: disable=cyclic-import
     from tarkov.profile.profile import Profile
 
-FENCE_ASSORT_LIFETIME = 10 * 60
-
 
 class Trader:
-    @inject
     def __init__(
         self,
         type_: TraderType,
-        templates_repository: ItemTemplatesRepository = Provide[AppContainer.repos.templates],
+        templates_repository: ItemTemplatesRepository,
+        trader_view_factory: Callable[..., TraderView],
     ):
-        self.templates_repository = templates_repository
+        self.__templates_repository = templates_repository
+        self.__view_factory = trader_view_factory
+
         self.type: TraderType = type_
         self.path = db_dir.joinpath("traders", self.type.value)
 
@@ -50,7 +48,7 @@ class Trader:
         self.inventory = TraderInventory(self)
 
     def view(self, player_profile: Profile) -> BaseTraderView:
-        return TraderView(self, player_profile)
+        return self.__view_factory(self, player_profile)
 
     @property
     def base(self) -> TraderBase:
@@ -73,11 +71,11 @@ class Trader:
         if not self.can_sell(item):
             raise ValueError("Item is not sellable")
 
-        tpl = self.templates_repository.get_template(item)
+        tpl = self.__templates_repository.get_template(item)
         price_rub = tpl.props.CreditsPrice
 
         for child in children_items:
-            child_tpl = self.templates_repository.get_template(child)
+            child_tpl = self.__templates_repository.get_template(child)
             child_price = child_tpl.props.CreditsPrice
             if self.can_sell(child):
                 price_rub += child_price
@@ -92,7 +90,7 @@ class Trader:
 
     def buy_item(self, item_id: ItemId, count: int) -> List[BoughtItems]:
         base_item = self.inventory.get(item_id)
-        item_template = self.templates_repository.get_template(base_item.tpl)
+        item_template = self.__templates_repository.get_template(base_item.tpl)
         item_stack_size = item_template.props.StackMaxSize
 
         bought_items_list: List[BoughtItems] = []
@@ -142,12 +140,11 @@ class BaseTraderView(Protocol):
 
 
 class TraderView(BaseTraderView):
-    @inject
     def __init__(
         self,
         trader: Trader,
         player_profile: Profile,
-        templates_repository: ItemTemplatesRepository = Provide[AppContainer.repos.templates],
+        templates_repository: ItemTemplatesRepository,
     ):
         self.__trader = trader
         self.__profile = player_profile

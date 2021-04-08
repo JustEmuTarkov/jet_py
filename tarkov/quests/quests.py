@@ -27,7 +27,7 @@ from .models import (
     QuestStatus,
 )
 from .repositories import QuestsRepository
-from ..trader.trader import Trader
+from tarkov.trader.manager import TraderManager
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
@@ -135,6 +135,7 @@ class Quests:
         self,
         quest_id: str,
         templates_repository: ItemTemplatesRepository = Provide[AppContainer.repos.templates],
+        trader_manager: TraderManager = Provide[AppContainer.trader.manager],
     ) -> None:
         quest_template = self.__quests_repository.get_quest_template(quest_id)
         quest = self.get_quest(quest_id)
@@ -159,7 +160,7 @@ class Quests:
                 standing_change = float(reward.value)
                 trader_id = reward.target
 
-                trader = Trader(TraderType(trader_id))
+                trader = trader_manager.get_trader(TraderType(trader_id))
                 trader_view = trader.view(player_profile=self.profile)
                 standing = trader_view.standing
                 standing.current_standing += standing_change

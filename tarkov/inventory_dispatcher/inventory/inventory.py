@@ -15,7 +15,8 @@ from tarkov.inventory.models import Item, ItemUpdTogglable
 from tarkov.inventory.types import TemplateId
 from tarkov.inventory_dispatcher.base import Dispatcher
 from tarkov.inventory_dispatcher.models import ActionType, Owner
-from tarkov.trader.trader import Trader
+from tarkov.trader.manager import TraderManager
+from tarkov.trader.models import TraderType
 from .models import (
     ApplyInventoryChanges,
     Bind,
@@ -32,7 +33,6 @@ from .models import (
     Toggle,
     Transfer,
 )
-from ...trader.models import TraderType
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
@@ -48,10 +48,12 @@ class InventoryDispatcher(Dispatcher):
         manager: "DispatcherManager",
         flea_market: FleaMarket = Provide[AppContainer.flea.market],
         templates_repository: ItemTemplatesRepository = Provide[AppContainer.repos.templates],
+        trader_manager: TraderManager = Provide[AppContainer.trader.manager],
     ):
         super().__init__(manager)
         self.flea_market = flea_market
         self.templates_repository = templates_repository
+        self.trader_manager = trader_manager
 
         self.dispatch_map = {
             ActionType.Move: self._move,
@@ -116,7 +118,7 @@ class InventoryDispatcher(Dispatcher):
         if action.fromOwner.type == "Trader":
             trader_id = action.fromOwner.id
 
-            trader_inventory = Trader(TraderType(trader_id)).inventory
+            trader_inventory = self.trader_manager.get_trader(TraderType(trader_id)).inventory
             item = trader_inventory.get(item_id)
             self.profile.encyclopedia.examine(item)
 
@@ -187,7 +189,7 @@ class InventoryDispatcher(Dispatcher):
 
     def _insure(self, action: Insure) -> None:
         trader_type = TraderType(action.tid)
-        trader = Trader(TraderType(action.tid))
+        trader = self.trader_manager.get_trader(TraderType(action.tid))
         trader_view = trader.view(self.profile)
 
         rubles_tpl_id = tarkov.inventory.types.TemplateId("5449016a4bdc2d6f028b456f")
@@ -203,7 +205,7 @@ class InventoryDispatcher(Dispatcher):
         self.response.items.del_.extend(deleted_items)
 
     def _repair(self, action: Repair) -> None:
-        trader = Trader(TraderType(action.tid))
+        trader = self.trader_manager.get_trader(TraderType(action.tid))
         trader_view = trader.view(self.profile)
         try:
             price_rate: float = 1 + trader_view.base.repair.price_rate / 100
