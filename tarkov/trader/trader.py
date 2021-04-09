@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import random
 import time
 from abc import abstractmethod
 from datetime import timedelta
@@ -9,6 +10,7 @@ import pydantic
 
 from server import db_dir
 from tarkov.inventory.helpers import regenerate_items_ids
+from tarkov.inventory.implementations import SimpleInventory
 from tarkov.inventory.inventory import ImmutableInventory
 from tarkov.inventory.models import Item, ItemUpd
 from tarkov.inventory.repositories import ItemTemplatesRepository
@@ -17,6 +19,7 @@ from tarkov.quests.models import QuestStatus
 from tarkov.repositories.categories import category_repository
 from tarkov.trader.models import (
     BarterScheme,
+    BarterSchemeEntry,
     BoughtItems,
     Price,
     QuestAssort,
@@ -37,7 +40,7 @@ class Trader:
         self,
         trader_type: TraderType,
         templates_repository: ItemTemplatesRepository,
-        trader_view_factory: Callable[..., TraderView],
+        trader_view_factory: Callable[..., BaseTraderView],
     ):
         self.__templates_repository = templates_repository
         self.__view_factory = trader_view_factory
@@ -45,17 +48,20 @@ class Trader:
         self.type: Final[TraderType] = trader_type
         self.path = db_dir.joinpath("traders", self.type.value)
 
-        self.barter_scheme: Final[BarterScheme] = BarterScheme.parse_file(
-            self.path.joinpath("barter_scheme.json")
-        )
+        if trader_type == TraderType.Fence:
+            self.__barter_scheme_generator = FenceAssortGenerator(self)
+        else:
+            self.__barter_scheme_generator = TraderAssortGenerator(self)
+
+        self._base: Final[TraderBase] = TraderBase.parse_file(self.path.joinpath("base.json"))
+        self._base.supply_next_time = int(time.time() + TRADER_RESUPPLY_TIME_SECONDS)
+
+        self.inventory = self.__barter_scheme_generator.generate_inventory()
+        self.barter_scheme: BarterScheme = self.__barter_scheme_generator.generate_barter_scheme(self.inventory)
         self.loyal_level_items: Final[Dict[str, int]] = pydantic.parse_file_as(
             Dict[str, int], self.path.joinpath("loyal_level_items.json")
         )
         self.quest_assort: Final[QuestAssort] = QuestAssort.parse_file(self.path.joinpath("questassort.json"))
-
-        self._base: Final[TraderBase] = TraderBase.parse_file(self.path.joinpath("base.json"))
-        self._base.supply_next_time = int(time.time() + TRADER_RESUPPLY_TIME_SECONDS)
-        self.inventory = TraderInventory(self)
 
     def view(self, player_profile: Profile) -> BaseTraderView:
         return self.__view_factory(self, player_profile)
@@ -125,6 +131,55 @@ class Trader:
         return bought_items_list
 
 
+class TraderAssortGenerator:
+    def __init__(self, trader: Trader) -> None:
+        self.trader = trader
+
+    def _read_items(self) -> List[Item]:
+        return pydantic.parse_file_as(
+            List[Item],
+            self.trader.path.joinpath("items.json"),
+        )
+
+    def generate_inventory(self) -> ImmutableInventory:
+        return SimpleInventory(self._read_items())
+
+    def generate_barter_scheme(self, inventory: ImmutableInventory) -> BarterScheme:
+        return BarterScheme.parse_file(self.trader.path.joinpath("barter_scheme.json"))
+
+
+class FenceAssortGenerator(TraderAssortGenerator):
+    def generate_inventory(self) -> List[Item]:
+        inventory = SimpleInventory(self._read_items())
+        root_items = set(item for item in inventory.items.values() if item.slot_id == "hideout")
+        assort = random.sample(root_items, k=min(len(root_items), 200))
+
+        child_items: List[Item] = []
+
+        for item in assort:
+            child_items.extend(inventory.iter_item_children_recursively(item))
+
+        assort.extend(child_items)
+
+        return assort
+
+    def generate_barter_scheme(self, inventory: ImmutableInventory) -> BarterScheme:
+        barter_scheme = BarterScheme()
+
+        for item in inventory.items.values():
+            item_price = 1  # TODO: replace
+            barter_scheme[item.id] = [
+                [
+                    BarterSchemeEntry(
+                        count=item_price,
+                        item_required=TemplateId("5449016a4bdc2d6f028b456f"),
+                    )
+                ]
+            ]
+
+        return barter_scheme
+
+
 class BaseTraderView(Protocol):
     barter_scheme: BarterScheme
     loyal_level_items: Dict[str, int]
@@ -160,7 +215,7 @@ class TraderView(BaseTraderView):
         self.__profile = player_profile
         self.__templates_repository = templates_repository
 
-        self.barter_scheme: BarterScheme = self.__trader.barter_scheme
+        self.barter_scheme = self.__trader.barter_scheme
         self.loyal_level_items = self.__trader.loyal_level_items
         self.quest_assort = self.__trader.quest_assort
 
