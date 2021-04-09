@@ -48,6 +48,7 @@ class Trader:
         self.type: Final[TraderType] = trader_type
         self.path = db_dir.joinpath("traders", self.type.value)
 
+        self.__barter_scheme_generator: TraderAssortGenerator
         if trader_type == TraderType.Fence:
             self.__barter_scheme_generator = FenceAssortGenerator(self)
         else:
@@ -149,7 +150,7 @@ class TraderAssortGenerator:
 
 
 class FenceAssortGenerator(TraderAssortGenerator):
-    def generate_inventory(self) -> List[Item]:
+    def generate_inventory(self) -> ImmutableInventory:
         inventory = SimpleInventory(self._read_items())
         root_items = set(item for item in inventory.items.values() if item.slot_id == "hideout")
         assort = random.sample(root_items, k=min(len(root_items), 200))
@@ -161,7 +162,7 @@ class FenceAssortGenerator(TraderAssortGenerator):
 
         assort.extend(child_items)
 
-        return assort
+        return SimpleInventory(assort)
 
     def generate_barter_scheme(self, inventory: ImmutableInventory) -> BarterScheme:
         barter_scheme = BarterScheme()

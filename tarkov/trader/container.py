@@ -15,7 +15,12 @@ class TraderContainer(containers.DeclarativeContainer):
     )
 
     trader = providers.Factory(
-        Trader, templates_repository=templates_repository, trader_view_factory=trader_view.provider
+        Trader,
+        templates_repository=templates_repository,
+        trader_view_factory=trader_view.provider,
     )
 
-    manager = providers.Singleton(TraderManager, trader_factory=trader.provider)
+    manager = providers.Singleton(
+        TraderManager,
+        trader_factory=trader.provider,
+    )

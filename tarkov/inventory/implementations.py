@@ -3,9 +3,9 @@ from __future__ import annotations
 import random
 from typing import Dict, List, TYPE_CHECKING, Tuple
 
-from dependency_injector.wiring import Provide, inject
+from dependency_injector.wiring import inject
 
-from server.container import AppContainer
+import server.app  # pylint: disable=cyclic-import
 from tarkov.exceptions import NoSpaceError
 from tarkov.inventory.inventory import (
     GridInventory,
@@ -94,8 +94,8 @@ class MultiGridContainer:
         cls,
         item: Item,
         slot_id: str,
-        item_templates_repository: ItemTemplatesRepository = Provide[AppContainer.repos.templates],
     ) -> MultiGridContainer:
+        item_templates_repository: ItemTemplatesRepository = server.app.container.repos.templates()
         return cls(item_templates_repository.get_template(item), item.id, slot_id)
 
     @property
