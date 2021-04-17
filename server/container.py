@@ -9,6 +9,7 @@ from tarkov.mail.container import MailContainer
 from tarkov.notifier.container import NotifierContainer
 from tarkov.profile.container import ProfileContainer
 from tarkov.quests.container import QuestsContainer
+from tarkov.trader.container import TraderContainer
 
 
 class AppContainer(containers.DeclarativeContainer):
@@ -66,6 +67,23 @@ class AppContainer(containers.DeclarativeContainer):
         ),
     )
 
-    launcher: LauncherContainer = cast(LauncherContainer, providers.Container(LauncherContainer))
+    launcher: LauncherContainer = cast(
+        LauncherContainer, providers.Container(LauncherContainer)
+    )
 
-    profile: ProfileContainer = cast(ProfileContainer, providers.Container(ProfileContainer))
+    profile: ProfileContainer = cast(
+        ProfileContainer,
+        providers.Container(
+            ProfileContainer,
+            account_service=launcher.account_service,
+        ),
+    )
+
+    trader: TraderContainer = cast(
+        TraderContainer,
+        providers.Container(
+            TraderContainer,
+            templates_repository=repos.templates,
+            config=config.traders,
+        ),
+    )

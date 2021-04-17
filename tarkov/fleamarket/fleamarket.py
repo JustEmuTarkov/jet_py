@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from typing import Callable, Dict, List
 
 from server import logger
-from tarkov import config
+from tarkov.config import FleaMarketConfig
 from tarkov.exceptions import NotFoundError
 from tarkov.inventory.models import Item, ItemTemplate
 from tarkov.inventory.types import TemplateId
@@ -21,8 +21,9 @@ class FleaMarket:
         self,
         offer_generator: OfferGenerator,
         flea_view_factory: Callable[..., FleaMarketView],
+        flea_config: FleaMarketConfig,
     ) -> None:
-        self.offers_amount: int = config.flea_market.offers_amount
+        self.offers_amount: int = flea_config.offers_amount
 
         self.updated_at: datetime = datetime.fromtimestamp(0)
 
@@ -49,7 +50,11 @@ class FleaMarket:
         """
         Calculates min, max and average price of item on flea. Used by client when selling items.
         """
-        offers = [offer for offer in self.offers.values() if offer.root_item.tpl == template_id]
+        offers = [
+            offer
+            for offer in self.offers.values()
+            if offer.root_item.tpl == template_id
+        ]
         if not offers:
             return {
                 "min": 0,
@@ -67,7 +72,12 @@ class FleaMarket:
         }
 
     def items_price(self, items: List[Item]) -> int:
-        return int(sum(self.generator.item_prices[item.tpl] * item.upd.StackObjectsCount for item in items))
+        return int(
+            sum(
+                self.generator.item_prices[item.tpl] * item.upd.StackObjectsCount
+                for item in items
+            )
+        )
 
     def selling_time(self, items: List[Item], selling_price: int) -> timedelta:
         """
@@ -75,12 +85,16 @@ class FleaMarket:
         """
         items_price = self.items_price(items)
         base_selling_time = math.log(items_price, 3)
-        time_sell_minutes = base_selling_time ** ((selling_price / items_price) ** 1.3) - 1
+        time_sell_minutes = (
+            base_selling_time ** ((selling_price / items_price) ** 1.3) - 1
+        )
         time_sell_minutes = min(time_sell_minutes, 2 ** 31)
         return timedelta(minutes=time_sell_minutes)
 
     @staticmethod
-    def get_offer_tax(template: ItemTemplate, requirements_cost: int, quantity: int) -> int:
+    def get_offer_tax(
+        template: ItemTemplate, requirements_cost: int, quantity: int
+    ) -> int:
         """
         Returns tax for selling specific item
         """
@@ -110,7 +124,9 @@ class FleaMarket:
         """
         now = datetime.now()
         now_timestamp = now.timestamp()
-        expired_offers_keys = [key for key, offer in self.offers.items() if now_timestamp > offer.endTime]
+        expired_offers_keys = [
+            key for key, offer in self.offers.items() if now_timestamp > offer.endTime
+        ]
 
         for key in expired_offers_keys:
             del self.offers[key]
@@ -126,7 +142,9 @@ class FleaMarket:
         self.updated_at = now
 
         try:
-            keys_to_delete = random.sample(list(self.offers.keys()), k=int(time_elapsed.total_seconds()))
+            keys_to_delete = random.sample(
+                list(self.offers.keys()), k=int(time_elapsed.total_seconds())
+            )
         except ValueError:
             keys_to_delete = []
 

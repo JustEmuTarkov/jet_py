@@ -22,10 +22,18 @@ def hideout_settings() -> TarkovSuccessResponse[HideoutSettingsModel]:
 
 
 @hideout_router.post("/client/hideout/production/recipes")
-def client_hideout_production_recipes() -> TarkovSuccessResponse[List[HideoutProductionModel]]:
-    return TarkovSuccessResponse(data=hideout_repositories.production_repository.production)
+def client_hideout_production_recipes() -> TarkovSuccessResponse[
+    List[HideoutProductionModel]
+]:
+    return TarkovSuccessResponse(
+        data=hideout_repositories.production_repository.production
+    )
 
 
 @hideout_router.post("/client/hideout/production/scavcase/recipes")
-def hideout_production_scav_recipes() -> TarkovSuccessResponse[List[ScavcaseProductionModel]]:
-    return TarkovSuccessResponse(data=hideout_repositories.scavcase_production_repository.production)
+def hideout_production_scav_recipes() -> TarkovSuccessResponse[
+    List[ScavcaseProductionModel]
+]:
+    return TarkovSuccessResponse(
+        data=hideout_repositories.scavcase_production_repository.production
+    )

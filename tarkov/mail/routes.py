@@ -33,7 +33,9 @@ def mail_dialog_view(
     profile: Profile = Depends(profile_manager.with_profile),  # type: ignore
 ) -> Union[TarkovSuccessResponse[dict], TarkovErrorResponse]:
     return TarkovSuccessResponse(
-        data=profile.mail.view.view_dialog(dialogue_id=request.dialogue_id, time_=request.time)
+        data=profile.mail.view.view_dialog(
+            dialogue_id=request.dialogue_id, time_=request.time
+        )
     )
 
 
@@ -42,4 +44,6 @@ def mail_dialog_all_attachments(
     request: GetAllAttachmentsRequest,
     profile: Profile = Depends(profile_manager.with_profile),  # type: ignore
 ) -> Union[TarkovSuccessResponse[dict], TarkovErrorResponse]:
-    return TarkovSuccessResponse(data=profile.mail.view.all_attachments_view(dialogue_id=request.dialogue_id))
+    return TarkovSuccessResponse(
+        data=profile.mail.view.all_attachments_view(dialogue_id=request.dialogue_id)
+    )

@@ -22,7 +22,9 @@ if TYPE_CHECKING:
 class BotGenerator:
     @inject
     def __init__(self, preset_factory: Callable[..., BotGeneratorPreset]) -> None:
-        self._bot_base: Final[dict] = ujson.load(db_dir.joinpath("base", "botBase.json").open(encoding="utf8"))
+        self._bot_base: Final[dict] = ujson.load(
+            db_dir.joinpath("base", "botBase.json").open(encoding="utf8")
+        )
         self.preset_factory = preset_factory
 
     def generate(self, bot_role: str) -> dict:
@@ -38,13 +40,19 @@ class BotGenerator:
         bot_base = copy.deepcopy(self._bot_base)
 
         with bot_inventory:
-            equipment_generator = BotEquipmentGenerator(bot_inventory=bot_inventory, preset=preset)
+            equipment_generator = BotEquipmentGenerator(
+                bot_inventory=bot_inventory, preset=preset
+            )
             equipment_generator.generate_equipment()
 
-            weapon_generator = BotWeaponGenerator(bot_inventory=bot_inventory, preset=preset)
+            weapon_generator = BotWeaponGenerator(
+                bot_inventory=bot_inventory, preset=preset
+            )
             weapon_generator.generate()
 
-            loot_generator = BotLootGenerator(bot_inventory=bot_inventory, preset=preset)
+            loot_generator = BotLootGenerator(
+                bot_inventory=bot_inventory, preset=preset
+            )
             loot_generator.generate()
             bot_inventory.regenerate_ids()
 

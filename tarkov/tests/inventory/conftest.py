@@ -20,7 +20,9 @@ TEST_RESOURCES_PATH = root_dir.joinpath("tarkov", "tests", "resources")
 @pytest.fixture()
 def player_profile() -> Profile:
     profile = Profile("profile_id")
-    profile.pmc = ProfileModel.parse_file(TEST_RESOURCES_PATH.joinpath("pmc_profile.json"))
+    profile.pmc = ProfileModel.parse_file(
+        TEST_RESOURCES_PATH.joinpath("pmc_profile.json")
+    )
     return profile
 
 
@@ -46,16 +48,23 @@ def make_inventory(player_profile: Profile) -> Callable:
 @pytest.fixture()
 @inject
 def random_items(
-    templates_repository: ItemTemplatesRepository = Provide[AppContainer.repos.templates],
+    templates_repository: ItemTemplatesRepository = Provide[
+        AppContainer.repos.templates
+    ],
     item_factory: ItemFactory = Provide[AppContainer.items.factory],
 ) -> List[Item]:
     random.seed(42)
     random_templates = random.sample(
-        [tpl for tpl in templates_repository._item_templates.values() if isinstance(tpl, ItemTemplate)],
+        [
+            tpl
+            for tpl in templates_repository._item_templates.values()
+            if isinstance(tpl, ItemTemplate)
+        ],
         k=100,
     )
 
     items: List[Item] = [
-        item_factory.create_item(templates_repository.get_template(tpl.id))[0] for tpl in random_templates
+        item_factory.create_item(templates_repository.get_template(tpl.id))[0]
+        for tpl in random_templates
     ]
     return items

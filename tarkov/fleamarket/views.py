@@ -3,7 +3,12 @@ from __future__ import annotations
 import collections
 from typing import Dict, List, TYPE_CHECKING, Union
 
-from tarkov.fleamarket.models import FleaMarketRequest, FleaMarketResponse, Offer, SortType
+from tarkov.fleamarket.models import (
+    FleaMarketRequest,
+    FleaMarketResponse,
+    Offer,
+    SortType,
+)
 from tarkov.inventory.repositories import ItemTemplatesRepository
 from tarkov.inventory.types import TemplateId
 from tarkov.repositories.categories import CategoryId, category_repository
@@ -33,21 +38,31 @@ class FleaMarketView:
 
         # Apply linked search filter
         if request.linkedSearchId:
-            linked_search_template = self.templates_repository.get_template(request.linkedSearchId)
-            offers = [offer for offer in offers if linked_search_template.has_in_slots(offer.root_item.tpl)]
+            linked_search_template = self.templates_repository.get_template(
+                request.linkedSearchId
+            )
+            offers = [
+                offer
+                for offer in offers
+                if linked_search_template.has_in_slots(offer.root_item.tpl)
+            ]
 
         # Else apply required search filter
         elif request.neededSearchId:
             offers = [
                 offer
                 for offer in offers
-                if self.templates_repository.get_template(offer.root_item).has_in_slots(request.neededSearchId)
+                if self.templates_repository.get_template(offer.root_item).has_in_slots(
+                    request.neededSearchId
+                )
             ]
 
         categories: Dict[Union[TemplateId, CategoryId], int]
         if not request.linkedSearchId and not request.neededSearchId:
             # If it's not linked/required search then return categories for all offers
-            categories = collections.Counter(offer.root_item.tpl for offer in self.flea_market.offers.values())
+            categories = collections.Counter(
+                offer.root_item.tpl for offer in self.flea_market.offers.values()
+            )
         else:
             # Else return categories for filtered offers
             categories = collections.Counter(offer.root_item.tpl for offer in offers)
@@ -58,7 +73,9 @@ class FleaMarketView:
 
         # Offers pagination/sorting
         page_size = request.limit
-        offers = self._sorted_offers(offers, request.sortType, reverse=request.sortDirection == 1)
+        offers = self._sorted_offers(
+            offers, request.sortType, reverse=request.sortDirection == 1
+        )
         offers_view = offers[request.page * page_size : (request.page + 1) * page_size]
 
         return FleaMarketResponse(
@@ -69,7 +86,9 @@ class FleaMarketView:
         )
 
     @staticmethod
-    def __filter_category_search(offers: List[Offer], request: FleaMarketRequest) -> List[Offer]:
+    def __filter_category_search(
+        offers: List[Offer], request: FleaMarketRequest
+    ) -> List[Offer]:
         return [
             offer
             for offer in offers
@@ -80,7 +99,9 @@ class FleaMarketView:
             or offer.root_item.tpl == request.handbookId
         ]
 
-    def _sorted_offers(self, offers: List[Offer], sort_type: SortType, reverse: bool = False) -> List[Offer]:
+    def _sorted_offers(
+        self, offers: List[Offer], sort_type: SortType, reverse: bool = False
+    ) -> List[Offer]:
         """Sorts offers in place"""
 
         def sort_by_title(offer: Offer) -> str:

@@ -45,7 +45,12 @@ async def notifierserver_get(
             notifications = notifier.get_notifications_view(profile_id)
             logger.debug(f"New notifications for profile {profile_id}")
             logger.debug(notifications)
-            response = "\n".join([orjson.dumps(notification).decode("utf8") for notification in notifications])
+            response = "\n".join(
+                [
+                    orjson.dumps(notification).decode("utf8")
+                    for notification in notifications
+                ]
+            )
             logger.debug(f"NotifierService response: {response}")
             return PlainTextResponse(
                 content=response,

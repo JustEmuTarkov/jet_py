@@ -14,7 +14,11 @@ from tarkov.inventory.factories import ItemFactory
 from tarkov.inventory.helpers import regenerate_item_ids_dict
 from tarkov.inventory.inventory import GridInventory, GridInventoryStashMap
 from tarkov.inventory.models import Item, ItemTemplate
-from tarkov.inventory.prop_models import CompoundProps, LootContainerProps, StackableItemProps
+from tarkov.inventory.prop_models import (
+    CompoundProps,
+    LootContainerProps,
+    StackableItemProps,
+)
 from tarkov.inventory.repositories import ItemTemplatesRepository
 from tarkov.inventory.types import ItemId, TemplateId
 from tarkov.models import Base
@@ -40,7 +44,9 @@ class ContainerInventory(GridInventory):
     def __init__(
         self,
         container: ContainerModel,
-        templates_repository: ItemTemplatesRepository = Provide[AppContainer.repos.templates],
+        templates_repository: ItemTemplatesRepository = Provide[
+            AppContainer.repos.templates
+        ],
     ):
         super().__init__()
         self.container = container
@@ -86,23 +92,30 @@ class ContainerLootGenerator:
         self,
         location_generator: LocationGenerator,
         container: ContainerModel,
-        templates_repository: ItemTemplatesRepository = Provide[AppContainer.repos.templates],
+        templates_repository: ItemTemplatesRepository = Provide[
+            AppContainer.repos.templates
+        ],
     ):
         # Reference to location generator
         self.location_generator = location_generator
         # Container model
         self.container = container
 
-        self.container_template = templates_repository.get_template(container.Items[0].tpl)
+        self.container_template = templates_repository.get_template(
+            container.Items[0].tpl
+        )
         assert isinstance(self.container_template.props, LootContainerProps)
 
         # List of item templates that are allowed to spawn inside container
         self.__item_templates: List[ItemTemplate] = []
         for template_id in self.container_template.props.SpawnFilter:
-            self.__item_templates.extend(self.location_generator.get_category_items(template_id))
+            self.__item_templates.extend(
+                self.location_generator.get_category_items(template_id)
+            )
         # Chances of templates to spawn
         self.__item_templates_weights: List[float] = [
-            self.location_generator.template_weight(tpl) for tpl in self.__item_templates
+            self.location_generator.template_weight(tpl)
+            for tpl in self.__item_templates
         ]
 
     @staticmethod
@@ -116,10 +129,15 @@ class ContainerLootGenerator:
         self, item_factory: ItemFactory = Provide[AppContainer.items.factory]
     ) -> Tuple[Item, List[Item]]:
         """Generates random item for this container"""
-        random_template = random.choices(self.__item_templates, self.__item_templates_weights, k=1)[0]
+        random_template = random.choices(
+            self.__item_templates, self.__item_templates_weights, k=1
+        )[0]
         count = 1
         if isinstance(random_template.props, StackableItemProps):
-            count = random.randint(random_template.props.StackMinRandom, random_template.props.StackMaxRandom)
+            count = random.randint(
+                random_template.props.StackMinRandom,
+                random_template.props.StackMaxRandom,
+            )
 
         return item_factory.create_item(random_template, count=count)
 
@@ -148,7 +166,9 @@ class LocationGenerator:
     def __init__(
         self,
         location: str,
-        templates_repository: ItemTemplatesRepository = Provide[AppContainer.repos.templates],
+        templates_repository: ItemTemplatesRepository = Provide[
+            AppContainer.repos.templates
+        ],
     ):
         self.templates_repository = templates_repository
         location_file_path = db_dir.joinpath("locations", f"{location}.json")
@@ -189,7 +209,9 @@ class LocationGenerator:
             root_item = loot_point["Items"][0]
             loot_point["Root"] = loot_point["Items"][0]["_id"]
 
-            root_item_template = self.templates_repository.get_template(root_item["_tpl"])
+            root_item_template = self.templates_repository.get_template(
+                root_item["_tpl"]
+            )
             should_spawn = random.uniform(0, 100) < root_item_template.props.SpawnChance
             if not should_spawn:
                 continue

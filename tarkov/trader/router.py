@@ -1,16 +1,17 @@
 from typing import Dict, List, Optional, Union
 
+from dependency_injector.wiring import Provide, inject
 from fastapi.params import Cookie, Depends
 
+from server.container import AppContainer
 from server.utils import make_router
 from tarkov.dependencies import profile_manager
 from tarkov.inventory.models import Item
 from tarkov.inventory.types import ItemId
 from tarkov.models import Base, TarkovErrorResponse, TarkovSuccessResponse
 from tarkov.profile.profile import Profile
-from tarkov.trader import TraderType
-from tarkov.trader.models import BarterSchemeEntry
-from tarkov.trader.trader import Trader
+from tarkov.trader.manager import TraderManager
+from tarkov.trader.models import BarterSchemeEntry, TraderType
 
 trader_router = make_router(tags=["Traders"])
 
@@ -23,7 +24,9 @@ async def customization_storage(
     profile_id: Optional[str] = Cookie(alias="PHPSESSID", default=None),  # type: ignore
 ) -> Union[TarkovSuccessResponse[dict], TarkovErrorResponse]:
     if profile_id is None:
-        return TarkovErrorResponse(data="", err=True, errmsg="No session cookie provided")
+        return TarkovErrorResponse(
+            data="", err=True, errmsg="No session cookie provided"
+        )
     # customization_data = ujson.load(
     #     root_dir.joinpath('resources', 'profiles', profile_id, 'storage.json').open('r', encoding='utf8')
     # )
@@ -52,11 +55,13 @@ async def customization(
     response_model_exclude_unset=True,
     response_model_exclude_none=True,
 )
+@inject
 async def get_user_assort_price(
     trader_id: str,
     profile: Profile = Depends(profile_manager.with_profile_readonly),  # type: ignore
+    trader_manager: TraderManager = Depends(Provide[AppContainer.trader.manager]),  # type: ignore
 ) -> Union[TarkovSuccessResponse[Dict[ItemId, List[List[dict]]]], TarkovErrorResponse]:
-    trader = Trader(TraderType(trader_id), profile=profile)
+    trader = trader_manager.get_trader(TraderType(trader_id))
     items = {}
 
     for item in profile.inventory.items.values():
@@ -65,7 +70,8 @@ async def get_user_assort_price(
         if not trader.can_sell(item):
             continue
 
-        price = trader.get_sell_price(item)
+        children_items = profile.inventory.iter_item_children_recursively(item)
+        price = trader.get_sell_price(item, children_items=children_items)
         items[item.id] = [[{"_tpl": price.template_id, "count": price.amount}]]
 
     # TODO: Calculate price for items to sell in specified trader
@@ -74,13 +80,16 @@ async def get_user_assort_price(
 
 
 @trader_router.post("/client/trading/api/getTradersList")
+@inject
 async def get_trader_list(
     profile: Profile = Depends(profile_manager.with_profile),  # type: ignore
+    trader_manager: TraderManager = Depends(Provide[AppContainer.trader.manager]),  # type: ignore
 ) -> TarkovSuccessResponse[List[dict]]:
     response = []
     for trader_type in TraderType:
-        trader = Trader(trader_type, profile)
-        response.append(trader.base.dict(exclude_none=True))
+        trader = trader_manager.get_trader(trader_type)
+        trader_view = trader.view(profile)
+        response.append(trader_view.base.dict(exclude_none=True))
     response.sort(key=lambda base: base["_id"])
     return TarkovSuccessResponse(data=response)
 
@@ -96,23 +105,30 @@ class TraderAssortResponse(Base):
     response_model=TarkovSuccessResponse[TraderAssortResponse],
     response_model_exclude_none=True,
 )
+@inject
 async def get_trader_assort(
     trader_id: str,
     profile: Profile = Depends(profile_manager.with_profile_readonly),  # type: ignore
+    trader_manager: TraderManager = Depends(Provide[AppContainer.trader.manager]),  # type: ignore
 ) -> Union[TarkovSuccessResponse[TraderAssortResponse], TarkovErrorResponse]:
-    trader = Trader(TraderType(trader_id), profile=profile)
+    trader = trader_manager.get_trader(TraderType(trader_id))
+    view = trader.view(player_profile=profile)
+
     assort_response = TraderAssortResponse(
-        barter_scheme=trader.inventory.barter_scheme.__root__,
-        items=trader.inventory.assort,
-        loyal_level_items=trader.inventory.loyal_level_items,
+        barter_scheme=view.barter_scheme.__root__,
+        items=view.assort,
+        loyal_level_items=view.loyal_level_items,
     )
     return TarkovSuccessResponse(data=assort_response)
 
 
 @trader_router.post("/client/trading/api/getTrader/{trader_id}")
+@inject
 async def trading_api_get_trader(
     trader_id: str,
     profile: Profile = Depends(profile_manager.with_profile),  # type: ignore
+    trader_manager: TraderManager = Depends(Provide[AppContainer.trader.manager]),  # type: ignore
 ) -> TarkovSuccessResponse[dict]:
-    trader = Trader(TraderType(trader_id), profile)
-    return TarkovSuccessResponse(data=trader.base.dict(exclude_none=True))
+    trader = trader_manager.get_trader(TraderType(trader_id))
+    trader_view = trader.view(player_profile=profile)
+    return TarkovSuccessResponse(data=trader_view.base.dict(exclude_none=True))

@@ -14,7 +14,7 @@ from tarkov.inventory.models import Item, ItemTemplate
 from tarkov.inventory.types import TemplateId
 from tarkov.mail import Mail
 from tarkov.quests.quests import Quests
-from tarkov.trader import TraderType
+from tarkov.trader.models import TraderType
 from .models import ItemInsurance, ProfileModel
 from tarkov.notifier.notifier import NotifierService
 
@@ -31,7 +31,9 @@ class Encyclopedia:
     def examine(
         self,
         item: Union[Item, TemplateId],
-        templates_repository: ItemTemplatesRepository = Provide[AppContainer.repos.templates],
+        templates_repository: ItemTemplatesRepository = Provide[
+            AppContainer.repos.templates
+        ],
     ) -> None:
         template: ItemTemplate = templates_repository.get_template(item)
         self.data[template.id] = False
@@ -75,7 +77,9 @@ class Profile:
         return root_dir.joinpath("resources", "profiles", profile_id).exists()
 
     def add_insurance(self, item: Item, trader: TraderType) -> None:
-        self.pmc.InsuredItems.append(ItemInsurance(item_id=item.id, trader_id=trader.value))
+        self.pmc.InsuredItems.append(
+            ItemInsurance(item_id=item.id, trader_id=trader.value)
+        )
 
         #  Todo remove insurance from items that aren't present in inventory after raid
 
@@ -83,7 +87,9 @@ class Profile:
         self.pmc.Info.Experience += amount
 
     @inject
-    def read(self, notifier_service: NotifierService = Provide[AppContainer.notifier.service]) -> None:
+    def read(
+        self, notifier_service: NotifierService = Provide[AppContainer.notifier.service]
+    ) -> None:
         if not self.profile_dir.exists() or not self.pmc_profile_path.exists():
             raise Profile.ProfileDoesNotExistsError
         self.pmc = ProfileModel.parse_file(self.pmc_profile_path)

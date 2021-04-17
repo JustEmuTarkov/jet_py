@@ -124,18 +124,24 @@ async def singleplayer_raid_profile_save(
     }
     for key, raid_counter in backend_counters.items():
         profile_counter = profile.pmc.BackendCounters.get(key, raid_counter)
-        profile.pmc.BackendCounters[key] = max(raid_counter, profile_counter, key=lambda c: c.value)
+        profile.pmc.BackendCounters[key] = max(
+            raid_counter, profile_counter, key=lambda c: c.value
+        )
 
     profile.pmc.Stats = raid_profile["Stats"]
 
-    raid_inventory_items: List[Item] = parse_obj_as(List[Item], body["profile"]["Inventory"]["items"])
+    raid_inventory_items: List[Item] = parse_obj_as(
+        List[Item], body["profile"]["Inventory"]["items"]
+    )
     raid_inventory = SimpleInventory(items=raid_inventory_items)
     equipment = profile.inventory.get(profile.inventory.inventory.equipment)
 
     # Remove all equipment children
     profile.inventory.remove_item(equipment, remove_children=True)
 
-    raid_equipment = raid_inventory.iter_item_children_recursively(raid_inventory.get(equipment.id))
+    raid_equipment = raid_inventory.iter_item_children_recursively(
+        raid_inventory.get(equipment.id)
+    )
     profile.inventory.add_item(equipment, list(raid_equipment))
 
     return TarkovSuccessResponse(data=None)

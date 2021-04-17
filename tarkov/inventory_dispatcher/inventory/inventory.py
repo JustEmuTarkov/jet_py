@@ -15,8 +15,8 @@ from tarkov.inventory.models import Item, ItemUpdTogglable
 from tarkov.inventory.types import TemplateId
 from tarkov.inventory_dispatcher.base import Dispatcher
 from tarkov.inventory_dispatcher.models import ActionType, Owner
-from tarkov.trader import TraderType
-from tarkov.trader.trader import Trader
+from tarkov.trader.manager import TraderManager
+from tarkov.trader.models import TraderType
 from .models import (
     ApplyInventoryChanges,
     Bind,
@@ -47,11 +47,15 @@ class InventoryDispatcher(Dispatcher):
         self,
         manager: "DispatcherManager",
         flea_market: FleaMarket = Provide[AppContainer.flea.market],
-        templates_repository: ItemTemplatesRepository = Provide[AppContainer.repos.templates],
+        templates_repository: ItemTemplatesRepository = Provide[
+            AppContainer.repos.templates
+        ],
+        trader_manager: TraderManager = Provide[AppContainer.trader.manager],
     ):
         super().__init__(manager)
         self.flea_market = flea_market
         self.templates_repository = templates_repository
+        self.trader_manager = trader_manager
 
         self.dispatch_map = {
             ActionType.Move: self._move,
@@ -71,7 +75,9 @@ class InventoryDispatcher(Dispatcher):
         }
 
     @contextmanager
-    def owner_inventory(self, owner: Optional[Owner] = None) -> Iterator[MutableInventory]:
+    def owner_inventory(
+        self, owner: Optional[Owner] = None
+    ) -> Iterator[MutableInventory]:
         if owner is None:
             yield self.inventory
             return
@@ -116,7 +122,9 @@ class InventoryDispatcher(Dispatcher):
         if action.fromOwner.type == "Trader":
             trader_id = action.fromOwner.id
 
-            trader_inventory = Trader(TraderType(trader_id), self.profile).inventory
+            trader_inventory = self.trader_manager.get_trader(
+                TraderType(trader_id)
+            ).inventory
             item = trader_inventory.get(item_id)
             self.profile.encyclopedia.examine(item)
 
@@ -128,7 +136,9 @@ class InventoryDispatcher(Dispatcher):
             try:
                 offer = self.flea_market.get_offer(OfferId(action.fromOwner.id))
             except NotFoundError:
-                self.response.append_error(title="Item examination error", message="Offer can not be found")
+                self.response.append_error(
+                    title="Item examination error", message="Offer can not be found"
+                )
                 return
 
             item = offer.root_item
@@ -186,28 +196,29 @@ class InventoryDispatcher(Dispatcher):
                 self.response.items.del_.append(item)
 
     def _insure(self, action: Insure) -> None:
-        trader = TraderType(action.tid)
-        trader_inventory = Trader(
-            TraderType(action.tid),
-            profile=self.profile,
-        )
+        trader_type = TraderType(action.tid)
+        trader = self.trader_manager.get_trader(TraderType(action.tid))
+        trader_view = trader.view(self.profile)
 
         rubles_tpl_id = tarkov.inventory.types.TemplateId("5449016a4bdc2d6f028b456f")
         total_price = 0
         for item_id in action.items:
             item = self.profile.inventory.get(item_id)
-            total_price += trader_inventory.calculate_insurance_price(item)
-            self.profile.add_insurance(item, trader)
+            total_price += trader_view.insurance_price([item])
+            self.profile.add_insurance(item, trader_type)
 
-        affected_items, deleted_items = self.profile.inventory.take_item(rubles_tpl_id, total_price)
+        affected_items, deleted_items = self.profile.inventory.take_item(
+            rubles_tpl_id, total_price
+        )
 
         self.response.items.change.extend(affected_items)
         self.response.items.del_.extend(deleted_items)
 
     def _repair(self, action: Repair) -> None:
-        trader = Trader(TraderType(action.tid), self.profile)
+        trader = self.trader_manager.get_trader(TraderType(action.tid))
+        trader_view = trader.view(self.profile)
         try:
-            price_rate: float = 1 + trader.base.repair.price_rate / 100
+            price_rate: float = 1 + trader_view.base.repair.price_rate / 100
         except ZeroDivisionError:
             price_rate = 1
 
@@ -225,10 +236,14 @@ class InventoryDispatcher(Dispatcher):
             item.upd.Repairable.Durability = new_durability
             self.response.items.change.append(item)
 
-            total_repair_cost: int = round(repair_cost_per_1_durability * price_rate * repair_item.count)
+            total_repair_cost: int = round(
+                repair_cost_per_1_durability * price_rate * repair_item.count
+            )
 
-            assert trader.base.repair.currency is not None
-            affected, deleted = self.inventory.take_item(trader.base.repair.currency, total_repair_cost)
+            assert trader_view.base.repair.currency is not None
+            affected, deleted = self.inventory.take_item(
+                trader_view.base.repair.currency, total_repair_cost
+            )
             self.response.items.change.extend(affected)
             self.response.items.del_.extend(deleted)
 

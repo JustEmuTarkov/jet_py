@@ -19,9 +19,14 @@ class ScavcaseProductionRepository:
     production: List[ScavcaseProductionModel]
 
     def __init__(self, production: List[dict]):
-        self.production = pydantic.parse_obj_as(List[ScavcaseProductionModel], production)
+        self.production = pydantic.parse_obj_as(
+            List[ScavcaseProductionModel], production
+        )
 
 
 scavcase_production_repository = ScavcaseProductionRepository(
-    production=[ujson.load(path.open()) for path in db_dir.joinpath("hideout", "scavcase").glob("*.json")]
+    production=[
+        ujson.load(path.open())
+        for path in db_dir.joinpath("hideout", "scavcase").glob("*.json")
+    ]
 )

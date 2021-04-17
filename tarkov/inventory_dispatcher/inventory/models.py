@@ -15,7 +15,9 @@ class ApplyInventoryChanges(ActionModel):
 
 class InventoryExamineActionOwnerModel(models.Base):
     id: ItemId
-    type: Optional[Literal["Trader", "HideoutUpgrade", "HideoutProduction", "RagFair"]] = None
+    type: Optional[
+        Literal["Trader", "HideoutUpgrade", "HideoutProduction", "RagFair"]
+    ] = None
 
 
 class Examine(ActionModel):

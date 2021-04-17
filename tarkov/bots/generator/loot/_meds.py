@@ -18,7 +18,9 @@ class MedsGenerator(BaseLootGenerator):
         amount = random.randint(self.config.healing.min, self.config.healing.max)
 
         for _ in range(amount):
-            container = self.inventory_containers.random_container(include=["TacticalVest", "Pockets"])
+            container = self.inventory_containers.random_container(
+                include=["TacticalVest", "Pockets"]
+            )
             try:
                 container.place_randomly(self._make_random_meds())
             except NoSpaceError:

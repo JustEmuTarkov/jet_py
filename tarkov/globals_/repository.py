@@ -12,7 +12,9 @@ if TYPE_CHECKING:
 
 class GlobalsRepository:
     def __init__(self) -> None:
-        self.globals: GlobalsModel = GlobalsModel.parse_file(db_dir.joinpath("base", "globals.json"))
+        self.globals: GlobalsModel = GlobalsModel.parse_file(
+            db_dir.joinpath("base", "globals.json")
+        )
 
     def has_preset(self, item_template: ItemTemplate) -> bool:
         return item_template.id in self.globals.ItemPresets

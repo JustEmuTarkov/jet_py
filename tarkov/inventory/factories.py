@@ -41,9 +41,9 @@ class ItemFactory:
             tpl=item_template.id,
         )
         if isinstance(item_template.props, AmmoBoxProps):
-            ammo_template_id: TemplateId = item_template.props.StackSlots[0]["_props"]["filters"][0]["Filter"][
-                0
-            ]
+            ammo_template_id: TemplateId = item_template.props.StackSlots[0]["_props"][
+                "filters"
+            ][0]["Filter"][0]
             ammo_template = self.templates_repository.get_template(ammo_template_id)
             ammo, _ = self.create_item(ammo_template, 1)
             ammo.upd.StackObjectsCount = count
@@ -73,7 +73,9 @@ class ItemFactory:
         item.parent_id = None
         return item, []
 
-    def create_items(self, template_id: TemplateId, count: int = 1) -> List[Tuple[Item, List[Item]]]:
+    def create_items(
+        self, template_id: TemplateId, count: int = 1
+    ) -> List[Tuple[Item, List[Item]]]:
         """
         Returns list of Tuple[Root Item, [Child items]
         """

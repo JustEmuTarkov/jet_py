@@ -9,7 +9,7 @@ from server import db_dir
 from tarkov.hideout.models import HideoutAreaType
 from tarkov.inventory.types import TemplateId
 from tarkov.models import Base
-from tarkov.trader import TraderType
+from tarkov.trader.models import TraderType
 
 
 class Requirements(SimpleNamespace):
@@ -118,5 +118,8 @@ class HideoutAreasRepository:
 
 
 areas_repository = HideoutAreasRepository(
-    areas=[ujson.load(path.open()) for path in db_dir.joinpath("hideout", "areas").glob("*.json")]
+    areas=[
+        ujson.load(path.open())
+        for path in db_dir.joinpath("hideout", "areas").glob("*.json")
+    ]
 )

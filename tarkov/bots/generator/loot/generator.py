@@ -18,7 +18,9 @@ class BotLootGenerator:
         self.bot_inventory = bot_inventory
         self.preset = preset
         self.config = LootGenerationConfig.parse_obj(preset.generation["items"])
-        self.bot_inventory_containers = BotInventoryContainers.from_inventory(self.bot_inventory)
+        self.bot_inventory_containers = BotInventoryContainers.from_inventory(
+            self.bot_inventory
+        )
 
     def generate(self) -> None:
         """

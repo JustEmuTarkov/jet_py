@@ -1,3 +1,4 @@
+from datetime import timedelta
 from pathlib import Path
 from typing import ClassVar
 
@@ -25,5 +26,8 @@ class BotGenerationConfig(BaseConfig):
     usec_change: float = 0.5
 
 
-flea_market = FleaMarketConfig.load()
-bot_generation = BotGenerationConfig.load()
+class TradersConfig(BaseConfig):
+    __config_path__: ClassVar[Path] = config_dir.joinpath("traders.yaml")
+
+    fence_assort_size: int = 200
+    assort_refresh_time_sec: int = int(timedelta(minutes=30).total_seconds())

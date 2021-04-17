@@ -1,13 +1,17 @@
 from __future__ import annotations
 
 import random
-from typing import Dict, List, Tuple
+from typing import Dict, List, TYPE_CHECKING, Tuple
 
-from dependency_injector.wiring import Provide, inject
+from dependency_injector.wiring import inject
 
-from server.container import AppContainer
+import server.app  # pylint: disable=cyclic-import
 from tarkov.exceptions import NoSpaceError
-from tarkov.inventory.inventory import GridInventory, GridInventoryStashMap, MutableInventory
+from tarkov.inventory.inventory import (
+    GridInventory,
+    GridInventoryStashMap,
+    MutableInventory,
+)
 from tarkov.inventory.models import (
     AnyItemLocation,
     Item,
@@ -17,7 +21,9 @@ from tarkov.inventory.models import (
 )
 from tarkov.inventory.prop_models import CompoundProps, Grid
 from tarkov.inventory.repositories import ItemTemplatesRepository
-from tarkov.inventory.types import ItemId
+
+if TYPE_CHECKING:
+    from tarkov.inventory.types import ItemId
 
 
 class SimpleInventory(MutableInventory):
@@ -88,14 +94,18 @@ class MultiGridContainer:
         cls,
         item: Item,
         slot_id: str,
-        item_templates_repository: ItemTemplatesRepository = Provide[AppContainer.repos.templates],
     ) -> MultiGridContainer:
+        item_templates_repository: ItemTemplatesRepository = (
+            server.app.container.repos.templates()
+        )
         return cls(item_templates_repository.get_template(item), item.id, slot_id)
 
     @property
     def size(self) -> int:
         assert isinstance(self.template.props, CompoundProps)
-        return sum(grid.props.height * grid.props.width for grid in self.template.props.Grids)
+        return sum(
+            grid.props.height * grid.props.width for grid in self.template.props.Grids
+        )
 
     def place_randomly(self, item: Item, child_items: List[Item] = None) -> None:
         """
@@ -115,6 +125,8 @@ class MultiGridContainer:
                 for orientation in ItemOrientationEnum:
                     location = ItemInventoryLocation(x=x, y=y, r=orientation.value)
                     if inventory.stash_map.can_place(item, child_items, location):
-                        inventory.place_item(item, child_items=child_items, location=location)
+                        inventory.place_item(
+                            item, child_items=child_items, location=location
+                        )
                         return
         raise NoSpaceError
