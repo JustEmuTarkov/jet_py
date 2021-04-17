@@ -41,4 +41,5 @@ class FleaMarketContainer(containers.DeclarativeContainer):
         FleaMarket,
         offer_generator=generator,
         flea_view_factory=view.provider,
+        flea_config=flea_config,
     )

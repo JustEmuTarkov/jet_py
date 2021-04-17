@@ -10,7 +10,7 @@ from starlette.requests import Request
 from server import db_dir, start_time
 from server.container import AppContainer
 from server.utils import get_request_url_root, make_router
-from tarkov import config
+from tarkov.config import FleaMarketConfig
 from tarkov.inventory.repositories import AnyTemplate, ItemTemplatesRepository
 from tarkov.inventory.types import TemplateId
 from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
@@ -111,13 +111,14 @@ def client_customization() -> TarkovSuccessResponse[dict]:
 
 
 @misc_router.post("/client/globals")
-def client_globals() -> TarkovSuccessResponse[dict]:
+@inject
+def client_globals(
+    flea_config: FleaMarketConfig = Depends(Provide[AppContainer.config.flea_market]),
+) -> TarkovSuccessResponse[dict]:
     globals_path = db_dir.joinpath("base", "globals.json")
     globals_base = ujson.load(globals_path.open(encoding="utf8"))
     globals_base["time"] = int(datetime.datetime.now().timestamp())
-    globals_base["config"]["RagFair"][
-        "minUserLevel"
-    ] = config.flea_market.level_required
+    globals_base["config"]["RagFair"]["minUserLevel"] = flea_config.level_required
     return TarkovSuccessResponse(data=globals_base)
 
 

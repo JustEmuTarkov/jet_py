@@ -3,18 +3,19 @@ from dependency_injector.providers import (
     Dependency,
 )  # pylint: disable=no-name-in-module
 
-from tarkov.config import BotGenerationConfig, FleaMarketConfig
 from tarkov.globals_.repository import GlobalsRepository
 from tarkov.inventory.factories import ItemFactory
 from tarkov.inventory.repositories import ItemTemplatesRepository
+from . import config
 
 
 class ConfigContainer(containers.DeclarativeContainer):
     flea_market = providers.Singleton(
-        FleaMarketConfig,
+        config.FleaMarketConfig.load,
     )
 
-    bot_generation = providers.Singleton(BotGenerationConfig)
+    bot_generation = providers.Singleton(config.BotGenerationConfig.load)
+    traders = providers.Singleton(config.TradersConfig.load)
 
 
 class RepositoriesContainer(containers.DeclarativeContainer):

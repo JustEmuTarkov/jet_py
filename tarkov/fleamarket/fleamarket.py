@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from typing import Callable, Dict, List
 
 from server import logger
-from tarkov import config
+from tarkov.config import FleaMarketConfig
 from tarkov.exceptions import NotFoundError
 from tarkov.inventory.models import Item, ItemTemplate
 from tarkov.inventory.types import TemplateId
@@ -21,8 +21,9 @@ class FleaMarket:
         self,
         offer_generator: OfferGenerator,
         flea_view_factory: Callable[..., FleaMarketView],
+        flea_config: FleaMarketConfig,
     ) -> None:
-        self.offers_amount: int = config.flea_market.offers_amount
+        self.offers_amount: int = flea_config.offers_amount
 
         self.updated_at: datetime = datetime.fromtimestamp(0)
 
