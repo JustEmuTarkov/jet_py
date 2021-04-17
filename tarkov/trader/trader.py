@@ -198,7 +198,9 @@ class FenceAssortGenerator(TraderAssortGenerator):
         return SimpleInventory(assort)
 
     def generate_barter_scheme(self, inventory: ImmutableInventory) -> BarterScheme:
-        templates_repository: ItemTemplatesRepository = server.app.container.repos.templates()
+        templates_repository: ItemTemplatesRepository = (
+            server.app.container.repos.templates()
+        )
         barter_scheme = BarterScheme()
 
         for item in inventory.items.values():
