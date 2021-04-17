@@ -12,7 +12,7 @@ from server.container import AppContainer
 from server.package_lib import PackageManager
 from tarkov.bots.router import bots_router
 from tarkov.fleamarket.routes import flea_market_router
-from tarkov.launcher.routes import launcher_router
+from tarkov.launcher.router import launcher_router
 from tarkov.mail.routes import mail_router
 from tarkov.notifier.router import notifier_router
 from tarkov.profile.routes import profile_router
