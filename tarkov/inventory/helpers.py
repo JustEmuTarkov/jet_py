@@ -35,7 +35,9 @@ def regenerate_items_ids(items: List["Item"]) -> None:
 
 
 def regenerate_item_ids_dict(items: List[Dict]) -> None:
-    id_map: Dict["ItemId", "ItemId"] = {item["_id"]: generate_item_id() for item in items}
+    id_map: Dict["ItemId", "ItemId"] = {
+        item["_id"]: generate_item_id() for item in items
+    }
 
     for item in items:
         item["_id"] = id_map[item["_id"]]

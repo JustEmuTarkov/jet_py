@@ -31,10 +31,13 @@ class LooseLootGenerator(BaseLootGenerator):
 
     @inject
     def _make_random_item(
-        self, slot_id: str, item_factory: ItemFactory = Provide[AppContainer.items.factory]
+        self,
+        slot_id: str,
+        item_factory: ItemFactory = Provide[AppContainer.items.factory],
     ) -> Tuple[Item, List[Item]]:
         templates: List[ItemTemplate] = [
-            self.templates_repository.get_template(tpl) for tpl in self.preset.inventory["items"][slot_id]
+            self.templates_repository.get_template(tpl)
+            for tpl in self.preset.inventory["items"][slot_id]
         ]
         templates_chances: List[float] = [t.props.SpawnChance for t in templates]
         template: ItemTemplate = random.choices(templates, templates_chances, k=1)[0]
@@ -42,7 +45,10 @@ class LooseLootGenerator(BaseLootGenerator):
         # If item is stackable then we have to generate count for it
         if isinstance(template.props, StackableItemProps):
             return item_factory.create_item(
-                template, count=random.randint(template.props.StackMinRandom, template.props.StackMaxRandom)
+                template,
+                count=random.randint(
+                    template.props.StackMinRandom, template.props.StackMaxRandom
+                ),
             )
 
         return item_factory.create_item(template)

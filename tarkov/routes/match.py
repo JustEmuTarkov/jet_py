@@ -79,5 +79,7 @@ def exit_() -> TarkovSuccessResponse[Literal[None]]:
 @match_router.post("/client/getMetricsConfig")
 def get_metrics_config() -> TarkovSuccessResponse[dict]:
     return TarkovSuccessResponse(
-        data=ujson.load(db_dir.joinpath("base", "matchMetrics.json").open(encoding="utf8"))
+        data=ujson.load(
+            db_dir.joinpath("base", "matchMetrics.json").open(encoding="utf8")
+        )
     )

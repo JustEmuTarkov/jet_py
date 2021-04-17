@@ -24,7 +24,9 @@ async def customization_storage(
     profile_id: Optional[str] = Cookie(alias="PHPSESSID", default=None),  # type: ignore
 ) -> Union[TarkovSuccessResponse[dict], TarkovErrorResponse]:
     if profile_id is None:
-        return TarkovErrorResponse(data="", err=True, errmsg="No session cookie provided")
+        return TarkovErrorResponse(
+            data="", err=True, errmsg="No session cookie provided"
+        )
     # customization_data = ujson.load(
     #     root_dir.joinpath('resources', 'profiles', profile_id, 'storage.json').open('r', encoding='utf8')
     # )

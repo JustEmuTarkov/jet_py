@@ -27,7 +27,9 @@ class MailView:
         self.mail = mail
 
     def view_dialogue_preview_list(self) -> List[Dict]:
-        dialogues_previews = DialoguePreviewList.from_dialogues(self.mail.dialogues).__root__
+        dialogues_previews = DialoguePreviewList.from_dialogues(
+            self.mail.dialogues
+        ).__root__
         return [dialogue_preview.dict() for dialogue_preview in dialogues_previews]
 
     def view_dialog_preview(self, dialogue_id: str) -> dict:
@@ -92,7 +94,9 @@ class Mail:
         category: MailDialogue = self.get_dialogue(message.uid)
         category.messages.insert(0, message)
 
-        self.__notifier_service.add_message_notification(profile_id=self.profile.profile_id, message=message)
+        self.__notifier_service.add_message_notification(
+            profile_id=self.profile.profile_id, message=message
+        )
 
     def get_message(self, message_id: str) -> MailDialogueMessage:
         """Returns MailDialogueMessage by it's id"""
@@ -105,7 +109,9 @@ class Mail:
     @staticmethod
     def is_message_expired(message: MailDialogueMessage) -> bool:
         datetime_now = datetime.datetime.now()
-        message_expires_at = datetime.datetime.fromtimestamp(message.dt + message.maxStorageTime)
+        message_expires_at = datetime.datetime.fromtimestamp(
+            message.dt + message.maxStorageTime
+        )
         return datetime_now > message_expires_at
 
     def read(self) -> None:
@@ -116,6 +122,8 @@ class Mail:
 
     def write(self) -> None:
         atomic_write(
-            self.dialogues.json(by_alias=True, exclude_unset=False, exclude_none=True, indent=4),
+            self.dialogues.json(
+                by_alias=True, exclude_unset=False, exclude_none=True, indent=4
+            ),
             self.path,
         )

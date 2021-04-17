@@ -64,7 +64,9 @@ class TraderStanding(Base):
     current_standing: float = Field(alias="currentStanding")
     current_sales_sum: int = Field(alias="currentSalesSum")
     next_loyalty: Any = Field(alias="NextLoyalty", const=None)
-    loyalty_levels: Dict[Literal["0", "1", "2", "3"], TraderLoyaltyLevel] = Field(alias="loyaltyLevels")
+    loyalty_levels: Dict[Literal["0", "1", "2", "3"], TraderLoyaltyLevel] = Field(
+        alias="loyaltyLevels"
+    )
     display: Optional[StrictBool] = None
     current_loyalty: Optional[float] = Field(alias="CurrentLoyalty", default=None)
 

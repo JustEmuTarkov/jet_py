@@ -50,7 +50,9 @@ class Hideout:
 
     def area_upgrade_start(self, area_type: HideoutAreaType) -> None:
         area = self.get_area(area_type)
-        area["completeTime"] = 0  # Todo: grab construction time from db/hideout/areas and current time
+        area[
+            "completeTime"
+        ] = 0  # Todo: grab construction time from db/hideout/areas and current time
         area["constructing"] = True
 
     def area_upgrade_finish(self, area_type: HideoutAreaType) -> None:
@@ -75,7 +77,9 @@ class Hideout:
 
         area_slots[slot_id]["item"] = [item.dict()]
 
-    def take_item_from_area_slot(self, area_type: HideoutAreaType, slot_id: int) -> inventory.models.Item:
+    def take_item_from_area_slot(
+        self, area_type: HideoutAreaType, slot_id: int
+    ) -> inventory.models.Item:
         area = self.get_area(area_type)
         slot = area["slots"][slot_id]
         item: dict = slot["item"][0]
@@ -99,7 +103,9 @@ class Hideout:
 
     @inject
     def take_production(
-        self, recipe_id: str, item_factory: ItemFactory = Provide[AppContainer.items.factory]
+        self,
+        recipe_id: str,
+        item_factory: ItemFactory = Provide[AppContainer.items.factory],
     ) -> List[inventory.models.Item]:
         recipe = self.get_recipe(recipe_id)
 
@@ -123,7 +129,9 @@ class Hideout:
         area = self.get_area(area_type)
         area["active"] = enabled
 
-    def __update_production_time(self, time_elapsed: int, generator_work_time: int) -> None:
+    def __update_production_time(
+        self, time_elapsed: int, generator_work_time: int
+    ) -> None:
         for production in self.data["Production"].values():
             production = cast(HideoutProduction, production)
 
@@ -133,7 +141,8 @@ class Hideout:
 
             # TODO: Move 0.15 into settings
             production["Progress"] += (
-                generator_work_time + generator_idle_time * self.__GENERATOR_SPEED_WITHOUT_FUEL
+                generator_work_time
+                + generator_idle_time * self.__GENERATOR_SPEED_WITHOUT_FUEL
             )
             # production['SkipTime'] +=
 

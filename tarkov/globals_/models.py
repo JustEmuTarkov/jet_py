@@ -34,10 +34,14 @@ class GlobalsModel(Base):
     time: int
 
     @root_validator(pre=True)
-    def transform_item_presets(cls, values: dict) -> dict:  # pylint: disable=no-self-argument, no-self-use
+    def transform_item_presets(
+        cls, values: dict
+    ) -> dict:  # pylint: disable=no-self-argument, no-self-use
         presets: dict = values["ItemPresets"]
         # Take only these presets that have _encyclopedia (TemplateId) In them
         values["ItemPresets"] = {
-            preset["_encyclopedia"]: preset for preset in presets.values() if "_encyclopedia" in preset
+            preset["_encyclopedia"]: preset
+            for preset in presets.values()
+            if "_encyclopedia" in preset
         }
         return values

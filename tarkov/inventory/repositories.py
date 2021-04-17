@@ -28,7 +28,9 @@ class ItemTemplatesRepository:
 
         # Read every file from db/items
         for item_file_path in db_dir.joinpath("items").glob("*"):
-            file_data: List[dict] = ujson.load(item_file_path.open("r", encoding="utf8"))
+            file_data: List[dict] = ujson.load(
+                item_file_path.open("r", encoding="utf8")
+            )
             item_templates.extend(
                 pydantic.parse_obj_as(
                     List[ItemTemplate],
@@ -48,7 +50,9 @@ class ItemTemplatesRepository:
 
     @staticmethod
     def __read_item_categories() -> dict:
-        items = ujson.load(db_dir.joinpath("templates", "items.json").open("r", encoding="utf8"))
+        items = ujson.load(
+            db_dir.joinpath("templates", "items.json").open("r", encoding="utf8")
+        )
         items = {item["Id"]: item for item in items}
         return items
 
@@ -73,7 +77,9 @@ class ItemTemplatesRepository:
 
         return item_template
 
-    def get_any_template(self, item: Union[Item, TemplateId]) -> Union[NodeTemplate, ItemTemplate]:
+    def get_any_template(
+        self, item: Union[Item, TemplateId]
+    ) -> Union[NodeTemplate, ItemTemplate]:
         if isinstance(item, Item):
             template_id = item.tpl
         else:
@@ -87,8 +93,12 @@ class ItemTemplatesRepository:
 
         raise NotFoundError(f"Can not found any template with id {template_id}")
 
-    def iter_template_children(self, template_id: TemplateId) -> Iterable[Union[NodeTemplate, ItemTemplate]]:
-        templates: List[Union[NodeTemplate, ItemTemplate]] = [self.get_any_template(template_id)]
+    def iter_template_children(
+        self, template_id: TemplateId
+    ) -> Iterable[Union[NodeTemplate, ItemTemplate]]:
+        templates: List[Union[NodeTemplate, ItemTemplate]] = [
+            self.get_any_template(template_id)
+        ]
         while templates:
             template = templates.pop()
             yield template
@@ -111,4 +121,8 @@ class ItemTemplatesRepository:
         template = self.get_any_template(template_id)
         if isinstance(template, ItemTemplate):
             return [template]
-        return [tpl for tpl in self.iter_template_children(template_id) if isinstance(tpl, ItemTemplate)]
+        return [
+            tpl
+            for tpl in self.iter_template_children(template_id)
+            if isinstance(tpl, ItemTemplate)
+        ]

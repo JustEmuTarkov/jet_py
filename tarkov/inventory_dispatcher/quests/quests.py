@@ -23,7 +23,9 @@ class QuestDispatcher(Dispatcher):
 
     def _quest_handover(self, action: Handover) -> None:
         items_dict = {item.id: item.count for item in action.items}
-        removed, changed = self.profile.quests.handover_items(action.qid, action.conditionId, items_dict)
+        removed, changed = self.profile.quests.handover_items(
+            action.qid, action.conditionId, items_dict
+        )
 
         self.response.items.change.extend(changed)
         self.response.items.del_.extend(removed)

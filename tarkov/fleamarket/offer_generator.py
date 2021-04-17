@@ -58,7 +58,9 @@ class OfferGenerator:
         item_prices: Dict[TemplateId, int] = pydantic.parse_file_as(
             Dict[TemplateId, int], db_dir.joinpath("flea_prices.json")
         )
-        self.item_prices.update({tpl: price for tpl, price in item_prices.items() if price > 0})
+        self.item_prices.update(
+            {tpl: price for tpl, price in item_prices.items() if price > 0}
+        )
 
         # Load seller usernames.
         self.seller_names = pydantic.parse_file_as(
@@ -67,20 +69,29 @@ class OfferGenerator:
 
         # All the item templates that we have prices for
         self.item_templates = [
-            tpl for tpl in self.__templates_repository.templates.values() if tpl.id in self.item_prices
+            tpl
+            for tpl in self.__templates_repository.templates.values()
+            if tpl.id in self.item_prices
         ]
         prices = list(self.item_prices.values())
         median_price = statistics.median(prices)
         prices_sorted = sorted(prices)
         # Calculates low/high percentile, they're used to weight too cheap/expensive items
-        self.percentile_high: int = prices_sorted[int(len(prices) * self.__config.percentile_high)]
-        self.percentile_low: int = prices_sorted[int(len(prices) * self.__config.percentile_low)]
-
-        self.item_templates_weights = [
-            self._get_item_template_weight(tpl, median_price) for tpl in self.item_templates
+        self.percentile_high: int = prices_sorted[
+            int(len(prices) * self.__config.percentile_high)
+        ]
+        self.percentile_low: int = prices_sorted[
+            int(len(prices) * self.__config.percentile_low)
         ]
 
-    def _get_item_template_weight(self, template: ItemTemplate, median_price: float) -> float:
+        self.item_templates_weights = [
+            self._get_item_template_weight(tpl, median_price)
+            for tpl in self.item_templates
+        ]
+
+    def _get_item_template_weight(
+        self, template: ItemTemplate, median_price: float
+    ) -> float:
         """
         Calculates item spawn chance on flea market
         """
@@ -103,7 +114,9 @@ class OfferGenerator:
         Generates multiple offers
         """
         offers = {}
-        templates = random.choices(self.item_templates, weights=self.item_templates_weights, k=amount)
+        templates = random.choices(
+            self.item_templates, weights=self.item_templates_weights, k=amount
+        )
         for template in templates:
             offer = self._generate_offer(template)
             offers[offer.id] = offer
@@ -151,7 +164,9 @@ class OfferGenerator:
             count=offer_price,
         )
         now = datetime.now()
-        expiration_time = random.gauss(timedelta(hours=6).total_seconds(), timedelta(hours=6).total_seconds())
+        expiration_time = random.gauss(
+            timedelta(hours=6).total_seconds(), timedelta(hours=6).total_seconds()
+        )
         expires_at = now + timedelta(seconds=abs(expiration_time))
 
         return Offer(

@@ -93,7 +93,9 @@ class Quests:
 
         quest_template = self.__quests_repository.get_quest_template(quest_id)
         quest_condition = next(
-            cond for cond in quest_template.conditions.AvailableForFinish if cond.props["id"] == condition_id
+            cond
+            for cond in quest_template.conditions.AvailableForFinish
+            if cond.props["id"] == condition_id
         )
         # Amount of items required for quest condition
         required_amount: int = int(quest_condition.props["value"])
@@ -134,7 +136,9 @@ class Quests:
     def complete_quest(
         self,
         quest_id: str,
-        templates_repository: ItemTemplatesRepository = Provide[AppContainer.repos.templates],
+        templates_repository: ItemTemplatesRepository = Provide[
+            AppContainer.repos.templates
+        ],
         trader_manager: TraderManager = Provide[AppContainer.trader.manager],
     ) -> None:
         quest_template = self.__quests_repository.get_quest_template(quest_id)
@@ -149,8 +153,14 @@ class Quests:
                     stack_size: int = item_template.props.StackMaxSize
 
                     while reward_item.upd.StackObjectsCount > 0:
-                        amount_to_split = min(reward_item.upd.StackObjectsCount, stack_size)
-                        reward_items.append(PlayerInventory.simple_split_item(reward_item, amount_to_split))
+                        amount_to_split = min(
+                            reward_item.upd.StackObjectsCount, stack_size
+                        )
+                        reward_items.append(
+                            PlayerInventory.simple_split_item(
+                                reward_item, amount_to_split
+                            )
+                        )
 
             elif isinstance(reward, QuestRewardExperience):
                 exp_amount: str = reward.value
@@ -170,7 +180,9 @@ class Quests:
                 pass
 
             else:
-                raise ValueError(f"Unknown reward: {reward.__class__.__name__} {reward}")
+                raise ValueError(
+                    f"Unknown reward: {reward.__class__.__name__} {reward}"
+                )
 
         message = MailDialogueMessage(
             uid=quest_template.traderId,

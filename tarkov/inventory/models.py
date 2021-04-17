@@ -59,7 +59,9 @@ class ItemTemplate(NodeTemplateBase):
     props: AnyProp
 
     @root_validator(pre=True)
-    def assign_prop(cls, values: dict) -> dict:  # pylint: disable=no-self-argument, no-self-use
+    def assign_prop(
+        cls, values: dict
+    ) -> dict:  # pylint: disable=no-self-argument, no-self-use
         if values["_type"] != "Item":
             return values
         if isinstance(values["_props"], BaseItemProps):
@@ -69,7 +71,9 @@ class ItemTemplate(NodeTemplateBase):
         try:
             model = props_models_map[values["_parent"]]
         except KeyError as e:
-            raise KeyError(f"Props class for node with id {values['_parent']} was not found") from e
+            raise KeyError(
+                f"Props class for node with id {values['_parent']} was not found"
+            ) from e
         try:
             values["_props"] = model.parse_obj(props)
         except ValidationError as e:
@@ -128,7 +132,9 @@ class ItemUpdLockable(Base):
 
 
 class ItemUpdRepairable(Base):
-    MaxDurability: Optional[float] = None  # TODO: Some items in bot inventories don't have MaxDurability
+    MaxDurability: Optional[
+        float
+    ] = None  # TODO: Some items in bot inventories don't have MaxDurability
     Durability: float
 
 
@@ -199,7 +205,9 @@ class ItemInventoryLocation(Base):
     isSearched: Optional[bool] = None
 
     @validator("r", pre=True)
-    def validate_rotation(cls, value: Any) -> Any:  # pylint: disable=no-self-argument, no-self-use
+    def validate_rotation(
+        cls, value: Any
+    ) -> Any:  # pylint: disable=no-self-argument, no-self-use
         if value == 1:
             return ItemOrientationEnum.Vertical.value
         if value == 0:
@@ -214,7 +222,9 @@ class Item(Base):
     class Config:
         extra = Extra.forbid
 
-    __inventory__: Optional["MutableInventory"] = PrivateAttr(default=None)  # Link to the inventory
+    __inventory__: Optional["MutableInventory"] = PrivateAttr(
+        default=None
+    )  # Link to the inventory
 
     id: ItemId = Field(alias="_id", default_factory=generate_item_id)
     tpl: TemplateId = Field(alias="_tpl")

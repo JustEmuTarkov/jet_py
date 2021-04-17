@@ -22,7 +22,9 @@ class BaseLootGenerator:
         bot_inventory: BotInventory,
         config: LootGenerationConfig,
         preset: BotGeneratorPreset,
-        templates_repository: ItemTemplatesRepository = Provide[AppContainer.repos.templates],
+        templates_repository: ItemTemplatesRepository = Provide[
+            AppContainer.repos.templates
+        ],
     ):
         self.inventory_containers = inventory_containers
         self.bot_inventory = bot_inventory

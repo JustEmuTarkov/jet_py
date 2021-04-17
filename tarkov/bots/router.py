@@ -19,7 +19,9 @@ def bot_difficulty_settings(bot_type: str, difficulty: str) -> dict:
     if bot_type == "core":
         return ujson.load(db_dir.joinpath("base", "botCore.json").open(encoding="utf8"))
 
-    bot_file = db_dir.joinpath("bots", bot_type, "difficulty", f"{difficulty}.json").open(encoding="utf8")
+    bot_file = db_dir.joinpath(
+        "bots", bot_type, "difficulty", f"{difficulty}.json"
+    ).open(encoding="utf8")
 
     return ujson.load(bot_file)
 

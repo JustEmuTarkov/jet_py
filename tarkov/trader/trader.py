@@ -54,15 +54,21 @@ class Trader:
         else:
             self.__barter_scheme_generator = TraderAssortGenerator(self)
 
-        self._base: Final[TraderBase] = TraderBase.parse_file(self.path.joinpath("base.json"))
+        self._base: Final[TraderBase] = TraderBase.parse_file(
+            self.path.joinpath("base.json")
+        )
         self._base.supply_next_time = int(time.time() + TRADER_RESUPPLY_TIME_SECONDS)
 
         self.inventory = self.__barter_scheme_generator.generate_inventory()
-        self.barter_scheme: BarterScheme = self.__barter_scheme_generator.generate_barter_scheme(self.inventory)
+        self.barter_scheme: BarterScheme = (
+            self.__barter_scheme_generator.generate_barter_scheme(self.inventory)
+        )
         self.loyal_level_items: Final[Dict[str, int]] = pydantic.parse_file_as(
             Dict[str, int], self.path.joinpath("loyal_level_items.json")
         )
-        self.quest_assort: Final[QuestAssort] = QuestAssort.parse_file(self.path.joinpath("questassort.json"))
+        self.quest_assort: Final[QuestAssort] = QuestAssort.parse_file(
+            self.path.joinpath("questassort.json")
+        )
 
     def view(self, player_profile: Profile) -> BaseTraderView:
         return self.__view_factory(self, player_profile)
@@ -76,7 +82,8 @@ class Trader:
         try:
             category = category_repository.get_category(item.tpl)
             return category.Id in self.base.sell_category or any(
-                c.Id in self.base.sell_category for c in category_repository.parent_categories(category)
+                c.Id in self.base.sell_category
+                for c in category_repository.parent_categories(category)
             )
         except KeyError:
             return False
@@ -97,7 +104,9 @@ class Trader:
             if self.can_sell(child):
                 price_rub += child_price
 
-        currency_template_id: TemplateId = TemplateId(CurrencyEnum[self.base.currency].value)
+        currency_template_id: TemplateId = TemplateId(
+            CurrencyEnum[self.base.currency].value
+        )
         currency_ratio = category_repository.item_categories[currency_template_id].Price
         price = round(price_rub / currency_ratio)
         return Price(
@@ -118,7 +127,8 @@ class Trader:
             item: Item = base_item.copy(deep=True)
             item.upd.StackObjectsCount = 1
             children_items: List[Item] = [
-                child.copy(deep=True) for child in self.inventory.iter_item_children_recursively(base_item)
+                child.copy(deep=True)
+                for child in self.inventory.iter_item_children_recursively(base_item)
             ]
 
             all_items = children_items + [item]
@@ -127,7 +137,9 @@ class Trader:
                 item.upd.UnlimitedCount = False
 
             item.upd = ItemUpd(StackObjectsCount=stack_size)
-            bought_items_list.append(BoughtItems(item=item, children_items=children_items))
+            bought_items_list.append(
+                BoughtItems(item=item, children_items=children_items)
+            )
 
         return bought_items_list
 
@@ -152,7 +164,9 @@ class TraderAssortGenerator:
 class FenceAssortGenerator(TraderAssortGenerator):
     def generate_inventory(self) -> ImmutableInventory:
         inventory = SimpleInventory(self._read_items())
-        root_items = set(item for item in inventory.items.values() if item.slot_id == "hideout")
+        root_items = set(
+            item for item in inventory.items.values() if item.slot_id == "hideout"
+        )
         assort = random.sample(root_items, k=min(len(root_items), 200))
 
         child_items: List[Item] = []
@@ -229,7 +243,9 @@ class TraderView(BaseTraderView):
         trader_type = self.__trader.type
         if trader_type.value not in self.__profile.pmc.TraderStandings:
             standing_copy: TraderStanding = self.__trader.base.loyalty.copy(deep=True)
-            self.__profile.pmc.TraderStandings[trader_type.value] = TraderStanding.parse_obj(standing_copy)
+            self.__profile.pmc.TraderStandings[
+                trader_type.value
+            ] = TraderStanding.parse_obj(standing_copy)
 
         return self.__profile.pmc.TraderStandings[trader_type.value]
 

@@ -67,16 +67,19 @@ class AppContainer(containers.DeclarativeContainer):
         ),
     )
 
-    launcher: LauncherContainer = cast(LauncherContainer, providers.Container(LauncherContainer))
+    launcher: LauncherContainer = cast(
+        LauncherContainer, providers.Container(LauncherContainer)
+    )
 
     profile: ProfileContainer = cast(
         ProfileContainer,
         providers.Container(
             ProfileContainer,
             account_service=launcher.account_service,
-        )
+        ),
     )
 
     trader: TraderContainer = cast(
-        TraderContainer, providers.Container(TraderContainer, templates_repository=repos.templates)
+        TraderContainer,
+        providers.Container(TraderContainer, templates_repository=repos.templates),
     )

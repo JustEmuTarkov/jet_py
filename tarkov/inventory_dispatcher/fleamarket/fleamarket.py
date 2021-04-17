@@ -47,7 +47,9 @@ class FleaMarketDispatcher(Dispatcher):
                 )
                 return
             if not offer.sellInOnePiece:
-                bough_stack = self.inventory.simple_split_item(offer.root_item, count=offer_to_buy.count)
+                bough_stack = self.inventory.simple_split_item(
+                    offer.root_item, count=offer_to_buy.count
+                )
                 bough_items: List[Item] = self.inventory.split_into_stacks(bough_stack)
                 for item in bough_items:
                     self.inventory.place_item(item)
@@ -75,7 +77,11 @@ class FleaMarketDispatcher(Dispatcher):
                     self.response.items.change.append(item)
 
     @inject
-    def _add_offer(self, action: Add, item_factory: ItemFactory = Provide[AppContainer.items.factory]) -> None:
+    def _add_offer(
+        self,
+        action: Add,
+        item_factory: ItemFactory = Provide[AppContainer.items.factory],
+    ) -> None:
         # Todo: Add taxation
         items = [self.inventory.get(item_id) for item_id in action.items]
         self.response.items.del_.extend(item.copy(deep=True) for item in items)
@@ -84,12 +90,16 @@ class FleaMarketDispatcher(Dispatcher):
         required_items: List[Item] = []
         for requirement in action.requirements:
             # TODO: This will probably cause issues with nested items, create_item function have to be changed
-            required_items_list = item_factory.create_items(requirement.template_id, requirement.count)
+            required_items_list = item_factory.create_items(
+                requirement.template_id, requirement.count
+            )
             for item, children in required_items_list:
                 required_items.extend([item, *children])
 
         selling_price_rub = self.flea_market.items_price(required_items)
-        selling_time: timedelta = self.flea_market.selling_time(items, selling_price_rub)
+        selling_time: timedelta = self.flea_market.selling_time(
+            items, selling_price_rub
+        )
         logger.debug(f"Requirements cost in rubles: {selling_price_rub}")
         logger.debug(f"Selling time: {selling_time}")
 

@@ -47,7 +47,9 @@ class InventoryDispatcher(Dispatcher):
         self,
         manager: "DispatcherManager",
         flea_market: FleaMarket = Provide[AppContainer.flea.market],
-        templates_repository: ItemTemplatesRepository = Provide[AppContainer.repos.templates],
+        templates_repository: ItemTemplatesRepository = Provide[
+            AppContainer.repos.templates
+        ],
         trader_manager: TraderManager = Provide[AppContainer.trader.manager],
     ):
         super().__init__(manager)
@@ -73,7 +75,9 @@ class InventoryDispatcher(Dispatcher):
         }
 
     @contextmanager
-    def owner_inventory(self, owner: Optional[Owner] = None) -> Iterator[MutableInventory]:
+    def owner_inventory(
+        self, owner: Optional[Owner] = None
+    ) -> Iterator[MutableInventory]:
         if owner is None:
             yield self.inventory
             return
@@ -118,7 +122,9 @@ class InventoryDispatcher(Dispatcher):
         if action.fromOwner.type == "Trader":
             trader_id = action.fromOwner.id
 
-            trader_inventory = self.trader_manager.get_trader(TraderType(trader_id)).inventory
+            trader_inventory = self.trader_manager.get_trader(
+                TraderType(trader_id)
+            ).inventory
             item = trader_inventory.get(item_id)
             self.profile.encyclopedia.examine(item)
 
@@ -130,7 +136,9 @@ class InventoryDispatcher(Dispatcher):
             try:
                 offer = self.flea_market.get_offer(OfferId(action.fromOwner.id))
             except NotFoundError:
-                self.response.append_error(title="Item examination error", message="Offer can not be found")
+                self.response.append_error(
+                    title="Item examination error", message="Offer can not be found"
+                )
                 return
 
             item = offer.root_item
@@ -199,7 +207,9 @@ class InventoryDispatcher(Dispatcher):
             total_price += trader_view.insurance_price([item])
             self.profile.add_insurance(item, trader_type)
 
-        affected_items, deleted_items = self.profile.inventory.take_item(rubles_tpl_id, total_price)
+        affected_items, deleted_items = self.profile.inventory.take_item(
+            rubles_tpl_id, total_price
+        )
 
         self.response.items.change.extend(affected_items)
         self.response.items.del_.extend(deleted_items)
@@ -226,10 +236,14 @@ class InventoryDispatcher(Dispatcher):
             item.upd.Repairable.Durability = new_durability
             self.response.items.change.append(item)
 
-            total_repair_cost: int = round(repair_cost_per_1_durability * price_rate * repair_item.count)
+            total_repair_cost: int = round(
+                repair_cost_per_1_durability * price_rate * repair_item.count
+            )
 
             assert trader_view.base.repair.currency is not None
-            affected, deleted = self.inventory.take_item(trader_view.base.repair.currency, total_repair_cost)
+            affected, deleted = self.inventory.take_item(
+                trader_view.base.repair.currency, total_repair_cost
+            )
             self.response.items.change.extend(affected)
             self.response.items.del_.extend(deleted)
 

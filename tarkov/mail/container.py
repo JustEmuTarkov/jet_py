@@ -1,5 +1,7 @@
 from dependency_injector import containers, providers
-from dependency_injector.providers import Dependency  # pylint: disable=no-name-in-module
+from dependency_injector.providers import (
+    Dependency,
+)  # pylint: disable=no-name-in-module
 
 from tarkov.notifier.notifier import NotifierService
 

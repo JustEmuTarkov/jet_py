@@ -23,7 +23,9 @@ class BotEquipmentGenerator:
         self,
         bot_inventory: BotInventory,
         preset: BotGeneratorPreset,
-        templates_repository: ItemTemplatesRepository = Provide[AppContainer.repos.templates],
+        templates_repository: ItemTemplatesRepository = Provide[
+            AppContainer.repos.templates
+        ],
     ):
         self.bot_inventory = bot_inventory
         self.preset = preset
@@ -34,17 +36,23 @@ class BotEquipmentGenerator:
     ) -> bool:
         template = self.templates_repository.get_template(template_id)
         blocks_slots: Set[str] = {
-            k.lstrip("Blocks") for k, v in template.props.dict().items() if k.startswith("Blocks") and v is True
+            k.lstrip("Blocks")
+            for k, v in template.props.dict().items()
+            if k.startswith("Blocks") and v is True
         }
         # If any of slots that should be generated conflicts with slots that item blocks
         if not blocks_slots.isdisjoint(equipment_slots_to_generate):
             return False
         # If template conflicts with any of the existing items
-        if any(item.tpl in template.props.ConflictingItems for item in self.bot_inventory.items.values()):
+        if any(
+            item.tpl in template.props.ConflictingItems
+            for item in self.bot_inventory.items.values()
+        ):
             return False
         # If any of the existing items conflict with template
         if any(
-            template.id in self.templates_repository.get_template(item).props.ConflictingItems
+            template.id
+            in self.templates_repository.get_template(item).props.ConflictingItems
             for item in self.bot_inventory.items.values()
         ):
             return False
@@ -73,11 +81,16 @@ class BotEquipmentGenerator:
         if not any(slot in equipment_slots_to_generate for slot in weapon_slots):
             equipment_slots_to_generate.add("Holster")
 
-        assert any(i in weapon_slots for i in ("FirstPrimaryWeapon", "SecondPrimaryWeapon", "Holster"))
+        assert any(
+            i in weapon_slots
+            for i in ("FirstPrimaryWeapon", "SecondPrimaryWeapon", "Holster")
+        )
         for equipment_slot in equipment_slots_to_generate:
             template_ids = self.preset.inventory["equipment"][equipment_slot]
             template_ids = [
-                i for i in template_ids if self.__filter_conflicting_items(i, equipment_slots_to_generate)
+                i
+                for i in template_ids
+                if self.__filter_conflicting_items(i, equipment_slots_to_generate)
             ]
 
             random_template_id = random.choice(template_ids)

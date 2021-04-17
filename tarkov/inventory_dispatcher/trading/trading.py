@@ -22,7 +22,9 @@ if TYPE_CHECKING:
 class TradingDispatcher(Dispatcher):
     @inject
     def __init__(
-        self, manager: DispatcherManager, trader_manager: TraderManager = Provide[AppContainer.trader.manager]
+        self,
+        manager: DispatcherManager,
+        trader_manager: TraderManager = Provide[AppContainer.trader.manager],
     ):
         super().__init__(manager)
         self.__trader_manager = trader_manager
@@ -57,7 +59,9 @@ class TradingDispatcher(Dispatcher):
 
         # Take required items from inventory
         for scheme_item in action.scheme_items:
-            self.profile.pmc.TraderStandings[action.tid].current_sales_sum += scheme_item.count
+            self.profile.pmc.TraderStandings[
+                action.tid
+            ].current_sales_sum += scheme_item.count
             item = self.inventory.get(scheme_item.id)
             item.upd.StackObjectsCount -= scheme_item.count
             if not item.upd.StackObjectsCount:
@@ -67,7 +71,9 @@ class TradingDispatcher(Dispatcher):
                 self.response.items.change.append(item)
 
         trader_view = trader.view(self.profile)
-        self.response.currentSalesSums[action.tid] = trader_view.standing.current_sales_sum
+        self.response.currentSalesSums[
+            action.tid
+        ] = trader_view.standing.current_sales_sum
 
     def __sell_to_trader(self, action: SellToTrader) -> None:
         trader_id = action.tid
@@ -77,7 +83,8 @@ class TradingDispatcher(Dispatcher):
 
         items = list(self.inventory.get(i.id) for i in items_to_sell)
         price_sum: int = sum(
-            trader.get_sell_price(self.inventory.get(i.id), children_items=[]).amount for i in items_to_sell
+            trader.get_sell_price(self.inventory.get(i.id), children_items=[]).amount
+            for i in items_to_sell
         )
         # price_sum: int = sum(trader.get_sell_price(item, children_items=[]).amount for item in items)
 

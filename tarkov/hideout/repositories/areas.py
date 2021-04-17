@@ -118,5 +118,8 @@ class HideoutAreasRepository:
 
 
 areas_repository = HideoutAreasRepository(
-    areas=[ujson.load(path.open()) for path in db_dir.joinpath("hideout", "areas").glob("*.json")]
+    areas=[
+        ujson.load(path.open())
+        for path in db_dir.joinpath("hideout", "areas").glob("*.json")
+    ]
 )

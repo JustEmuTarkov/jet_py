@@ -23,7 +23,9 @@ class BotWeaponGenerator:
         self,
         bot_inventory: BotInventory,
         preset: BotGeneratorPreset,
-        templates_repository: ItemTemplatesRepository = Provide[AppContainer.repos.templates],
+        templates_repository: ItemTemplatesRepository = Provide[
+            AppContainer.repos.templates
+        ],
     ):
         self.templates_repository = templates_repository
         self.bot_inventory = bot_inventory
@@ -54,7 +56,11 @@ class BotWeaponGenerator:
             for item_template_id, slots in self.preset.inventory["mods"].items():
                 try:
                     # Skip iteration if item with template id we need isn't present in inventory
-                    parent = next(i for i in self.bot_inventory.items.values() if i.tpl == item_template_id)
+                    parent = next(
+                        i
+                        for i in self.bot_inventory.items.values()
+                        if i.tpl == item_template_id
+                    )
                 except StopIteration:
                     continue
                 # Skip if we already generated children for that template
@@ -64,14 +70,18 @@ class BotWeaponGenerator:
                 seen_templates.add(item_template_id)
 
                 for slot, template_ids in slots.items():
-                    self.__generate_mod(slot=slot, template_ids=template_ids, parent=parent)
+                    self.__generate_mod(
+                        slot=slot, template_ids=template_ids, parent=parent
+                    )
 
             # break from loop if we didn't generate any new items
             if amount_of_items == len(self.bot_inventory.items):
                 break
             amount_of_items = len(self.bot_inventory.items)
 
-    def __generate_mod(self, slot: str, template_ids: List[TemplateId], parent: Item) -> None:
+    def __generate_mod(
+        self, slot: str, template_ids: List[TemplateId], parent: Item
+    ) -> None:
         try:
             if not random.uniform(0, 100) <= self.preset.chances["mods"][slot]:
                 return
@@ -82,7 +92,9 @@ class BotWeaponGenerator:
         if not template_ids:
             return
 
-        random_template = self.templates_repository.get_template(random.choice(template_ids))
+        random_template = self.templates_repository.get_template(
+            random.choice(template_ids)
+        )
         # Ammo generation will be handler later via BotMagazineGenerator class
         if slot == "cartridges":
             return

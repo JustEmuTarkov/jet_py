@@ -115,6 +115,8 @@ class Quest(models.Base):
 
     quest_id: str = Field(alias="qid")
     started_at: int = Field(alias="startTime")
-    completed_conditions: List[str] = Field(alias="completedConditions", default_factory=list)
+    completed_conditions: List[str] = Field(
+        alias="completedConditions", default_factory=list
+    )
     status_timers: Dict[str, float] = Field(alias="statusTimers", default_factory=dict)
     status: QuestStatus

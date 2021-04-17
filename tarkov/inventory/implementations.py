@@ -95,13 +95,17 @@ class MultiGridContainer:
         item: Item,
         slot_id: str,
     ) -> MultiGridContainer:
-        item_templates_repository: ItemTemplatesRepository = server.app.container.repos.templates()
+        item_templates_repository: ItemTemplatesRepository = (
+            server.app.container.repos.templates()
+        )
         return cls(item_templates_repository.get_template(item), item.id, slot_id)
 
     @property
     def size(self) -> int:
         assert isinstance(self.template.props, CompoundProps)
-        return sum(grid.props.height * grid.props.width for grid in self.template.props.Grids)
+        return sum(
+            grid.props.height * grid.props.width for grid in self.template.props.Grids
+        )
 
     def place_randomly(self, item: Item, child_items: List[Item] = None) -> None:
         """
@@ -121,6 +125,8 @@ class MultiGridContainer:
                 for orientation in ItemOrientationEnum:
                     location = ItemInventoryLocation(x=x, y=y, r=orientation.value)
                     if inventory.stash_map.can_place(item, child_items, location):
-                        inventory.place_item(item, child_items=child_items, location=location)
+                        inventory.place_item(
+                            item, child_items=child_items, location=location
+                        )
                         return
         raise NoSpaceError

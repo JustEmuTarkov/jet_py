@@ -38,7 +38,11 @@ class ProfileNotifier:
     @property
     def has_new_notifications(self) -> bool:
         return bool(
-            [notification for notification in self.unsent_notifications if notification.data.message.arrived]
+            [
+                notification
+                for notification in self.unsent_notifications
+                if notification.data.message.arrived
+            ]
         )
 
     def notifications_ready_to_send_view(self) -> List[dict]:
@@ -48,7 +52,9 @@ class ProfileNotifier:
             if notification.data.message.arrived
         ]
         self.unsent_notifications = [
-            notification for notification in self.unsent_notifications if not notification.data.message.arrived
+            notification
+            for notification in self.unsent_notifications
+            if not notification.data.message.arrived
         ]
 
         return messages_ready_to_send
@@ -72,7 +78,9 @@ class NotifierService:
         profile_notifier = self.notifications[profile_id]
         return profile_notifier.notifications_ready_to_send_view()
 
-    def add_message_notification(self, profile_id: str, message: MailDialogueMessage) -> None:
+    def add_message_notification(
+        self, profile_id: str, message: MailDialogueMessage
+    ) -> None:
         notification = MessageNotification(
             event_id=message.id,
             data=MessageNotificationData(dialogue_id=message.uid, message=message),
