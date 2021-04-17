@@ -1,3 +1,4 @@
+import json
 from typing import List
 
 import orjson
@@ -62,4 +63,4 @@ class AccountService:
     def __write(self) -> None:
         self.path.parent.mkdir(exist_ok=True, parents=True)
         accounts = [a.dict() for a in self.accounts]
-        atomic_write(orjson.dumps(accounts).decode("utf8"), self.path)
+        atomic_write(json.dumps(accounts, indent=4, ensure_ascii=False), self.path)
