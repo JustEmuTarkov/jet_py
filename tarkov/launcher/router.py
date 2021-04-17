@@ -15,11 +15,15 @@ launcher_router = make_router(tags=["Launcher"])
 
 
 @launcher_router.get("/launcher/server/connect")
-async def connect(request: Request) -> dict:
+@inject
+async def connect(
+    request: Request,
+    account_service: AccountService = Depends(Provide[AppContainer.launcher.account_service]),  # type: ignore
+) -> dict:
     return {
         "backendUrl": get_request_url_root(request).rstrip("/"),
         "name": "Jet Py",
-        "editions": ["Edge Of Darkness"],
+        "editions": account_service.available_editions,
     }
 
 
