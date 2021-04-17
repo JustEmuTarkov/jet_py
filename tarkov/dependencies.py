@@ -1,12 +1,16 @@
+from __future__ import annotations
+
 from asyncio import Lock
 from collections import defaultdict
-from typing import AsyncIterable, Dict
+from typing import AsyncIterable, Dict, TYPE_CHECKING
 
 from fastapi import BackgroundTasks
 from fastapi.params import Cookie
 
 from server import logger
-from tarkov.profile.profile import Profile
+
+if TYPE_CHECKING:
+    from tarkov.profile.profile import Profile
 
 
 class ProfileManager:
@@ -15,14 +19,20 @@ class ProfileManager:
         self.profiles: Dict[str, Profile] = {}
 
     def get_or_create_profile(self, profile_id: str) -> Profile:
+        from tarkov.profile.profile import Profile
         if profile_id not in self.profiles:
-            self.profiles[profile_id] = Profile(profile_id)
-            self.profiles[profile_id].read()
+            profile = Profile(profile_id)
+            profile.read()
+            self.profiles[profile_id] = profile
+
         return self.profiles[profile_id]
 
     def _save_profile_task(self, profile: Profile) -> None:
         assert self.locks[profile.profile_id].locked()
         profile.write()
+
+    def has(self, profile_id: str) -> bool:
+        return profile_id in self.profiles
 
     async def with_profile(
         self,

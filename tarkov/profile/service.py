@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import json
+import shutil
 from typing import TYPE_CHECKING
 
 import ujson
 
 from server import db_dir, root_dir
+from tarkov.dependencies import profile_manager
 
 if TYPE_CHECKING:
     from tarkov.launcher.accounts import AccountService
@@ -21,7 +24,6 @@ class ProfileService:
         side: str,
         profile_id: str,
     ) -> ProfileModel:
-        # TODO: That's just disgusting but i don't want to deal with cyclic imports right now
         from tarkov.profile.models import ProfileModel
 
         account = self.__account_service.get_account(profile_id)
@@ -51,6 +53,19 @@ class ProfileService:
         with profile_dir.joinpath("pmc_profile.json").open(
             "w", encoding="utf8"
         ) as file:
-            file.write(profile.json())
+            file.write(profile.json(exclude_none=True))
 
+        # TODO: Scav profile generation
+        scav_profile = json.load(root_dir.joinpath("resources", "scav_profile.json").open("r", encoding="utf8"))
+        scav_profile["id"] = f"scav{profile.aid}"
+        scav_profile["savage"] = f"scav{profile.aid}"
+        scav_profile["aid"] = profile.aid
+        json.dump(
+            scav_profile,
+            profile_dir.joinpath("scav_profile.json").open("w", encoding="utf8"),
+            indent=4,
+            ensure_ascii=False,
+        )
+
+        profile_manager.get_or_create_profile(profile_id=profile_id)
         return profile

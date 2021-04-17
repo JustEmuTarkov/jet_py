@@ -13,10 +13,10 @@ from tarkov.inventory.inventory import PlayerInventory
 from tarkov.inventory.models import Item, ItemTemplate
 from tarkov.inventory.types import TemplateId
 from tarkov.mail import Mail
+from tarkov.notifier.notifier import NotifierService
 from tarkov.quests.quests import Quests
 from tarkov.trader.models import TraderType
 from .models import ItemInsurance, ProfileModel
-from tarkov.notifier.notifier import NotifierService
 
 if TYPE_CHECKING:
     from tarkov.inventory.repositories import ItemTemplatesRepository
@@ -90,8 +90,9 @@ class Profile:
     def read(
         self, notifier_service: NotifierService = Provide[AppContainer.notifier.service]
     ) -> None:
-        if not self.profile_dir.exists() or not self.pmc_profile_path.exists():
+        if any(not path.exists() for path in (self.pmc_profile_path, self.scav_profile_path)):
             raise Profile.ProfileDoesNotExistsError
+
         self.pmc = ProfileModel.parse_file(self.pmc_profile_path)
         self.scav = ProfileModel.parse_file(self.scav_profile_path)
 
