@@ -30,4 +30,4 @@ class TradersConfig(BaseConfig):
     __config_path__: ClassVar[Path] = config_dir.joinpath("traders.yaml")
 
     fence_assort_size: int = 200
-    assort_refresh_time_sec: int = timedelta(minutes=30).total_seconds()
+    assort_refresh_time_sec: int = int(timedelta(minutes=30).total_seconds())

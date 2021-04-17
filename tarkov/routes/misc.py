@@ -113,7 +113,7 @@ def client_customization() -> TarkovSuccessResponse[dict]:
 @misc_router.post("/client/globals")
 @inject
 def client_globals(
-    flea_config: FleaMarketConfig = Depends(Provide[AppContainer.config.flea_market]),
+    flea_config: FleaMarketConfig = Depends(Provide[AppContainer.config.flea_market]),  # type: ignore
 ) -> TarkovSuccessResponse[dict]:
     globals_path = db_dir.joinpath("base", "globals.json")
     globals_base = ujson.load(globals_path.open(encoding="utf8"))

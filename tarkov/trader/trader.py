@@ -1,14 +1,15 @@
 from __future__ import annotations
 
 import random
-import time
 from abc import abstractmethod
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import Callable, Dict, Final, Iterable, List, Protocol, TYPE_CHECKING
 
 import pydantic
 
+import server.app
 from server import db_dir
+from tarkov.config import TradersConfig
 from tarkov.inventory.helpers import regenerate_items_ids
 from tarkov.inventory.implementations import SimpleInventory
 from tarkov.inventory.inventory import ImmutableInventory
@@ -36,14 +37,20 @@ TRADER_RESUPPLY_TIME_SECONDS: Final[int] = int(timedelta(minutes=30).total_secon
 
 
 class Trader:
+    inventory: ImmutableInventory
+    barter_scheme: BarterScheme
+    __supply_next_time: datetime
+
     def __init__(
         self,
         trader_type: TraderType,
         templates_repository: ItemTemplatesRepository,
         trader_view_factory: Callable[..., BaseTraderView],
+        config: TradersConfig,
     ):
         self.__templates_repository = templates_repository
         self.__view_factory = trader_view_factory
+        self.__config = config
 
         self.type: Final[TraderType] = trader_type
         self.path = db_dir.joinpath("traders", self.type.value)
@@ -57,25 +64,37 @@ class Trader:
         self._base: Final[TraderBase] = TraderBase.parse_file(
             self.path.joinpath("base.json")
         )
-        self._base.supply_next_time = int(time.time() + TRADER_RESUPPLY_TIME_SECONDS)
-
-        self.inventory = self.__barter_scheme_generator.generate_inventory()
-        self.barter_scheme: BarterScheme = (
-            self.__barter_scheme_generator.generate_barter_scheme(self.inventory)
-        )
         self.loyal_level_items: Final[Dict[str, int]] = pydantic.parse_file_as(
             Dict[str, int], self.path.joinpath("loyal_level_items.json")
         )
         self.quest_assort: Final[QuestAssort] = QuestAssort.parse_file(
             self.path.joinpath("questassort.json")
         )
+        self.__update()
+
+    def __update(self) -> None:
+        self.__supply_next_time = datetime.now() + timedelta(
+            seconds=self.__config.assort_refresh_time_sec
+        )
+        self.inventory = self.__barter_scheme_generator.generate_inventory()
+        self.barter_scheme: BarterScheme = (
+            self.__barter_scheme_generator.generate_barter_scheme(self.inventory)
+        )
+
+    def __try_update(self) -> None:
+        now = datetime.now()
+        if now > self.__supply_next_time:
+            self.__update()
 
     def view(self, player_profile: Profile) -> BaseTraderView:
+        self.__try_update()
         return self.__view_factory(self, player_profile)
 
     @property
     def base(self) -> TraderBase:
+        self.__try_update()
         trader_base = self._base.copy(deep=True)
+        trader_base.supply_next_time = int(self.__supply_next_time.timestamp())
         return trader_base
 
     def can_sell(self, item: Item) -> bool:
@@ -179,10 +198,12 @@ class FenceAssortGenerator(TraderAssortGenerator):
         return SimpleInventory(assort)
 
     def generate_barter_scheme(self, inventory: ImmutableInventory) -> BarterScheme:
+        templates_repository: ItemTemplatesRepository = server.app.container.repos.templates()
         barter_scheme = BarterScheme()
 
         for item in inventory.items.values():
-            item_price = 1  # TODO: replace
+            item_price = templates_repository.get_template(item.tpl).props.CreditsPrice
+            item_price += int(item_price * self.trader.base.discount / 100)
             barter_scheme[item.id] = [
                 [
                     BarterSchemeEntry(

@@ -81,5 +81,9 @@ class AppContainer(containers.DeclarativeContainer):
 
     trader: TraderContainer = cast(
         TraderContainer,
-        providers.Container(TraderContainer, templates_repository=repos.templates),
+        providers.Container(
+            TraderContainer,
+            templates_repository=repos.templates,
+            config=config.traders,
+        ),
     )
