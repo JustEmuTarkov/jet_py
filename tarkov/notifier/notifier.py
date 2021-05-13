@@ -86,7 +86,3 @@ class NotifierService:
             data=MessageNotificationData(dialogue_id=message.uid, message=message),
         )
         self.notifications[profile_id].add_mail_notification(notification)
-
-    @staticmethod
-    def get_empty_notification() -> dict:
-        return {"type": "ping", "eventId": "ping"}
