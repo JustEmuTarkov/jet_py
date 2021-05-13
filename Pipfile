@@ -4,15 +4,15 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-flask = ">=1.1.*"
-pyopenssl = ">=20.0.0"
-pydantic = ">=1.7.3"
-pyyaml = ">=5.4.1"
-orjson = "*"
-fastapi = {extras = ["all"], version = "*"}
 uvicorn = "*"
+fastapi = {extras = ["all"], version = "*"}
+pydantic = ">=1.7.3"
+pyopenssl = ">=20.0.0"
 aiofiles = "*"
 dependency-injector = "*"
+pyyaml = ">=5.4.1"
+ujson = "*"
+orjson = "*"
 
 [dev-packages]
 pyinstaller = ">=4.1"
