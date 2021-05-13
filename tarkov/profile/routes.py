@@ -1,13 +1,12 @@
 from typing import List, Union
 
 from dependency_injector.wiring import Provide, inject
-from fastapi import APIRouter
 from fastapi.params import Body, Cookie, Depends
 from fastapi.requests import Request
 
 from server import logger
 from server.container import AppContainer
-from server.utils import get_request_url_root
+from server.utils import get_request_url_root, make_router
 from tarkov.dependencies import profile_manager
 from tarkov.inventory_dispatcher import DispatcherManager
 from tarkov.inventory_dispatcher.manager import DispatcherResponse
@@ -16,8 +15,7 @@ from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
 from tarkov.profile.profile import Profile
 from tarkov.profile.service import ProfileService
 
-# profile_router = make_router(tags=["Profile"])
-profile_router = APIRouter()
+profile_router = make_router(tags=["Profile"])
 
 
 @profile_router.post(
