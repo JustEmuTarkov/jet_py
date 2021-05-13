@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 uvicorn = "*"
+starlette = "*"
 fastapi = {extras = ["all"], version = "*"}
 pydantic = ">=1.7.3"
 pyopenssl = ">=20.0.0"
