@@ -1,4 +1,4 @@
-import uvicorn  # type: ignore
+import uvicorn
 
 import tarkov
 from server.app import app

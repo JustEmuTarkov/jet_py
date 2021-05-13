@@ -1,9 +1,11 @@
+import json
+from functools import lru_cache
 from typing import List
 
 import orjson
 import pydantic
 
-from server import root_dir
+from server import db_dir, root_dir
 from server.utils import atomic_write
 from tarkov.exceptions import NotFoundError
 from tarkov.inventory.helpers import generate_item_id
@@ -16,6 +18,12 @@ class AccountService:
         self.path = root_dir.joinpath("resources", "profiles.json")
 
         self.__read()
+
+    @property
+    @lru_cache(1)
+    def available_editions(self) -> List[str]:
+        editions_dirs = [d for d in db_dir.joinpath("profile").glob("*") if d.is_dir()]
+        return [d.name for d in editions_dirs]
 
     def is_nickname_taken(self, nickname: str) -> bool:
         for account in self.accounts:
@@ -62,4 +70,4 @@ class AccountService:
     def __write(self) -> None:
         self.path.parent.mkdir(exist_ok=True, parents=True)
         accounts = [a.dict() for a in self.accounts]
-        atomic_write(orjson.dumps(accounts).decode("utf8"), self.path)
+        atomic_write(json.dumps(accounts, indent=4, ensure_ascii=False), self.path)

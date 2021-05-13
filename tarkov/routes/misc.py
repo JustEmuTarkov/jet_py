@@ -46,7 +46,7 @@ def client_game_version_validate() -> TarkovSuccessResponse[Type[None]]:
 @misc_router.post("/client/game/config")
 def client_game_config(
     request: Request,
-    profile_id: Optional[str] = Cookie(alias="PHPSESSID", default=None),  # type: ignore
+    profile_id: Optional[str] = Cookie(alias="PHPSESSID", default=None),
 ) -> Union[TarkovSuccessResponse[dict], TarkovErrorResponse]:
     url_root = get_request_url_root(request)
 
@@ -77,7 +77,7 @@ def client_game_config(
 
 @misc_router.post("/client/game/keepalive")
 def client_game_keepalive(
-    profile_id: Optional[str] = Cookie(alias="PHPSESSID", default=None),  # type: ignore
+    profile_id: Optional[str] = Cookie(alias="PHPSESSID", default=None),
 ) -> Union[TarkovSuccessResponse[dict], TarkovErrorResponse]:
     if not profile_id:
         return TarkovErrorResponse(err=True, errmsg="No Session", data=None)
@@ -92,7 +92,9 @@ def client_game_keepalive(
 )
 @inject
 def client_items(
-    templates_repository: ItemTemplatesRepository = Depends(Provide[AppContainer.repos.templates]),  # type: ignore
+    templates_repository: ItemTemplatesRepository = Depends(
+        Provide[AppContainer.repos.templates]
+    ),
 ) -> TarkovSuccessResponse[Dict[TemplateId, Union[AnyTemplate]]]:
     return TarkovSuccessResponse(data=templates_repository.client_items_view)
 
@@ -113,7 +115,7 @@ def client_customization() -> TarkovSuccessResponse[dict]:
 @misc_router.post("/client/globals")
 @inject
 def client_globals(
-    flea_config: FleaMarketConfig = Depends(Provide[AppContainer.config.flea_market]),  # type: ignore
+    flea_config: FleaMarketConfig = Depends(Provide[AppContainer.config.flea_market]),
 ) -> TarkovSuccessResponse[dict]:
     globals_path = db_dir.joinpath("base", "globals.json")
     globals_base = ujson.load(globals_path.open(encoding="utf8"))

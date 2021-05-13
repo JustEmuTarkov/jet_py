@@ -1,10 +1,12 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from pathlib import Path
+from typing import Final, TYPE_CHECKING
 
 import ujson
 
 from server import db_dir, root_dir
+from tarkov.dependencies import profile_manager
 
 if TYPE_CHECKING:
     from tarkov.launcher.accounts import AccountService
@@ -17,11 +19,10 @@ class ProfileService:
 
     def create_profile(
         self,
+        profile_id: str,
         nickname: str,
         side: str,
-        profile_id: str,
     ) -> ProfileModel:
-        # TODO: That's just disgusting but i don't want to deal with cyclic imports right now
         from tarkov.profile.models import ProfileModel
 
         account = self.__account_service.get_account(profile_id)
@@ -45,12 +46,31 @@ class ProfileService:
         profile.Info.Side = side.capitalize()
         profile.Info.Voice = f"{side.capitalize()}_1"
 
-        profile_dir = root_dir.joinpath("resources", "profiles", account.id)
+        profile_dir: Final[Path] = root_dir.joinpath(
+            "resources", "profiles", account.id
+        )
         profile_dir.mkdir(parents=True, exist_ok=True)
 
         with profile_dir.joinpath("pmc_profile.json").open(
             "w", encoding="utf8"
         ) as file:
-            file.write(profile.json())
+            file.write(profile.json(exclude_none=True))
 
+        # TODO: Scav profile generation, for not it just copies
+        scav_profile = ujson.load(
+            root_dir.joinpath("resources", "scav_profile.json").open(
+                "r", encoding="utf8"
+            )
+        )
+        scav_profile["id"] = f"scav{profile.aid}"
+        scav_profile["savage"] = f"scav{profile.aid}"
+        scav_profile["aid"] = profile.aid
+        ujson.dump(
+            scav_profile,
+            profile_dir.joinpath("scav_profile.json").open("w", encoding="utf8"),
+            indent=4,
+            ensure_ascii=False,
+        )
+
+        profile_manager.get_profile(profile_id=profile_id)
         return profile

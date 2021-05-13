@@ -15,20 +15,28 @@ launcher_router = make_router(tags=["Launcher"])
 
 
 @launcher_router.get("/launcher/server/connect")
-async def connect(request: Request) -> dict:
+@inject
+async def connect(
+    request: Request,
+    account_service: AccountService = Depends(
+        Provide[AppContainer.launcher.account_service]
+    ),
+) -> dict:
     return {
         "backendUrl": get_request_url_root(request).rstrip("/"),
         "name": "Jet Py",
-        "editions": ["Edge Of Darkness"],
+        "editions": account_service.available_editions,
     }
 
 
 @launcher_router.post("/launcher/profile/login")
 @inject
 def login(
-    email: str = Body(..., embed=True),  # type: ignore
-    password: str = Body(..., embed=True),  # type: ignore
-    account_service: AccountService = Depends(Provide[AppContainer.launcher.account_service]),  # type: ignore
+    email: str = Body(..., embed=True),
+    password: str = Body(..., embed=True),
+    account_service: AccountService = Depends(
+        Provide[AppContainer.launcher.account_service]
+    ),
 ) -> PlainTextResponse:
     try:
         account_service.find(email=email, password=password)
@@ -40,9 +48,11 @@ def login(
 @launcher_router.post("/launcher/profile/get")
 @inject
 async def get_profile(
-    email: str = Body(..., embed=True),  # type: ignore
-    password: str = Body(..., embed=True),  # type: ignore
-    account_service: AccountService = Depends(Provide[AppContainer.launcher.account_service]),  # type: ignore
+    email: str = Body(..., embed=True),
+    password: str = Body(..., embed=True),
+    account_service: AccountService = Depends(
+        Provide[AppContainer.launcher.account_service]
+    ),
 ) -> Account:
     return account_service.find(email, password)
 
@@ -53,10 +63,12 @@ async def get_profile(
 )
 @inject
 def register_account(
-    email: str = Body(..., embed=True),  # type: ignore
-    password: str = Body(..., embed=True),  # type: ignore
-    edition: str = Body(..., embed=True),  # type: ignore
-    account_service: AccountService = Depends(Provide[AppContainer.launcher.account_service]),  # type: ignore
+    email: str = Body(..., embed=True),
+    password: str = Body(..., embed=True),
+    edition: str = Body(..., embed=True),
+    account_service: AccountService = Depends(
+        Provide[AppContainer.launcher.account_service]
+    ),
 ) -> PlainTextResponse:
     try:
         account_service.find(email=email, password=password)
