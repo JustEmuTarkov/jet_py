@@ -5,7 +5,7 @@ import orjson
 from dependency_injector.wiring import Provide, inject
 from fastapi import Request
 from fastapi.params import Cookie, Depends
-from starlette.responses import PlainTextResponse
+from fastapi.responses import PlainTextResponse
 
 from server import logger
 from server.container import AppContainer

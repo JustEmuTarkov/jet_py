@@ -2,8 +2,8 @@ import zlib
 
 from dependency_injector.wiring import Provide, inject
 from fastapi.params import Body, Depends
-from starlette.requests import Request
-from starlette.responses import PlainTextResponse
+from fastapi.requests import Request
+from fastapi.responses import PlainTextResponse
 
 from server.container import AppContainer
 from server.utils import get_request_url_root, make_router

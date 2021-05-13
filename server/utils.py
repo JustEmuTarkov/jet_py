@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter
-from starlette.requests import Request
+from fastapi.requests import Request
 
 from server.requests import ZLibRoute
 from server.responses import ZLibORJSONResponse

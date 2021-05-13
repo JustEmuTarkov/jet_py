@@ -3,7 +3,7 @@ from typing import List
 import ujson
 from dependency_injector.wiring import Provide, inject
 from fastapi.params import Depends
-from starlette.requests import Request
+from fastapi.requests import Request
 
 from server import db_dir, logger
 from server.utils import make_router

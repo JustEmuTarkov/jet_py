@@ -3,8 +3,8 @@ from typing import Callable
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from starlette.requests import Request
-from starlette.responses import Response
+from fastapi.requests import Request
+from fastapi.responses import Response
 
 import tarkov
 from server import logger, root_dir

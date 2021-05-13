@@ -3,11 +3,11 @@ from typing import List, Union
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter
 from fastapi.params import Body, Cookie, Depends
-from starlette.requests import Request
+from fastapi.requests import Request
 
 from server import logger
 from server.container import AppContainer
-from server.utils import get_request_url_root, make_router
+from server.utils import get_request_url_root
 from tarkov.dependencies import profile_manager
 from tarkov.inventory_dispatcher import DispatcherManager
 from tarkov.inventory_dispatcher.manager import DispatcherResponse

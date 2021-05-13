@@ -5,7 +5,7 @@ from typing import Dict, Optional, Type, Union
 import ujson
 from dependency_injector.wiring import Provide, inject
 from fastapi.params import Cookie, Depends
-from starlette.requests import Request
+from fastapi.requests import Request
 
 from server import db_dir, start_time
 from server.container import AppContainer
