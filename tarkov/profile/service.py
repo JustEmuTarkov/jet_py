@@ -46,7 +46,9 @@ class ProfileService:
         profile.Info.Side = side.capitalize()
         profile.Info.Voice = f"{side.capitalize()}_1"
 
-        profile_dir: Final[Path] = root_dir.joinpath("resources", "profiles", account.id)
+        profile_dir: Final[Path] = root_dir.joinpath(
+            "resources", "profiles", account.id
+        )
         profile_dir.mkdir(parents=True, exist_ok=True)
 
         with profile_dir.joinpath("pmc_profile.json").open(
@@ -55,7 +57,11 @@ class ProfileService:
             file.write(profile.json(exclude_none=True))
 
         # TODO: Scav profile generation, for not it just copies
-        scav_profile = ujson.load(root_dir.joinpath("resources", "scav_profile.json").open("r", encoding="utf8"))
+        scav_profile = ujson.load(
+            root_dir.joinpath("resources", "scav_profile.json").open(
+                "r", encoding="utf8"
+            )
+        )
         scav_profile["id"] = f"scav{profile.aid}"
         scav_profile["savage"] = f"scav{profile.aid}"
         scav_profile["aid"] = profile.aid

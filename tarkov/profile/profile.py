@@ -90,7 +90,10 @@ class Profile:
     def read(
         self, notifier_service: NotifierService = Provide[AppContainer.notifier.service]
     ) -> None:
-        if any(not path.exists() for path in (self.pmc_profile_path, self.scav_profile_path)):
+        if any(
+            not path.exists()
+            for path in (self.pmc_profile_path, self.scav_profile_path)
+        ):
             raise Profile.ProfileDoesNotExistsError
 
         self.pmc = ProfileModel.parse_file(self.pmc_profile_path)

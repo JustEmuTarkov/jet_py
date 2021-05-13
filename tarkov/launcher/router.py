@@ -18,7 +18,9 @@ launcher_router = make_router(tags=["Launcher"])
 @inject
 async def connect(
     request: Request,
-    account_service: AccountService = Depends(Provide[AppContainer.launcher.account_service]),
+    account_service: AccountService = Depends(
+        Provide[AppContainer.launcher.account_service]
+    ),
 ) -> dict:
     return {
         "backendUrl": get_request_url_root(request).rstrip("/"),
@@ -32,7 +34,9 @@ async def connect(
 def login(
     email: str = Body(..., embed=True),
     password: str = Body(..., embed=True),
-    account_service: AccountService = Depends(Provide[AppContainer.launcher.account_service]),
+    account_service: AccountService = Depends(
+        Provide[AppContainer.launcher.account_service]
+    ),
 ) -> PlainTextResponse:
     try:
         account_service.find(email=email, password=password)
@@ -46,7 +50,9 @@ def login(
 async def get_profile(
     email: str = Body(..., embed=True),
     password: str = Body(..., embed=True),
-    account_service: AccountService = Depends(Provide[AppContainer.launcher.account_service]),
+    account_service: AccountService = Depends(
+        Provide[AppContainer.launcher.account_service]
+    ),
 ) -> Account:
     return account_service.find(email, password)
 
@@ -60,7 +66,9 @@ def register_account(
     email: str = Body(..., embed=True),
     password: str = Body(..., embed=True),
     edition: str = Body(..., embed=True),
-    account_service: AccountService = Depends(Provide[AppContainer.launcher.account_service]),
+    account_service: AccountService = Depends(
+        Provide[AppContainer.launcher.account_service]
+    ),
 ) -> PlainTextResponse:
     try:
         account_service.find(email=email, password=password)

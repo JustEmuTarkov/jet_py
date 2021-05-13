@@ -90,7 +90,9 @@ def client_profile_status(
 @inject
 def nickname_reserved(
     profile_id: str = Cookie(..., alias="PHPSESSID"),
-    account_service: AccountService = Depends(Provide[AppContainer.launcher.account_service]),
+    account_service: AccountService = Depends(
+        Provide[AppContainer.launcher.account_service]
+    ),
 ) -> TarkovSuccessResponse[str]:
     account = account_service.get_account(profile_id)
     return TarkovSuccessResponse(data=account.nickname)
@@ -100,7 +102,9 @@ def nickname_reserved(
 @inject
 def nickname_validate(
     nickname: str = Body(..., embed=True),
-    account_service: AccountService = Depends(Provide[AppContainer.launcher.account_service]),
+    account_service: AccountService = Depends(
+        Provide[AppContainer.launcher.account_service]
+    ),
 ) -> Union[TarkovSuccessResponse, TarkovErrorResponse]:
     if len(nickname) < 3:
         return TarkovErrorResponse(errmsg="Nickname is too short", err=256)

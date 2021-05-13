@@ -20,6 +20,7 @@ class ProfileManager:
 
     def get_profile(self, profile_id: str) -> Profile:
         from tarkov.profile.profile import Profile
+
         if profile_id not in self.profiles:
             profile = Profile(profile_id)
             profile.read()

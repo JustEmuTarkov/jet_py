@@ -92,7 +92,9 @@ def client_game_keepalive(
 )
 @inject
 def client_items(
-    templates_repository: ItemTemplatesRepository = Depends(Provide[AppContainer.repos.templates]),
+    templates_repository: ItemTemplatesRepository = Depends(
+        Provide[AppContainer.repos.templates]
+    ),
 ) -> TarkovSuccessResponse[Dict[TemplateId, Union[AnyTemplate]]]:
     return TarkovSuccessResponse(data=templates_repository.client_items_view)
 
