@@ -66,5 +66,5 @@ class ProfileService:
             ensure_ascii=False,
         )
 
-        profile_manager.get_or_create_profile(profile_id=profile_id)
+        profile_manager.get_profile(profile_id=profile_id)
         return profile

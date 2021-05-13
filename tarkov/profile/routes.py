@@ -1,6 +1,7 @@
 from typing import List, Union
 
 from dependency_injector.wiring import Provide, inject
+from fastapi import APIRouter
 from fastapi.params import Body, Cookie, Depends
 from starlette.requests import Request
 
@@ -15,7 +16,8 @@ from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
 from tarkov.profile.profile import Profile
 from tarkov.profile.service import ProfileService
 
-profile_router = make_router(tags=["Profile"])
+# profile_router = make_router(tags=["Profile"])
+profile_router = APIRouter()
 
 
 @profile_router.post(
@@ -25,8 +27,8 @@ profile_router = make_router(tags=["Profile"])
     response_model_exclude_unset=False,
 )
 def client_game_profile_item_move(
-    profile: Profile = Depends(profile_manager.with_profile),  # type: ignore
-    body: dict = Body(...),  # type: ignore
+    profile: Profile = Depends(profile_manager.with_profile),
+    body: dict = Body(...),
 ) -> Union[TarkovSuccessResponse[DispatcherResponse], TarkovErrorResponse]:
     dispatcher = DispatcherManager(profile)
     response = dispatcher.dispatch(body["data"])
@@ -39,7 +41,7 @@ async def client_game_profile_list(
 ) -> Union[TarkovSuccessResponse[List[dict]], TarkovErrorResponse]:
     try:
         async with profile_manager.locks[profile_id]:
-            profile = profile_manager.get_or_create_profile(profile_id)
+            profile = profile_manager.get_profile(profile_id)
             return TarkovSuccessResponse(
                 data=[
                     profile.pmc.dict(exclude_none=True),

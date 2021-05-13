@@ -18,7 +18,7 @@ class ProfileManager:
         self.locks: Dict[str, Lock] = defaultdict(Lock)
         self.profiles: Dict[str, Profile] = {}
 
-    def get_or_create_profile(self, profile_id: str) -> Profile:
+    def get_profile(self, profile_id: str) -> Profile:
         from tarkov.profile.profile import Profile
         if profile_id not in self.profiles:
             profile = Profile(profile_id)
@@ -44,7 +44,7 @@ class ProfileManager:
         Should be only used as a dependency for fastapi routes
         """
         async with self.locks[profile_id]:
-            profile = self.get_or_create_profile(profile_id)
+            profile = self.get_profile(profile_id)
             try:
                 background_tasks.add_task(self._save_profile_task, profile)
                 profile.update()
@@ -65,7 +65,7 @@ class ProfileManager:
         Should work the same way as with_profile method but it won't save the profile
         """
         async with self.locks[profile_id]:
-            profile = self.get_or_create_profile(profile_id)
+            profile = self.get_profile(profile_id)
             try:
                 yield profile
             except Exception as error:
