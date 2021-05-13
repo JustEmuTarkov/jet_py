@@ -118,6 +118,8 @@ def create_profile(
     profile_service: ProfileService = Depends(Provide[AppContainer.profile.service]),  # type: ignore
 ) -> TarkovSuccessResponse[dict]:
     profile = profile_service.create_profile(
-        nickname=nickname, side=side, profile_id=profile_id
+        profile_id=profile_id,
+        nickname=nickname,
+        side=side,
     )
     return TarkovSuccessResponse(data={"uid": profile.id})
