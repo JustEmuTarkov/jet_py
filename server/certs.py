@@ -2,7 +2,7 @@ import datetime
 import random
 from pathlib import Path
 
-from OpenSSL import crypto  # type: ignore
+from OpenSSL import crypto
 
 
 def is_ssl_certificate_expired() -> bool:

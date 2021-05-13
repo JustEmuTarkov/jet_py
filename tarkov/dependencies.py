@@ -37,7 +37,7 @@ class ProfileManager:
     async def with_profile(
         self,
         background_tasks: BackgroundTasks,
-        profile_id: str = Cookie(..., alias="PHPSESSID"),  # type: ignore
+        profile_id: str = Cookie(..., alias="PHPSESSID"),
     ) -> AsyncIterable[Profile]:
         """
         Provides a Profile instance and saves it after request using background task
@@ -58,7 +58,7 @@ class ProfileManager:
 
     async def with_profile_readonly(
         self,
-        profile_id: str = Cookie(..., alias="PHPSESSID"),  # type: ignore
+        profile_id: str = Cookie(..., alias="PHPSESSID"),
     ) -> AsyncIterable[Profile]:
         """
         Provides a Profile instance

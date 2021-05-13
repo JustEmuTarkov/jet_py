@@ -19,7 +19,7 @@ notifier_router = make_router(tags=["NotifierService"])
 @notifier_router.post("/client/notifier/channel/create")
 def client_notifier_channel_create(
     request: Request,
-    profile_id: Optional[str] = Cookie(alias="PHPSESSID", default=None),  # type: ignore
+    profile_id: Optional[str] = Cookie(alias="PHPSESSID", default=None),
 ) -> TarkovSuccessResponse[dict]:
     url_root = get_request_url_root(request).rstrip("/")
     notifier_server_url = f"{url_root}/notifierServer/get/{profile_id}"
@@ -38,7 +38,7 @@ def client_notifier_channel_create(
 @inject
 async def notifierserver_get(
     profile_id: str,
-    notifier: NotifierService = Depends(Provide[AppContainer.notifier.service]),  # type: ignore
+    notifier: NotifierService = Depends(Provide[AppContainer.notifier.service]),
 ) -> PlainTextResponse:
     for _ in range(90):
         if notifier.has_notifications(profile_id):

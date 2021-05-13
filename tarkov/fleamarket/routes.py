@@ -21,7 +21,7 @@ flea_market_router = make_router(tags=["FleaMarket"])
 @inject
 async def find(
     req: Request,
-    flea_market: FleaMarket = Depends(Provide[AppContainer.flea.market]),  # type: ignore
+    flea_market: FleaMarket = Depends(Provide[AppContainer.flea.market]),
 ) -> TarkovSuccessResponse[FleaMarketResponse]:
     request = FleaMarketRequest.parse_obj(await req.json())
     return TarkovSuccessResponse(data=flea_market.view.get_response(request))
@@ -35,7 +35,7 @@ def client_items_prices() -> TarkovSuccessResponse:
 @flea_market_router.post("/client/ragfair/itemMarketPrice")
 @inject
 def client_ragfair_item_market_price(
-    template_id: TemplateId = Body(..., alias="templateId", embed=True),  # type: ignore
-    flea_market: FleaMarket = Depends(Provide[AppContainer.flea.market]),  # type: ignore
+    template_id: TemplateId = Body(..., alias="templateId", embed=True),
+    flea_market: FleaMarket = Depends(Provide[AppContainer.flea.market]),
 ) -> TarkovSuccessResponse:
     return TarkovSuccessResponse(data=flea_market.item_price_view(template_id))

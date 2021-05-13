@@ -27,8 +27,8 @@ class InsuranceListCostRequest(BaseModel):
 @inject
 async def items_list_cost(
     request: InsuranceListCostRequest,
-    profile: Profile = Depends(profile_manager.with_profile),  # type: ignore
-    trader_manager: TraderManager = Depends(Provide[AppContainer.trader.manager]),  # type: ignore
+    profile: Profile = Depends(profile_manager.with_profile),
+    trader_manager: TraderManager = Depends(Provide[AppContainer.trader.manager]),
 ) -> Union[TarkovSuccessResponse[Dict[str, dict]], TarkovErrorResponse]:
     insurance_data: Dict[str, dict] = {}
 

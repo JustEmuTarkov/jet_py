@@ -90,7 +90,7 @@ class ProfileSaveRequest(BaseModel):
 @singleplayer_router.put("/raid/profile/save")
 async def singleplayer_raid_profile_save(
     request: Request,
-    profile: Profile = Depends(profile_manager.with_profile),  # type: ignore
+    profile: Profile = Depends(profile_manager.with_profile),
 ) -> TarkovSuccessResponse:
     # TODO: Add Saving profile here
     # data struct {exit, isPlayerScav, profile, health}
@@ -175,7 +175,7 @@ def weapon_durability() -> bool:
 @singleplayer_router.post("/player/health/sync")
 async def health_sync(
     request: Request,
-    profile: Profile = Depends(profile_manager.with_profile),  # type: ignore
+    profile: Profile = Depends(profile_manager.with_profile),
 ) -> TarkovSuccessResponse:
     body = await request.json()
 

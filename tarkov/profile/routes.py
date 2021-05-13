@@ -37,7 +37,7 @@ def client_game_profile_item_move(
 
 @profile_router.post("/client/game/profile/list")
 async def client_game_profile_list(
-    profile_id: str = Cookie(..., alias="PHPSESSID"),  # type: ignore
+    profile_id: str = Cookie(..., alias="PHPSESSID"),
 ) -> Union[TarkovSuccessResponse[List[dict]], TarkovErrorResponse]:
     try:
         async with profile_manager.locks[profile_id]:
@@ -68,7 +68,7 @@ def client_game_profile_list_select(request: Request) -> TarkovSuccessResponse[d
 
 @profile_router.post("/client/profile/status")
 def client_profile_status(
-    profile: Profile = Depends(profile_manager.with_profile),  # type: ignore
+    profile: Profile = Depends(profile_manager.with_profile),
 ) -> Union[TarkovSuccessResponse[List[dict]], TarkovErrorResponse]:
     response = []
     for profile_type in ("scav", "pmc"):
@@ -89,8 +89,8 @@ def client_profile_status(
 @profile_router.post("/client/game/profile/nickname/reserved")
 @inject
 def nickname_reserved(
-    profile_id: str = Cookie(..., alias="PHPSESSID"),  # type: ignore
-    account_service: AccountService = Depends(Provide[AppContainer.launcher.account_service]),  # type: ignore
+    profile_id: str = Cookie(..., alias="PHPSESSID"),
+    account_service: AccountService = Depends(Provide[AppContainer.launcher.account_service]),
 ) -> TarkovSuccessResponse[str]:
     account = account_service.get_account(profile_id)
     return TarkovSuccessResponse(data=account.nickname)
@@ -99,8 +99,8 @@ def nickname_reserved(
 @profile_router.post("/client/game/profile/nickname/validate")
 @inject
 def nickname_validate(
-    nickname: str = Body(..., embed=True),  # type: ignore
-    account_service: AccountService = Depends(Provide[AppContainer.launcher.account_service]),  # type: ignore
+    nickname: str = Body(..., embed=True),
+    account_service: AccountService = Depends(Provide[AppContainer.launcher.account_service]),
 ) -> Union[TarkovSuccessResponse, TarkovErrorResponse]:
     if len(nickname) < 3:
         return TarkovErrorResponse(errmsg="Nickname is too short", err=256)
@@ -114,10 +114,10 @@ def nickname_validate(
 @profile_router.post("/client/game/profile/create")
 @inject
 def create_profile(
-    profile_id: str = Cookie(..., alias="PHPSESSID"),  # type: ignore
-    side: str = Body(..., embed=True),  # type: ignore
-    nickname: str = Body(..., embed=True),  # type: ignore
-    profile_service: ProfileService = Depends(Provide[AppContainer.profile.service]),  # type: ignore
+    profile_id: str = Cookie(..., alias="PHPSESSID"),
+    side: str = Body(..., embed=True),
+    nickname: str = Body(..., embed=True),
+    profile_service: ProfileService = Depends(Provide[AppContainer.profile.service]),
 ) -> TarkovSuccessResponse[dict]:
     profile = profile_service.create_profile(
         profile_id=profile_id,

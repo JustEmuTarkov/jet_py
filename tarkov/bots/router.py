@@ -35,7 +35,7 @@ def settings_bot_limit(bot_type: str) -> int:  # pylint: disable=unused-argument
 @inject
 async def generate_bots(
     request: Request,
-    bot_generator: BotGenerator = Depends(Provide[BotContainer.bot_generator]),  # type: ignore
+    bot_generator: BotGenerator = Depends(Provide[BotContainer.bot_generator]),
 ) -> TarkovSuccessResponse[List[dict]]:
     bots: List[dict] = []
     request_data: dict = await request.json()
