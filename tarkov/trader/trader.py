@@ -33,8 +33,6 @@ if TYPE_CHECKING:
     # pylint: disable=cyclic-import
     from tarkov.profile.profile import Profile
 
-TRADER_RESUPPLY_TIME_SECONDS: Final[int] = int(timedelta(minutes=30).total_seconds())
-
 
 class Trader:
     inventory: ImmutableInventory
