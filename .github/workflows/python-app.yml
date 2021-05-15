@@ -26,7 +26,7 @@ jobs:
 
       - name: Check with black
         run: |
-          python -m black -l 112 ./ --check
+          python -m black ./ --check
 
   Test:
     runs-on: ubuntu-latest
