@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import abc
 import itertools
-from typing import Dict, Iterable, List, Optional, TYPE_CHECKING, Tuple
+from typing import Dict, Iterable, Iterator, List, Optional, TYPE_CHECKING, Tuple
 
 import server.app  # pylint: disable=cyclic-import
 from tarkov.exceptions import NoSpaceError, NotFoundError
@@ -38,6 +38,9 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
         self._templates_repository: ItemTemplatesRepository = (
             server.app.container.repos.templates()
         )
+
+    def __iter__(self) -> Iterator[Item]:
+        return iter(self.items.values())
 
     @property
     @abc.abstractmethod
