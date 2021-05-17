@@ -1,0 +1,9 @@
+# List of slots that wouldn't be deleted or cleared.
+protected_slots:
+  - SecuredContainer
+  - Scabbard
+  - Compass
+
+# List of slots that would not be deleted but cleared.
+retained_slots:
+  - Pockets

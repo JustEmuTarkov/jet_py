@@ -7,6 +7,7 @@ from tarkov.fleamarket.container import FleaMarketContainer
 from tarkov.launcher.container import LauncherContainer
 from tarkov.mail.container import MailContainer
 from tarkov.notifier.container import NotifierContainer
+from tarkov.offraid.container import OffraidContainer
 from tarkov.profile.container import ProfileContainer
 from tarkov.quests.container import QuestsContainer
 from tarkov.trader.container import TraderContainer
@@ -87,3 +88,5 @@ class AppContainer(containers.DeclarativeContainer):
             config=config.traders,
         ),
     )
+
+    offraid: OffraidContainer = providers.Container(OffraidContainer,)
