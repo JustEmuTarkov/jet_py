@@ -71,7 +71,7 @@ class Counter(Base):
     value: int
 
 
-class _ConditionCounters(Base):
+class ConditionCounters(Base):
     Counters: List[Counter] = Field(default_factory=list)
 
 
@@ -99,10 +99,10 @@ class ProfileModel(Base):
     Customization: ProfileCustomization
     Inventory: InventoryModel
     Skills: Skills
-    Stats: Dict
+    Stats: dict
 
     Encyclopedia: Dict[TemplateId, StrictBool] = Field(default_factory=dict)
-    ConditionCounters: _ConditionCounters = Field(default_factory=_ConditionCounters)
+    ConditionCounters_: ConditionCounters = Field(default_factory=ConditionCounters, alias="ConditionCounters")
     BackendCounters: Dict[str, BackendCounter] = Field(
         default_factory=dict
     )  # Dict key is the same as counter id
