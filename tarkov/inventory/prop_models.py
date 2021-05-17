@@ -251,7 +251,7 @@ class CompoundProps(BaseItemProps):
     Grids: List[Grid]
     Slots: List[FilterProperty]
     CanPutIntoDuringTheRaid: StrictBool
-    CantRemoveFromSlotsDuringRaid: list
+    CantRemoveFromSlotsDuringRaid: List[str]
 
 
 class SearchableProps(CompoundProps):
