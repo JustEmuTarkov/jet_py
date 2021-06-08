@@ -278,11 +278,11 @@ class TraderView(BaseTraderView):
 
     def insurance_price(self, items: Iterable[Item]) -> int:
         price: float = 0
+        standing = self.standing.current_standing
         for item in items:
-            item_template = self.__templates_repository.get_template(item)
-            price += item_template.props.CreditsPrice * 0.1
-            #  Todo account for trader standing (subtract standing from insurance price,
-            #  half of the insurance price should be minimum price
+            item_price = self.__templates_repository.get_template(item).props.CreditsPrice * 0.1
+            item_price -= item_price * (0.5 if standing > 0.5 else standing)
+            price += item_price
 
         return int(price)
 
