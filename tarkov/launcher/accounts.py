@@ -46,7 +46,11 @@ class AccountService:
 
     def find(self, email: str, password: str) -> Account:
         try:
-            return next(acc for acc in self.accounts if acc.email == email and acc.password == password)
+            return next(
+                acc
+                for acc in self.accounts
+                if acc.email == email and acc.password == password
+            )
         except StopIteration as error:
             raise NotFoundError from error
 
