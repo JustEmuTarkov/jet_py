@@ -10,6 +10,7 @@ from server.utils import get_request_url_root, make_router
 from tarkov.exceptions import NotFoundError
 from tarkov.launcher.accounts import AccountService
 from tarkov.launcher.models import Account
+from tarkov.launcher.helpers import available_editions
 
 launcher_router = make_router(tags=["Launcher"])
 
@@ -25,7 +26,7 @@ async def connect(
     return {
         "backendUrl": get_request_url_root(request).rstrip("/"),
         "name": "Jet Py",
-        "editions": account_service.available_editions,
+        "editions": available_editions(),
     }
 
 
