@@ -26,7 +26,7 @@ async def connect(
     return {
         "backendUrl": get_request_url_root(request).rstrip("/"),
         "name": "Jet Py",
-        "editions": available_editions,
+        "editions": available_editions(),
     }
 
 
