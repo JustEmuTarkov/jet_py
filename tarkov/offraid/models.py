@@ -8,7 +8,9 @@ from tarkov.inventory.types import ItemId, TemplateId
 from tarkov.profile.models import BackendCounter, ConditionCounters, Skills
 from tarkov.quests.models import Quest
 
-BodyPartKey = Literal["Head", "Chest", "Stomach", "LeftArm", "RightArm", "LeftLeg", "RightLeg"]
+BodyPartKey = Literal[
+    "Head", "Chest", "Stomach", "LeftArm", "RightArm", "LeftLeg", "RightLeg"
+]
 
 
 class BodyPart(pydantic.BaseModel):

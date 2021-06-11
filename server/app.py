@@ -78,11 +78,13 @@ async def log_response_time(request: Request, call_next: Callable) -> Response:
 
 @app.exception_handler(RequestValidationError)
 async def request_validation_exc_handler(
-    request: Request,
-    exc: RequestValidationError
+    request: Request, exc: RequestValidationError
 ) -> JSONResponse:
     traceback.print_tb(tb=exc.__traceback__)
-    return await fastapi.exception_handlers.request_validation_exception_handler(request, exc)
+    return await fastapi.exception_handlers.request_validation_exception_handler(
+        request, exc
+    )
+
 
 package_manager = PackageManager(root_dir.joinpath("mods"))
 package_manager.load_packages()

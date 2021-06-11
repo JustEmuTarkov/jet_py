@@ -280,7 +280,9 @@ class TraderView(BaseTraderView):
         price: float = 0
         standing = self.standing.current_standing
         for item in items:
-            item_price = self.__templates_repository.get_template(item).props.CreditsPrice * 0.1
+            item_price = (
+                self.__templates_repository.get_template(item).props.CreditsPrice * 0.1
+            )
             item_price -= item_price * min(standing, 0.5)
             price += item_price
 

@@ -89,4 +89,6 @@ class AppContainer(containers.DeclarativeContainer):
         ),
     )
 
-    offraid: OffraidContainer = providers.Container(OffraidContainer,)
+    offraid: OffraidContainer = providers.Container(
+        OffraidContainer,
+    )
