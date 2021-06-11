@@ -42,6 +42,9 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
     def __iter__(self) -> Iterator[Item]:
         return iter(self.items.values())
 
+    def __contains__(self, item: Item) -> bool:
+        return any(i.id == item.id for i in self)
+
     @property
     @abc.abstractmethod
     def items(self) -> Dict[ItemId, Item]:
