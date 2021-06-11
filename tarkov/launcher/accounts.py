@@ -5,7 +5,7 @@ from typing import List
 import orjson
 import pydantic
 
-from server import db_dir, root_dir
+from server import root_dir
 from server.utils import atomic_write
 from tarkov.exceptions import NotFoundError
 from tarkov.inventory.helpers import generate_item_id
@@ -19,22 +19,12 @@ class AccountService:
 
         self.__read()
 
-    @property
-    @lru_cache(1)
-    def available_editions(self) -> List[str]:
-        editions_dirs = [d for d in db_dir.joinpath("profile").glob("*") if d.is_dir()]
-        return [d.name for d in editions_dirs]
-
     def is_nickname_taken(self, nickname: str) -> bool:
-        for account in self.accounts:
-            if account.nickname == nickname:
-                return True
-        return False
+        return any(account.nickname == nickname for account in self.accounts)
 
     def create_account(self, email: str, password: str, edition: str) -> Account:
-        for account in self.accounts:
-            if account.email == email:
-                raise ValueError(f"Account with email {email} already exists")
+        if any(account.email == email for account in self.accounts):
+            raise ValueError(f"Account with email {email} already exists")
 
         account = Account(
             id=generate_item_id(),
@@ -43,6 +33,7 @@ class AccountService:
             edition=edition,
             nickname="",
         )
+
         self.accounts.append(account)
         self.__write()
         return account
@@ -54,10 +45,10 @@ class AccountService:
             raise NotFoundError from error
 
     def find(self, email: str, password: str) -> Account:
-        for account in self.accounts:
-            if account.email == email and account.password == password:
-                return account
-        raise NotFoundError
+        try:
+            return next(acc for acc in self.accounts if acc.email == email and acc.password == password)
+        except StopIteration as error:
+            raise NotFoundError from error
 
     def __read(self) -> None:
         try:
