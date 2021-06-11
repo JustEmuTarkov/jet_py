@@ -945,7 +945,7 @@ class PlayerInventory(GridInventory):
         return self.root_id
 
     @property
-    def equipment_id(self) -> str:
+    def equipment_id(self) -> ItemId:
         return self.inventory.equipment
 
     def read(self) -> None:
