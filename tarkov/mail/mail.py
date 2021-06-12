@@ -3,8 +3,6 @@ from __future__ import annotations
 import datetime
 from typing import Dict, List, TYPE_CHECKING
 
-from dependency_injector.wiring import inject
-
 from server.utils import atomic_write
 from tarkov.mail.models import (
     DialoguePreviewList,
@@ -85,14 +83,13 @@ class Mail:
             self.dialogues[trader_id] = dialogue
             return dialogue
 
-    @inject
     def add_message(
         self,
         message: MailDialogueMessage,
     ) -> None:
         """Adds message to mail and creates notification in notifier"""
-        category: MailDialogue = self.get_dialogue(message.uid)
-        category.messages.insert(0, message)
+        dialogue: MailDialogue = self.get_dialogue(message.uid)
+        dialogue.messages.insert(0, message)
 
         self.__notifier_service.add_message_notification(
             profile_id=self.profile.profile_id, message=message
