@@ -32,6 +32,7 @@ class MailMessageItems(Base):
                 item.parent_id = stash_id
             if not item.slot_id:
                 item.slot_id = "main"
+                item.location = None
 
         regenerate_items_ids(items)
         return cls(
