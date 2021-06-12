@@ -7,22 +7,26 @@ from typing import Dict, ItemsView, List
 
 from pydantic import Field, StrictBool, StrictInt
 
-from tarkov.inventory.helpers import generate_item_id, regenerate_items_ids
+from tarkov.inventory.helpers import clean_items_relationships, generate_item_id, regenerate_items_ids
 from tarkov.inventory.models import Item
 from tarkov.models import Base
+from tarkov.trader.types import TraderId
 
 
 class MailMessageItems(Base):
     stash: str = Field(default_factory=generate_item_id)  # Stash (root) id
     data: List[Item] = Field(default_factory=list)  # List of items in message
 
-    @staticmethod
-    def from_items(items: List[Item]) -> MailMessageItems:
+    @classmethod
+    def from_items(cls, items: List[Item]) -> MailMessageItems:
         """
         Creates MailMessageItems from list of items
         """
-        stash_id = generate_item_id()
+        # We have to remove parent_id and slot_id
+        # from items that have no parent in this list of items.
+        items = clean_items_relationships(items)
 
+        stash_id = generate_item_id()
         for item in items:
             if not item.parent_id:
                 item.parent_id = stash_id
@@ -30,8 +34,7 @@ class MailMessageItems(Base):
                 item.slot_id = "main"
 
         regenerate_items_ids(items)
-
-        return MailMessageItems(
+        return cls(
             stash=stash_id,
             data=items,
         )
@@ -43,7 +46,7 @@ class MailDialogueMessage(Base):
     """
 
     id: str = Field(alias="_id", default_factory=generate_item_id)  # Message id
-    uid: str  # Trader id (Same as MailDialogue id)
+    uid: TraderId  # Trader id (Same as parent MailDialogue id)
     type: int
     dt: float = Field(default_factory=time.time)  # Timestamp when message was sent
     templateId: str  # Locale template id
