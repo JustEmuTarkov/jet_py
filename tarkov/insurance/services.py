@@ -8,6 +8,8 @@ from tarkov.mail.models import MailDialogueMessage, MailMessageItems, MailMessag
 from tarkov.offraid.services import OffraidSaveService
 from tarkov.trader.models import TraderType
 from . import exceptions, interfaces
+from tarkov.inventory.prop_models import CompoundProps
+from tarkov.inventory.repositories import ItemTemplatesRepository
 
 if TYPE_CHECKING:
     from tarkov.inventory.models import Item
@@ -18,14 +20,61 @@ if TYPE_CHECKING:
     from tarkov.trader.types import TraderId
 
 
+class _InsuredItemsProcessor:
+    def __init__(
+        self,
+        insurance_service: _InsuranceService,
+        templates_repository: ItemTemplatesRepository,
+    ):
+        self.__insurance_service = insurance_service
+        self.__templates_repository = templates_repository
+
+    def process(self, items: List[Item]) -> Dict[TraderId, List[Item]]:
+        items = self._flatten_items(items)
+        items = self._clean_orphan_items_properties(items)
+        return self._group_items_by_insurer(items)
+
+    def _flatten_items(self, items: List[Item]) -> List[Item]:
+        """Takes out items from tactical vests and backpacks"""
+
+        for item in items:
+            tpl = self.__templates_repository.get_template(item=item)
+            if isinstance(tpl, CompoundProps):
+                item.parent_id = None
+        return items
+
+    def _clean_orphan_items_properties(self, items: List[Item]) -> List[Item]:
+        """Cleans Item.parent_id, Item.location and Item.slot_id from orphan items"""
+
+        for item in items:
+            if any(item.parent_id == i.id for i in items):
+                item.parent_id = None
+                item.slot_id = None
+                item.location = None
+        return items
+
+    def _group_items_by_insurer(self, items: List[Item], profile: Profile) -> Dict[TraderId, List[Item]]:
+        item_groups: Dict[TraderId, List[Item]] = collections.defaultdict(list)
+        for item in items:
+            insurance_info = self.__insurance_service.insurance_info(item=item, profile=profile)
+            item_groups[insurance_info.trader_id].append(item)
+        return item_groups
+
+
 class _InsuranceService(interfaces.IInsuranceService):
     def __init__(
         self,
         trader_manager: TraderManager,
         offraid_service: OffraidSaveService,
+        templates_repository: ItemTemplatesRepository,
     ):
         self.__trader_manager = trader_manager
         self.__offraid_service = offraid_service
+        self.__templates_repository = templates_repository
+        self.__items_processor = _InsuredItemsProcessor(
+            insurance_service=self,
+            templates_repository=templates_repository,
+        )
 
     def get_lost_insured_items(
         self,
@@ -44,14 +93,7 @@ class _InsuranceService(interfaces.IInsuranceService):
             if i not in protected_items
             and self.is_item_insured(item=i, profile=profile)
         ]
-        return self._group_items_by_insurer(items=items, profile=profile)
-
-    def _group_items_by_insurer(self, items: List[Item], profile: Profile) -> Dict[TraderId, List[Item]]:
-        item_groups: Dict[TraderId, List[Item]] = collections.defaultdict(list)
-        for item in items:
-            insurance_info = self.insurance_info(item=item, profile=profile)
-            item_groups[insurance_info.trader_id].append(item)
-        return item_groups
+        return self.__items_processor.process(items)
 
     def is_item_insured(self, item: Item, profile: Profile) -> bool:
         return any(
