@@ -95,4 +95,5 @@ class AppContainer(containers.DeclarativeContainer):
         InsuranceContainer,
         trader_manager=trader.manager,
         offraid_service=offraid.service,
+        templates_repository=items.templates_repository,
     )
