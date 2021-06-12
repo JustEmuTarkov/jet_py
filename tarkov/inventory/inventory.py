@@ -281,7 +281,7 @@ class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
         :param amount: The amount of items that should be deleted.
         :returns: Tuple[affected_items, deleted_items]
         """
-        items = (item for item in self.items.values() if item.tpl == template_id)
+        items = list(item for item in self if item.tpl == template_id)
         amount_to_take = amount
 
         affected_items = []
