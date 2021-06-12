@@ -4,6 +4,7 @@ from dependency_injector import containers, providers
 
 from tarkov.containers import ConfigContainer, ItemsContainer, RepositoriesContainer
 from tarkov.fleamarket.container import FleaMarketContainer
+from tarkov.insurance.container import InsuranceContainer
 from tarkov.launcher.container import LauncherContainer
 from tarkov.mail.container import MailContainer
 from tarkov.notifier.container import NotifierContainer
@@ -89,4 +90,9 @@ class AppContainer(containers.DeclarativeContainer):
         ),
     )
 
-    offraid: OffraidContainer = providers.Container(OffraidContainer,)
+    offraid: OffraidContainer = providers.Container(OffraidContainer)
+    insurance: InsuranceContainer = providers.Container(
+        InsuranceContainer,
+        trader_manager=trader.manager,
+        offraid_service=offraid.service,
+    )
