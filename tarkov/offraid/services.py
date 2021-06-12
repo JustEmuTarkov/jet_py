@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import List, TYPE_CHECKING, Tuple
 
 from tarkov.inventory.implementations import SimpleInventory
-from tarkov.inventory.repositories import ItemTemplatesRepository
 
 if TYPE_CHECKING:
     from tarkov.inventory.models import Item
@@ -31,7 +30,7 @@ class OffraidSaveService:
         pmc_health["Hydration"]["Current"] = raid_health.hydration
         pmc_health["Energy"]["Current"] = raid_health.energy
 
-    def _get_protected_items(self, raid_profile: OffraidProfile) -> List[Tuple[Item, List[Item]]]:
+    def get_protected_items(self, raid_profile: OffraidProfile) -> List[Tuple[Item, List[Item]]]:
         raid_inventory = SimpleInventory(raid_profile.Inventory.items)
         protected_items: List[Tuple[Item, List[Item]]] = []
         for item in raid_inventory:
@@ -64,7 +63,7 @@ class OffraidSaveService:
             profile.inventory.add_item(equipment, child_items=raid_equipment)
         else:
             profile.inventory.add_item(equipment)
-            protected_items = self._get_protected_items(raid_profile=raid_profile)
+            protected_items = self.get_protected_items(raid_profile=raid_profile)
             for item, child_items in protected_items:
                 profile.inventory.add_item(item=item, child_items=child_items)
 
