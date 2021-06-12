@@ -29,17 +29,17 @@ class _InsuredItemsProcessor:
         self.__insurance_service = insurance_service
         self.__templates_repository = templates_repository
 
-    def process(self, items: List[Item]) -> Dict[TraderId, List[Item]]:
+    def process(self, items: List[Item], profile: Profile) -> Dict[TraderId, List[Item]]:
         items = self._flatten_items(items)
         items = self._clean_orphan_items_properties(items)
-        return self._group_items_by_insurer(items)
+        return self._group_items_by_insurer(items, profile=profile)
 
     def _flatten_items(self, items: List[Item]) -> List[Item]:
         """Takes out items from tactical vests and backpacks"""
 
         for item in items:
             tpl = self.__templates_repository.get_template(item=item)
-            if isinstance(tpl, CompoundProps):
+            if isinstance(tpl.props, CompoundProps):
                 item.parent_id = None
         return items
 
@@ -93,7 +93,7 @@ class _InsuranceService(interfaces.IInsuranceService):
             if i not in protected_items
             and self.is_item_insured(item=i, profile=profile)
         ]
-        return self.__items_processor.process(items)
+        return self.__items_processor.process(items, profile)
 
     def is_item_insured(self, item: Item, profile: Profile) -> bool:
         return any(
