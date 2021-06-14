@@ -2,14 +2,14 @@ from __future__ import annotations
 
 import collections
 import datetime
-from typing import Dict, List, TYPE_CHECKING
+from typing import Dict, List, Set, TYPE_CHECKING
 
+from tarkov.inventory.prop_models import CompoundProps
+from tarkov.inventory.repositories import ItemTemplatesRepository
 from tarkov.mail.models import MailDialogueMessage, MailMessageItems, MailMessageType
 from tarkov.offraid.services import OffraidSaveService
 from tarkov.trader.models import TraderType
 from . import exceptions, interfaces
-from tarkov.inventory.prop_models import CompoundProps
-from tarkov.inventory.repositories import ItemTemplatesRepository
 
 if TYPE_CHECKING:
     from tarkov.inventory.models import Item
@@ -76,24 +76,35 @@ class _InsuranceService(interfaces.IInsuranceService):
             templates_repository=templates_repository,
         )
 
-    def get_lost_insured_items(
+    def get_insurance(
         self,
         profile: Profile,
         offraid_profile: OffraidProfile,
+        is_alive: bool,
     ) -> Dict[TraderId, List[Item]]:
-        temp_ = self.__offraid_service.get_protected_items(raid_profile=offraid_profile)
-
         protected_items: List[Item] = []
-        for item, children in temp_:
+        for item, children in self.__offraid_service.get_protected_items(raid_profile=offraid_profile):
             protected_items.append(item)
             protected_items.extend(children)
 
-        items = [
-            i for i in offraid_profile.Inventory.items
-            if i not in protected_items
-            and self.is_item_insured(item=i, profile=profile)
-        ]
-        return self.__items_processor.process(items, profile)
+        equipment_item = profile.inventory.get(item_id=profile.inventory.equipment_id)
+        equipment_items = profile.inventory.iter_item_children_recursively(item=equipment_item)
+        insured_items: Set[Item] = {
+            item.copy() for item in equipment_items
+            if item not in offraid_profile.Inventory.items
+            and self.is_item_insured(item=item, profile=profile)
+        }
+
+        if not is_alive:
+            insured_items.update({
+                item.copy() for item in offraid_profile.Inventory.items
+                if item not in protected_items
+                and self.is_item_insured(item=item, profile=profile)
+            })
+
+        # Make sure to copy all items before returning them from get_insurance method
+        # since they would probably get modified when sending mail.
+        return self.__items_processor.process(list(insured_items), profile)
 
     def is_item_insured(self, item: Item, profile: Profile) -> bool:
         return any(

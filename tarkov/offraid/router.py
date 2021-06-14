@@ -24,17 +24,19 @@ def singleplayer_raid_profile_save(
     if request.is_player_scav:
         raise NotImplementedError
 
-    if not request.health.is_alive:
-        insured_items = insurance_service.get_lost_insured_items(
+    print(request.profile.json())
+
+    insured_items = insurance_service.get_insurance(
+        profile=profile,
+        offraid_profile=request.profile,
+        is_alive=request.health.is_alive,
+    )
+    for trader_id, items in insured_items.items():
+        insurance_service.send_insurance_mail(
+            items=items,
+            trader_id=trader_id,
             profile=profile,
-            offraid_profile=request.profile,
         )
-        for trader_id, items in insured_items.items():
-            insurance_service.send_insurance_mail(
-                items=items,
-                trader_id=trader_id,
-                profile=profile,
-            )
 
     offraid_service.update_profile(
         profile=profile,

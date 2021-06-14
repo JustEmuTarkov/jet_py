@@ -19,10 +19,11 @@ class IInsuranceService(abc.ABC):
     def insurance_info(self, item: Item, profile: Profile) -> ItemInsurance: ...
 
     @abc.abstractmethod
-    def get_lost_insured_items(
+    def get_insurance(
         self,
         profile: Profile,
         offraid_profile: OffraidProfile,
+        is_alive: bool,
     ) -> Dict[TraderId, List[Item]]: ...
 
     @abc.abstractmethod
