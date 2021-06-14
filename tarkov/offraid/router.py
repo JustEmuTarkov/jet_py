@@ -35,6 +35,7 @@ def singleplayer_raid_profile_save(
             trader_id=trader_id,
             profile=profile,
         )
+        insurance_service.remove_insurance(items=items, profile=profile)
 
     offraid_service.update_profile(
         profile=profile,

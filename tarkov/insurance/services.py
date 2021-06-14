@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import collections
 import datetime
-from typing import Dict, List, Set, TYPE_CHECKING
+from typing import Dict, Iterable, List, Set, TYPE_CHECKING
 
 from tarkov.inventory.prop_models import CompoundProps
 from tarkov.inventory.repositories import ItemTemplatesRepository
@@ -92,14 +92,14 @@ class _InsuranceService(interfaces.IInsuranceService):
         insured_items: Set[Item] = {
             item.copy() for item in equipment_items
             if item not in offraid_profile.Inventory.items
-            and self.is_item_insured(item=item, profile=profile)
+               and self.is_item_insured(item=item, profile=profile)
         }
 
         if not is_alive:
             insured_items.update({
                 item.copy() for item in offraid_profile.Inventory.items
                 if item not in protected_items
-                and self.is_item_insured(item=item, profile=profile)
+                   and self.is_item_insured(item=item, profile=profile)
             })
 
         # Make sure to copy all items before returning them from get_insurance method
@@ -111,9 +111,14 @@ class _InsuranceService(interfaces.IInsuranceService):
             insurance.item_id == item.id for insurance in profile.pmc.InsuredItems
         )
 
+    def remove_insurance(self, items: Iterable[Item], profile: Profile) -> None:
+        for item in items:
+            insurance = self.insurance_info(item=item, profile=profile)
+            profile.pmc.InsuredItems.remove(insurance)
+
     def insurance_info(self, item: Item, profile: Profile) -> ItemInsurance:
         if not self.is_item_insured(item=item, profile=profile):
-            raise exceptions.InsuranceNotFound
+            raise exceptions.InsuranceNotFound(f"Insurance for item {item.id} was not found.")
         return next(
             insurance
             for insurance in profile.pmc.InsuredItems
