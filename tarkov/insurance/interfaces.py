@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import abc
-from typing import Dict, List, TYPE_CHECKING
+from typing import Dict, Iterable, List, TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
     from tarkov.inventory.models import Item
@@ -25,6 +25,9 @@ class IInsuranceService(abc.ABC):
         offraid_profile: OffraidProfile,
         is_alive: bool,
     ) -> Dict[TraderId, List[Item]]: ...
+
+    @abc.abstractmethod
+    def remove_insurance(self, items: Iterable[Item], profile: Profile) -> None: ...
 
     @abc.abstractmethod
     def send_insurance_mail(
