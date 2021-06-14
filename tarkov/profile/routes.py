@@ -79,7 +79,6 @@ def client_profile_status(
                 "port": 0,
             }
         )
-    print(response)
 
     return TarkovSuccessResponse(data=response)
 

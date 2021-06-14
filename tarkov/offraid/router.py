@@ -24,8 +24,6 @@ def singleplayer_raid_profile_save(
     if request.is_player_scav:
         raise NotImplementedError
 
-    print(request.profile.json())
-
     insured_items = insurance_service.get_insurance(
         profile=profile,
         offraid_profile=request.profile,
