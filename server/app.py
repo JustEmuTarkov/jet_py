@@ -38,6 +38,7 @@ class FastAPIWithContainer(FastAPI):
 container = AppContainer()
 container.wire(packages=[tarkov])
 container.offraid.config.from_yaml("./config/offraid.yaml")
+container.insurance_config.from_yaml("./config/insurance.yaml")
 
 app = FastAPIWithContainer()
 app.container = container
@@ -82,7 +83,8 @@ async def request_validation_exc_handler(
 ) -> JSONResponse:
     traceback.print_tb(tb=exc.__traceback__)
     return await fastapi.exception_handlers.request_validation_exception_handler(
-        request, exc
+        request,
+        exc,
     )
 
 

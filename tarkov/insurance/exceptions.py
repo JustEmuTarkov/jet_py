@@ -1,0 +1,2 @@
+class InsuranceNotFound(Exception):
+    pass

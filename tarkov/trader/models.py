@@ -18,6 +18,7 @@ from tarkov.inventory.models import Item
 from tarkov.inventory.types import ItemId, TemplateId
 from tarkov.models import Base
 from tarkov.repositories.categories import CategoryId
+from .types import TraderId
 
 
 class TraderType(Enum):
@@ -44,7 +45,7 @@ class BoughtItems(NamedTuple):
 
 class ItemInsurance(Base):
     item_id: ItemId = Field(alias="itemId")
-    trader_id: str = Field(alias="tid")
+    trader_id: TraderId = Field(alias="tid")
 
 
 class TraderLoyaltyLevel(Base):
@@ -91,7 +92,7 @@ class TraderRepair(Base):
 
 
 class TraderBase(Base):
-    id: str = Field(alias="_id")
+    id: TraderId = Field(alias="_id")
     working: StrictBool
     customization_seller: StrictBool
     name: str

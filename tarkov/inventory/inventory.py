@@ -42,6 +42,9 @@ class ImmutableInventory(metaclass=abc.ABCMeta):
     def __iter__(self) -> Iterator[Item]:
         return iter(self.items.values())
 
+    def __contains__(self, item: Item) -> bool:
+        return any(i.id == item.id for i in self)
+
     @property
     @abc.abstractmethod
     def items(self) -> Dict[ItemId, Item]:
@@ -278,7 +281,7 @@ class MutableInventory(ImmutableInventory, metaclass=abc.ABCMeta):
         :param amount: The amount of items that should be deleted.
         :returns: Tuple[affected_items, deleted_items]
         """
-        items = (item for item in self.items.values() if item.tpl == template_id)
+        items = list(item for item in self if item.tpl == template_id)
         amount_to_take = amount
 
         affected_items = []
@@ -942,7 +945,7 @@ class PlayerInventory(GridInventory):
         return self.root_id
 
     @property
-    def equipment_id(self) -> str:
+    def equipment_id(self) -> ItemId:
         return self.inventory.equipment
 
     def read(self) -> None:
