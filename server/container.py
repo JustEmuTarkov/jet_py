@@ -21,7 +21,7 @@ class AppContainer(containers.DeclarativeContainer):
     items = providers.Container(
         ItemsContainer,
         globals_repository=repos.globals,
-        templates_repository=repos.templates
+        templates_repository=repos.templates,
     )
 
     flea = providers.Container(
@@ -58,9 +58,7 @@ class AppContainer(containers.DeclarativeContainer):
     offraid = providers.Container(OffraidContainer)
     insurance = providers.Container(
         InsuranceContainer,
-
         config=insurance_config,
-
         trader_manager=trader.manager,
         offraid_service=offraid.service,
         templates_repository=items.templates_repository,

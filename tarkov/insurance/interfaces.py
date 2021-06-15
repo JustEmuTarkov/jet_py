@@ -13,10 +13,12 @@ if TYPE_CHECKING:
 
 class IInsuranceService(abc.ABC):
     @abc.abstractmethod
-    def is_item_insured(self, item: Item, profile: Profile) -> bool: ...
+    def is_item_insured(self, item: Item, profile: Profile) -> bool:
+        ...
 
     @abc.abstractmethod
-    def insurance_info(self, item: Item, profile: Profile) -> ItemInsurance: ...
+    def insurance_info(self, item: Item, profile: Profile) -> ItemInsurance:
+        ...
 
     @abc.abstractmethod
     def get_insurance(
@@ -24,15 +26,15 @@ class IInsuranceService(abc.ABC):
         profile: Profile,
         offraid_profile: OffraidProfile,
         is_alive: bool,
-    ) -> Dict[TraderId, List[Item]]: ...
+    ) -> Dict[TraderId, List[Item]]:
+        ...
 
     @abc.abstractmethod
-    def remove_insurance(self, items: Iterable[Item], profile: Profile) -> None: ...
+    def remove_insurance(self, items: Iterable[Item], profile: Profile) -> None:
+        ...
 
     @abc.abstractmethod
     def send_insurance_mail(
-        self,
-        items: List[Item],
-        trader_id: TraderId,
-        profile: Profile
-    ) -> None: ...
+        self, items: List[Item], trader_id: TraderId, profile: Profile
+    ) -> None:
+        ...

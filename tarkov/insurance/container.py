@@ -18,7 +18,6 @@ class InsuranceContainer(containers.DeclarativeContainer):
         _InsuranceService,
         storage_time_multiplier=config.storage_time_multiplier,
         insurance_enabled=config.enabled,
-
         trader_manager=trader_manager,
         offraid_service=offraid_service,
         templates_repository=templates_repository,

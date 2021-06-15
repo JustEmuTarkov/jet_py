@@ -29,7 +29,9 @@ class _InsuredItemsProcessor:
         self.__insurance_service = insurance_service
         self.__templates_repository = templates_repository
 
-    def process(self, items: List[Item], profile: Profile) -> Dict[TraderId, List[Item]]:
+    def process(
+        self, items: List[Item], profile: Profile
+    ) -> Dict[TraderId, List[Item]]:
         items = self._flatten_items(items)
         items = self._clean_orphan_items_properties(items)
         return self._group_items_by_insurer(items, profile=profile)
@@ -53,10 +55,14 @@ class _InsuredItemsProcessor:
                 item.location = None
         return items
 
-    def _group_items_by_insurer(self, items: List[Item], profile: Profile) -> Dict[TraderId, List[Item]]:
+    def _group_items_by_insurer(
+        self, items: List[Item], profile: Profile
+    ) -> Dict[TraderId, List[Item]]:
         item_groups: Dict[TraderId, List[Item]] = collections.defaultdict(list)
         for item in items:
-            insurance_info = self.__insurance_service.insurance_info(item=item, profile=profile)
+            insurance_info = self.__insurance_service.insurance_info(
+                item=item, profile=profile
+            )
             item_groups[insurance_info.trader_id].append(item)
         return item_groups
 
@@ -91,24 +97,32 @@ class _InsuranceService(interfaces.IInsuranceService):
             return {}
 
         protected_items: List[Item] = []
-        for item, children in self.__offraid_service.get_protected_items(raid_profile=offraid_profile):
+        for item, children in self.__offraid_service.get_protected_items(
+            raid_profile=offraid_profile
+        ):
             protected_items.append(item)
             protected_items.extend(children)
 
         equipment_item = profile.inventory.get(item_id=profile.inventory.equipment_id)
-        equipment_items = profile.inventory.iter_item_children_recursively(item=equipment_item)
+        equipment_items = profile.inventory.iter_item_children_recursively(
+            item=equipment_item
+        )
         insured_items: Set[Item] = {
-            item.copy() for item in equipment_items
+            item.copy()
+            for item in equipment_items
             if item not in offraid_profile.Inventory.items
-               and self.is_item_insured(item=item, profile=profile)
+            and self.is_item_insured(item=item, profile=profile)
         }
 
         if not is_alive:
-            insured_items.update({
-                item.copy() for item in offraid_profile.Inventory.items
-                if item not in protected_items
-                   and self.is_item_insured(item=item, profile=profile)
-            })
+            insured_items.update(
+                {
+                    item.copy()
+                    for item in offraid_profile.Inventory.items
+                    if item not in protected_items
+                    and self.is_item_insured(item=item, profile=profile)
+                }
+            )
 
         # Make sure to copy all items before returning them from get_insurance method
         # since they would probably get modified when sending mail.
@@ -126,7 +140,9 @@ class _InsuranceService(interfaces.IInsuranceService):
 
     def insurance_info(self, item: Item, profile: Profile) -> ItemInsurance:
         if not self.is_item_insured(item=item, profile=profile):
-            raise exceptions.InsuranceNotFound(f"Insurance for item {item.id} was not found.")
+            raise exceptions.InsuranceNotFound(
+                f"Insurance for item {item.id} was not found."
+            )
         return next(
             insurance
             for insurance in profile.pmc.InsuredItems
@@ -134,14 +150,17 @@ class _InsuranceService(interfaces.IInsuranceService):
         )
 
     def send_insurance_mail(
-        self,
-        items: List[Item],
-        trader_id: TraderId,
-        profile: Profile
+        self, items: List[Item], trader_id: TraderId, profile: Profile
     ) -> None:
         trader = self.__trader_manager.get_trader(trader_type=TraderType(trader_id))
-        insurance_storage_time = int(datetime.timedelta(hours=trader.base.insurance.max_storage_time).total_seconds())
-        insurance_storage_time = int(insurance_storage_time * self.__storage_time_multiplier)
+        insurance_storage_time = int(
+            datetime.timedelta(
+                hours=trader.base.insurance.max_storage_time
+            ).total_seconds()
+        )
+        insurance_storage_time = int(
+            insurance_storage_time * self.__storage_time_multiplier
+        )
 
         mail = profile.mail
         message = MailDialogueMessage(

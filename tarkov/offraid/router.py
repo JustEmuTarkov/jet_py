@@ -18,8 +18,12 @@ offraid_router = make_router(tags=["Offraid"])
 def singleplayer_raid_profile_save(
     request: OffraidSaveRequest,
     profile: Profile = Depends(profile_manager.with_profile),
-    offraid_service: OffraidSaveService = Depends(Provide[AppContainer.offraid.service]),
-    insurance_service: IInsuranceService = Depends(Provide[AppContainer.insurance.service]),
+    offraid_service: OffraidSaveService = Depends(
+        Provide[AppContainer.offraid.service]
+    ),
+    insurance_service: IInsuranceService = Depends(
+        Provide[AppContainer.insurance.service]
+    ),
 ) -> TarkovSuccessResponse:
     if request.is_player_scav:
         raise NotImplementedError

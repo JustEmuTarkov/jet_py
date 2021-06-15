@@ -23,14 +23,20 @@ class OffraidSaveService:
         pmc_health = profile.pmc.Health
 
         for body_part, body_part_health in raid_health.health.items():
-            pmc_health["BodyParts"][body_part]["Health"]["Maximum"] = body_part_health.maximum
-            pmc_health["BodyParts"][body_part]["Health"]["Current"] = body_part_health.current
+            pmc_health["BodyParts"][body_part]["Health"][
+                "Maximum"
+            ] = body_part_health.maximum
+            pmc_health["BodyParts"][body_part]["Health"][
+                "Current"
+            ] = body_part_health.current
             pmc_health["BodyParts"][body_part]["Effects"] = body_part_health.effects
 
         pmc_health["Hydration"]["Current"] = raid_health.hydration
         pmc_health["Energy"]["Current"] = raid_health.energy
 
-    def get_protected_items(self, raid_profile: OffraidProfile) -> List[Tuple[Item, List[Item]]]:
+    def get_protected_items(
+        self, raid_profile: OffraidProfile
+    ) -> List[Tuple[Item, List[Item]]]:
         raid_inventory = SimpleInventory(raid_profile.Inventory.items)
         protected_items: List[Tuple[Item, List[Item]]] = []
         for item in raid_inventory:
@@ -38,7 +44,9 @@ class OffraidSaveService:
                 continue
 
             if item.slot_id in self.protected_slots:
-                protected_items.append((item, list(raid_inventory.iter_item_children_recursively(item))))
+                protected_items.append(
+                    (item, list(raid_inventory.iter_item_children_recursively(item)))
+                )
 
             elif item.slot_id in self.retained_slots:
                 protected_items.append((item, []))
@@ -57,9 +65,11 @@ class OffraidSaveService:
         profile.inventory.remove_item(equipment, remove_children=True)
 
         if is_alive:
-            raid_equipment: List[Item] = list(raid_inventory.iter_item_children_recursively(
-                raid_inventory.get(equipment.id)
-            ))
+            raid_equipment: List[Item] = list(
+                raid_inventory.iter_item_children_recursively(
+                    raid_inventory.get(equipment.id)
+                )
+            )
             profile.inventory.add_item(equipment, child_items=raid_equipment)
         else:
             profile.inventory.add_item(equipment)
@@ -74,7 +84,9 @@ class OffraidSaveService:
         raid_health: OffraidHealth,
     ) -> None:
         self._update_health(profile=profile, raid_health=raid_health)
-        self._update_inventory(profile=profile, raid_profile=raid_profile, is_alive=raid_health.is_alive)
+        self._update_inventory(
+            profile=profile, raid_profile=raid_profile, is_alive=raid_health.is_alive
+        )
 
         profile.pmc.Encyclopedia.update(raid_profile.Encyclopedia)
         profile.pmc.Skills = raid_profile.Skills

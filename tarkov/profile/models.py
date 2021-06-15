@@ -102,7 +102,9 @@ class ProfileModel(Base):
     Stats: dict
 
     Encyclopedia: Dict[TemplateId, StrictBool] = Field(default_factory=dict)
-    ConditionCounters_: ConditionCounters = Field(default_factory=ConditionCounters, alias="ConditionCounters")
+    ConditionCounters_: ConditionCounters = Field(
+        default_factory=ConditionCounters, alias="ConditionCounters"
+    )
     BackendCounters: Dict[str, BackendCounter] = Field(
         default_factory=dict
     )  # Dict key is the same as counter id
