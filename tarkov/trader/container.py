@@ -8,11 +8,13 @@ from tarkov.trader.trader import Trader, TraderView
 
 
 class TraderContainer(containers.DeclarativeContainer):
+    insurance_config = providers.Configuration()
     config: Dependency[TradersConfig] = providers.Dependency()
     templates_repository: Dependency[ItemTemplatesRepository] = providers.Dependency()
 
     trader_view = providers.Factory(
         TraderView,
+        insurance_price_multiplier=insurance_config.price_multiplier,
         templates_repository=templates_repository,
     )
 

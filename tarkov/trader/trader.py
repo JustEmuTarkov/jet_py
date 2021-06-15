@@ -243,10 +243,13 @@ class BaseTraderView(Protocol):
 class TraderView(BaseTraderView):
     def __init__(
         self,
+        insurance_price_multiplier: float,
         trader: Trader,
         player_profile: Profile,
         templates_repository: ItemTemplatesRepository,
     ):
+        self.__insurance_price_multiplier = insurance_price_multiplier
+
         self.__trader = trader
         self.__profile = player_profile
         self.__templates_repository = templates_repository
@@ -277,14 +280,13 @@ class TraderView(BaseTraderView):
         return trader_base
 
     def insurance_price(self, items: Iterable[Item]) -> int:
-        price: float = 0
-        for item in items:
-            item_template = self.__templates_repository.get_template(item)
-            price += item_template.props.CreditsPrice * 0.1
-            #  Todo account for trader standing (subtract standing from insurance price,
-            #  half of the insurance price should be minimum price
-
-        return int(price)
+        """
+        Calculates insurance price of given items based on their total price, current loyalty and insurance config.
+        """
+        total_price: float = sum(self.__templates_repository.get_template(item).props.CreditsPrice for item in items)
+        total_price *= self.__insurance_price_multiplier
+        total_price *= 1 - min(self.standing.current_loyalty, 0.5)
+        return int(total_price)
 
     @property
     def __trader_items(self) -> Iterable[Item]:

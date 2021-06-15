@@ -13,6 +13,8 @@ from tarkov.trader.container import TraderContainer
 
 
 class AppContainer(containers.DeclarativeContainer):
+    insurance_config = providers.Configuration()
+
     config = providers.Container(ConfigContainer)
     repos = providers.Container(RepositoriesContainer)
 
@@ -46,15 +48,19 @@ class AppContainer(containers.DeclarativeContainer):
         account_service=launcher.account_service,
     )
 
-    trader: TraderContainer = providers.Container(
+    trader = providers.Container(
         TraderContainer,
         templates_repository=repos.templates,
         config=config.traders,
+        insurance_config=insurance_config,
     )
 
-    offraid: OffraidContainer = providers.Container(OffraidContainer)
-    insurance: InsuranceContainer = providers.Container(
+    offraid = providers.Container(OffraidContainer)
+    insurance = providers.Container(
         InsuranceContainer,
+
+        config=insurance_config,
+
         trader_manager=trader.manager,
         offraid_service=offraid.service,
         templates_repository=items.templates_repository,

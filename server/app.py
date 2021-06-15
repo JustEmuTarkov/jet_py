@@ -38,7 +38,7 @@ class FastAPIWithContainer(FastAPI):
 container = AppContainer()
 container.wire(packages=[tarkov])
 container.offraid.config.from_yaml("./config/offraid.yaml")
-container.insurance.config.from_yaml("./config/insurance.yaml")
+container.insurance_config.from_yaml("./config/insurance.yaml")
 
 app = FastAPIWithContainer()
 app.container = container

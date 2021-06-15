@@ -15,8 +15,6 @@ from tarkov.trader.models import TraderType
 
 insurance_router = make_router(tags=["Insurance"])
 
-INSURANCE_PRICE_MODIFIER = 0.1
-
 
 class InsuranceListCostRequest(BaseModel):
     traders: List[str]

@@ -16,7 +16,7 @@ class InsuranceContainer(containers.DeclarativeContainer):
 
     service: providers.Provider[IInsuranceService] = providers.Factory(
         _InsuranceService,
-        storage_time_modifier=config.storage_time_modifier,
+        storage_time_multiplier=config.storage_time_multiplier,
         insurance_enabled=config.enabled,
 
         trader_manager=trader_manager,
