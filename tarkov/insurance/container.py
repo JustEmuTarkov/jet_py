@@ -12,8 +12,13 @@ class InsuranceContainer(containers.DeclarativeContainer):
     offraid_service = providers.Dependency(instance_of=OffraidSaveService)
     templates_repository = providers.Dependency(instance_of=ItemTemplatesRepository)
 
+    config = providers.Configuration(strict=True)
+
     service: providers.Provider[IInsuranceService] = providers.Factory(
         _InsuranceService,
+        storage_time_modifier=config.storage_time_modifier,
+        insurance_enabled=config.enabled,
+
         trader_manager=trader_manager,
         offraid_service=offraid_service,
         templates_repository=templates_repository,

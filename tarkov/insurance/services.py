@@ -64,10 +64,15 @@ class _InsuredItemsProcessor:
 class _InsuranceService(interfaces.IInsuranceService):
     def __init__(
         self,
+        storage_time_modifier: float,
+        insurance_enabled: bool,
         trader_manager: TraderManager,
         offraid_service: OffraidSaveService,
         templates_repository: ItemTemplatesRepository,
     ):
+        self.__storage_time_modifier = storage_time_modifier
+        self.__insurance_enabled = insurance_enabled
+
         self.__trader_manager = trader_manager
         self.__offraid_service = offraid_service
         self.__templates_repository = templates_repository
@@ -82,6 +87,9 @@ class _InsuranceService(interfaces.IInsuranceService):
         offraid_profile: OffraidProfile,
         is_alive: bool,
     ) -> Dict[TraderId, List[Item]]:
+        if not self.__insurance_enabled:
+            return {}
+
         protected_items: List[Item] = []
         for item, children in self.__offraid_service.get_protected_items(raid_profile=offraid_profile):
             protected_items.append(item)
@@ -133,6 +141,8 @@ class _InsuranceService(interfaces.IInsuranceService):
     ) -> None:
         trader = self.__trader_manager.get_trader(trader_type=TraderType(trader_id))
         insurance_storage_time = int(datetime.timedelta(hours=trader.base.insurance.max_storage_time).total_seconds())
+        insurance_storage_time = int(insurance_storage_time * self.__storage_time_modifier)
+
         mail = profile.mail
         message = MailDialogueMessage(
             uid=trader_id,
