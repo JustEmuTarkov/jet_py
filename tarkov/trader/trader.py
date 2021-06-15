@@ -281,11 +281,11 @@ class TraderView(BaseTraderView):
 
     def insurance_price(self, items: Iterable[Item]) -> int:
         """
-        Calculates insurance price of given items based on their total price, current loyalty and insurance config.
+        Calculates insurance price of given items based on their total price, current standing and insurance config.
         """
         total_price: float = sum(self.__templates_repository.get_template(item).props.CreditsPrice for item in items)
         total_price *= self.__insurance_price_multiplier
-        total_price *= 1 - min(self.standing.current_loyalty, 0.5)
+        total_price *= 1 - min(self.standing.current_standing, 0.5)
         return int(total_price)
 
     @property
