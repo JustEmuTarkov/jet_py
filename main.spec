@@ -5,6 +5,7 @@ block_cipher = None
 
 hidden_imports_starlette = collect_submodules("starlette")
 hidden_imports_uvicorn = collect_submodules("uvicorn")
+hidden_imports_dependency_injector = collect_submodules("dependency_injector")
 
 a = Analysis(
     ['main.py'],
@@ -13,6 +14,7 @@ a = Analysis(
     hiddenimports=[
         *hidden_imports_starlette,
         *hidden_imports_uvicorn,
+        *hidden_imports_dependency_injector,
     ],
     hookspath=[],
     runtime_hooks=[],
