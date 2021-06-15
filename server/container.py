@@ -1,5 +1,3 @@
-from typing import cast
-
 from dependency_injector import containers, providers
 
 from tarkov.containers import ConfigContainer, ItemsContainer, RepositoriesContainer
@@ -15,79 +13,43 @@ from tarkov.trader.container import TraderContainer
 
 
 class AppContainer(containers.DeclarativeContainer):
-    # Code completion is better when using container types instead of say
-    # Container[ConfigContainer]
+    config = providers.Container(ConfigContainer)
+    repos = providers.Container(RepositoriesContainer)
 
-    config: ConfigContainer = cast(
-        ConfigContainer,
-        providers.Container(
-            ConfigContainer,
-        ),
-    )
-    repos: RepositoriesContainer = cast(
-        RepositoriesContainer,
-        providers.Container(
-            RepositoriesContainer,
-        ),
-    )
-
-    items: ItemsContainer = cast(
+    items = providers.Container(
         ItemsContainer,
-        providers.Container(
-            ItemsContainer,
-            globals_repository=repos.globals,
-            templates_repository=repos.templates,
-        ),
+        globals_repository=repos.globals,
+        templates_repository=repos.templates
     )
 
-    flea: FleaMarketContainer = cast(
+    flea = providers.Container(
         FleaMarketContainer,
-        providers.Container(
-            FleaMarketContainer,
-            globals_repository=repos.globals,
-            templates_repository=repos.templates,
-            flea_config=config.flea_market,
-            item_factory=items.factory,
-        ),
+        globals_repository=repos.globals,
+        templates_repository=repos.templates,
+        flea_config=config.flea_market,
+        item_factory=items.factory,
     )
 
-    notifier: NotifierContainer = cast(
-        NotifierContainer,
-        providers.Container(NotifierContainer),
-    )
+    notifier = providers.Container(NotifierContainer)
 
-    quests: QuestsContainer = cast(
-        QuestsContainer,
-        providers.Container(QuestsContainer),
-    )
+    quests = providers.Container(QuestsContainer)
 
-    mail: MailContainer = cast(
+    mail = providers.Container(
         MailContainer,
-        providers.Container(
-            MailContainer,
-            notifier_service=notifier.service,
-        ),
+        notifier_service=notifier.service,
     )
 
-    launcher: LauncherContainer = cast(
-        LauncherContainer, providers.Container(LauncherContainer)
-    )
+    launcher = providers.Container(LauncherContainer)
 
-    profile: ProfileContainer = cast(
+    profile = providers.Container(
         ProfileContainer,
-        providers.Container(
-            ProfileContainer,
-            account_service=launcher.account_service,
-        ),
+        account_service=launcher.account_service,
     )
 
-    trader: TraderContainer = cast(
+    trader: TraderContainer = providers.Container(
         TraderContainer,
-        providers.Container(
-            TraderContainer,
-            templates_repository=repos.templates,
-            config=config.traders,
-        ),
+        templates_repository=repos.templates,
+        config=config.traders,
     )
 
     offraid: OffraidContainer = providers.Container(OffraidContainer)
