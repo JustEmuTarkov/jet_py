@@ -19,7 +19,8 @@ class OffraidSaveService:
         self.protected_slots = protected_slots
         self.retained_slots = retained_slots
 
-    def _update_health(self, profile: Profile, raid_health: OffraidHealth) -> None:
+    @staticmethod
+    def _update_health(profile: Profile, raid_health: OffraidHealth) -> None:
         pmc_health = profile.pmc.Health
 
         for body_part, body_part_health in raid_health.health.items():

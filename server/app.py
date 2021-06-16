@@ -36,7 +36,7 @@ class FastAPIWithContainer(FastAPI):
 
 
 container = AppContainer()
-container.wire(packages=[tarkov])
+container.wire(packages=[tarkov])  # pylint: disable=no-member
 container.offraid.config.from_yaml("./config/offraid.yaml")
 container.insurance_config.from_yaml("./config/insurance.yaml")
 

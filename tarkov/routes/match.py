@@ -1,7 +1,6 @@
 from typing import Literal, Union
 
 import ujson
-from dependency_injector.wiring import Provide
 from fastapi import Request
 from fastapi.params import Depends
 

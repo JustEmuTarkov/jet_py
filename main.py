@@ -8,10 +8,10 @@ from tarkov.containers import ConfigContainer
 
 if __name__ == "__main__":
     bot_container = BotContainer()
-    bot_container.wire(packages=[tarkov])
+    bot_container.wire(packages=[tarkov])  # pylint: disable=no-member
 
     config_container = ConfigContainer()
-    config_container.wire(packages=[tarkov])
+    config_container.wire(packages=[tarkov])  # pylint: disable=no-member
 
     try:
         if is_ssl_certificate_expired():
