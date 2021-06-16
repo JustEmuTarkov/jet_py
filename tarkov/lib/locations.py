@@ -85,7 +85,7 @@ class ContainerInventory(GridInventory):
 
 
 class ContainerLootGenerator:
-    ATTEMPTS_TO_PLACE_LOOT: Final[ClassVar[int]] = 10
+    ATTEMPTS_TO_PLACE_LOOT: Final[int] = 10
 
     @inject
     def __init__(
