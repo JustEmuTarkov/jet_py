@@ -19,9 +19,6 @@ launcher_router = make_router(tags=["Launcher"])
 @inject
 async def connect(
     request: Request,
-    account_service: AccountService = Depends(
-        Provide[AppContainer.launcher.account_service]
-    ),
 ) -> dict:
     return {
         "backendUrl": get_request_url_root(request).rstrip("/"),

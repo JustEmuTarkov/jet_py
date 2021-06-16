@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import abc
-from typing import Dict, Iterable, List, TYPE_CHECKING, Union
+from typing import Dict, Iterable, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from tarkov.inventory.models import Item

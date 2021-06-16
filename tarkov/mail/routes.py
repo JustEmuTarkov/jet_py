@@ -1,9 +1,7 @@
 from typing import Dict, List, Union
 
-from dependency_injector.wiring import Provide, inject
 from fastapi.params import Body, Depends
 
-from server.container import AppContainer
 from server.utils import make_router
 from tarkov.profile.dependencies import with_profile, with_profile_readonly
 from tarkov.mail.requests import GetAllAttachmentsRequest, MailDialogViewRequest

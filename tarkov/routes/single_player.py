@@ -1,6 +1,5 @@
 from typing import Any, List
 
-from dependency_injector.wiring import Provide
 from fastapi import Request
 from fastapi.params import Depends
 from pydantic import BaseModel

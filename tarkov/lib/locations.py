@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import collections
 import random
-from typing import Any, ClassVar, DefaultDict, Dict, Final, List, Tuple, Union
+from typing import Any, DefaultDict, Dict, Final, List, Tuple, Union
 
 import ujson
 from dependency_injector.wiring import Provide, inject
