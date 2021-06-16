@@ -3,7 +3,7 @@ from fastapi.params import Depends
 
 from server.container import AppContainer
 from server.utils import make_router
-from tarkov.dependencies import profile_manager
+from tarkov.profile.dependencies import with_profile
 from tarkov.insurance.interfaces import IInsuranceService
 from tarkov.models import TarkovSuccessResponse
 from tarkov.offraid.requests import OffraidSaveRequest
@@ -17,7 +17,7 @@ offraid_router = make_router(tags=["Offraid"])
 @inject
 def singleplayer_raid_profile_save(
     request: OffraidSaveRequest,
-    profile: Profile = Depends(profile_manager.with_profile),
+    profile: Profile = Depends(with_profile),
     offraid_service: OffraidSaveService = Depends(
         Provide[AppContainer.offraid.service]
     ),

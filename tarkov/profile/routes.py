@@ -7,12 +7,13 @@ from fastapi.requests import Request
 from server import logger
 from server.container import AppContainer
 from server.utils import get_request_url_root, make_router
-from tarkov.dependencies import profile_manager
 from tarkov.inventory_dispatcher import DispatcherManager
 from tarkov.inventory_dispatcher.manager import DispatcherResponse
 from tarkov.launcher.accounts import AccountService
 from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
+from tarkov.profile.dependencies import with_profile
 from tarkov.profile.profile import Profile
+from tarkov.profile.profile_manager import ProfileManager
 from tarkov.profile.service import ProfileService
 
 profile_router = make_router(tags=["Profile"])
@@ -24,8 +25,9 @@ profile_router = make_router(tags=["Profile"])
     response_model_exclude_none=True,
     response_model_exclude_unset=False,
 )
+@inject
 def client_game_profile_item_move(
-    profile: Profile = Depends(profile_manager.with_profile),
+    profile: Profile = Depends(with_profile),
     body: dict = Body(...),
 ) -> Union[TarkovSuccessResponse[DispatcherResponse], TarkovErrorResponse]:
     dispatcher = DispatcherManager(profile)
@@ -34,8 +36,10 @@ def client_game_profile_item_move(
 
 
 @profile_router.post("/client/game/profile/list")
+@inject
 async def client_game_profile_list(
     profile_id: str = Cookie(..., alias="PHPSESSID"),
+    profile_manager: ProfileManager = Depends(Provide[AppContainer.profile.manager]),
 ) -> Union[TarkovSuccessResponse[List[dict]], TarkovErrorResponse]:
     try:
         async with profile_manager.locks[profile_id]:
@@ -66,7 +70,7 @@ def client_game_profile_list_select(request: Request) -> TarkovSuccessResponse[d
 
 @profile_router.post("/client/profile/status")
 def client_profile_status(
-    profile: Profile = Depends(profile_manager.with_profile),
+    profile: Profile = Depends(with_profile),
 ) -> Union[TarkovSuccessResponse[List[dict]], TarkovErrorResponse]:
     response = []
     for profile_type in ("scav", "pmc"):

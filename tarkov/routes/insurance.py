@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 from server.container import AppContainer
 from server.utils import make_router
-from tarkov.dependencies import profile_manager
+from tarkov.profile.dependencies import with_profile
 from tarkov.inventory.types import ItemId, TemplateId
 from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
 from tarkov.profile.profile import Profile
@@ -25,7 +25,7 @@ class InsuranceListCostRequest(BaseModel):
 @inject
 async def items_list_cost(
     request: InsuranceListCostRequest,
-    profile: Profile = Depends(profile_manager.with_profile),
+    profile: Profile = Depends(with_profile),
     trader_manager: TraderManager = Depends(Provide[AppContainer.trader.manager]),
 ) -> Union[TarkovSuccessResponse[Dict[str, dict]], TarkovErrorResponse]:
     insurance_data: Dict[str, dict] = {}

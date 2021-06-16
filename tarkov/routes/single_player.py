@@ -1,11 +1,12 @@
 from typing import Any, List
 
+from dependency_injector.wiring import Provide
 from fastapi import Request
 from fastapi.params import Depends
 from pydantic import BaseModel
 
 from server.utils import make_router
-from tarkov.dependencies import profile_manager
+from tarkov.profile.dependencies import with_profile
 from tarkov.lib import locations
 from tarkov.models import TarkovSuccessResponse
 from tarkov.profile.models import ProfileModel
@@ -111,7 +112,7 @@ def weapon_durability() -> bool:
 @singleplayer_router.post("/player/health/sync")
 async def health_sync(
     request: Request,
-    profile: Profile = Depends(profile_manager.with_profile),
+    profile: Profile = Depends(with_profile),
 ) -> TarkovSuccessResponse:
     body = await request.json()
 
