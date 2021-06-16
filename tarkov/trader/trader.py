@@ -288,7 +288,7 @@ class TraderView(BaseTraderView):
             for item in items
         )
         total_price *= self.__insurance_price_multiplier
-        total_price -= item_price * min(self.standing.current_standing, 0.5)
+        total_price -= total_price * min(self.standing.current_standing, 0.5)
         return int(total_price)
 
     @property
