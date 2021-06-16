@@ -43,7 +43,7 @@ class AppContainer(containers.DeclarativeContainer):
 
     launcher = providers.Container(LauncherContainer)
 
-    profile = providers.Container(
+    profile: ProfileContainer = providers.Container(
         ProfileContainer,
         account_service=launcher.account_service,
     )

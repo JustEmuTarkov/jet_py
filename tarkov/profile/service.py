@@ -6,16 +6,21 @@ from typing import Final, TYPE_CHECKING
 import ujson
 
 from server import db_dir, root_dir
-from tarkov.dependencies import profile_manager
 
 if TYPE_CHECKING:
     from tarkov.launcher.accounts import AccountService
     from tarkov.profile.models import ProfileModel
+    from tarkov.profile.profile_manager import ProfileManager
 
 
 class ProfileService:
-    def __init__(self, account_service: AccountService):
+    def __init__(
+        self,
+        account_service: AccountService,
+        profile_manager: ProfileManager,
+    ):
         self.__account_service = account_service
+        self.__profile_manager = profile_manager
 
     def create_profile(
         self,
@@ -72,5 +77,5 @@ class ProfileService:
             ensure_ascii=False,
         )
 
-        profile_manager.get_profile(profile_id=profile_id)
+        self.__profile_manager.get_profile(profile_id=profile_id)
         return profile
