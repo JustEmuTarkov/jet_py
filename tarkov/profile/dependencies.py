@@ -12,7 +12,7 @@ async def with_profile(
     request: Request,
     background_tasks: BackgroundTasks,
     profile_id: str = Query(..., alias="PHPSESSID"),
-):
+) -> AsyncIterable[Profile]:
     """
     Provides a Profile instance and saves it after request using background task
     Should be only used as a dependency for fastapi routes
