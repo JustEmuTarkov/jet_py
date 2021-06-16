@@ -15,16 +15,16 @@ from tarkov.trader.container import TraderContainer
 class AppContainer(containers.DeclarativeContainer):
     insurance_config = providers.Configuration()
 
-    config = providers.Container(ConfigContainer)
-    repos = providers.Container(RepositoriesContainer)
+    config: ConfigContainer = providers.Container(ConfigContainer)
+    repos: RepositoriesContainer = providers.Container(RepositoriesContainer)
 
-    items = providers.Container(
+    items: ItemsContainer = providers.Container(
         ItemsContainer,
         globals_repository=repos.globals,
         templates_repository=repos.templates,
     )
 
-    flea = providers.Container(
+    flea: FleaMarketContainer = providers.Container(
         FleaMarketContainer,
         globals_repository=repos.globals,
         templates_repository=repos.templates,
@@ -32,31 +32,31 @@ class AppContainer(containers.DeclarativeContainer):
         item_factory=items.factory,
     )
 
-    notifier = providers.Container(NotifierContainer)
+    notifier: NotifierContainer = providers.Container(NotifierContainer)
 
-    quests = providers.Container(QuestsContainer)
+    quests: QuestsContainer = providers.Container(QuestsContainer)
 
-    mail = providers.Container(
+    mail: MailContainer = providers.Container(
         MailContainer,
         notifier_service=notifier.service,
     )
 
-    launcher = providers.Container(LauncherContainer)
+    launcher: LauncherContainer = providers.Container(LauncherContainer)
 
     profile: ProfileContainer = providers.Container(
         ProfileContainer,
         account_service=launcher.account_service,
     )
 
-    trader = providers.Container(
+    trader: TraderContainer = providers.Container(
         TraderContainer,
         templates_repository=repos.templates,
         config=config.traders,
         insurance_config=insurance_config,
     )
 
-    offraid = providers.Container(OffraidContainer)
-    insurance = providers.Container(
+    offraid: OffraidContainer = providers.Container(OffraidContainer)
+    insurance: InsuranceContainer = providers.Container(
         InsuranceContainer,
         config=insurance_config,
         trader_manager=trader.manager,
