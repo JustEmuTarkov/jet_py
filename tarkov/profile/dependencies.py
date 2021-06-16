@@ -1,11 +1,15 @@
-from typing import AsyncIterable
+from __future__ import annotations
+
+from typing import AsyncIterable, TYPE_CHECKING
 
 from fastapi import Cookie, Query, Request
 from starlette.background import BackgroundTasks
 
 from server import logger
 from tarkov.profile.profile import Profile
-from tarkov.profile.profile_manager import ProfileManager
+
+if TYPE_CHECKING:
+    from tarkov.profile.profile_manager import ProfileManager
 
 
 async def with_profile(

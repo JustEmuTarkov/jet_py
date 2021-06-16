@@ -27,12 +27,12 @@ from .models import (
     QuestStatus,
 )
 from .repositories import QuestsRepository
-from tarkov.trader.manager import TraderManager
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
     from tarkov.profile.profile import Profile
     from tarkov.inventory.repositories import ItemTemplatesRepository
+    from tarkov.trader.manager import TraderManager
 
 
 class Quests:

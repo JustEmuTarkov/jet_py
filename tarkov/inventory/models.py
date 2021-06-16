@@ -59,9 +59,9 @@ class ItemTemplate(NodeTemplateBase):
     props: AnyProp
 
     @root_validator(pre=True)
-    def assign_prop(
+    def assign_prop(  # pylint: disable=no-self-argument, no-self-use
         cls, values: dict
-    ) -> dict:  # pylint: disable=no-self-argument, no-self-use
+    ) -> dict:
         if values["_type"] != "Item":
             return values
         if isinstance(values["_props"], BaseItemProps):
@@ -205,9 +205,9 @@ class ItemInventoryLocation(Base):
     isSearched: Optional[bool] = None
 
     @validator("r", pre=True)
-    def validate_rotation(
+    def validate_rotation(  # pylint: disable=no-self-argument, no-self-use
         cls, value: Any
-    ) -> Any:  # pylint: disable=no-self-argument, no-self-use
+    ) -> Any:
         if value == 1:
             return ItemOrientationEnum.Vertical.value
         if value == 0:

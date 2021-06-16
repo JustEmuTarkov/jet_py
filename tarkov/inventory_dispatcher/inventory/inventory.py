@@ -15,7 +15,6 @@ from tarkov.inventory.models import Item, ItemUpdTogglable
 from tarkov.inventory.types import TemplateId
 from tarkov.inventory_dispatcher.base import Dispatcher
 from tarkov.inventory_dispatcher.models import ActionType, Owner
-from tarkov.trader.manager import TraderManager
 from tarkov.trader.models import TraderType
 from .models import (
     ApplyInventoryChanges,
@@ -39,6 +38,7 @@ if TYPE_CHECKING:
     from tarkov.inventory_dispatcher.manager import DispatcherManager
     from tarkov.fleamarket.fleamarket import FleaMarket
     from tarkov.inventory.repositories import ItemTemplatesRepository
+    from tarkov.trader.manager import TraderManager
 
 
 class InventoryDispatcher(Dispatcher):

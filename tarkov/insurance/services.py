@@ -45,7 +45,8 @@ class _InsuredItemsProcessor:
                 item.parent_id = None
         return items
 
-    def _clean_orphan_items_properties(self, items: List[Item]) -> List[Item]:
+    @staticmethod
+    def _clean_orphan_items_properties(items: List[Item]) -> List[Item]:
         """Cleans Item.parent_id, Item.location and Item.slot_id from orphan items"""
 
         for item in items:

@@ -1,4 +1,6 @@
-from typing import List
+from __future__ import annotations
+
+from typing import List, TYPE_CHECKING
 
 import ujson
 from dependency_injector.wiring import Provide, inject
@@ -7,9 +9,11 @@ from fastapi.requests import Request
 
 from server import db_dir, logger
 from server.utils import make_router
-from tarkov.bots.generator import BotGenerator
 from tarkov.bots.container import BotContainer
 from tarkov.models import TarkovSuccessResponse
+
+if TYPE_CHECKING:
+    from tarkov.bots.generator import BotGenerator
 
 bots_router = make_router(tags=["Bots"])
 

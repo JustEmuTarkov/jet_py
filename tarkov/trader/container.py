@@ -4,7 +4,8 @@ from dependency_injector.providers import Dependency
 from tarkov.config import TradersConfig
 from tarkov.inventory.repositories import ItemTemplatesRepository
 from tarkov.trader.manager import TraderManager
-from tarkov.trader.trader import Trader, TraderView
+from tarkov.trader.trader import Trader
+from tarkov.trader.view import TraderView
 
 
 class TraderContainer(containers.DeclarativeContainer):
