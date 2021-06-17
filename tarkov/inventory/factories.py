@@ -11,6 +11,7 @@ from tarkov.inventory.prop_models import AmmoBoxProps, FuelProps, MedsProps
 from tarkov.inventory.types import TemplateId
 
 if TYPE_CHECKING:
+    # pylint: disable=cyclic-import
     from tarkov.globals_.repository import GlobalsRepository
     from tarkov.inventory.repositories import ItemTemplatesRepository
 

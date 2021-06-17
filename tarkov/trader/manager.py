@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Callable, Dict, TYPE_CHECKING
 
 if TYPE_CHECKING:
+    # pylint: disable=cyclic-import
     from tarkov.trader.models import TraderType
     from tarkov.trader.trader import Trader
 

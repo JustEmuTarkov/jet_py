@@ -7,6 +7,7 @@ from tarkov.exceptions import NotFoundError
 from .models import GlobalsModel, ItemPreset
 
 if TYPE_CHECKING:
+    # pylint: disable=cyclic-import
     from tarkov.inventory.models import ItemTemplate
 
 

@@ -12,6 +12,7 @@ from tarkov.fleamarket.offer_generator import OfferGenerator
 from tarkov.fleamarket.views import FleaMarketView
 
 if TYPE_CHECKING:
+    # pylint: disable=cyclic-import
     from tarkov.config import FleaMarketConfig
     from tarkov.inventory.repositories import ItemTemplatesRepository
     from tarkov.globals_.repository import GlobalsRepository

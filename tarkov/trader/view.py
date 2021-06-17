@@ -1,12 +1,17 @@
-from typing import Iterable, List
+from __future__ import annotations
 
-from tarkov.inventory.models import Item
-from tarkov.inventory.repositories import ItemTemplatesRepository
-from tarkov.profile.profile import Profile
-from tarkov.quests.models import QuestStatus
+from typing import Iterable, List, TYPE_CHECKING
+
 from tarkov.trader.interfaces import BaseTraderView
-from tarkov.trader.models import TraderBase, TraderStanding
-from tarkov.trader.trader import Trader
+
+if TYPE_CHECKING:
+    # pylint: disable=cyclic-import
+    from tarkov.inventory.models import Item
+    from tarkov.inventory.repositories import ItemTemplatesRepository
+    from tarkov.quests.models import QuestStatus
+    from tarkov.trader.models import TraderBase, TraderStanding
+    from tarkov.trader.trader import Trader
+    from tarkov.profile.profile import Profile
 
 
 class TraderView(BaseTraderView):

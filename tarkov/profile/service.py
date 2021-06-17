@@ -8,6 +8,7 @@ import ujson
 from server import db_dir, root_dir
 
 if TYPE_CHECKING:
+    # pylint: disable=cyclic-import
     from tarkov.launcher.accounts import AccountService
     from tarkov.profile.models import ProfileModel
     from tarkov.profile.profile_manager import ProfileManager

@@ -11,11 +11,11 @@ from tarkov.mail.models import (
     MailDialoguePreview,
     MailDialogues,
 )
-from tarkov.notifier.notifier import NotifierService
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
     from tarkov.profile.profile import Profile
+    from tarkov.notifier.notifier import NotifierService
 
 
 class MailView:
@@ -67,7 +67,11 @@ class Mail:
     dialogues: MailDialogues
     view: MailView
 
-    def __init__(self, profile: Profile, notifier_service: NotifierService):
+    def __init__(
+        self,
+        profile: Profile,
+        notifier_service: NotifierService,
+    ):
         self.__notifier_service = notifier_service
 
         self.profile = profile

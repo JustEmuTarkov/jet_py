@@ -81,7 +81,7 @@ class Trader:
 
     def view(self, player_profile: Profile) -> BaseTraderView:
         self.__try_update()
-        return self.__view_factory(self, player_profile)
+        return self.__view_factory(trader=self, player_profile=player_profile)
 
     @property
     def base(self) -> TraderBase:

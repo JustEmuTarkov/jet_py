@@ -23,6 +23,7 @@ from tarkov.inventory.prop_models import CompoundProps, Grid
 from tarkov.inventory.repositories import ItemTemplatesRepository
 
 if TYPE_CHECKING:
+    # pylint: disable=cyclic-import
     from tarkov.inventory.types import ItemId
 
 

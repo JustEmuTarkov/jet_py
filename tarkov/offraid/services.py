@@ -5,6 +5,7 @@ from typing import List, TYPE_CHECKING, Tuple
 from tarkov.inventory.implementations import SimpleInventory
 
 if TYPE_CHECKING:
+    # pylint: disable=cyclic-import
     from tarkov.inventory.models import Item
     from tarkov.offraid.models import OffraidHealth, OffraidProfile
     from tarkov.profile.profile import Profile

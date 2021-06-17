@@ -2,12 +2,12 @@ import time
 import traceback
 from typing import Callable
 
-from fastapi import FastAPI
 import fastapi.exception_handlers
+from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
-from fastapi.staticfiles import StaticFiles
 from fastapi.requests import Request
 from fastapi.responses import Response
+from fastapi.staticfiles import StaticFiles
 from starlette.responses import JSONResponse
 
 import tarkov
@@ -39,6 +39,7 @@ container = AppContainer()
 container.wire(packages=[tarkov])  # pylint: disable=no-member
 container.offraid.config.from_yaml("./config/offraid.yaml")
 container.insurance_config.from_yaml("./config/insurance.yaml")
+container.profile.config.from_yaml("./config/profile.yaml")
 
 app = FastAPIWithContainer()
 app.container = container

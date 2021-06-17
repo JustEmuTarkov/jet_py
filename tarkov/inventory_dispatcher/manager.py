@@ -14,7 +14,7 @@ from tarkov.models import Base
 from tarkov.profile.profile import Profile
 
 if TYPE_CHECKING:
-    # pylint: disable=unused-import
+    # pylint: disable=cyclic-import
     from tarkov.inventory_dispatcher.base import Dispatcher
 
 

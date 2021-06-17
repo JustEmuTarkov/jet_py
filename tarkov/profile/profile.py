@@ -1,50 +1,18 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Union
+from pathlib import Path
+from typing import Callable
 
-from dependency_injector.wiring import Provide, inject
-
-from server import root_dir
-from server.container import AppContainer
 from server.utils import atomic_write
-from tarkov.hideout import Hideout
+from tarkov.hideout.main import Hideout
 from tarkov.inventory.inventory import PlayerInventory
-from tarkov.inventory.models import Item, ItemTemplate
-from tarkov.inventory.types import TemplateId
-from tarkov.mail import Mail
-from tarkov.notifier.notifier import NotifierService
+from tarkov.inventory.models import Item
+from tarkov.mail.mail import Mail
 from tarkov.quests.quests import Quests
 from tarkov.trader.models import TraderType
+from .encyclopedia import Encyclopedia
 from .models import ItemInsurance, ProfileModel
-
-if TYPE_CHECKING:
-    from tarkov.inventory.repositories import ItemTemplatesRepository
-
-
-class Encyclopedia:
-    def __init__(self, profile: Profile):
-        self.profile = profile
-        self.data = profile.pmc.Encyclopedia
-
-    @inject
-    def examine(
-        self,
-        item: Union[Item, TemplateId],
-        templates_repository: ItemTemplatesRepository = Provide[
-            AppContainer.repos.templates
-        ],
-    ) -> None:
-        template: ItemTemplate = templates_repository.get_template(item)
-        self.data[template.id] = False
-        self.profile.receive_experience(template.props.ExamineExperience)
-
-    def read(self, item: Union[Item, TemplateId]) -> None:
-        if isinstance(item, Item):
-            item_tpl_id = item.tpl
-        else:
-            item_tpl_id = item
-
-        self.data[item_tpl_id] = True
+from tarkov.notifier.notifier import NotifierService
 
 
 class Profile:
@@ -63,10 +31,22 @@ class Profile:
     encyclopedia: Encyclopedia
     mail: Mail
 
-    def __init__(self, profile_id: str):
-        self.profile_id = profile_id
+    def __init__(
+        self,
+        profile_dir: Path,
+        profile_id: str,
+        encyclopedia_factory: Callable[..., Encyclopedia],
+        hideout_factory: Callable[..., Hideout],
+        quests_factory: Callable[..., Quests],
+        notifier_service: NotifierService,
+    ):
+        self.__encyclopedia_factory = encyclopedia_factory
+        self.__hideout_factory = hideout_factory
+        self.__quests_factory = quests_factory
+        self.__notifier_service = notifier_service
 
-        self.profile_dir = root_dir.joinpath("resources", "profiles", profile_id)
+        self.profile_dir = profile_dir
+        self.profile_id = profile_id
 
         self.pmc_profile_path = self.profile_dir.joinpath("pmc_profile.json")
         self.scav_profile_path = self.profile_dir.joinpath("scav_profile.json")
@@ -81,10 +61,7 @@ class Profile:
     def receive_experience(self, amount: int) -> None:
         self.pmc.Info.Experience += amount
 
-    @inject
-    def read(
-        self, notifier_service: NotifierService = Provide[AppContainer.notifier.service]
-    ) -> None:
+    def read(self) -> None:
         if any(
             not path.exists()
             for path in (self.pmc_profile_path, self.scav_profile_path)
@@ -94,16 +71,16 @@ class Profile:
         self.pmc = ProfileModel.parse_file(self.pmc_profile_path)
         self.scav = ProfileModel.parse_file(self.scav_profile_path)
 
-        self.encyclopedia = Encyclopedia(profile=self)
+        self.encyclopedia = self.__encyclopedia_factory(profile=self)
         self.inventory = PlayerInventory(profile=self)
         self.inventory.read()
 
-        self.quests = Quests(profile=self)
+        self.quests = self.__quests_factory(profile=self)
 
-        self.hideout = Hideout(profile=self)
+        self.hideout = self.__hideout_factory(profile=self)
         self.hideout.read()
 
-        self.mail = Mail(self, notifier_service)
+        self.mail = Mail(profile=self, notifier_service=self.__notifier_service)
         self.mail.read()
 
     def write(self) -> None:

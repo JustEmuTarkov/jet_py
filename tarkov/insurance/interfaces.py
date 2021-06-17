@@ -4,6 +4,7 @@ import abc
 from typing import Dict, Iterable, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
+    # pylint: disable=cyclic-import
     from tarkov.inventory.models import Item
     from tarkov.offraid.models import OffraidProfile
     from tarkov.profile.profile import Profile

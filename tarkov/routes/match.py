@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Literal, TYPE_CHECKING, Union
+from typing import Literal, Union
 
 import ujson
 from fastapi import Request
@@ -11,8 +9,7 @@ from server.utils import make_router
 from tarkov.models import TarkovErrorResponse, TarkovSuccessResponse
 from tarkov.profile.dependencies import with_profile
 
-if TYPE_CHECKING:
-    from tarkov.profile.profile import Profile
+from tarkov.profile.profile import Profile
 
 match_router = make_router(tags=["Match"])
 

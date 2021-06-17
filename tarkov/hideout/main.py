@@ -1,21 +1,20 @@
+from __future__ import annotations
+
 import time
 from typing import Dict, List, TYPE_CHECKING, cast
 
 import ujson
-from dependency_injector.wiring import Provide, inject
 from pydantic import parse_obj_as
 
 from server import db_dir, logger
-from server.container import AppContainer
 from server.utils import atomic_write
-from tarkov import inventory
 from tarkov.inventory.models import Item
 from .models import HideoutArea, HideoutAreaType, HideoutProduction
-from ..inventory.factories import ItemFactory
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
     from tarkov.profile.profile import Profile
+    from tarkov.inventory.factories import ItemFactory
 
 
 class Hideout:
@@ -30,7 +29,12 @@ class Hideout:
     work_time_elapsed: int
     current_time: int
 
-    def __init__(self, profile: "Profile"):
+    def __init__(
+        self,
+        profile: "Profile",
+        item_factory: ItemFactory,
+    ):
+        self.__item_factory = item_factory
         self.meta_path = profile.profile_dir.joinpath("pmc_hideout.meta.json")
 
         self.profile: "Profile" = profile
@@ -62,7 +66,10 @@ class Hideout:
         area["level"] += 1
 
     def put_items_in_area_slots(
-        self, area_type: HideoutAreaType, slot_id: int, item: inventory.models.Item
+        self,
+        area_type: HideoutAreaType,
+        slot_id: int,
+        item: Item,
     ) -> None:
         area = self.get_area(area_type)
 
@@ -78,8 +85,10 @@ class Hideout:
         area_slots[slot_id]["item"] = [item.dict()]
 
     def take_item_from_area_slot(
-        self, area_type: HideoutAreaType, slot_id: int
-    ) -> inventory.models.Item:
+        self,
+        area_type: HideoutAreaType,
+        slot_id: int,
+    ) -> Item:
         area = self.get_area(area_type)
         slot = area["slots"][slot_id]
         item: dict = slot["item"][0]
@@ -101,18 +110,13 @@ class Hideout:
 
         self.data["Production"][recipe_id] = production
 
-    @inject
-    def take_production(
-        self,
-        recipe_id: str,
-        item_factory: ItemFactory = Provide[AppContainer.items.factory],
-    ) -> List[inventory.models.Item]:
+    def take_production(self, recipe_id: str) -> List[Item]:
         recipe = self.get_recipe(recipe_id)
 
         product_tpl = recipe["endProduct"]
         count = recipe["count"]
 
-        items = item_factory.create_items(product_tpl, count)
+        items = self.__item_factory.create_items(product_tpl, count)
         items_list: List[Item] = []
         for item, child_items in items:
             items_list.append(item)

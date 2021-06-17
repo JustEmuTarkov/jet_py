@@ -43,16 +43,21 @@ class AppContainer(containers.DeclarativeContainer):
 
     launcher: LauncherContainer = providers.Container(LauncherContainer)
 
-    profile: ProfileContainer = providers.Container(
-        ProfileContainer,
-        account_service=launcher.account_service,
-    )
-
     trader: TraderContainer = providers.Container(
         TraderContainer,
         templates_repository=repos.templates,
         config=config.traders,
         insurance_config=insurance_config,
+    )
+
+    profile: ProfileContainer = providers.Container(
+        ProfileContainer,
+        account_service=launcher.account_service,
+        templates_repository=repos.templates,
+        notifier_service=notifier.service,
+        item_factory=items.factory,
+        quests_repository=quests.repository,
+        trader_manager=trader.manager,
     )
 
     offraid: OffraidContainer = providers.Container(OffraidContainer)

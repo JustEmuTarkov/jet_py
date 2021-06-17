@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import random
-from typing import List
+from typing import List, TYPE_CHECKING
 
 import pydantic
 
@@ -12,7 +12,10 @@ from tarkov.inventory.models import Item
 from tarkov.inventory.repositories import ItemTemplatesRepository
 from tarkov.inventory.types import TemplateId
 from tarkov.trader.models import BarterScheme, BarterSchemeEntry
-from tarkov.trader.trader import Trader
+
+if TYPE_CHECKING:
+    # pylint: disable=cyclic-import
+    from tarkov.trader.trader import Trader
 
 
 class TraderAssortGenerator:

@@ -5,7 +5,6 @@ from typing import Iterator, List, Optional, TYPE_CHECKING, Tuple
 
 from dependency_injector.wiring import Provide, inject
 
-import tarkov.inventory
 from server.container import AppContainer
 from tarkov.exceptions import NotFoundError
 from tarkov.fleamarket.models import OfferId
@@ -200,7 +199,7 @@ class InventoryDispatcher(Dispatcher):
         trader = self.trader_manager.get_trader(TraderType(action.tid))
         trader_view = trader.view(self.profile)
 
-        rubles_tpl_id = tarkov.inventory.types.TemplateId("5449016a4bdc2d6f028b456f")
+        rubles_tpl_id = TemplateId("5449016a4bdc2d6f028b456f")
         total_price = 0
         for item_id in action.items:
             item = self.profile.inventory.get(item_id)

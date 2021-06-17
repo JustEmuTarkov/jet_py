@@ -3,12 +3,8 @@ from __future__ import annotations
 import time
 from typing import Dict, List, TYPE_CHECKING, Tuple
 
-from dependency_injector.wiring import Provide, inject
 from pydantic import StrictInt
 
-import tarkov.inventory.types
-from server.container import AppContainer
-from tarkov import inventory
 from tarkov.inventory.inventory import PlayerInventory
 from tarkov.inventory.models import Item
 from tarkov.mail.models import (
@@ -27,6 +23,7 @@ from .models import (
     QuestStatus,
 )
 from .repositories import QuestsRepository
+from tarkov.inventory.types import ItemId
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
@@ -36,18 +33,18 @@ if TYPE_CHECKING:
 
 
 class Quests:
-    profile: "Profile"
-    quests: List[Quest]
-
-    @inject
     def __init__(
         self,
-        profile: "Profile",
-        quests_repository: QuestsRepository = Provide[AppContainer.quests.repository],
+        profile: Profile,
+        quests_repository: QuestsRepository,
+        templates_repository: ItemTemplatesRepository,
+        trader_manager: TraderManager,
     ):
         self.__quests_repository = quests_repository
+        self.__templates_repository = templates_repository
+        self.__trader_manager = trader_manager
 
-        self.profile: "Profile" = profile
+        self.profile = profile
         self.quests = self.profile.pmc.Quests
 
     def create_quest(self, quest_id: str) -> Quest:
@@ -82,8 +79,8 @@ class Quests:
         self,
         quest_id: str,
         condition_id: str,
-        items: Dict[tarkov.inventory.types.ItemId, int],
-    ) -> Tuple[List[inventory.models.Item], List[inventory.models.Item]]:
+        items: Dict[ItemId, int],
+    ) -> Tuple[List[Item], List[Item]]:
         try:
             backend_counter = self.profile.pmc.BackendCounters[condition_id]
         except KeyError:
@@ -135,10 +132,6 @@ class Quests:
     def complete_quest(
         self,
         quest_id: str,
-        templates_repository: ItemTemplatesRepository = Provide[
-            AppContainer.repos.templates
-        ],
-        trader_manager: TraderManager = Provide[AppContainer.trader.manager],
     ) -> None:
         quest_template = self.__quests_repository.get_quest_template(quest_id)
         quest = self.get_quest(quest_id)
@@ -148,7 +141,7 @@ class Quests:
         for reward in quest_template.rewards.Success:
             if isinstance(reward, QuestRewardItem):
                 for reward_item in reward.items:
-                    item_template = templates_repository.get_template(reward_item)
+                    item_template = self.__templates_repository.get_template(reward_item)
                     stack_size: int = item_template.props.StackMaxSize
 
                     while reward_item.upd.StackObjectsCount > 0:
@@ -169,7 +162,7 @@ class Quests:
                 standing_change = float(reward.value)
                 trader_id = reward.target
 
-                trader = trader_manager.get_trader(TraderType(trader_id))
+                trader = self.__trader_manager.get_trader(TraderType(trader_id))
                 trader_view = trader.view(player_profile=self.profile)
                 standing = trader_view.standing
                 standing.current_standing += standing_change

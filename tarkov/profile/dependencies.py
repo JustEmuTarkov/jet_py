@@ -2,20 +2,21 @@ from __future__ import annotations
 
 from typing import AsyncIterable, TYPE_CHECKING
 
-from fastapi import Cookie, Query, Request
+from fastapi import Cookie, Request
 from starlette.background import BackgroundTasks
 
 from server import logger
 from tarkov.profile.profile import Profile
 
 if TYPE_CHECKING:
+    # pylint: disable=cyclic-import
     from tarkov.profile.profile_manager import ProfileManager
 
 
 async def with_profile(
     request: Request,
     background_tasks: BackgroundTasks,
-    profile_id: str = Query(..., alias="PHPSESSID"),
+    profile_id: str = Cookie(..., alias="PHPSESSID"),
 ) -> AsyncIterable[Profile]:
     """
     Provides a Profile instance and saves it after request using background task

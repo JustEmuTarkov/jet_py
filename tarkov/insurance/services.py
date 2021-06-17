@@ -12,6 +12,7 @@ from tarkov.trader.models import TraderType
 from . import exceptions, interfaces
 
 if TYPE_CHECKING:
+    # pylint: disable=cyclic-import
     from tarkov.inventory.models import Item
     from tarkov.offraid.models import OffraidProfile
     from tarkov.profile.profile import Profile
