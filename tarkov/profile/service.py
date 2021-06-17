@@ -6,11 +6,11 @@ from typing import Final, TYPE_CHECKING
 import ujson
 
 from server import db_dir, root_dir
+from tarkov.profile.models import ProfileModel
 
 if TYPE_CHECKING:
     # pylint: disable=cyclic-import
     from tarkov.launcher.accounts import AccountService
-    from tarkov.profile.models import ProfileModel
     from tarkov.profile.profile_manager import ProfileManager
 
 
@@ -29,8 +29,6 @@ class ProfileService:
         nickname: str,
         side: str,
     ) -> ProfileModel:
-        from tarkov.profile.models import ProfileModel
-
         account = self.__account_service.get_account(profile_id)
         base_profile_dir = db_dir.joinpath("profile", account.edition)
 
