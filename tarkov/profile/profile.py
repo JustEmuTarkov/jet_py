@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from types import TracebackType
-from typing import Optional, TYPE_CHECKING, Type, Union
+from typing import TYPE_CHECKING, Union
 
 from dependency_injector.wiring import Provide, inject
 
@@ -72,10 +71,6 @@ class Profile:
         self.pmc_profile_path = self.profile_dir.joinpath("pmc_profile.json")
         self.scav_profile_path = self.profile_dir.joinpath("scav_profile.json")
 
-    @staticmethod
-    def exists(profile_id: str) -> bool:
-        return root_dir.joinpath("resources", "profiles", profile_id).exists()
-
     def add_insurance(self, item: Item, trader: TraderType) -> None:
         self.pmc.InsuredItems.append(
             ItemInsurance(item_id=item.id, trader_id=trader.value)
@@ -121,16 +116,3 @@ class Profile:
 
     def update(self) -> None:
         self.hideout.update()
-
-    def __enter__(self) -> Profile:
-        self.read()
-        return self
-
-    def __exit__(
-        self,
-        exc_type: Optional[Type[BaseException]],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
-    ) -> None:
-        if exc_type is None:
-            self.write()
