@@ -1,11 +1,9 @@
 from pathlib import Path
-from typing import Callable
 
 import pytest
-from dependency_injector.wiring import Provider, inject
+from dependency_injector.wiring import inject
 
 import server.app
-from server.container import AppContainer
 from tarkov.profile.profile import Profile
 
 
