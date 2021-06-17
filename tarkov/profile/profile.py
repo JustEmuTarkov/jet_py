@@ -8,17 +8,14 @@ from tarkov.hideout.main import Hideout
 from tarkov.inventory.inventory import PlayerInventory
 from tarkov.inventory.models import Item
 from tarkov.mail.mail import Mail
+from tarkov.notifier.notifier import NotifierService
 from tarkov.quests.quests import Quests
 from tarkov.trader.models import TraderType
 from .encyclopedia import Encyclopedia
 from .models import ItemInsurance, ProfileModel
-from tarkov.notifier.notifier import NotifierService
 
 
 class Profile:
-    # pylint: disable=too-many-instance-attributes
-    # Disabling that in case of profile is reasonable
-
     class ProfileDoesNotExistsError(Exception):
         pass
 
@@ -52,11 +49,10 @@ class Profile:
         self.scav_profile_path = self.profile_dir.joinpath("scav_profile.json")
 
     def add_insurance(self, item: Item, trader: TraderType) -> None:
+        # TODO: Move this function into IInsuranceService
         self.pmc.InsuredItems.append(
             ItemInsurance(item_id=item.id, trader_id=trader.value)
         )
-
-        #  Todo remove insurance from items that aren't present in inventory after raid
 
     def receive_experience(self, amount: int) -> None:
         self.pmc.Info.Experience += amount
