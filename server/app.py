@@ -11,6 +11,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.responses import JSONResponse
 
 import tarkov
+import tests
 from server import logger, root_dir
 from server.container import AppContainer
 from server.package_lib import PackageManager
@@ -36,7 +37,7 @@ class FastAPIWithContainer(FastAPI):
 
 
 container = AppContainer()
-container.wire(packages=[tarkov])  # pylint: disable=no-member
+container.wire(packages=[tarkov, tests])  # pylint: disable=no-member
 container.offraid.config.from_yaml("./config/offraid.yaml")
 container.insurance_config.from_yaml("./config/insurance.yaml")
 container.profile.config.from_yaml("./config/profile.yaml")
